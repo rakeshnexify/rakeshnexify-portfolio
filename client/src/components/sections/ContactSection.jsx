@@ -1,9 +1,8 @@
-import { useState } from "react";
-
 import siteData from "../../data/siteData";
 import Container from "../layout/Container";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
+import ContactForm from "./contact/ContactForm";
 
 function ContactDetail({ label, value, href, icon }) {
   const content = (
@@ -73,18 +72,8 @@ function PlatformLink({ platform }) {
 }
 
 function ContactSection() {
-  const [formStatus, setFormStatus] = useState("");
-
   const { contact, socialPlatforms, developerPlatforms, freelancerPlatforms } =
     siteData;
-
-  function handleSubmit(event) {
-    event.preventDefault();
-
-    setFormStatus(
-      "Contact form design is ready. Its Express and MongoDB message API will be connected in the backend step.",
-    );
-  }
 
   const emailHref = contact.email ? `mailto:${contact.email}` : "";
 
@@ -216,147 +205,7 @@ function ContactSection() {
             </div>
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm sm:p-8"
-          >
-            <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="contact-name"
-                  className="text-sm font-semibold text-slate-800"
-                >
-                  Full name
-                </label>
-
-                <input
-                  id="contact-name"
-                  name="name"
-                  type="text"
-                  required
-                  autoComplete="name"
-                  placeholder="Your full name"
-                  className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="contact-email"
-                  className="text-sm font-semibold text-slate-800"
-                >
-                  Email address
-                </label>
-
-                <input
-                  id="contact-email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="contact-phone"
-                  className="text-sm font-semibold text-slate-800"
-                >
-                  Phone or WhatsApp
-                </label>
-
-                <input
-                  id="contact-phone"
-                  name="phone"
-                  type="tel"
-                  autoComplete="tel"
-                  placeholder="Optional contact number"
-                  className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="contact-service"
-                  className="text-sm font-semibold text-slate-800"
-                >
-                  Required service
-                </label>
-
-                <select
-                  id="contact-service"
-                  name="service"
-                  defaultValue=""
-                  required
-                  className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10"
-                >
-                  <option value="" disabled>
-                    Select a service
-                  </option>
-
-                  {siteData.services.map((service) => (
-                    <option key={service.id} value={service.id}>
-                      {service.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="mt-5">
-              <label
-                htmlFor="contact-subject"
-                className="text-sm font-semibold text-slate-800"
-              >
-                Project subject
-              </label>
-
-              <input
-                id="contact-subject"
-                name="subject"
-                type="text"
-                required
-                placeholder="Example: E-commerce website development"
-                className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10"
-              />
-            </div>
-
-            <div className="mt-5">
-              <label
-                htmlFor="contact-message"
-                className="text-sm font-semibold text-slate-800"
-              >
-                Project details
-              </label>
-
-              <textarea
-                id="contact-message"
-                name="message"
-                required
-                rows="6"
-                placeholder="Describe your project, required features, timeline and other important information."
-                className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20"
-            >
-              Send Project Enquiry
-            </button>
-
-            {formStatus && (
-              <p
-                role="status"
-                className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800"
-              >
-                {formStatus}
-              </p>
-            )}
-          </form>
+          <ContactForm />
         </div>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-3">
