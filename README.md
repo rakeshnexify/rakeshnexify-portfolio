@@ -8,7 +8,7 @@ The website is being developed as the official online platform for **RakeshNexif
 
 **Currently in active development**
 
-The frontend design foundation, MongoDB Atlas connection and working contact-enquiry system are complete.
+The frontend design foundation, MongoDB Atlas connection and working contact-enquiry system are complete. The next development phases will convert all portfolio content into MongoDB-managed dynamic data and introduce a secure administration dashboard.
 
 ## Main Features
 
@@ -25,6 +25,12 @@ The frontend design foundation, MongoDB Atlas connection and working contact-enq
 - Backend validation and error handling
 - MongoDB Atlas message storage
 - Production-ready environment configuration
+- Fully dynamic MongoDB-powered website content
+- Secure admin authentication and dashboard
+- Admin-managed services, projects, companies and brands
+- Dynamic social-media and freelancer-platform management
+- Section visibility and ordering controls
+- Media, SEO and contact-enquiry management
 
 ## Technology Stack
 
@@ -252,6 +258,18 @@ npm run build
 - [ ] Contact-message management
 - [ ] SEO and metadata
 - [ ] Deployment and domain connection
+- [ ] Dynamic public-content APIs
+- [ ] MongoDB content collections
+- [ ] Admin login and protected routes
+- [ ] Admin dashboard
+- [ ] Dynamic profile and website settings
+- [ ] Services CRUD management
+- [ ] Projects CRUD management
+- [ ] Companies and brands CRUD management
+- [ ] Social and freelancer links management
+- [ ] Section visibility and ordering
+- [ ] Media upload and management
+- [ ] SEO settings management
 
 ## Security
 
