@@ -1,20 +1,33 @@
+import Footer from "../components/layout/Footer";
+import Navbar from "../components/layout/Navbar";
+import AboutSection from "../components/sections/AboutSection";
+import CompaniesSection from "../components/sections/CompaniesSection";
+import ContactSection from "../components/sections/ContactSection";
+import HeroSection from "../components/sections/HeroSection";
+import ProjectsSection from "../components/sections/ProjectsSection";
+import ServicesSection from "../components/sections/ServicesSection";
+
 function HomePage() {
   return (
-    <main className="setup-page">
-      <section className="setup-card">
-        <p className="setup-label">RakeshNexify</p>
+    <>
+      <Navbar />
 
-        <h1>Professional Portfolio Website</h1>
+      <main className="min-h-screen bg-slate-50">
+        <HeroSection />
 
-        <p className="setup-description">
-          React frontend setup completed successfully.
-        </p>
+        <AboutSection />
 
-        <span className="setup-status">
-          MERN portfolio development has started
-        </span>
-      </section>
-    </main>
+        <ServicesSection />
+
+        <ProjectsSection />
+
+        <CompaniesSection />
+
+        <ContactSection />
+      </main>
+
+      <Footer />
+    </>
   );
 }
 
