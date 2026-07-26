@@ -1,39 +1,56 @@
-import siteData from "../../data/siteData";
+import useSiteSettings from "../../hooks/useSiteSettings";
 
 function Logo({
-  showTagline = false,
   className = "",
+  iconClassName = "",
   textClassName = "",
+  showTagline = false,
 }) {
-  const { brand } = siteData;
+  const { settings } = useSiteSettings();
 
-  const brandParts = brand.name.match(/^(.+?)(Nexify)$/i);
+  const brand = settings?.brand || {};
 
-  const firstPart = brandParts ? brandParts[1] : brand.name;
-  const highlightedPart = brandParts ? brandParts[2] : "";
+  const brandName = brand.name || "RakeshNexify";
+  const shortName = brand.shortName || "RN";
+  const tagline = brand.tagline || "Developer · Creator · Entrepreneur";
+  const logoUrl = brand.logoUrl || "";
+
+  const isDefaultBrand = brandName.toLowerCase() === "rakeshnexify";
 
   return (
-    <div className={`inline-flex items-center gap-3 ${className}`}>
-      <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-600 text-lg font-extrabold text-white shadow-lg shadow-brand-600/20">
-        {brand.shortName}
-      </div>
+    <div className={`flex items-center gap-3 ${className}`}>
+      {logoUrl ? (
+        <img
+          src={logoUrl}
+          alt={`${brandName} logo`}
+          className={`h-12 w-12 rounded-2xl object-cover shadow-md ${iconClassName}`}
+        />
+      ) : (
+        <span
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-600 text-lg font-extrabold text-white shadow-md ${iconClassName}`}
+          aria-hidden="true"
+        >
+          {shortName}
+        </span>
+      )}
 
       <div className="min-w-0">
         <p
-          className={`text-xl font-extrabold tracking-tight text-slate-950 ${textClassName}`}
+          className={`truncate text-xl font-extrabold tracking-tight text-slate-950 ${textClassName}`}
         >
-          {firstPart}
-
-          {highlightedPart && (
-            <span className="text-brand-600">
-              {highlightedPart}
-            </span>
+          {isDefaultBrand ? (
+            <>
+              Rakesh
+              <span className="text-brand-600">Nexify</span>
+            </>
+          ) : (
+            brandName
           )}
         </p>
 
         {showTagline && (
-          <p className="mt-0.5 text-xs font-medium tracking-wide text-slate-500">
-            {brand.tagline}
+          <p className="mt-0.5 truncate text-xs font-medium text-slate-500">
+            {tagline}
           </p>
         )}
       </div>

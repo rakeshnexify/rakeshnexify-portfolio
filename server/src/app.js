@@ -3,6 +3,7 @@ import express from "express";
 
 import contactMessageRoutes from "./routes/contactMessage.routes.js";
 import healthRoutes from "./routes/health.routes.js";
+import siteSettingsRoutes from "./routes/siteSettings.routes.js";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/health", healthRoutes);
+app.use("/api/site-settings", siteSettingsRoutes);
 app.use("/api/contact-messages", contactMessageRoutes);
 
 app.use((req, res) => {

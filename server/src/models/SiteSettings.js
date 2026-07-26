@@ -1,0 +1,369 @@
+import mongoose from "mongoose";
+
+const buttonSchema = new mongoose.Schema(
+  {
+    label: {
+      type: String,
+      trim: true,
+      maxlength: 50,
+      default: "",
+    },
+    url: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const brandSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "RakeshNexify",
+    },
+    shortName: {
+      type: String,
+      trim: true,
+      maxlength: 10,
+      default: "RN",
+    },
+    tagline: {
+      type: String,
+      trim: true,
+      maxlength: 150,
+      default: "Developer · Creator · Entrepreneur",
+    },
+    logoUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+    faviconUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const ownerSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "Rakesh Pandit",
+    },
+    professionalTitle: {
+      type: String,
+      trim: true,
+      maxlength: 150,
+      default: "MERN Stack Developer",
+    },
+    location: {
+      type: String,
+      trim: true,
+      maxlength: 150,
+      default: "Kathmandu, Nepal",
+    },
+    profileImageUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+    resumeUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const heroSchema = new mongoose.Schema(
+  {
+    eyebrow: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "MERN Stack Developer",
+    },
+    heading: {
+      type: String,
+      trim: true,
+      maxlength: 250,
+      default: "I build modern digital experiences that help businesses grow.",
+    },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 1000,
+      default:
+        "I create responsive websites, MERN applications, e-commerce platforms and scalable digital solutions.",
+    },
+    primaryButton: {
+      type: buttonSchema,
+      default: () => ({
+        label: "View Projects",
+        url: "#projects",
+      }),
+    },
+    secondaryButton: {
+      type: buttonSchema,
+      default: () => ({
+        label: "Contact Me",
+        url: "#contact",
+      }),
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const aboutSchema = new mongoose.Schema(
+  {
+    heading: {
+      type: String,
+      trim: true,
+      maxlength: 150,
+      default: "About Me",
+    },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 3000,
+      default:
+        "I am a developer, creator and entrepreneur focused on building useful digital products and professional online experiences.",
+    },
+    highlights: {
+      type: [String],
+      default: [],
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const contactSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: 150,
+      default: "",
+    },
+    phone: {
+      type: String,
+      trim: true,
+      maxlength: 30,
+      default: "",
+    },
+    whatsapp: {
+      type: String,
+      trim: true,
+      maxlength: 30,
+      default: "",
+    },
+    location: {
+      type: String,
+      trim: true,
+      maxlength: 150,
+      default: "Kathmandu, Nepal",
+    },
+    availability: {
+      type: String,
+      trim: true,
+      maxlength: 250,
+      default: "Available for freelance and business projects",
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const seoSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      trim: true,
+      maxlength: 70,
+      default: "RakeshNexify | MERN Stack Developer",
+    },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 180,
+      default:
+        "Official portfolio of RakeshNexify, showcasing MERN development, WordPress, e-commerce and business website services.",
+    },
+    keywords: {
+      type: [String],
+      default: [],
+    },
+    ogImageUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const sectionSchema = new mongoose.Schema(
+  {
+    key: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      maxlength: 50,
+    },
+    label: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 100,
+    },
+    isVisible: {
+      type: Boolean,
+      default: true,
+    },
+    order: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const siteSettingsSchema = new mongoose.Schema(
+  {
+    siteKey: {
+      type: String,
+      required: true,
+      unique: true,
+      immutable: true,
+      trim: true,
+      lowercase: true,
+      default: "main",
+    },
+
+    brand: {
+      type: brandSchema,
+      default: () => ({}),
+    },
+
+    owner: {
+      type: ownerSchema,
+      default: () => ({}),
+    },
+
+    hero: {
+      type: heroSchema,
+      default: () => ({}),
+    },
+
+    about: {
+      type: aboutSchema,
+      default: () => ({}),
+    },
+
+    contact: {
+      type: contactSchema,
+      default: () => ({}),
+    },
+
+    seo: {
+      type: seoSchema,
+      default: () => ({}),
+    },
+
+    sections: {
+      type: [sectionSchema],
+      default: () => [
+        {
+          key: "hero",
+          label: "Hero",
+          isVisible: true,
+          order: 1,
+        },
+        {
+          key: "about",
+          label: "About",
+          isVisible: true,
+          order: 2,
+        },
+        {
+          key: "services",
+          label: "Services",
+          isVisible: true,
+          order: 3,
+        },
+        {
+          key: "projects",
+          label: "Projects",
+          isVisible: true,
+          order: 4,
+        },
+        {
+          key: "companies",
+          label: "Companies",
+          isVisible: true,
+          order: 5,
+        },
+        {
+          key: "contact",
+          label: "Contact",
+          isVisible: true,
+          order: 6,
+        },
+      ],
+    },
+
+    isPublished: {
+      type: Boolean,
+      default: true,
+    },
+
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AdminUser",
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+    collection: "site_settings",
+  },
+);
+
+const SiteSettings = mongoose.model("SiteSettings", siteSettingsSchema);
+
+export default SiteSettings;

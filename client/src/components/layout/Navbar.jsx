@@ -1,25 +1,104 @@
 import { useEffect, useRef, useState } from "react";
 
 import siteData from "../../data/siteData";
+import useSiteSettings from "../../hooks/useSiteSettings";
 import Button from "../ui/Button";
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
+const supportedNavigationSections = new Set([
+  "hero",
+  "about",
+  "services",
+  "projects",
+  "companies",
+  "contact",
+]);
+
+function getSectionHref(sectionKey) {
+  return sectionKey === "hero" ? "#home" : `#${sectionKey}`;
+}
+
+function getSectionLabel(section) {
+  if (section.key === "hero" && section.label === "Hero") {
+    return "Home";
+  }
+
+  return section.label;
+}
+
+function getFallbackSections() {
+  return siteData.navigation.map((link, index) => ({
+    key: link.href === "#home" ? "hero" : link.href.replace("#", ""),
+    label: link.label,
+    isVisible: true,
+    order: index + 1,
+  }));
+}
+
 function Navbar() {
+  const { settings } = useSiteSettings();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const mobileMenuRef = useRef(null);
 
-  const navigationLinks = siteData.navigation.filter(
-    (link) => link.label !== "Contact",
+  const brandName =
+    settings?.brand?.name || siteData.brand.name || "RakeshNexify";
+
+  const settingsSections = Array.isArray(settings?.sections)
+    ? settings.sections
+    : [];
+
+  const availableSections =
+    settingsSections.length > 0 ? settingsSections : getFallbackSections();
+
+  const visibleSections = [...availableSections]
+    .filter(
+      (section) =>
+        section.isVisible !== false &&
+        supportedNavigationSections.has(section.key),
+    )
+    .sort(
+      (firstSection, secondSection) => firstSection.order - secondSection.order,
+    );
+
+  const navigationLinks = visibleSections
+    .filter((section) => section.key !== "contact")
+    .map((section) => ({
+      key: section.key,
+      label: getSectionLabel(section),
+      href: getSectionHref(section.key),
+    }));
+
+  const isContactVisible = visibleSections.some(
+    (section) => section.key === "contact",
   );
 
   function closeMobileMenu() {
     setIsMenuOpen(false);
   }
 
-  function goToContactSection() {
-    window.location.hash = "contact";
+  function goToSection(sectionId) {
+    const targetSection = document.getElementById(sectionId);
+
+    if (targetSection) {
+      targetSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      window.history.replaceState(
+        null,
+        "",
+        sectionId === "home" ? "#home" : `#${sectionId}`,
+      );
+    }
+
     closeMobileMenu();
+  }
+
+  function goToContactSection() {
+    goToSection("contact");
   }
 
   useEffect(() => {
@@ -75,8 +154,11 @@ function Navbar() {
         <div className="flex min-h-20 items-center justify-between gap-6">
           <a
             href="#home"
-            aria-label={`Go to ${siteData.brand.name} homepage`}
-            onClick={closeMobileMenu}
+            aria-label={`Go to ${brandName} homepage`}
+            onClick={(event) => {
+              event.preventDefault();
+              goToSection("home");
+            }}
           >
             <Logo />
           </a>
@@ -87,8 +169,14 @@ function Navbar() {
           >
             {navigationLinks.map((link) => (
               <a
-                key={link.label}
+                key={link.key}
                 href={link.href}
+                onClick={(event) => {
+                  event.preventDefault();
+                  goToSection(
+                    link.href === "#home" ? "home" : link.href.slice(1),
+                  );
+                }}
                 className="text-sm font-semibold text-slate-600 transition-colors hover:text-brand-600"
               >
                 {link.label}
@@ -96,19 +184,19 @@ function Navbar() {
             ))}
           </nav>
 
-          <div className="hidden lg:block">
-            <Button size="small" onClick={goToContactSection}>
-              Contact Me
-            </Button>
-          </div>
+          {isContactVisible && (
+            <div className="hidden lg:block">
+              <Button size="small" onClick={goToContactSection}>
+                Contact Me
+              </Button>
+            </div>
+          )}
 
           <div ref={mobileMenuRef} className="lg:hidden">
             <button
               type="button"
               aria-label={
-                isMenuOpen
-                  ? "Close navigation menu"
-                  : "Open navigation menu"
+                isMenuOpen ? "Close navigation menu" : "Open navigation menu"
               }
               aria-expanded={isMenuOpen}
               aria-controls="mobile-navigation"
@@ -160,21 +248,31 @@ function Navbar() {
                     <div className="flex flex-col gap-2">
                       {navigationLinks.map((link) => (
                         <a
-                          key={link.label}
+                          key={link.key}
                           href={link.href}
-                          onClick={closeMobileMenu}
+                          onClick={(event) => {
+                            event.preventDefault();
+
+                            goToSection(
+                              link.href === "#home"
+                                ? "home"
+                                : link.href.slice(1),
+                            );
+                          }}
                           className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-brand-50 hover:text-brand-600"
                         >
                           {link.label}
                         </a>
                       ))}
 
-                      <Button
-                        className="mt-3 w-full"
-                        onClick={goToContactSection}
-                      >
-                        Contact Me
-                      </Button>
+                      {isContactVisible && (
+                        <Button
+                          className="mt-3 w-full"
+                          onClick={goToContactSection}
+                        >
+                          Contact Me
+                        </Button>
+                      )}
                     </div>
                   </nav>
                 </Container>

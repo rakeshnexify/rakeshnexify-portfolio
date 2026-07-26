@@ -1,10 +1,15 @@
 import siteData from "../../data/siteData";
+import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import ContactForm from "./contact/ContactForm";
 
 function ContactDetail({ label, value, href, icon }) {
+  if (!value) {
+    return null;
+  }
+
   const content = (
     <>
       <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
@@ -16,18 +21,14 @@ function ContactDetail({ label, value, href, icon }) {
           {label}
         </p>
 
-        <p
-          className={`mt-1 break-words text-sm font-semibold ${
-            value ? "text-slate-900" : "text-slate-400"
-          }`}
-        >
-          {value || "Will be added soon"}
+        <p className="mt-1 break-words text-sm font-semibold text-slate-900">
+          {value}
         </p>
       </div>
     </>
   );
 
-  if (!value || !href) {
+  if (!href) {
     return (
       <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
         {content}
@@ -35,11 +36,13 @@ function ContactDetail({ label, value, href, icon }) {
     );
   }
 
+  const isExternalLink = href.startsWith("http");
+
   return (
     <a
       href={href}
-      target={href.startsWith("http") ? "_blank" : undefined}
-      rel={href.startsWith("http") ? "noreferrer" : undefined}
+      target={isExternalLink ? "_blank" : undefined}
+      rel={isExternalLink ? "noopener noreferrer" : undefined}
       className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-brand-200 hover:bg-brand-50/50"
     >
       {content}
@@ -48,13 +51,13 @@ function ContactDetail({ label, value, href, icon }) {
 }
 
 function PlatformLink({ platform }) {
-  if (!platform.url) {
+  if (!platform?.url) {
     return (
       <span
-        title={`${platform.name} link will be added soon`}
+        title={`${platform?.name || "Platform"} link will be added soon`}
         className="inline-flex cursor-not-allowed items-center rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400"
       >
-        {platform.name}
+        {platform?.name || "Platform"}
       </span>
     );
   }
@@ -63,7 +66,7 @@ function PlatformLink({ platform }) {
     <a
       href={platform.url}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-brand-600 hover:text-brand-600"
     >
       {platform.name}
@@ -72,16 +75,28 @@ function PlatformLink({ platform }) {
 }
 
 function ContactSection() {
-  const { contact, socialPlatforms, developerPlatforms, freelancerPlatforms } =
-    siteData;
+  const { settings } = useSiteSettings();
 
-  const emailHref = contact.email ? `mailto:${contact.email}` : "";
+  const contact = settings?.contact || siteData.contact || {};
 
-  const phoneHref = contact.phone
-    ? `tel:${contact.phone.replace(/\s+/g, "")}`
-    : "";
+  const socialPlatforms = siteData.socialPlatforms || [];
+  const developerPlatforms = siteData.developerPlatforms || [];
+  const freelancerPlatforms = siteData.freelancerPlatforms || [];
 
-  const whatsappNumber = contact.whatsapp.replace(/\D/g, "");
+  const email = String(contact.email || "").trim();
+  const phone = String(contact.phone || "").trim();
+  const whatsapp = String(contact.whatsapp || "").trim();
+  const location = String(contact.location || "").trim();
+
+  const availability =
+    String(contact.availability || "").trim() ||
+    "Available for freelance and business projects";
+
+  const emailHref = email ? `mailto:${email}` : "";
+
+  const phoneHref = phone ? `tel:${phone.replace(/[^\d+]/g, "")}` : "";
+
+  const whatsappNumber = whatsapp.replace(/\D/g, "");
 
   const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}` : "";
 
@@ -118,7 +133,7 @@ function ContactSection() {
                 <span className="size-3 shrink-0 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/40" />
 
                 <p className="text-sm font-semibold text-emerald-300">
-                  {contact.availability}
+                  {availability}
                 </p>
               </div>
             </div>
@@ -126,7 +141,7 @@ function ContactSection() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <ContactDetail
                 label="Email"
-                value={contact.email}
+                value={email}
                 href={emailHref}
                 icon={
                   <svg
@@ -145,7 +160,7 @@ function ContactSection() {
 
               <ContactDetail
                 label="Phone"
-                value={contact.phone}
+                value={phone}
                 href={phoneHref}
                 icon={
                   <svg
@@ -164,7 +179,7 @@ function ContactSection() {
 
               <ContactDetail
                 label="WhatsApp"
-                value={contact.whatsapp}
+                value={whatsapp}
                 href={whatsappHref}
                 icon={
                   <svg
@@ -185,7 +200,7 @@ function ContactSection() {
 
               <ContactDetail
                 label="Location"
-                value={contact.location}
+                value={location}
                 icon={
                   <svg
                     aria-hidden="true"
