@@ -5,12 +5,15 @@ import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminLoginPage from "../pages/admin/AdminLoginPage";
 import AdminServicesPage from "../pages/admin/AdminServicesPage";
 import AdminServiceEditorPage from "../pages/admin/AdminServiceEditorPage";
+import ProjectDetailsPage from "../pages/ProjectDetailsPage";
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+
+      <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
 
       <Route
         path="/admin"
