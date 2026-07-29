@@ -1,0 +1,156 @@
+import { Link, useNavigate } from "react-router";
+
+import useAdminAuth from "../../hooks/useAdminAuth";
+
+const dashboardModules = [
+  {
+    title: "Site Settings",
+    description:
+      "Manage brand, owner profile, hero, about, contact and SEO settings.",
+    status: "Foundation ready",
+  },
+  {
+    title: "Services",
+    description: "Create, edit, reorder, feature and hide portfolio services.",
+    status: "API ready",
+  },
+  {
+    title: "Projects",
+    description:
+      "Manage project details, screenshots, technologies and live links.",
+    status: "Setup pending",
+  },
+  {
+    title: "Contact Messages",
+    description: "Review client enquiries and manage their response status.",
+    status: "API ready",
+  },
+];
+
+function formatRole(role = "") {
+  return role
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function AdminDashboardPage() {
+  const navigate = useNavigate();
+
+  const { admin, logout } = useAdminAuth();
+
+  function handleLogout() {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+    });
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-100">
+      <header className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-600 font-extrabold text-white">
+              RN
+            </div>
+
+            <div className="min-w-0">
+              <p className="truncate font-extrabold text-slate-950">
+                RakeshNexify
+              </p>
+
+              <p className="truncate text-xs font-medium text-slate-500">
+                Admin Dashboard
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="hidden text-sm font-semibold text-slate-600 transition hover:text-brand-600 sm:inline-flex"
+            >
+              View Portfolio
+            </Link>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <div className="grid gap-6 rounded-3xl bg-slate-950 p-7 text-white sm:p-10 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-400">
+              Administration
+            </p>
+
+            <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+              Welcome, {admin?.name || "Administrator"}
+            </h1>
+
+            <p className="mt-4 max-w-2xl leading-7 text-slate-400">
+              Manage your portfolio content, services, projects, enquiries and
+              website settings from this secure dashboard.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-700 bg-slate-900 p-4 lg:min-w-64">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+              Signed in account
+            </p>
+
+            <p className="mt-2 break-words text-sm font-semibold text-white">
+              {admin?.email}
+            </p>
+
+            <span className="mt-3 inline-flex rounded-lg bg-brand-600/20 px-3 py-1.5 text-xs font-bold text-brand-300">
+              {formatRole(admin?.role)}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          {dashboardModules.map((module) => (
+            <article
+              key={module.title}
+              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-brand-200 hover:shadow-lg"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <h2 className="text-xl font-bold text-slate-950">
+                  {module.title}
+                </h2>
+
+                <span className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
+                  {module.status}
+                </span>
+              </div>
+
+              <p className="mt-3 leading-7 text-slate-600">
+                {module.description}
+              </p>
+
+              <button
+                type="button"
+                disabled
+                className="mt-6 inline-flex min-h-10 cursor-not-allowed items-center rounded-lg bg-slate-100 px-4 text-sm font-semibold text-slate-400"
+              >
+                Management page coming next
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+export default AdminDashboardPage;

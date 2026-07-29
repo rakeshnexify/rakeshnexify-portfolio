@@ -1,0 +1,29 @@
+import { Navigate, Route, Routes } from "react-router";
+
+import HomePage from "../pages/HomePage";
+import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
+import AdminLoginPage from "../pages/admin/AdminLoginPage";
+import ProtectedAdminRoute from "./ProtectedAdminRoute";
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+
+      <Route
+        path="/admin"
+        element={<Navigate to="/admin/dashboard" replace />}
+      />
+
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+
+      <Route element={<ProtectedAdminRoute />}>
+        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+export default AppRoutes;
