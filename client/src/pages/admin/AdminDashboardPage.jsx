@@ -18,8 +18,9 @@ const dashboardModules = [
   {
     title: "Projects",
     description:
-      "Manage project details, screenshots, technologies and live links.",
-    status: "Setup pending",
+      "Manage portfolio projects, case studies, images and project links.",
+    status: "API ready",
+    path: "/admin/projects",
   },
   {
     title: "Contact Messages",
