@@ -13,6 +13,7 @@ const dashboardModules = [
     title: "Services",
     description: "Create, edit, reorder, feature and hide portfolio services.",
     status: "API ready",
+    path: "/admin/services",
   },
   {
     title: "Projects",
@@ -138,13 +139,22 @@ function AdminDashboardPage() {
                 {module.description}
               </p>
 
-              <button
-                type="button"
-                disabled
-                className="mt-6 inline-flex min-h-10 cursor-not-allowed items-center rounded-lg bg-slate-100 px-4 text-sm font-semibold text-slate-400"
-              >
-                Management page coming next
-              </button>
+              {module.path ? (
+                <Link
+                  to={module.path}
+                  className="mt-6 inline-flex min-h-10 items-center rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
+                >
+                  Open management page →
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="mt-6 inline-flex min-h-10 cursor-not-allowed items-center rounded-lg bg-slate-100 px-4 text-sm font-semibold text-slate-400"
+                >
+                  Management page coming next
+                </button>
+              )}
             </article>
           ))}
         </div>
