@@ -1,8 +1,12 @@
 import { Navigate, Route, Routes } from "react-router";
 
+import BrandDetailsPage from "../pages/BrandDetailsPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import HomePage from "../pages/HomePage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
+
+import AdminBrandEditorPage from "../pages/admin/AdminBrandEditorPage";
+import AdminBrandsPage from "../pages/admin/AdminBrandsPage";
 import AdminCompaniesPage from "../pages/admin/AdminCompaniesPage";
 import AdminCompanyEditorPage from "../pages/admin/AdminCompanyEditorPage";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
@@ -11,6 +15,7 @@ import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
 import AdminProjectsPage from "../pages/admin/AdminProjectsPage";
 import AdminServiceEditorPage from "../pages/admin/AdminServiceEditorPage";
 import AdminServicesPage from "../pages/admin/AdminServicesPage";
+
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 
 function AppRoutes() {
@@ -21,6 +26,8 @@ function AppRoutes() {
       <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
 
       <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
+
+      <Route path="/brands/:slug" element={<BrandDetailsPage />} />
 
       <Route
         path="/admin"
@@ -66,6 +73,18 @@ function AppRoutes() {
         <Route
           path="/admin/companies/:id/edit"
           element={<AdminCompanyEditorPage mode="edit" />}
+        />
+
+        <Route path="/admin/brands" element={<AdminBrandsPage />} />
+
+        <Route
+          path="/admin/brands/new"
+          element={<AdminBrandEditorPage mode="create" />}
+        />
+
+        <Route
+          path="/admin/brands/:id/edit"
+          element={<AdminBrandEditorPage mode="edit" />}
         />
       </Route>
 

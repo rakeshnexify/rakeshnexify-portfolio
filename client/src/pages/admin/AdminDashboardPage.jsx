@@ -30,6 +30,13 @@ const dashboardModules = [
     path: "/admin/companies",
   },
   {
+    title: "Brands",
+    description:
+      "Create and manage personal, creator, business, product and digital brand profiles.",
+    status: "Management ready",
+    path: "/admin/brands",
+  },
+  {
     title: "Contact Messages",
     description: "Review client enquiries and manage their response status.",
     status: "API ready",

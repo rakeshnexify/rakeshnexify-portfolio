@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router";
 
 import siteData from "../../data/siteData";
+import useBrands from "../../hooks/useBrands";
 import useCompanies from "../../hooks/useCompanies";
 import Container from "../layout/Container";
 import Section from "../layout/Section";
@@ -28,6 +29,61 @@ const statusClasses = {
   inactive: "bg-slate-200 text-slate-700",
   archived: "bg-red-100 text-red-700",
 };
+
+const brandTypeLabels = {
+  personal: "Personal Brand",
+  creator: "Creator Brand",
+  business: "Business Brand",
+  product: "Product Brand",
+  media: "Media Brand",
+  education: "Education Brand",
+  community: "Community Brand",
+  other: "Digital Brand",
+};
+
+function normaliseBrand(brand, index) {
+  const focusAreas = Array.isArray(brand.focusAreas) ? brand.focusAreas : [];
+
+  const platforms = Array.isArray(brand.platforms) ? brand.platforms : [];
+
+  const highlights = Array.isArray(brand.highlights) ? brand.highlights : [];
+
+  const numericOrder = Number(brand.order);
+
+  return {
+    id: brand._id || brand.id || brand.slug || `brand-${index + 1}`,
+
+    name: brand.name || "Digital Brand",
+
+    slug: brand.slug || "",
+
+    tagline: brand.tagline || "",
+
+    description: brand.shortDescription || brand.description || "",
+
+    category: brand.category || "Digital Brand",
+
+    brandType: brand.brandType || "creator",
+
+    status: brand.status || "active",
+
+    role: brand.role || "",
+
+    websiteUrl: brand.websiteUrl || brand.website || "",
+
+    logoUrl: brand.logoUrl || "",
+
+    coverImageUrl: brand.coverImageUrl || "",
+
+    focusAreas,
+    platforms,
+    highlights,
+
+    featured: Boolean(brand.isFeatured ?? brand.featured),
+
+    order: Number.isFinite(numericOrder) ? numericOrder : index,
+  };
+}
 
 function createInitials(name) {
   const initials = String(name || "")
@@ -290,30 +346,116 @@ function CompanyCard({ company, index }) {
 }
 
 function BrandCard({ brand }) {
+  const brandTypeLabel =
+    brandTypeLabels[brand.brandType] || brand.brandType || "Digital Brand";
+
   return (
-    <article className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-slate-200/70 sm:p-8">
-      <div className="flex items-start justify-between gap-5">
-        <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-brand-600 text-lg font-extrabold text-white shadow-lg shadow-brand-600/20">
-          {createInitials(brand.name)}
+    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-slate-200/70">
+      <div className="relative overflow-hidden bg-slate-950 px-6 py-7 sm:px-8">
+        {brand.coverImageUrl && (
+          <img
+            src={brand.coverImageUrl}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 size-full object-cover opacity-25 transition duration-500 group-hover:scale-105"
+          />
+        )}
+
+        {brand.coverImageUrl && (
+          <div className="absolute inset-0 bg-slate-950/70" />
+        )}
+
+        <div className="absolute -right-12 -top-12 size-40 rounded-full bg-brand-600/20 blur-3xl" />
+
+        <div className="relative flex items-start justify-between gap-5">
+          {brand.logoUrl ? (
+            <div className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white">
+              <img
+                src={brand.logoUrl}
+                alt={`${brand.name} logo`}
+                loading="lazy"
+                className="size-full object-contain p-1"
+              />
+            </div>
+          ) : (
+            <div className="grid size-14 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/10 text-lg font-extrabold text-white">
+              {createInitials(brand.name)}
+            </div>
+          )}
+
+          <div className="flex flex-wrap justify-end gap-2">
+            <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-slate-200">
+              {brandTypeLabel}
+            </span>
+
+            {brand.featured && (
+              <span className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">
+                Featured
+              </span>
+            )}
+          </div>
         </div>
 
-        <span className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-500">
-          Brand
-        </span>
+        <div className="relative mt-8">
+          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-400">
+            {brand.category}
+          </p>
+
+          <h3 className="mt-3 text-2xl font-bold tracking-tight text-white">
+            {brand.name}
+          </h3>
+
+          {brand.tagline && (
+            <p className="mt-3 leading-7 text-slate-300">{brand.tagline}</p>
+          )}
+        </div>
       </div>
 
-      <p className="mt-7 text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-        {brand.category}
-      </p>
+      <div className="flex flex-1 flex-col p-6 sm:p-8">
+        {brand.role && (
+          <span className="w-fit rounded-full bg-brand-50 px-3 py-1.5 text-xs font-semibold text-brand-700">
+            {brand.role}
+          </span>
+        )}
 
-      <h3 className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
-        {brand.name}
-      </h3>
+        <p className="mt-5 leading-7 text-slate-600">{brand.description}</p>
 
-      <p className="mt-4 leading-7 text-slate-600">{brand.description}</p>
+        {brand.focusAreas.length > 0 && (
+          <div className="mt-6">
+            <p className="text-sm font-bold text-slate-950">Focus areas</p>
 
-      <div className="mt-auto pt-8">
-        <WebsiteLink href={brand.website}>Visit Brand Website</WebsiteLink>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {brand.focusAreas.slice(0, 5).map((area) => (
+                <span
+                  key={`${brand.id}-${area}`}
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600"
+                >
+                  {area}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {brand.platforms.length > 0 && (
+          <p className="mt-5 text-sm font-semibold text-slate-500">
+            Available on {brand.platforms.length}{" "}
+            {brand.platforms.length === 1 ? "platform" : "platforms"}
+          </p>
+        )}
+
+        <div className="mt-auto flex flex-col gap-3 pt-8 sm:flex-row">
+          {brand.slug && (
+            <Link
+              to={`/brands/${brand.slug}`}
+              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            >
+              View Brand Profile
+            </Link>
+          )}
+
+          <WebsiteLink href={brand.websiteUrl}>Visit Website</WebsiteLink>
+        </div>
       </div>
     </article>
   );
@@ -324,15 +466,24 @@ function CompaniesSection() {
     ? siteData.companies
     : [];
 
-  const brands = Array.isArray(siteData.brands) ? siteData.brands : [];
+  const fallbackBrands = Array.isArray(siteData.brands) ? siteData.brands : [];
 
   const {
     companies: loadedCompanies,
-    isLoading,
-    error,
+    isLoading: isCompaniesLoading,
+    error: companiesError,
     refreshCompanies,
   } = useCompanies({
     fallbackCompanies,
+  });
+
+  const {
+    brands: loadedBrands,
+    isLoading: isBrandsLoading,
+    error: brandsError,
+    refreshBrands,
+  } = useBrands({
+    fallbackBrands,
   });
 
   const companies = useMemo(
@@ -345,6 +496,18 @@ function CompaniesSection() {
             firstCompany.order - secondCompany.order,
         ),
     [loadedCompanies],
+  );
+
+  const brands = useMemo(
+    () =>
+      loadedBrands
+        .map(normaliseBrand)
+        .sort(
+          (firstBrand, secondBrand) =>
+            Number(secondBrand.featured) - Number(firstBrand.featured) ||
+            firstBrand.order - secondBrand.order,
+        ),
+    [loadedBrands],
   );
 
   const hasCompanies = companies.length > 0;
@@ -364,12 +527,12 @@ function CompaniesSection() {
         />
 
         <p aria-live="polite" className="sr-only">
-          {isLoading
-            ? "Loading companies."
-            : `${companies.length} companies loaded.`}
+          {isCompaniesLoading || isBrandsLoading
+            ? "Loading companies and brands."
+            : `${companies.length} companies and ${brands.length} brands loaded.`}
         </p>
 
-        {error && (
+        {companiesError && (
           <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-bold text-amber-800">
@@ -384,10 +547,33 @@ function CompaniesSection() {
             <button
               type="button"
               onClick={refreshCompanies}
-              disabled={isLoading}
+              disabled={isCompaniesLoading}
               className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? "Retrying..." : "Retry"}
+              {isCompaniesLoading ? "Retrying..." : "Retry Companies"}
+            </button>
+          </div>
+        )}
+
+        {brandsError && (
+          <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold text-amber-800">
+                Saved brand information is being displayed
+              </p>
+
+              <p className="mt-1 text-sm leading-6 text-amber-700">
+                The live Brands API could not be reached.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={refreshBrands}
+              disabled={isBrandsLoading}
+              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isBrandsLoading ? "Retrying..." : "Retry Brands"}
             </button>
           </div>
         )}
@@ -419,7 +605,7 @@ function CompaniesSection() {
           </div>
         )}
 
-        {!hasCompanies && !isLoading && (
+        {!hasCompanies && !isCompaniesLoading && (
           <div className="mt-12 rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center">
             <p className="text-lg font-bold text-slate-950">
               No public companies available
@@ -454,6 +640,18 @@ function CompaniesSection() {
                 <BrandCard key={brand.id} brand={brand} />
               ))}
             </div>
+          </div>
+        )}
+
+        {!hasBrands && !isBrandsLoading && (
+          <div className="mt-16 rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center">
+            <p className="text-lg font-bold text-slate-950">
+              No public brands available
+            </p>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Brand information will appear here after it is published.
+            </p>
           </div>
         )}
 
