@@ -38,8 +38,10 @@ const dashboardModules = [
   },
   {
     title: "Contact Messages",
-    description: "Review client enquiries and manage their response status.",
-    status: "API ready",
+    description:
+      "Review client enquiries, update response status, save private notes and archive completed conversations.",
+    status: "Management ready",
+    path: "/admin/contact-messages",
   },
 ];
 

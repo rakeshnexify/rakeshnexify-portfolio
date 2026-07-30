@@ -4,6 +4,7 @@ import express from "express";
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import adminBrandRoutes from "./routes/adminBrand.routes.js";
 import adminCompanyRoutes from "./routes/adminCompany.routes.js";
+import adminContactMessageRoutes from "./routes/adminContactMessage.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
 import brandRoutes from "./routes/brand.routes.js";
@@ -47,6 +48,7 @@ app.use("/api/admin/services", adminServiceRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/admin/companies", adminCompanyRoutes);
 app.use("/api/admin/brands", adminBrandRoutes);
+app.use("/api/admin/contact-messages", adminContactMessageRoutes);
 app.use("/api/contact-messages", contactMessageRoutes);
 
 app.use((req, res) => {

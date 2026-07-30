@@ -9,6 +9,7 @@ import AdminBrandEditorPage from "../pages/admin/AdminBrandEditorPage";
 import AdminBrandsPage from "../pages/admin/AdminBrandsPage";
 import AdminCompaniesPage from "../pages/admin/AdminCompaniesPage";
 import AdminCompanyEditorPage from "../pages/admin/AdminCompanyEditorPage";
+import AdminContactMessagesPage from "../pages/admin/AdminContactMessagesPage";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminLoginPage from "../pages/admin/AdminLoginPage";
 import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
@@ -38,6 +39,10 @@ function AppRoutes() {
 
       <Route element={<ProtectedAdminRoute />}>
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route
+          path="/admin/contact-messages"
+          element={<AdminContactMessagesPage />}
+        />
 
         <Route path="/admin/services" element={<AdminServicesPage />} />
 
