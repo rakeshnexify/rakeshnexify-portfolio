@@ -2,6 +2,34 @@ import SiteSettings from "../models/SiteSettings.js";
 
 const MAIN_SITE_KEY = "main";
 
+const orderedArrayFields = [
+  "sections",
+  "socialPlatforms",
+  "developerPlatforms",
+  "freelancerPlatforms",
+];
+
+function sortByOrder(firstItem, secondItem) {
+  return Number(firstItem?.order || 0) - Number(secondItem?.order || 0);
+}
+
+function serializePublicSettings(settings) {
+  const publicSettings =
+    typeof settings?.toObject === "function"
+      ? settings.toObject()
+      : { ...settings };
+
+  orderedArrayFields.forEach((fieldName) => {
+    publicSettings[fieldName] = Array.isArray(publicSettings[fieldName])
+      ? [...publicSettings[fieldName]].sort(sortByOrder)
+      : [];
+  });
+
+  delete publicSettings.updatedBy;
+
+  return publicSettings;
+}
+
 async function getPublicSiteSettings(req, res, next) {
   try {
     let settings = await SiteSettings.findOne({
@@ -18,18 +46,12 @@ async function getPublicSiteSettings(req, res, next) {
       );
     }
 
-    const publicSettings = settings.toObject();
-
-    publicSettings.sections = [...publicSettings.sections].sort(
-      (firstSection, secondSection) => firstSection.order - secondSection.order,
-    );
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: publicSettings,
+      data: serializePublicSettings(settings),
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 }
 

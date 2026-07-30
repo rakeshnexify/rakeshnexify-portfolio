@@ -6,6 +6,7 @@ import {
   createSiteSettingsFormValues,
   createSiteSettingsPayload,
 } from "../../../utils/siteSettingsForm";
+import PlatformSettingsEditor from "./PlatformSettingsEditor";
 
 const inputClasses =
   "mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
@@ -14,6 +15,75 @@ const textareaClasses =
   "mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
 
 const defaultFormValues = createSiteSettingsFormValues({});
+
+const MAX_PLATFORMS_PER_GROUP = 25;
+
+const platformGroupFields = [
+  "socialPlatforms",
+  "developerPlatforms",
+  "freelancerPlatforms",
+];
+
+function isSafeHttpUrl(value) {
+  const url = String(value || "").trim();
+
+  if (!url) {
+    return true;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    return (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      Boolean(parsedUrl.hostname) &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    );
+  } catch {
+    return false;
+  }
+}
+
+function validatePlatformGroup(formValues, fieldName, errors) {
+  const platforms = formValues?.[fieldName];
+
+  if (!Array.isArray(platforms)) {
+    errors[fieldName] = "Platforms must be provided as a list.";
+    return;
+  }
+
+  if (platforms.length > MAX_PLATFORMS_PER_GROUP) {
+    errors[fieldName] =
+      `A maximum of ${MAX_PLATFORMS_PER_GROUP} platforms is allowed.`;
+  }
+
+  const usedNames = new Set();
+
+  platforms.forEach((platform, index) => {
+    const fieldPrefix = `${fieldName}.${index}`;
+
+    const name = String(platform?.name || "").trim();
+
+    if (!name) {
+      errors[`${fieldPrefix}.name`] = "Platform name is required.";
+    } else {
+      const normalizedName = name.toLowerCase();
+
+      if (usedNames.has(normalizedName)) {
+        errors[`${fieldPrefix}.name`] =
+          `The platform "${name}" is already added to this group.`;
+      } else {
+        usedNames.add(normalizedName);
+      }
+    }
+
+    if (!isSafeHttpUrl(platform?.url)) {
+      errors[`${fieldPrefix}.url`] =
+        "Enter a complete http:// or https:// URL without login credentials.";
+    }
+  });
+}
 
 function prepareInitialValues(initialValues = {}) {
   const normalizedValues = createSiteSettingsFormValues(initialValues);
@@ -38,6 +108,20 @@ function prepareInitialValues(initialValues = {}) {
           ? initialValues.seo.keywordsText
           : normalizedValues.seo.keywordsText,
     },
+
+    socialPlatforms: normalizedValues.socialPlatforms.map((platform) => ({
+      ...platform,
+    })),
+
+    developerPlatforms: normalizedValues.developerPlatforms.map((platform) => ({
+      ...platform,
+    })),
+
+    freelancerPlatforms: normalizedValues.freelancerPlatforms.map(
+      (platform) => ({
+        ...platform,
+      }),
+    ),
 
     sections: normalizedValues.sections.map((section) => ({
       ...section,
@@ -64,6 +148,16 @@ function setNestedValue(source, path, value) {
       value,
     ),
   };
+}
+
+function removeErrorGroup(errors, fieldPrefix) {
+  return Object.fromEntries(
+    Object.entries(errors).filter(([fieldName]) => {
+      return (
+        fieldName !== fieldPrefix && !fieldName.startsWith(`${fieldPrefix}.`)
+      );
+    }),
+  );
 }
 
 function validateSiteSettingsForm(formValues) {
@@ -136,6 +230,10 @@ function validateSiteSettingsForm(formValues) {
       errors[`sections.${index}.order`] =
         "Section order must be a non-negative number.";
     }
+  });
+
+  platformGroupFields.forEach((fieldName) => {
+    validatePlatformGroup(formValues, fieldName, errors);
   });
 
   return errors;
@@ -349,6 +447,32 @@ function SiteSettingsForm({
     });
   }
 
+  function clearFieldErrorGroup(fieldPrefix) {
+    setLocalErrors((currentErrors) =>
+      removeErrorGroup(currentErrors, fieldPrefix),
+    );
+
+    setServerErrors((currentErrors) =>
+      removeErrorGroup(currentErrors, fieldPrefix),
+    );
+  }
+
+  function handlePlatformChange(fieldName, nextPlatforms) {
+    const platforms = Array.isArray(nextPlatforms) ? nextPlatforms : [];
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+
+      [fieldName]: platforms.map((platform, index) => ({
+        ...platform,
+        order: index + 1,
+      })),
+    }));
+
+    clearFieldErrorGroup(fieldName);
+    setSubmitError("");
+  }
+
   function handleFieldChange(event) {
     const { name, value, type, checked } = event.target;
 
@@ -460,6 +584,11 @@ function SiteSettingsForm({
       setIsSubmitting(false);
     }
   }
+
+  const combinedFieldErrors = {
+    ...serverErrors,
+    ...localErrors,
+  };
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-8">
@@ -846,6 +975,42 @@ function SiteSettingsForm({
           </div>
         </div>
       </SettingsCard>
+
+      <PlatformSettingsEditor
+        title="Social Platforms"
+        description="Manage social media profiles displayed in the Contact section and website Footer."
+        fieldName="socialPlatforms"
+        platforms={formValues.socialPlatforms}
+        fieldErrors={combinedFieldErrors}
+        disabled={isSubmitting}
+        onChange={(nextPlatforms) =>
+          handlePlatformChange("socialPlatforms", nextPlatforms)
+        }
+      />
+
+      <PlatformSettingsEditor
+        title="Developer Platforms"
+        description="Manage coding and developer profile links such as GitHub, GitLab, StackBlitz and CodePen."
+        fieldName="developerPlatforms"
+        platforms={formValues.developerPlatforms}
+        fieldErrors={combinedFieldErrors}
+        disabled={isSubmitting}
+        onChange={(nextPlatforms) =>
+          handlePlatformChange("developerPlatforms", nextPlatforms)
+        }
+      />
+
+      <PlatformSettingsEditor
+        title="Freelancer Platforms"
+        description="Manage public freelancing profiles such as Upwork, Fiverr, Freelancer, PeoplePerHour and Contra."
+        fieldName="freelancerPlatforms"
+        platforms={formValues.freelancerPlatforms}
+        fieldErrors={combinedFieldErrors}
+        disabled={isSubmitting}
+        onChange={(nextPlatforms) =>
+          handlePlatformChange("freelancerPlatforms", nextPlatforms)
+        }
+      />
 
       <SettingsCard
         title="SEO Settings"

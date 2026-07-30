@@ -37,11 +37,131 @@ const defaultSections = [
   },
 ];
 
+const defaultPlatformGroups = {
+  socialPlatforms: [
+    {
+      name: "YouTube",
+      username: "RakeshNexify",
+      url: "",
+      isVisible: true,
+      order: 1,
+    },
+    {
+      name: "LinkedIn",
+      username: "Rakesh Pandit",
+      url: "",
+      isVisible: true,
+      order: 2,
+    },
+    {
+      name: "Instagram",
+      username: "RakeshNexify",
+      url: "",
+      isVisible: true,
+      order: 3,
+    },
+    {
+      name: "Facebook",
+      username: "RakeshNexify",
+      url: "",
+      isVisible: true,
+      order: 4,
+    },
+    {
+      name: "Threads",
+      username: "RakeshNexify",
+      url: "",
+      isVisible: true,
+      order: 5,
+    },
+    {
+      name: "TikTok",
+      username: "RakeshNexify",
+      url: "",
+      isVisible: true,
+      order: 6,
+    },
+  ],
+
+  developerPlatforms: [
+    {
+      name: "GitHub",
+      username: "Rakesh-Pandit-Developer",
+      url: "",
+      isVisible: true,
+      order: 1,
+    },
+    {
+      name: "GitLab",
+      username: "",
+      url: "",
+      isVisible: true,
+      order: 2,
+    },
+    {
+      name: "StackBlitz",
+      username: "",
+      url: "",
+      isVisible: true,
+      order: 3,
+    },
+    {
+      name: "CodePen",
+      username: "",
+      url: "",
+      isVisible: true,
+      order: 4,
+    },
+  ],
+
+  freelancerPlatforms: [
+    {
+      name: "Upwork",
+      username: "",
+      url: "",
+      isVisible: true,
+      order: 1,
+    },
+    {
+      name: "Fiverr",
+      username: "",
+      url: "",
+      isVisible: true,
+      order: 2,
+    },
+    {
+      name: "Freelancer",
+      username: "",
+      url: "",
+      isVisible: true,
+      order: 3,
+    },
+    {
+      name: "PeoplePerHour",
+      username: "",
+      url: "",
+      isVisible: true,
+      order: 4,
+    },
+    {
+      name: "Contra",
+      username: "",
+      url: "",
+      isVisible: true,
+      order: 5,
+    },
+  ],
+};
+
 function cleanString(value) {
   return String(value ?? "").trim();
 }
 
 function createMultilineValue(value) {
+  if (typeof value === "string") {
+    return value;
+  }
+
   if (!Array.isArray(value)) {
     return "";
   }
@@ -53,42 +173,36 @@ function createMultilineValue(value) {
 }
 
 function createArrayFromLines(value) {
-  const uniqueValues = new Set();
-
-  String(value || "")
+  const items = String(value ?? "")
     .split(/\r?\n/)
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .forEach((item) => {
-      uniqueValues.add(item);
-    });
+    .map((item) => cleanString(item))
+    .filter(Boolean);
 
-  return [...uniqueValues];
+  return [...new Set(items)];
 }
 
 function createKeywordsValue(value) {
+  if (typeof value === "string") {
+    return value;
+  }
+
   if (!Array.isArray(value)) {
     return "";
   }
 
   return value
-    .map((keyword) => cleanString(keyword))
+    .map((item) => cleanString(item))
     .filter(Boolean)
     .join(", ");
 }
 
 function createKeywordsArray(value) {
-  const uniqueKeywords = new Set();
+  const keywords = String(value ?? "")
+    .split(/[\n,]+/)
+    .map((keyword) => cleanString(keyword).toLowerCase())
+    .filter(Boolean);
 
-  String(value || "")
-    .split(/[,\n]/)
-    .map((keyword) => keyword.trim().toLowerCase())
-    .filter(Boolean)
-    .forEach((keyword) => {
-      uniqueKeywords.add(keyword);
-    });
-
-  return [...uniqueKeywords];
+  return [...new Set(keywords)];
 }
 
 function normalizeSection(section, index) {
@@ -96,11 +210,9 @@ function normalizeSection(section, index) {
 
   return {
     key: cleanString(section?.key).toLowerCase(),
-
     label: cleanString(section?.label),
 
-    isVisible:
-      typeof section?.isVisible === "boolean" ? section.isVisible : true,
+    isVisible: section?.isVisible !== false,
 
     order:
       Number.isFinite(numericOrder) && numericOrder >= 0
@@ -109,35 +221,67 @@ function normalizeSection(section, index) {
   };
 }
 
-function normalizeSections(sections) {
-  const sourceSections =
-    Array.isArray(sections) && sections.length > 0 ? sections : defaultSections;
+function normalizeSections(value) {
+  const source =
+    Array.isArray(value) && value.length > 0 ? value : defaultSections;
 
-  return sourceSections
-    .map(normalizeSection)
-    .filter((section) => section.key && section.label)
+  return source
+    .map((section, index) => normalizeSection(section, index))
+    .filter((section) => section.key)
     .sort(
       (firstSection, secondSection) => firstSection.order - secondSection.order,
     );
 }
 
+function createEmptyPlatform(order = 1) {
+  return {
+    name: "",
+    username: "",
+    url: "",
+    isVisible: true,
+    order,
+  };
+}
+
+function normalizePlatform(platform, index) {
+  const numericOrder = Number(platform?.order);
+
+  return {
+    name: cleanString(platform?.name),
+    username: cleanString(platform?.username),
+    url: cleanString(platform?.url),
+
+    isVisible: platform?.isVisible !== false,
+
+    order:
+      Number.isFinite(numericOrder) && numericOrder >= 0
+        ? numericOrder
+        : index + 1,
+  };
+}
+
+function normalizePlatforms(value, fallbackPlatforms = []) {
+  const source = Array.isArray(value) ? value : fallbackPlatforms;
+
+  return source
+    .map((platform, index) => normalizePlatform(platform, index))
+    .sort(
+      (firstPlatform, secondPlatform) =>
+        firstPlatform.order - secondPlatform.order,
+    );
+}
+
 function createSiteSettingsFormValues(settings = {}) {
-  const brand = settings.brand || {};
-  const owner = settings.owner || {};
-  const hero = settings.hero || {};
-  const about = settings.about || {};
-  const contact = settings.contact || {};
-  const seo = settings.seo || {};
+  const brand = settings?.brand || {};
+  const owner = settings?.owner || {};
+  const hero = settings?.hero || {};
+  const about = settings?.about || {};
+  const contact = settings?.contact || {};
+  const seo = settings?.seo || {};
 
-  const primaryButton = hero.primaryButton || {
-    label: hero.primaryAction?.label,
-    url: hero.primaryAction?.href,
-  };
+  const primaryButton = hero.primaryButton || hero.primaryAction || {};
 
-  const secondaryButton = hero.secondaryButton || {
-    label: hero.secondaryAction?.label,
-    url: hero.secondaryAction?.href,
-  };
+  const secondaryButton = hero.secondaryButton || hero.secondaryAction || {};
 
   const aboutDescription =
     cleanString(about.description) ||
@@ -167,28 +311,38 @@ function createSiteSettingsFormValues(settings = {}) {
 
     hero: {
       eyebrow: cleanString(hero.eyebrow),
-      heading: cleanString(hero.heading || hero.title),
+
+      heading: cleanString(hero.heading) || cleanString(hero.title),
+
       description: cleanString(hero.description),
 
       primaryButton: {
-        label: cleanString(primaryButton?.label),
-        url: cleanString(primaryButton?.url),
+        label: cleanString(primaryButton.label),
+
+        url: cleanString(primaryButton.url) || cleanString(primaryButton.href),
       },
 
       secondaryButton: {
-        label: cleanString(secondaryButton?.label),
-        url: cleanString(secondaryButton?.url),
+        label: cleanString(secondaryButton.label),
+
+        url:
+          cleanString(secondaryButton.url) || cleanString(secondaryButton.href),
       },
     },
 
     about: {
-      heading: cleanString(about.heading || about.title),
+      heading: cleanString(about.heading) || cleanString(about.title),
+
       description: aboutDescription,
-      highlightsText: createMultilineValue(about.highlights),
+
+      highlightsText:
+        typeof about.highlightsText === "string"
+          ? about.highlightsText
+          : createMultilineValue(about.highlights),
     },
 
     contact: {
-      email: cleanString(contact.email).toLowerCase(),
+      email: cleanString(contact.email),
       phone: cleanString(contact.phone),
       whatsapp: cleanString(contact.whatsapp),
       location: cleanString(contact.location),
@@ -198,15 +352,44 @@ function createSiteSettingsFormValues(settings = {}) {
     seo: {
       title: cleanString(seo.title),
       description: cleanString(seo.description),
-      keywordsText: createKeywordsValue(seo.keywords),
+
+      keywordsText:
+        typeof seo.keywordsText === "string"
+          ? seo.keywordsText
+          : createKeywordsValue(seo.keywords),
+
       ogImageUrl: cleanString(seo.ogImageUrl),
     },
 
-    sections: normalizeSections(settings.sections),
+    socialPlatforms: normalizePlatforms(
+      settings?.socialPlatforms,
+      defaultPlatformGroups.socialPlatforms,
+    ),
 
-    isPublished:
-      typeof settings.isPublished === "boolean" ? settings.isPublished : true,
+    developerPlatforms: normalizePlatforms(
+      settings?.developerPlatforms,
+      defaultPlatformGroups.developerPlatforms,
+    ),
+
+    freelancerPlatforms: normalizePlatforms(
+      settings?.freelancerPlatforms,
+      defaultPlatformGroups.freelancerPlatforms,
+    ),
+
+    sections: normalizeSections(settings?.sections),
+
+    isPublished: settings?.isPublished !== false,
   };
+}
+
+function createPlatformPayload(platforms) {
+  return normalizePlatforms(platforms, []).map((platform, index) => ({
+    name: cleanString(platform.name),
+    username: cleanString(platform.username),
+    url: cleanString(platform.url),
+    isVisible: platform.isVisible !== false,
+    order: index + 1,
+  }));
 }
 
 function createSiteSettingsPayload(formValues = {}) {
@@ -214,11 +397,19 @@ function createSiteSettingsPayload(formValues = {}) {
 
   return {
     brand: {
-      ...values.brand,
+      name: values.brand.name,
+      shortName: values.brand.shortName,
+      tagline: values.brand.tagline,
+      logoUrl: values.brand.logoUrl,
+      faviconUrl: values.brand.faviconUrl,
     },
 
     owner: {
-      ...values.owner,
+      name: values.owner.name,
+      professionalTitle: values.owner.professionalTitle,
+      location: values.owner.location,
+      profileImageUrl: values.owner.profileImageUrl,
+      resumeUrl: values.owner.resumeUrl,
     },
 
     hero: {
@@ -241,23 +432,38 @@ function createSiteSettingsPayload(formValues = {}) {
       heading: values.about.heading,
       description: values.about.description,
 
-      highlights: createArrayFromLines(formValues.about?.highlightsText),
+      highlights: createArrayFromLines(values.about.highlightsText),
     },
 
     contact: {
-      ...values.contact,
+      email: values.contact.email,
+      phone: values.contact.phone,
+      whatsapp: values.contact.whatsapp,
+      location: values.contact.location,
+      availability: values.contact.availability,
     },
 
     seo: {
       title: values.seo.title,
       description: values.seo.description,
 
-      keywords: createKeywordsArray(formValues.seo?.keywordsText),
+      keywords: createKeywordsArray(values.seo.keywordsText),
 
       ogImageUrl: values.seo.ogImageUrl,
     },
 
-    sections: normalizeSections(formValues.sections),
+    socialPlatforms: createPlatformPayload(values.socialPlatforms),
+
+    developerPlatforms: createPlatformPayload(values.developerPlatforms),
+
+    freelancerPlatforms: createPlatformPayload(values.freelancerPlatforms),
+
+    sections: normalizeSections(values.sections).map((section, index) => ({
+      key: section.key,
+      label: section.label,
+      isVisible: section.isVisible,
+      order: index + 1,
+    })),
 
     isPublished: values.isPublished,
   };
@@ -265,8 +471,11 @@ function createSiteSettingsPayload(formValues = {}) {
 
 export {
   createArrayFromLines,
+  createEmptyPlatform,
   createKeywordsArray,
   createSiteSettingsFormValues,
   createSiteSettingsPayload,
+  defaultPlatformGroups,
   defaultSections,
+  normalizePlatforms,
 };

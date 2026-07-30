@@ -2,6 +2,14 @@ import SiteSettings from "../models/SiteSettings.js";
 
 const MAIN_SITE_KEY = "main";
 
+const MAX_PLATFORMS_PER_GROUP = 25;
+
+const platformGroupFields = [
+  "socialPlatforms",
+  "developerPlatforms",
+  "freelancerPlatforms",
+];
+
 const brandStringFields = [
   "name",
   "shortName",
@@ -119,6 +127,48 @@ function cleanOrder(value, fieldName) {
   }
 
   return numericOrder;
+}
+
+function cleanHttpUrl(value, fieldName) {
+  const url = cleanString(value);
+
+  if (!url) {
+    return "";
+  }
+
+  let parsedUrl;
+
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    throw createHttpError(`${fieldName} must be a valid website URL.`, 400, {
+      [fieldName]: "Enter a complete URL beginning with http:// or https://.",
+    });
+  }
+
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    throw createHttpError(`${fieldName} must use http:// or https://.`, 400, {
+      [fieldName]: "Only http:// and https:// URLs are allowed.",
+    });
+  }
+
+  if (!parsedUrl.hostname) {
+    throw createHttpError(`${fieldName} must contain a valid hostname.`, 400, {
+      [fieldName]: "Enter a valid website hostname.",
+    });
+  }
+
+  if (parsedUrl.username || parsedUrl.password) {
+    throw createHttpError(
+      `${fieldName} cannot contain login credentials.`,
+      400,
+      {
+        [fieldName]: "URLs containing usernames or passwords are not allowed.",
+      },
+    );
+  }
+
+  return url;
 }
 
 function appendStringFields(payload, source, prefix, fieldNames) {
@@ -266,6 +316,74 @@ function cleanSections(value) {
   });
 }
 
+function cleanPlatforms(value, fieldName) {
+  if (!Array.isArray(value)) {
+    throw createHttpError(`${fieldName} must be an array.`, 400, {
+      [fieldName]: `${fieldName} must be an array.`,
+    });
+  }
+
+  if (value.length > MAX_PLATFORMS_PER_GROUP) {
+    throw createHttpError(
+      `${fieldName} cannot contain more than ${MAX_PLATFORMS_PER_GROUP} platforms.`,
+      400,
+      {
+        [fieldName]: `Add no more than ${MAX_PLATFORMS_PER_GROUP} platforms to this group.`,
+      },
+    );
+  }
+
+  const usedNames = new Set();
+
+  return value.map((platformValue, index) => {
+    const fieldPrefix = `${fieldName}.${index}`;
+
+    const platform = ensureObject(platformValue, fieldPrefix);
+
+    const name = cleanString(platform.name);
+
+    if (!name) {
+      throw createHttpError("Every platform requires a name.", 400, {
+        [`${fieldPrefix}.name`]: "Platform name is required.",
+      });
+    }
+
+    const normalizedName = name.toLowerCase();
+
+    if (usedNames.has(normalizedName)) {
+      throw createHttpError(
+        `Platform names inside ${fieldName} must be unique.`,
+        400,
+        {
+          [`${fieldPrefix}.name`]: `The platform "${name}" already exists in this group.`,
+        },
+      );
+    }
+
+    usedNames.add(normalizedName);
+
+    return {
+      name,
+
+      username: hasOwnProperty(platform, "username")
+        ? cleanString(platform.username)
+        : "",
+
+      url: hasOwnProperty(platform, "url")
+        ? cleanHttpUrl(platform.url, `${fieldPrefix}.url`)
+        : "",
+
+      isVisible: hasOwnProperty(platform, "isVisible")
+        ? cleanBoolean(platform.isVisible, `${fieldPrefix}.isVisible`)
+        : true,
+
+      order: hasOwnProperty(platform, "order")
+        ? cleanOrder(platform.order, `${fieldPrefix}.order`)
+        : index + 1,
+    };
+  });
+}
+
 function buildSiteSettingsPayload(requestBody) {
   const body = ensureObject(requestBody, "siteSettings");
 
@@ -294,6 +412,12 @@ function buildSiteSettingsPayload(requestBody) {
   if (hasOwnProperty(body, "seo")) {
     appendSeoPayload(payload, body.seo);
   }
+
+  platformGroupFields.forEach((fieldName) => {
+    if (hasOwnProperty(body, fieldName)) {
+      payload[fieldName] = cleanPlatforms(body[fieldName], fieldName);
+    }
+  });
 
   if (hasOwnProperty(body, "sections")) {
     payload.sections = cleanSections(body.sections);
@@ -325,6 +449,10 @@ async function getOrCreateMainSettings() {
   );
 }
 
+function sortByOrder(firstItem, secondItem) {
+  return (firstItem.order || 0) - (secondItem.order || 0);
+}
+
 function serializeSettings(settings) {
   const data =
     typeof settings.toObject === "function"
@@ -332,11 +460,14 @@ function serializeSettings(settings) {
       : { ...settings };
 
   data.sections = Array.isArray(data.sections)
-    ? [...data.sections].sort(
-        (firstSection, secondSection) =>
-          (firstSection.order || 0) - (secondSection.order || 0),
-      )
+    ? [...data.sections].sort(sortByOrder)
     : [];
+
+  platformGroupFields.forEach((fieldName) => {
+    data[fieldName] = Array.isArray(data[fieldName])
+      ? [...data[fieldName]].sort(sortByOrder)
+      : [];
+  });
 
   return data;
 }

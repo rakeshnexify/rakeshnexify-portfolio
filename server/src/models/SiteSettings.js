@@ -262,6 +262,165 @@ const sectionSchema = new mongoose.Schema(
   },
 );
 
+const platformSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Platform name is required."],
+      trim: true,
+      maxlength: [80, "Platform name cannot exceed 80 characters."],
+    },
+
+    username: {
+      type: String,
+      trim: true,
+      maxlength: [150, "Platform username cannot exceed 150 characters."],
+      default: "",
+    },
+
+    url: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Platform URL cannot exceed 500 characters."],
+      default: "",
+    },
+
+    isVisible: {
+      type: Boolean,
+      default: true,
+    },
+
+    order: {
+      type: Number,
+      min: [0, "Platform display order cannot be negative."],
+      default: 0,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const defaultSocialPlatforms = [
+  {
+    name: "YouTube",
+    username: "RakeshNexify",
+    url: "",
+    isVisible: true,
+    order: 1,
+  },
+  {
+    name: "LinkedIn",
+    username: "Rakesh Pandit",
+    url: "",
+    isVisible: true,
+    order: 2,
+  },
+  {
+    name: "Instagram",
+    username: "RakeshNexify",
+    url: "",
+    isVisible: true,
+    order: 3,
+  },
+  {
+    name: "Facebook",
+    username: "RakeshNexify",
+    url: "",
+    isVisible: true,
+    order: 4,
+  },
+  {
+    name: "Threads",
+    username: "RakeshNexify",
+    url: "",
+    isVisible: true,
+    order: 5,
+  },
+  {
+    name: "TikTok",
+    username: "RakeshNexify",
+    url: "",
+    isVisible: true,
+    order: 6,
+  },
+];
+
+const defaultDeveloperPlatforms = [
+  {
+    name: "GitHub",
+    username: "Rakesh-Pandit-Developer",
+    url: "",
+    isVisible: true,
+    order: 1,
+  },
+  {
+    name: "GitLab",
+    username: "",
+    url: "",
+    isVisible: true,
+    order: 2,
+  },
+  {
+    name: "StackBlitz",
+    username: "",
+    url: "",
+    isVisible: true,
+    order: 3,
+  },
+  {
+    name: "CodePen",
+    username: "",
+    url: "",
+    isVisible: true,
+    order: 4,
+  },
+];
+
+const defaultFreelancerPlatforms = [
+  {
+    name: "Upwork",
+    username: "",
+    url: "",
+    isVisible: true,
+    order: 1,
+  },
+  {
+    name: "Fiverr",
+    username: "",
+    url: "",
+    isVisible: true,
+    order: 2,
+  },
+  {
+    name: "Freelancer",
+    username: "",
+    url: "",
+    isVisible: true,
+    order: 3,
+  },
+  {
+    name: "PeoplePerHour",
+    username: "",
+    url: "",
+    isVisible: true,
+    order: 4,
+  },
+  {
+    name: "Contra",
+    username: "",
+    url: "",
+    isVisible: true,
+    order: 5,
+  },
+];
+
+function clonePlatformDefaults(platforms) {
+  return platforms.map((platform) => ({
+    ...platform,
+  }));
+}
+
 const siteSettingsSchema = new mongoose.Schema(
   {
     siteKey: {
@@ -302,6 +461,24 @@ const siteSettingsSchema = new mongoose.Schema(
     seo: {
       type: seoSchema,
       default: () => ({}),
+    },
+
+    socialPlatforms: {
+      type: [platformSchema],
+
+      default: () => clonePlatformDefaults(defaultSocialPlatforms),
+    },
+
+    developerPlatforms: {
+      type: [platformSchema],
+
+      default: () => clonePlatformDefaults(defaultDeveloperPlatforms),
+    },
+
+    freelancerPlatforms: {
+      type: [platformSchema],
+
+      default: () => clonePlatformDefaults(defaultFreelancerPlatforms),
     },
 
     sections: {

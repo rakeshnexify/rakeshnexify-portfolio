@@ -5,6 +5,26 @@ import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import ContactForm from "./contact/ContactForm";
 
+function sortByOrder(firstPlatform, secondPlatform) {
+  return Number(firstPlatform?.order || 0) - Number(secondPlatform?.order || 0);
+}
+
+function getVisiblePlatforms(settingsPlatforms, fallbackPlatforms = []) {
+  const sourcePlatforms = Array.isArray(settingsPlatforms)
+    ? settingsPlatforms
+    : fallbackPlatforms;
+
+  return sourcePlatforms
+    .filter((platform) => {
+      return (
+        platform &&
+        platform.isVisible !== false &&
+        String(platform.name || "").trim()
+      );
+    })
+    .sort(sortByOrder);
+}
+
 function ContactDetail({ label, value, href, icon }) {
   if (!value) {
     return null;
@@ -51,26 +71,65 @@ function ContactDetail({ label, value, href, icon }) {
 }
 
 function PlatformLink({ platform }) {
-  if (!platform?.url) {
+  const name = String(platform?.name || "Platform").trim();
+
+  const username = String(platform?.username || "").trim();
+
+  const url = String(platform?.url || "").trim();
+
+  const content = (
+    <>
+      <span className="font-semibold">{name}</span>
+
+      {username && (
+        <span className="mt-0.5 max-w-40 truncate text-xs font-medium opacity-70">
+          {username}
+        </span>
+      )}
+    </>
+  );
+
+  if (!url) {
     return (
       <span
-        title={`${platform?.name || "Platform"} link will be added soon`}
-        className="inline-flex cursor-not-allowed items-center rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-400"
+        title={`${name} profile link will be added soon`}
+        className="inline-flex cursor-not-allowed flex-col items-start rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm text-slate-400"
       >
-        {platform?.name || "Platform"}
+        {content}
       </span>
     );
   }
 
   return (
     <a
-      href={platform.url}
+      href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-brand-600 hover:text-brand-600"
+      aria-label={`Open ${name}${username ? ` profile for ${username}` : ""}`}
+      className="inline-flex flex-col items-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 transition hover:border-brand-600 hover:text-brand-600"
     >
-      {platform.name}
+      {content}
     </a>
+  );
+}
+
+function PlatformGroup({ title, platforms }) {
+  if (!Array.isArray(platforms) || platforms.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+      <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+        {title}
+      </p>
+
+      <div className="mt-5 flex flex-wrap gap-3">
+        {platforms.map((platform) => (
+          <PlatformLink key={platform.name} platform={platform} />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -79,13 +138,45 @@ function ContactSection() {
 
   const contact = settings?.contact || siteData.contact || {};
 
-  const socialPlatforms = siteData.socialPlatforms || [];
-  const developerPlatforms = siteData.developerPlatforms || [];
-  const freelancerPlatforms = siteData.freelancerPlatforms || [];
+  const socialPlatforms = getVisiblePlatforms(
+    settings?.socialPlatforms,
+    siteData.socialPlatforms || [],
+  );
+
+  const developerPlatforms = getVisiblePlatforms(
+    settings?.developerPlatforms,
+    siteData.developerPlatforms || [],
+  );
+
+  const freelancerPlatforms = getVisiblePlatforms(
+    settings?.freelancerPlatforms,
+    siteData.freelancerPlatforms || [],
+  );
+
+  const platformGroups = [
+    {
+      key: "social",
+      title: "Social Media",
+      platforms: socialPlatforms,
+    },
+    {
+      key: "developer",
+      title: "Developer Profiles",
+      platforms: developerPlatforms,
+    },
+    {
+      key: "freelancer",
+      title: "Freelancer Profiles",
+      platforms: freelancerPlatforms,
+    },
+  ].filter((group) => group.platforms.length > 0);
 
   const email = String(contact.email || "").trim();
+
   const phone = String(contact.phone || "").trim();
+
   const whatsapp = String(contact.whatsapp || "").trim();
+
   const location = String(contact.location || "").trim();
 
   const availability =
@@ -223,43 +314,25 @@ function ContactSection() {
           <ContactForm />
         </div>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-            <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-              Social Media
-            </p>
-
-            <div className="mt-5 flex flex-wrap gap-3">
-              {socialPlatforms.map((platform) => (
-                <PlatformLink key={platform.name} platform={platform} />
-              ))}
-            </div>
+        {platformGroups.length > 0 && (
+          <div
+            className={`mt-12 grid gap-6 ${
+              platformGroups.length === 1
+                ? "lg:grid-cols-1"
+                : platformGroups.length === 2
+                  ? "lg:grid-cols-2"
+                  : "lg:grid-cols-3"
+            }`}
+          >
+            {platformGroups.map((group) => (
+              <PlatformGroup
+                key={group.key}
+                title={group.title}
+                platforms={group.platforms}
+              />
+            ))}
           </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-            <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-              Developer Profiles
-            </p>
-
-            <div className="mt-5 flex flex-wrap gap-3">
-              {developerPlatforms.map((platform) => (
-                <PlatformLink key={platform.name} platform={platform} />
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
-            <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-              Freelancer Profiles
-            </p>
-
-            <div className="mt-5 flex flex-wrap gap-3">
-              {freelancerPlatforms.map((platform) => (
-                <PlatformLink key={platform.name} platform={platform} />
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
       </Container>
     </Section>
   );

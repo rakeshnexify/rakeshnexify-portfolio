@@ -19,17 +19,20 @@ import AdminServicesPage from "../pages/admin/AdminServicesPage";
 import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
+import PublicSiteRoute from "./PublicSiteRoute";
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route element={<PublicSiteRoute />}>
+        <Route path="/" element={<HomePage />} />
 
-      <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
+        <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
 
-      <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
+        <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
 
-      <Route path="/brands/:slug" element={<BrandDetailsPage />} />
+        <Route path="/brands/:slug" element={<BrandDetailsPage />} />
+      </Route>
 
       <Route
         path="/admin"
