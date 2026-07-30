@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from "react-router";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import HomePage from "../pages/HomePage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
+import AdminCompaniesPage from "../pages/admin/AdminCompaniesPage";
+import AdminCompanyEditorPage from "../pages/admin/AdminCompanyEditorPage";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminLoginPage from "../pages/admin/AdminLoginPage";
 import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
@@ -52,6 +54,18 @@ function AppRoutes() {
         <Route
           path="/admin/projects/:id/edit"
           element={<AdminProjectEditorPage mode="edit" />}
+        />
+
+        <Route path="/admin/companies" element={<AdminCompaniesPage />} />
+
+        <Route
+          path="/admin/companies/new"
+          element={<AdminCompanyEditorPage mode="create" />}
+        />
+
+        <Route
+          path="/admin/companies/:id/edit"
+          element={<AdminCompanyEditorPage mode="edit" />}
         />
       </Route>
 

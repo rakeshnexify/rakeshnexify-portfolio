@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
+import adminCompanyRoutes from "./routes/adminCompany.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
 import companyRoutes from "./routes/company.routes.js";
@@ -41,6 +42,7 @@ app.use("/api/companies", companyRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/services", adminServiceRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
+app.use("/api/admin/companies", adminCompanyRoutes);
 app.use("/api/contact-messages", contactMessageRoutes);
 
 app.use((req, res) => {

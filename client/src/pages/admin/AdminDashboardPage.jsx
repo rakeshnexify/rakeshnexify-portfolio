@@ -12,15 +12,22 @@ const dashboardModules = [
   {
     title: "Services",
     description: "Create, edit, reorder, feature and hide portfolio services.",
-    status: "API ready",
+    status: "Management ready",
     path: "/admin/services",
   },
   {
     title: "Projects",
     description:
       "Manage portfolio projects, case studies, images and project links.",
-    status: "API ready",
+    status: "Management ready",
     path: "/admin/projects",
+  },
+  {
+    title: "Companies",
+    description:
+      "Create and manage company profiles, business information, services, contact details and public visibility.",
+    status: "Management ready",
+    path: "/admin/companies",
   },
   {
     title: "Contact Messages",
@@ -100,8 +107,8 @@ function AdminDashboardPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl leading-7 text-slate-400">
-              Manage your portfolio content, services, projects, enquiries and
-              website settings from this secure dashboard.
+              Manage your portfolio content, services, projects, companies,
+              enquiries and website settings from this secure dashboard.
             </p>
           </div>
 
