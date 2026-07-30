@@ -16,6 +16,7 @@ import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
 import AdminProjectsPage from "../pages/admin/AdminProjectsPage";
 import AdminServiceEditorPage from "../pages/admin/AdminServiceEditorPage";
 import AdminServicesPage from "../pages/admin/AdminServicesPage";
+import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 
@@ -39,6 +40,10 @@ function AppRoutes() {
 
       <Route element={<ProtectedAdminRoute />}>
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route
+          path="/admin/site-settings"
+          element={<AdminSiteSettingsPage />}
+        />
         <Route
           path="/admin/contact-messages"
           element={<AdminContactMessagesPage />}

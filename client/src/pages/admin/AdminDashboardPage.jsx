@@ -6,8 +6,9 @@ const dashboardModules = [
   {
     title: "Site Settings",
     description:
-      "Manage brand, owner profile, hero, about, contact and SEO settings.",
-    status: "Foundation ready",
+      "Manage brand identity, owner profile, Hero and About content, contact information, SEO and homepage sections.",
+    status: "Management ready",
+    path: "/admin/site-settings",
   },
   {
     title: "Services",

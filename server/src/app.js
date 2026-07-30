@@ -7,6 +7,7 @@ import adminCompanyRoutes from "./routes/adminCompany.routes.js";
 import adminContactMessageRoutes from "./routes/adminContactMessage.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
+import adminSiteSettingsRoutes from "./routes/adminSiteSettings.routes.js";
 import brandRoutes from "./routes/brand.routes.js";
 import companyRoutes from "./routes/company.routes.js";
 import contactMessageRoutes from "./routes/contactMessage.routes.js";
@@ -49,6 +50,7 @@ app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/admin/companies", adminCompanyRoutes);
 app.use("/api/admin/brands", adminBrandRoutes);
 app.use("/api/admin/contact-messages", adminContactMessageRoutes);
+app.use("/api/admin/site-settings", adminSiteSettingsRoutes);
 app.use("/api/contact-messages", contactMessageRoutes);
 
 app.use((req, res) => {
