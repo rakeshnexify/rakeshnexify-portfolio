@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 import siteData from "../../data/siteData";
 import useServices from "../../hooks/useServices";
 import useSiteSettings from "../../hooks/useSiteSettings";
@@ -13,8 +15,100 @@ const supportedFooterSections = new Set([
   "contact",
 ]);
 
+const defaultFooterContent = {
+  introduction:
+    "Developer, creator and entrepreneur building modern digital products.",
+
+  quickLinksHeading: "Quick Links",
+
+  servicesHeading: "Services",
+
+  platformsHeading: "Platforms",
+
+  platformNote: "Profiles without official URLs remain disabled.",
+
+  projectButton: {
+    label: "Start a project with me",
+    url: "#contact",
+  },
+
+  legalLinks: [
+    {
+      label: "Privacy Policy",
+      url: "#privacy",
+      isVisible: true,
+      order: 1,
+    },
+    {
+      label: "Terms",
+      url: "#terms",
+      isVisible: true,
+      order: 2,
+    },
+  ],
+
+  copyrightText: "All rights reserved.",
+};
+
 function sortByOrder(firstItem, secondItem) {
   return Number(firstItem?.order || 0) - Number(secondItem?.order || 0);
+}
+
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
+
+  for (let index = 0; index < text.length; index += 1) {
+    const characterCode = text.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getSafePublicUrl(value, fallbackUrl = "") {
+  const url = String(value || "").trim();
+
+  if (!url || containsControlCharacters(url)) {
+    return fallbackUrl;
+  }
+
+  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(url)) {
+    return url;
+  }
+
+  if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
+    return url;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return url;
+    }
+  } catch {
+    return fallbackUrl;
+  }
+
+  return fallbackUrl;
+}
+
+function getSafeHttpUrl(value) {
+  const safeUrl = getSafePublicUrl(value);
+
+  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
+    return safeUrl;
+  }
+
+  return "";
 }
 
 function getSectionHref(sectionKey) {
@@ -32,8 +126,11 @@ function getSectionLabel(section) {
 function getFallbackSections() {
   return (siteData.navigation || []).map((link, index) => ({
     key: link.href === "#home" ? "hero" : link.href.replace("#", ""),
+
     label: link.label,
+
     isVisible: true,
+
     order: index + 1,
   }));
 }
@@ -64,12 +161,71 @@ function getFooterServices(services) {
     .slice(0, 6);
 }
 
+function getLegalLinks(footer) {
+  const sourceLegalLinks = Array.isArray(footer?.legalLinks)
+    ? footer.legalLinks
+    : defaultFooterContent.legalLinks;
+
+  return sourceLegalLinks
+    .filter(
+      (link) =>
+        link && link.isVisible !== false && String(link.label || "").trim(),
+    )
+    .map((link, index) => ({
+      label: String(link.label || "").trim(),
+
+      url: getSafePublicUrl(link.url),
+
+      order: Number.isFinite(Number(link.order))
+        ? Number(link.order)
+        : index + 1,
+    }))
+    .filter((link) => link.url)
+    .sort(sortByOrder);
+}
+
+function FooterLink({ href, children, className = "", ariaLabel }) {
+  const safeHref = getSafePublicUrl(href);
+
+  if (!safeHref) {
+    return null;
+  }
+
+  if (safeHref.startsWith("http://") || safeHref.startsWith("https://")) {
+    return (
+      <a
+        href={safeHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={ariaLabel}
+        className={className}
+      >
+        {children}
+      </a>
+    );
+  }
+
+  if (safeHref.startsWith("/")) {
+    return (
+      <Link to={safeHref} aria-label={ariaLabel} className={className}>
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <a href={safeHref} aria-label={ariaLabel} className={className}>
+      {children}
+    </a>
+  );
+}
+
 function PlatformLink({ platform }) {
   const name = String(platform?.name || "Platform").trim();
 
   const username = String(platform?.username || "").trim();
 
-  const url = String(platform?.url || "").trim();
+  const url = getSafeHttpUrl(platform?.url);
 
   const commonClasses =
     "rounded-lg border border-slate-800 px-3 py-2 text-xs font-semibold transition";
@@ -112,15 +268,55 @@ function Footer() {
 
   const contact = settings?.contact || siteData.contact || {};
 
-  const brandName = brand.name || siteData.brand?.name || "RakeshNexify";
+  const footer = settings?.footer || {};
+
+  const brandName =
+    String(brand.name || siteData.brand?.name || "").trim() || "RakeshNexify";
 
   const introduction =
-    owner.introduction ||
-    siteData.owner?.introduction ||
-    "Developer, creator and entrepreneur building modern digital products.";
+    String(
+      footer.introduction ||
+        owner.introduction ||
+        siteData.owner?.introduction ||
+        "",
+    ).trim() || defaultFooterContent.introduction;
 
-  const location =
-    contact.location || owner.location || siteData.contact?.location || "";
+  const quickLinksHeading =
+    String(footer.quickLinksHeading || "").trim() ||
+    defaultFooterContent.quickLinksHeading;
+
+  const servicesHeading =
+    String(footer.servicesHeading || "").trim() ||
+    defaultFooterContent.servicesHeading;
+
+  const platformsHeading =
+    String(footer.platformsHeading || "").trim() ||
+    defaultFooterContent.platformsHeading;
+
+  const platformNote =
+    String(footer.platformNote || "").trim() ||
+    defaultFooterContent.platformNote;
+
+  const copyrightText =
+    String(footer.copyrightText || "").trim() ||
+    defaultFooterContent.copyrightText;
+
+  const location = String(
+    contact.location || owner.location || siteData.contact?.location || "",
+  ).trim();
+
+  const projectButton = footer.projectButton || {};
+
+  const projectButtonLabel =
+    String(projectButton.label || "").trim() ||
+    defaultFooterContent.projectButton.label;
+
+  const projectButtonUrl = getSafePublicUrl(
+    projectButton.url || projectButton.href,
+    defaultFooterContent.projectButton.url,
+  );
+
+  const legalLinks = getLegalLinks(footer);
 
   const settingsSections = Array.isArray(settings?.sections)
     ? settings.sections
@@ -138,7 +334,9 @@ function Footer() {
 
   const navigationLinks = visibleSections.map((section) => ({
     key: section.key,
+
     label: getSectionLabel(section),
+
     href: getSectionHref(section.key),
   }));
 
@@ -157,7 +355,9 @@ function Footer() {
   const platformGroups = [
     {
       key: "social",
+
       title: "Social",
+
       platforms: getVisiblePlatforms(
         settings?.socialPlatforms,
         siteData.socialPlatforms || [],
@@ -165,7 +365,9 @@ function Footer() {
     },
     {
       key: "developer",
+
       title: "Developer",
+
       platforms: getVisiblePlatforms(
         settings?.developerPlatforms,
         siteData.developerPlatforms || [],
@@ -173,7 +375,9 @@ function Footer() {
     },
     {
       key: "freelance",
+
       title: "Freelance",
+
       platforms: getVisiblePlatforms(
         settings?.freelancerPlatforms,
         siteData.freelancerPlatforms || [],
@@ -182,6 +386,14 @@ function Footer() {
   ].filter((group) => group.platforms.length > 0);
 
   const showPlatformsColumn = platformGroups.length > 0;
+
+  const showProjectButton =
+    Boolean(projectButtonLabel && projectButtonUrl) &&
+    !(projectButtonUrl === "#contact" && !isContactVisible);
+
+  const hasContactLegalLink = legalLinks.some(
+    (link) => link.url === "#contact",
+  );
 
   const gridClasses =
     showServicesColumn && showPlatformsColumn
@@ -211,30 +423,30 @@ function Footer() {
               <p className="mt-4 text-sm text-slate-500">{location}</p>
             )}
 
-            {isContactVisible && (
-              <a
-                href="#contact"
+            {showProjectButton && (
+              <FooterLink
+                href={projectButtonUrl}
                 className="mt-6 inline-flex text-sm font-semibold text-brand-500 transition hover:text-brand-400"
               >
-                Start a project with me →
-              </a>
+                {projectButtonLabel} →
+              </FooterLink>
             )}
           </div>
 
           <div>
             <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">
-              Quick Links
+              {quickLinksHeading}
             </h2>
 
             <ul className="mt-5 space-y-3">
               {navigationLinks.map((link) => (
                 <li key={link.key}>
-                  <a
+                  <FooterLink
                     href={link.href}
                     className="text-sm text-slate-400 transition hover:text-white"
                   >
                     {link.label}
-                  </a>
+                  </FooterLink>
                 </li>
               ))}
             </ul>
@@ -243,7 +455,7 @@ function Footer() {
           {showServicesColumn && (
             <div>
               <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">
-                Services
+                {servicesHeading}
               </h2>
 
               <ul className="mt-5 space-y-3">
@@ -256,12 +468,12 @@ function Footer() {
                       `${service.title}-${index}`
                     }
                   >
-                    <a
+                    <FooterLink
                       href="#services"
                       className="text-sm text-slate-400 transition hover:text-white"
                     >
                       {service.title}
-                    </a>
+                    </FooterLink>
                   </li>
                 ))}
               </ul>
@@ -271,7 +483,7 @@ function Footer() {
           {showPlatformsColumn && (
             <div>
               <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">
-                Platforms
+                {platformsHeading}
               </h2>
 
               <div className="mt-5 space-y-6">
@@ -293,31 +505,38 @@ function Footer() {
                 ))}
               </div>
 
-              <p className="mt-6 text-sm leading-6 text-slate-500">
-                Profiles without official URLs remain disabled.
-              </p>
+              {platformNote && (
+                <p className="mt-6 text-sm leading-6 text-slate-500">
+                  {platformNote}
+                </p>
+              )}
             </div>
           )}
         </div>
 
         <div className="flex flex-col gap-4 border-t border-slate-800 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {currentYear} {brandName}. All rights reserved.
+            © {currentYear} {brandName}. {copyrightText}
           </p>
 
           <div className="flex flex-wrap gap-x-5 gap-y-2">
-            <a href="#privacy" className="transition hover:text-white">
-              Privacy Policy
-            </a>
+            {legalLinks.map((link, index) => (
+              <FooterLink
+                key={`${link.label}-${link.url}-${index}`}
+                href={link.url}
+                className="transition hover:text-white"
+              >
+                {link.label}
+              </FooterLink>
+            ))}
 
-            <a href="#terms" className="transition hover:text-white">
-              Terms
-            </a>
-
-            {isContactVisible && (
-              <a href="#contact" className="transition hover:text-white">
+            {isContactVisible && !hasContactLegalLink && (
+              <FooterLink
+                href="#contact"
+                className="transition hover:text-white"
+              >
                 Contact
-              </a>
+              </FooterLink>
             )}
           </div>
         </div>

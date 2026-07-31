@@ -13,6 +13,14 @@ function sortByOrder(firstItem, secondItem) {
   return Number(firstItem?.order || 0) - Number(secondItem?.order || 0);
 }
 
+function getOrderedArray(items) {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  return [...items].sort(sortByOrder);
+}
+
 function serializePublicSettings(settings) {
   const publicSettings =
     typeof settings?.toObject === "function"
@@ -20,12 +28,23 @@ function serializePublicSettings(settings) {
       : { ...settings };
 
   orderedArrayFields.forEach((fieldName) => {
-    publicSettings[fieldName] = Array.isArray(publicSettings[fieldName])
-      ? [...publicSettings[fieldName]].sort(sortByOrder)
-      : [];
+    publicSettings[fieldName] = getOrderedArray(publicSettings[fieldName]);
   });
 
+  const footer =
+    publicSettings.footer && typeof publicSettings.footer === "object"
+      ? {
+          ...publicSettings.footer,
+        }
+      : {};
+
+  footer.legalLinks = getOrderedArray(footer.legalLinks);
+
+  publicSettings.footer = footer;
+
+  delete publicSettings.siteKey;
   delete publicSettings.updatedBy;
+  delete publicSettings.__v;
 
   return publicSettings;
 }

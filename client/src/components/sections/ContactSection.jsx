@@ -5,6 +5,22 @@ import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import ContactForm from "./contact/ContactForm";
 
+const defaultSectionContent = {
+  eyebrow: "Contact Me",
+
+  heading: "Let us discuss your next digital project",
+
+  description:
+    "Share your requirements for a business website, MERN application, WordPress website, e-commerce store or long-term development support.",
+
+  enquiryEyebrow: "Project Enquiries",
+
+  enquiryHeading: "Ready to build something useful?",
+
+  enquiryDescription:
+    "Explain your idea, required features, preferred technology and expected timeline. I will review the project details and reply through an available contact method.",
+};
+
 function sortByOrder(firstPlatform, secondPlatform) {
   return Number(firstPlatform?.order || 0) - Number(secondPlatform?.order || 0);
 }
@@ -138,6 +154,32 @@ function ContactSection() {
 
   const contact = settings?.contact || siteData.contact || {};
 
+  const sectionContent = settings?.contactSection || {};
+
+  const eyebrow =
+    String(sectionContent.eyebrow || "").trim() ||
+    defaultSectionContent.eyebrow;
+
+  const heading =
+    String(sectionContent.heading || sectionContent.title || "").trim() ||
+    defaultSectionContent.heading;
+
+  const description =
+    String(sectionContent.description || "").trim() ||
+    defaultSectionContent.description;
+
+  const enquiryEyebrow =
+    String(sectionContent.enquiryEyebrow || "").trim() ||
+    defaultSectionContent.enquiryEyebrow;
+
+  const enquiryHeading =
+    String(sectionContent.enquiryHeading || "").trim() ||
+    defaultSectionContent.enquiryHeading;
+
+  const enquiryDescription =
+    String(sectionContent.enquiryDescription || "").trim() ||
+    defaultSectionContent.enquiryDescription;
+
   const socialPlatforms = getVisiblePlatforms(
     settings?.socialPlatforms,
     siteData.socialPlatforms || [],
@@ -198,26 +240,24 @@ function ContactSection() {
     >
       <Container>
         <SectionHeading
-          eyebrow="Contact Me"
-          title="Let us discuss your next digital project"
-          description="Share your requirements for a business website, MERN application, WordPress website, e-commerce store or long-term development support."
+          eyebrow={eyebrow}
+          title={heading}
+          description={description}
         />
 
         <div className="mt-12 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="space-y-6">
             <div className="rounded-3xl bg-slate-950 p-6 text-white shadow-xl shadow-slate-200/70 sm:p-8">
               <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-400">
-                Project Enquiries
+                {enquiryEyebrow}
               </p>
 
               <h3 className="mt-3 text-3xl font-bold tracking-tight">
-                Ready to build something useful?
+                {enquiryHeading}
               </h3>
 
               <p className="mt-4 leading-7 text-slate-400">
-                Explain your idea, required features, preferred technology and
-                expected timeline. I will review the project details and reply
-                through an available contact method.
+                {enquiryDescription}
               </p>
 
               <div className="mt-7 flex items-center gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4">

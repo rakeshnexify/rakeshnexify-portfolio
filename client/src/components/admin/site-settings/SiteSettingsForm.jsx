@@ -6,6 +6,7 @@ import {
   createSiteSettingsFormValues,
   createSiteSettingsPayload,
 } from "../../../utils/siteSettingsForm";
+import LegalLinksEditor from "./LegalLinksEditor";
 import PlatformSettingsEditor from "./PlatformSettingsEditor";
 
 const inputClasses =
@@ -18,11 +19,60 @@ const defaultFormValues = createSiteSettingsFormValues({});
 
 const MAX_PLATFORMS_PER_GROUP = 25;
 
+const MAX_LEGAL_LINKS = 20;
+
 const platformGroupFields = [
   "socialPlatforms",
   "developerPlatforms",
   "freelancerPlatforms",
 ];
+
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
+
+  for (let index = 0; index < text.length; index += 1) {
+    const characterCode = text.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function isSafePublicUrl(value) {
+  const url = String(value || "").trim();
+
+  if (!url) {
+    return true;
+  }
+
+  if (containsControlCharacters(url)) {
+    return false;
+  }
+
+  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(url)) {
+    return true;
+  }
+
+  if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
+    return true;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    return (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      Boolean(parsedUrl.hostname) &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    );
+  } catch {
+    return false;
+  }
+}
 
 function isSafeHttpUrl(value) {
   const url = String(value || "").trim();
@@ -85,6 +135,76 @@ function validatePlatformGroup(formValues, fieldName, errors) {
   });
 }
 
+function validateLegalLinks(formValues, errors) {
+  const legalLinks = formValues?.footer?.legalLinks;
+
+  if (!Array.isArray(legalLinks)) {
+    errors["footer.legalLinks"] =
+      "Footer legal links must be provided as a list.";
+
+    return;
+  }
+
+  if (legalLinks.length > MAX_LEGAL_LINKS) {
+    errors["footer.legalLinks"] =
+      `A maximum of ${MAX_LEGAL_LINKS} legal links is allowed.`;
+  }
+
+  const usedLabels = new Set();
+
+  legalLinks.forEach((link, index) => {
+    const fieldPrefix = `footer.legalLinks.${index}`;
+
+    const label = String(link?.label || "").trim();
+
+    if (!label) {
+      errors[`${fieldPrefix}.label`] = "Legal link label is required.";
+    } else {
+      const normalizedLabel = label.toLowerCase();
+
+      if (usedLabels.has(normalizedLabel)) {
+        errors[`${fieldPrefix}.label`] =
+          `The legal link "${label}" is already added.`;
+      } else {
+        usedLabels.add(normalizedLabel);
+      }
+    }
+
+    if (!isSafePublicUrl(link?.url)) {
+      errors[`${fieldPrefix}.url`] =
+        "Use a #section, /relative-path or complete http:// or https:// URL.";
+    }
+  });
+}
+
+function validateDynamicContentUrls(formValues, errors) {
+  const urlFields = [
+    {
+      fieldName: "servicesSection.ctaButton.url",
+      value: formValues?.servicesSection?.ctaButton?.url,
+    },
+    {
+      fieldName: "projectsSection.ctaButton.url",
+      value: formValues?.projectsSection?.ctaButton?.url,
+    },
+    {
+      fieldName: "companiesSection.ctaButton.url",
+      value: formValues?.companiesSection?.ctaButton?.url,
+    },
+    {
+      fieldName: "footer.projectButton.url",
+      value: formValues?.footer?.projectButton?.url,
+    },
+  ];
+
+  urlFields.forEach(({ fieldName, value }) => {
+    if (!isSafePublicUrl(value)) {
+      errors[fieldName] =
+        "Use a #section, /relative-path or complete http:// or https:// URL.";
+    }
+  });
+}
+
 function prepareInitialValues(initialValues = {}) {
   const normalizedValues = createSiteSettingsFormValues(initialValues);
 
@@ -107,6 +227,46 @@ function prepareInitialValues(initialValues = {}) {
         typeof initialValues.seo?.keywordsText === "string"
           ? initialValues.seo.keywordsText
           : normalizedValues.seo.keywordsText,
+    },
+
+    servicesSection: {
+      ...normalizedValues.servicesSection,
+
+      ctaButton: {
+        ...normalizedValues.servicesSection.ctaButton,
+      },
+    },
+
+    projectsSection: {
+      ...normalizedValues.projectsSection,
+
+      ctaButton: {
+        ...normalizedValues.projectsSection.ctaButton,
+      },
+    },
+
+    companiesSection: {
+      ...normalizedValues.companiesSection,
+
+      ctaButton: {
+        ...normalizedValues.companiesSection.ctaButton,
+      },
+    },
+
+    contactSection: {
+      ...normalizedValues.contactSection,
+    },
+
+    footer: {
+      ...normalizedValues.footer,
+
+      projectButton: {
+        ...normalizedValues.footer.projectButton,
+      },
+
+      legalLinks: normalizedValues.footer.legalLinks.map((link) => ({
+        ...link,
+      })),
     },
 
     socialPlatforms: normalizedValues.socialPlatforms.map((platform) => ({
@@ -235,6 +395,10 @@ function validateSiteSettingsForm(formValues) {
   platformGroupFields.forEach((fieldName) => {
     validatePlatformGroup(formValues, fieldName, errors);
   });
+
+  validateLegalLinks(formValues, errors);
+
+  validateDynamicContentUrls(formValues, errors);
 
   return errors;
 }
@@ -390,6 +554,93 @@ function ImageUrlField({
   );
 }
 
+function ListingSectionSettingsCard({
+  title,
+  description,
+  fieldName,
+  values,
+  disabled,
+  onChange,
+  getFieldError,
+}) {
+  return (
+    <SettingsCard title={title} description={description}>
+      <div className="grid gap-5">
+        <TextInput
+          id={`settings-${fieldName}-eyebrow`}
+          name={`${fieldName}.eyebrow`}
+          label="Section eyebrow"
+          value={values.eyebrow}
+          onChange={onChange}
+          error={getFieldError(`${fieldName}.eyebrow`, fieldName)}
+          disabled={disabled}
+          placeholder="Selected Work"
+          maxLength={100}
+        />
+
+        <TextInput
+          id={`settings-${fieldName}-heading`}
+          name={`${fieldName}.heading`}
+          label="Section heading"
+          value={values.heading}
+          onChange={onChange}
+          error={getFieldError(`${fieldName}.heading`, fieldName)}
+          disabled={disabled}
+          placeholder="A clear section heading"
+          maxLength={200}
+        />
+
+        <TextareaInput
+          id={`settings-${fieldName}-description`}
+          name={`${fieldName}.description`}
+          label="Section description"
+          value={values.description}
+          onChange={onChange}
+          error={getFieldError(`${fieldName}.description`, fieldName)}
+          disabled={disabled}
+          rows={5}
+          maxLength={1200}
+          placeholder="Explain the content shown in this section."
+        />
+
+        <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">
+          <TextInput
+            id={`settings-${fieldName}-cta-label`}
+            name={`${fieldName}.ctaButton.label`}
+            label="CTA button label"
+            value={values.ctaButton.label}
+            onChange={onChange}
+            error={getFieldError(
+              `${fieldName}.ctaButton.label`,
+              `${fieldName}.ctaButton`,
+              fieldName,
+            )}
+            disabled={disabled}
+            placeholder="View All"
+            maxLength={50}
+          />
+
+          <TextInput
+            id={`settings-${fieldName}-cta-url`}
+            name={`${fieldName}.ctaButton.url`}
+            label="CTA button URL"
+            value={values.ctaButton.url}
+            onChange={onChange}
+            error={getFieldError(
+              `${fieldName}.ctaButton.url`,
+              `${fieldName}.ctaButton`,
+              fieldName,
+            )}
+            disabled={disabled}
+            placeholder="#contact or /projects"
+            maxLength={500}
+          />
+        </div>
+      </div>
+    </SettingsCard>
+  );
+}
+
 function SiteSettingsForm({
   initialValues = defaultFormValues,
   onSubmit,
@@ -470,6 +721,27 @@ function SiteSettingsForm({
     }));
 
     clearFieldErrorGroup(fieldName);
+    setSubmitError("");
+  }
+
+  function handleLegalLinksChange(nextLegalLinks) {
+    const legalLinks = Array.isArray(nextLegalLinks) ? nextLegalLinks : [];
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+
+      footer: {
+        ...currentValues.footer,
+
+        legalLinks: legalLinks.map((link, index) => ({
+          ...link,
+          order: index + 1,
+        })),
+      },
+    }));
+
+    clearFieldErrorGroup("footer.legalLinks");
+
     setSubmitError("");
   }
 
@@ -904,6 +1176,131 @@ function SiteSettingsForm({
         </div>
       </SettingsCard>
 
+      <ListingSectionSettingsCard
+        title="Services Section Content"
+        description="Manage the heading, description and call-to-action displayed above your public services."
+        fieldName="servicesSection"
+        values={formValues.servicesSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        title="Projects Section Content"
+        description="Manage the heading, description and call-to-action displayed above your public projects."
+        fieldName="projectsSection"
+        values={formValues.projectsSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        title="Companies Section Content"
+        description="Manage the heading, description and call-to-action displayed above your companies and brands."
+        fieldName="companiesSection"
+        values={formValues.companiesSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <SettingsCard
+        title="Contact Section Content"
+        description="Manage the public Contact section heading and project-enquiry card content."
+      >
+        <div className="grid gap-5">
+          <TextInput
+            id="settings-contact-section-eyebrow"
+            name="contactSection.eyebrow"
+            label="Section eyebrow"
+            value={formValues.contactSection.eyebrow}
+            onChange={handleFieldChange}
+            error={getFieldError("contactSection.eyebrow", "contactSection")}
+            disabled={isSubmitting}
+            placeholder="Contact Me"
+            maxLength={100}
+          />
+
+          <TextInput
+            id="settings-contact-section-heading"
+            name="contactSection.heading"
+            label="Section heading"
+            value={formValues.contactSection.heading}
+            onChange={handleFieldChange}
+            error={getFieldError("contactSection.heading", "contactSection")}
+            disabled={isSubmitting}
+            placeholder="Let us discuss your next digital project"
+            maxLength={200}
+          />
+
+          <TextareaInput
+            id="settings-contact-section-description"
+            name="contactSection.description"
+            label="Section description"
+            value={formValues.contactSection.description}
+            onChange={handleFieldChange}
+            error={getFieldError(
+              "contactSection.description",
+              "contactSection",
+            )}
+            disabled={isSubmitting}
+            rows={5}
+            maxLength={1200}
+            placeholder="Explain which types of projects and enquiries are welcome."
+          />
+
+          <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <TextInput
+              id="settings-contact-enquiry-eyebrow"
+              name="contactSection.enquiryEyebrow"
+              label="Enquiry-card eyebrow"
+              value={formValues.contactSection.enquiryEyebrow}
+              onChange={handleFieldChange}
+              error={getFieldError(
+                "contactSection.enquiryEyebrow",
+                "contactSection",
+              )}
+              disabled={isSubmitting}
+              placeholder="Project Enquiries"
+              maxLength={100}
+            />
+
+            <TextInput
+              id="settings-contact-enquiry-heading"
+              name="contactSection.enquiryHeading"
+              label="Enquiry-card heading"
+              value={formValues.contactSection.enquiryHeading}
+              onChange={handleFieldChange}
+              error={getFieldError(
+                "contactSection.enquiryHeading",
+                "contactSection",
+              )}
+              disabled={isSubmitting}
+              placeholder="Ready to build something useful?"
+              maxLength={200}
+            />
+
+            <TextareaInput
+              id="settings-contact-enquiry-description"
+              name="contactSection.enquiryDescription"
+              label="Enquiry-card description"
+              value={formValues.contactSection.enquiryDescription}
+              onChange={handleFieldChange}
+              error={getFieldError(
+                "contactSection.enquiryDescription",
+                "contactSection",
+              )}
+              disabled={isSubmitting}
+              rows={6}
+              maxLength={1500}
+              placeholder="Explain which project details the client should provide."
+            />
+          </div>
+        </div>
+      </SettingsCard>
+
       <SettingsCard
         title="Contact Information"
         description="Manage the public email, phone, WhatsApp, location and availability message."
@@ -1011,6 +1408,130 @@ function SiteSettingsForm({
           handlePlatformChange("freelancerPlatforms", nextPlatforms)
         }
       />
+
+      <SettingsCard
+        title="Footer Content"
+        description="Manage the Footer introduction, column headings, project button, legal links and copyright text."
+      >
+        <div className="grid gap-6">
+          <TextareaInput
+            id="settings-footer-introduction"
+            name="footer.introduction"
+            label="Footer introduction"
+            value={formValues.footer.introduction}
+            onChange={handleFieldChange}
+            error={getFieldError("footer.introduction", "footer")}
+            disabled={isSubmitting}
+            rows={5}
+            maxLength={1000}
+            placeholder="Write a short professional introduction for the Footer."
+          />
+
+          <div className="grid gap-5 lg:grid-cols-3">
+            <TextInput
+              id="settings-footer-quick-links-heading"
+              name="footer.quickLinksHeading"
+              label="Quick-links heading"
+              value={formValues.footer.quickLinksHeading}
+              onChange={handleFieldChange}
+              error={getFieldError("footer.quickLinksHeading", "footer")}
+              disabled={isSubmitting}
+              placeholder="Quick Links"
+              maxLength={100}
+            />
+
+            <TextInput
+              id="settings-footer-services-heading"
+              name="footer.servicesHeading"
+              label="Services heading"
+              value={formValues.footer.servicesHeading}
+              onChange={handleFieldChange}
+              error={getFieldError("footer.servicesHeading", "footer")}
+              disabled={isSubmitting}
+              placeholder="Services"
+              maxLength={100}
+            />
+
+            <TextInput
+              id="settings-footer-platforms-heading"
+              name="footer.platformsHeading"
+              label="Platforms heading"
+              value={formValues.footer.platformsHeading}
+              onChange={handleFieldChange}
+              error={getFieldError("footer.platformsHeading", "footer")}
+              disabled={isSubmitting}
+              placeholder="Platforms"
+              maxLength={100}
+            />
+          </div>
+
+          <TextareaInput
+            id="settings-footer-platform-note"
+            name="footer.platformNote"
+            label="Platform note"
+            value={formValues.footer.platformNote}
+            onChange={handleFieldChange}
+            error={getFieldError("footer.platformNote", "footer")}
+            disabled={isSubmitting}
+            rows={3}
+            maxLength={300}
+            placeholder="Profiles without official URLs remain disabled."
+          />
+
+          <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">
+            <TextInput
+              id="settings-footer-project-button-label"
+              name="footer.projectButton.label"
+              label="Project button label"
+              value={formValues.footer.projectButton.label}
+              onChange={handleFieldChange}
+              error={getFieldError(
+                "footer.projectButton.label",
+                "footer.projectButton",
+                "footer",
+              )}
+              disabled={isSubmitting}
+              placeholder="Start a project with me"
+              maxLength={50}
+            />
+
+            <TextInput
+              id="settings-footer-project-button-url"
+              name="footer.projectButton.url"
+              label="Project button URL"
+              value={formValues.footer.projectButton.url}
+              onChange={handleFieldChange}
+              error={getFieldError(
+                "footer.projectButton.url",
+                "footer.projectButton",
+                "footer",
+              )}
+              disabled={isSubmitting}
+              placeholder="#contact"
+              maxLength={500}
+            />
+          </div>
+
+          <LegalLinksEditor
+            legalLinks={formValues.footer.legalLinks}
+            fieldErrors={combinedFieldErrors}
+            disabled={isSubmitting}
+            onChange={handleLegalLinksChange}
+          />
+
+          <TextInput
+            id="settings-footer-copyright"
+            name="footer.copyrightText"
+            label="Copyright text"
+            value={formValues.footer.copyrightText}
+            onChange={handleFieldChange}
+            error={getFieldError("footer.copyrightText", "footer")}
+            disabled={isSubmitting}
+            placeholder="All rights reserved."
+            maxLength={250}
+          />
+        </div>
+      </SettingsCard>
 
       <SettingsCard
         title="SEO Settings"

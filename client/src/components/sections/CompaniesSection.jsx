@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import siteData from "../../data/siteData";
 import useBrands from "../../hooks/useBrands";
 import useCompanies from "../../hooks/useCompanies";
+import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
@@ -40,6 +41,98 @@ const brandTypeLabels = {
   community: "Community Brand",
   other: "Digital Brand",
 };
+
+const defaultSectionContent = {
+  eyebrow: "Companies and Brands",
+
+  heading: "Businesses and digital brands built for long-term growth",
+
+  description:
+    "Explore the registered companies, e-commerce businesses and creator brands that I own, manage or develop.",
+
+  ctaButton: {
+    label: "Discuss a Business Project",
+    url: "#contact",
+  },
+};
+
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
+
+  for (let index = 0; index < text.length; index += 1) {
+    const characterCode = text.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getSafePublicUrl(value, fallbackUrl = "#contact") {
+  const url = String(value || "").trim();
+
+  if (!url || containsControlCharacters(url)) {
+    return fallbackUrl;
+  }
+
+  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(url)) {
+    return url;
+  }
+
+  if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
+    return url;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return url;
+    }
+  } catch {
+    return fallbackUrl;
+  }
+
+  return fallbackUrl;
+}
+
+function DynamicActionLink({ url, children, className = "" }) {
+  const safeUrl = getSafePublicUrl(url);
+
+  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
+    return (
+      <a
+        href={safeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+      >
+        {children}
+      </a>
+    );
+  }
+
+  if (safeUrl.startsWith("/")) {
+    return (
+      <Link to={safeUrl} className={className}>
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <a href={safeUrl} className={className}>
+      {children}
+    </a>
+  );
+}
 
 function normaliseBrand(brand, index) {
   const focusAreas = Array.isArray(brand.focusAreas) ? brand.focusAreas : [];
@@ -462,6 +555,33 @@ function BrandCard({ brand }) {
 }
 
 function CompaniesSection() {
+  const { settings } = useSiteSettings();
+
+  const sectionContent = settings?.companiesSection || {};
+
+  const eyebrow =
+    String(sectionContent.eyebrow || "").trim() ||
+    defaultSectionContent.eyebrow;
+
+  const heading =
+    String(sectionContent.heading || sectionContent.title || "").trim() ||
+    defaultSectionContent.heading;
+
+  const description =
+    String(sectionContent.description || "").trim() ||
+    defaultSectionContent.description;
+
+  const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
+
+  const ctaLabel =
+    String(ctaButton.label || "").trim() ||
+    defaultSectionContent.ctaButton.label;
+
+  const ctaUrl = getSafePublicUrl(
+    ctaButton.url || ctaButton.href,
+    defaultSectionContent.ctaButton.url,
+  );
+
   const fallbackCompanies = Array.isArray(siteData.companies)
     ? siteData.companies
     : [];
@@ -521,9 +641,9 @@ function CompaniesSection() {
     >
       <Container>
         <SectionHeading
-          eyebrow="Companies and Brands"
-          title="Businesses and digital brands built for long-term growth"
-          description="Explore the registered companies, e-commerce businesses and creator brands that I own, manage or develop."
+          eyebrow={eyebrow}
+          title={heading}
+          description={description}
         />
 
         <p aria-live="polite" className="sr-only">
@@ -669,12 +789,12 @@ function CompaniesSection() {
             development services and digital-product opportunities.
           </p>
 
-          <a
-            href="#contact"
+          <DynamicActionLink
+            url={ctaUrl}
             className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
           >
-            Discuss a Business Project
-          </a>
+            {ctaLabel}
+          </DynamicActionLink>
         </div>
       </Container>
     </Section>

@@ -3,11 +3,18 @@ import SiteSettings from "../models/SiteSettings.js";
 const MAIN_SITE_KEY = "main";
 
 const MAX_PLATFORMS_PER_GROUP = 25;
+const MAX_LEGAL_LINKS = 20;
 
 const platformGroupFields = [
   "socialPlatforms",
   "developerPlatforms",
   "freelancerPlatforms",
+];
+
+const listingSectionFields = [
+  "servicesSection",
+  "projectsSection",
+  "companiesSection",
 ];
 
 const brandStringFields = [
@@ -32,6 +39,17 @@ const buttonStringFields = ["label", "url"];
 
 const aboutStringFields = ["heading", "description"];
 
+const listingSectionStringFields = ["eyebrow", "heading", "description"];
+
+const contactSectionStringFields = [
+  "eyebrow",
+  "heading",
+  "description",
+  "enquiryEyebrow",
+  "enquiryHeading",
+  "enquiryDescription",
+];
+
 const contactStringFields = [
   "email",
   "phone",
@@ -41,6 +59,15 @@ const contactStringFields = [
 ];
 
 const seoStringFields = ["title", "description", "ogImageUrl"];
+
+const footerStringFields = [
+  "introduction",
+  "quickLinksHeading",
+  "servicesHeading",
+  "platformsHeading",
+  "platformNote",
+  "copyrightText",
+];
 
 function createHttpError(message, statusCode = 400, fieldErrors = {}) {
   const error = new Error(message);
@@ -129,6 +156,20 @@ function cleanOrder(value, fieldName) {
   return numericOrder;
 }
 
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
+
+  for (let index = 0; index < text.length; index += 1) {
+    const characterCode = text.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function cleanHttpUrl(value, fieldName) {
   const url = cleanString(value);
 
@@ -171,6 +212,67 @@ function cleanHttpUrl(value, fieldName) {
   return url;
 }
 
+function cleanPublicUrl(value, fieldName) {
+  const url = cleanString(value);
+
+  if (!url) {
+    return "";
+  }
+
+  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(url)) {
+    return url;
+  }
+
+  if (
+    url.startsWith("/") &&
+    !url.startsWith("//") &&
+    !url.includes("\\") &&
+    !containsControlCharacters(url)
+  ) {
+    return url;
+  }
+
+  let parsedUrl;
+
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    throw createHttpError(`${fieldName} has an invalid URL.`, 400, {
+      [fieldName]:
+        "Use a #section anchor, /relative-path or complete http:// or https:// URL.",
+    });
+  }
+
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    throw createHttpError(
+      `${fieldName} contains an unsupported URL type.`,
+      400,
+      {
+        [fieldName]:
+          "Only section anchors, relative paths, http:// and https:// URLs are allowed.",
+      },
+    );
+  }
+
+  if (!parsedUrl.hostname) {
+    throw createHttpError(`${fieldName} must contain a valid hostname.`, 400, {
+      [fieldName]: "Enter a valid website hostname.",
+    });
+  }
+
+  if (parsedUrl.username || parsedUrl.password) {
+    throw createHttpError(
+      `${fieldName} cannot contain login credentials.`,
+      400,
+      {
+        [fieldName]: "URLs containing usernames or passwords are not allowed.",
+      },
+    );
+  }
+
+  return url;
+}
+
 function appendStringFields(payload, source, prefix, fieldNames) {
   fieldNames.forEach((fieldName) => {
     if (hasOwnProperty(source, fieldName)) {
@@ -183,6 +285,18 @@ function appendButtonPayload(payload, buttonValue, prefix) {
   const button = ensureObject(buttonValue, prefix);
 
   appendStringFields(payload, button, prefix, buttonStringFields);
+}
+
+function appendPublicButtonPayload(payload, buttonValue, prefix) {
+  const button = ensureObject(buttonValue, prefix);
+
+  if (hasOwnProperty(button, "label")) {
+    payload[`${prefix}.label`] = cleanString(button.label);
+  }
+
+  if (hasOwnProperty(button, "url")) {
+    payload[`${prefix}.url`] = cleanPublicUrl(button.url, `${prefix}.url`);
+  }
 }
 
 function appendBrandPayload(payload, brandValue) {
@@ -222,6 +336,31 @@ function appendAboutPayload(payload, aboutValue) {
       "about.highlights",
     );
   }
+}
+
+function appendListingSectionPayload(payload, sectionValue, fieldName) {
+  const section = ensureObject(sectionValue, fieldName);
+
+  appendStringFields(payload, section, fieldName, listingSectionStringFields);
+
+  if (hasOwnProperty(section, "ctaButton")) {
+    appendPublicButtonPayload(
+      payload,
+      section.ctaButton,
+      `${fieldName}.ctaButton`,
+    );
+  }
+}
+
+function appendContactSectionPayload(payload, sectionValue) {
+  const section = ensureObject(sectionValue, "contactSection");
+
+  appendStringFields(
+    payload,
+    section,
+    "contactSection",
+    contactSectionStringFields,
+  );
 }
 
 function appendContactPayload(payload, contactValue) {
@@ -267,7 +406,6 @@ function cleanSections(value) {
     const section = ensureObject(sectionValue, fieldPrefix);
 
     const key = cleanString(section.key).toLowerCase();
-
     const label = cleanString(section.label);
 
     if (!key) {
@@ -384,6 +522,86 @@ function cleanPlatforms(value, fieldName) {
   });
 }
 
+function cleanLegalLinks(value) {
+  const fieldName = "footer.legalLinks";
+
+  if (!Array.isArray(value)) {
+    throw createHttpError("Footer legal links must be an array.", 400, {
+      [fieldName]: "Footer legal links must be an array.",
+    });
+  }
+
+  if (value.length > MAX_LEGAL_LINKS) {
+    throw createHttpError(
+      `Footer cannot contain more than ${MAX_LEGAL_LINKS} legal links.`,
+      400,
+      {
+        [fieldName]: `Add no more than ${MAX_LEGAL_LINKS} legal links.`,
+      },
+    );
+  }
+
+  const usedLabels = new Set();
+
+  return value.map((linkValue, index) => {
+    const fieldPrefix = `${fieldName}.${index}`;
+
+    const link = ensureObject(linkValue, fieldPrefix);
+
+    const label = cleanString(link.label);
+
+    if (!label) {
+      throw createHttpError("Every legal link requires a label.", 400, {
+        [`${fieldPrefix}.label`]: "Legal link label is required.",
+      });
+    }
+
+    const normalizedLabel = label.toLowerCase();
+
+    if (usedLabels.has(normalizedLabel)) {
+      throw createHttpError("Footer legal link labels must be unique.", 400, {
+        [`${fieldPrefix}.label`]: `The legal link "${label}" already exists.`,
+      });
+    }
+
+    usedLabels.add(normalizedLabel);
+
+    return {
+      label,
+
+      url: hasOwnProperty(link, "url")
+        ? cleanPublicUrl(link.url, `${fieldPrefix}.url`)
+        : "",
+
+      isVisible: hasOwnProperty(link, "isVisible")
+        ? cleanBoolean(link.isVisible, `${fieldPrefix}.isVisible`)
+        : true,
+
+      order: hasOwnProperty(link, "order")
+        ? cleanOrder(link.order, `${fieldPrefix}.order`)
+        : index + 1,
+    };
+  });
+}
+
+function appendFooterPayload(payload, footerValue) {
+  const footer = ensureObject(footerValue, "footer");
+
+  appendStringFields(payload, footer, "footer", footerStringFields);
+
+  if (hasOwnProperty(footer, "projectButton")) {
+    appendPublicButtonPayload(
+      payload,
+      footer.projectButton,
+      "footer.projectButton",
+    );
+  }
+
+  if (hasOwnProperty(footer, "legalLinks")) {
+    payload["footer.legalLinks"] = cleanLegalLinks(footer.legalLinks);
+  }
+}
+
 function buildSiteSettingsPayload(requestBody) {
   const body = ensureObject(requestBody, "siteSettings");
 
@@ -405,12 +623,26 @@ function buildSiteSettingsPayload(requestBody) {
     appendAboutPayload(payload, body.about);
   }
 
+  listingSectionFields.forEach((fieldName) => {
+    if (hasOwnProperty(body, fieldName)) {
+      appendListingSectionPayload(payload, body[fieldName], fieldName);
+    }
+  });
+
+  if (hasOwnProperty(body, "contactSection")) {
+    appendContactSectionPayload(payload, body.contactSection);
+  }
+
   if (hasOwnProperty(body, "contact")) {
     appendContactPayload(payload, body.contact);
   }
 
   if (hasOwnProperty(body, "seo")) {
     appendSeoPayload(payload, body.seo);
+  }
+
+  if (hasOwnProperty(body, "footer")) {
+    appendFooterPayload(payload, body.footer);
   }
 
   platformGroupFields.forEach((fieldName) => {
@@ -450,7 +682,7 @@ async function getOrCreateMainSettings() {
 }
 
 function sortByOrder(firstItem, secondItem) {
-  return (firstItem.order || 0) - (secondItem.order || 0);
+  return Number(firstItem?.order || 0) - Number(secondItem?.order || 0);
 }
 
 function serializeSettings(settings) {
@@ -468,6 +700,16 @@ function serializeSettings(settings) {
       ? [...data[fieldName]].sort(sortByOrder)
       : [];
   });
+
+  if (isPlainObject(data.footer)) {
+    data.footer = {
+      ...data.footer,
+
+      legalLinks: Array.isArray(data.footer.legalLinks)
+        ? [...data.footer.legalLinks].sort(sortByOrder)
+        : [],
+    };
+  }
 
   return data;
 }
@@ -517,7 +759,6 @@ function sendSiteSettingsError(error, res, next) {
     return res.status(error.statusCode).json({
       success: false,
       message: error.message,
-
       fieldErrors: error.fieldErrors || {},
     });
   }

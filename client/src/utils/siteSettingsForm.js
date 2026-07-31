@@ -153,6 +153,21 @@ const defaultPlatformGroups = {
   ],
 };
 
+const defaultFooterLegalLinks = [
+  {
+    label: "Privacy Policy",
+    url: "#privacy",
+    isVisible: true,
+    order: 1,
+  },
+  {
+    label: "Terms",
+    url: "#terms",
+    isVisible: true,
+    order: 2,
+  },
+];
+
 function cleanString(value) {
   return String(value ?? "").trim();
 }
@@ -205,11 +220,48 @@ function createKeywordsArray(value) {
   return [...new Set(keywords)];
 }
 
+function normalizeButton(button = {}) {
+  return {
+    label: cleanString(button?.label),
+
+    url: cleanString(button?.url) || cleanString(button?.href),
+  };
+}
+
+function normalizeListingSection(section = {}) {
+  return {
+    eyebrow: cleanString(section?.eyebrow),
+
+    heading: cleanString(section?.heading) || cleanString(section?.title),
+
+    description: cleanString(section?.description),
+
+    ctaButton: normalizeButton(section?.ctaButton || section?.action || {}),
+  };
+}
+
+function normalizeContactSection(section = {}) {
+  return {
+    eyebrow: cleanString(section?.eyebrow),
+
+    heading: cleanString(section?.heading) || cleanString(section?.title),
+
+    description: cleanString(section?.description),
+
+    enquiryEyebrow: cleanString(section?.enquiryEyebrow),
+
+    enquiryHeading: cleanString(section?.enquiryHeading),
+
+    enquiryDescription: cleanString(section?.enquiryDescription),
+  };
+}
+
 function normalizeSection(section, index) {
   const numericOrder = Number(section?.order);
 
   return {
     key: cleanString(section?.key).toLowerCase(),
+
     label: cleanString(section?.label),
 
     isVisible: section?.isVisible !== false,
@@ -248,7 +300,9 @@ function normalizePlatform(platform, index) {
 
   return {
     name: cleanString(platform?.name),
+
     username: cleanString(platform?.username),
+
     url: cleanString(platform?.url),
 
     isVisible: platform?.isVisible !== false,
@@ -269,6 +323,70 @@ function normalizePlatforms(value, fallbackPlatforms = []) {
       (firstPlatform, secondPlatform) =>
         firstPlatform.order - secondPlatform.order,
     );
+}
+
+function createEmptyLegalLink(order = 1) {
+  return {
+    label: "",
+    url: "",
+    isVisible: true,
+    order,
+  };
+}
+
+function normalizeLegalLink(link, index) {
+  const numericOrder = Number(link?.order);
+
+  return {
+    label: cleanString(link?.label),
+
+    url: cleanString(link?.url) || cleanString(link?.href),
+
+    isVisible: link?.isVisible !== false,
+
+    order:
+      Number.isFinite(numericOrder) && numericOrder >= 0
+        ? numericOrder
+        : index + 1,
+  };
+}
+
+function normalizeLegalLinks(value, fallbackLinks = defaultFooterLegalLinks) {
+  const source = Array.isArray(value) ? value : fallbackLinks;
+
+  return source
+    .map((link, index) => normalizeLegalLink(link, index))
+    .sort((firstLink, secondLink) => firstLink.order - secondLink.order);
+}
+
+function normalizeFooter(footer = {}) {
+  return {
+    introduction: cleanString(footer?.introduction),
+
+    quickLinksHeading: cleanString(footer?.quickLinksHeading) || "Quick Links",
+
+    servicesHeading: cleanString(footer?.servicesHeading) || "Services",
+
+    platformsHeading: cleanString(footer?.platformsHeading) || "Platforms",
+
+    platformNote:
+      cleanString(footer?.platformNote) ||
+      "Profiles without official URLs remain disabled.",
+
+    projectButton: {
+      label:
+        cleanString(footer?.projectButton?.label) || "Start a project with me",
+
+      url:
+        cleanString(footer?.projectButton?.url) ||
+        cleanString(footer?.projectButton?.href) ||
+        "#contact",
+    },
+
+    legalLinks: normalizeLegalLinks(footer?.legalLinks),
+
+    copyrightText: cleanString(footer?.copyrightText) || "All rights reserved.",
+  };
 }
 
 function createSiteSettingsFormValues(settings = {}) {
@@ -303,9 +421,13 @@ function createSiteSettingsFormValues(settings = {}) {
 
     owner: {
       name: cleanString(owner.name),
+
       professionalTitle: cleanString(owner.professionalTitle),
+
       location: cleanString(owner.location),
+
       profileImageUrl: cleanString(owner.profileImageUrl),
+
       resumeUrl: cleanString(owner.resumeUrl),
     },
 
@@ -316,18 +438,9 @@ function createSiteSettingsFormValues(settings = {}) {
 
       description: cleanString(hero.description),
 
-      primaryButton: {
-        label: cleanString(primaryButton.label),
+      primaryButton: normalizeButton(primaryButton),
 
-        url: cleanString(primaryButton.url) || cleanString(primaryButton.href),
-      },
-
-      secondaryButton: {
-        label: cleanString(secondaryButton.label),
-
-        url:
-          cleanString(secondaryButton.url) || cleanString(secondaryButton.href),
-      },
+      secondaryButton: normalizeButton(secondaryButton),
     },
 
     about: {
@@ -341,16 +454,26 @@ function createSiteSettingsFormValues(settings = {}) {
           : createMultilineValue(about.highlights),
     },
 
+    servicesSection: normalizeListingSection(settings?.servicesSection),
+
+    projectsSection: normalizeListingSection(settings?.projectsSection),
+
+    companiesSection: normalizeListingSection(settings?.companiesSection),
+
+    contactSection: normalizeContactSection(settings?.contactSection),
+
     contact: {
       email: cleanString(contact.email),
       phone: cleanString(contact.phone),
       whatsapp: cleanString(contact.whatsapp),
       location: cleanString(contact.location),
+
       availability: cleanString(contact.availability),
     },
 
     seo: {
       title: cleanString(seo.title),
+
       description: cleanString(seo.description),
 
       keywordsText:
@@ -360,6 +483,8 @@ function createSiteSettingsFormValues(settings = {}) {
 
       ogImageUrl: cleanString(seo.ogImageUrl),
     },
+
+    footer: normalizeFooter(settings?.footer),
 
     socialPlatforms: normalizePlatforms(
       settings?.socialPlatforms,
@@ -385,11 +510,43 @@ function createSiteSettingsFormValues(settings = {}) {
 function createPlatformPayload(platforms) {
   return normalizePlatforms(platforms, []).map((platform, index) => ({
     name: cleanString(platform.name),
+
     username: cleanString(platform.username),
+
     url: cleanString(platform.url),
+
     isVisible: platform.isVisible !== false,
+
     order: index + 1,
   }));
+}
+
+function createLegalLinksPayload(legalLinks) {
+  return normalizeLegalLinks(legalLinks, []).map((link, index) => ({
+    label: cleanString(link.label),
+
+    url: cleanString(link.url),
+
+    isVisible: link.isVisible !== false,
+
+    order: index + 1,
+  }));
+}
+
+function createListingSectionPayload(section) {
+  const normalizedSection = normalizeListingSection(section);
+
+  return {
+    eyebrow: normalizedSection.eyebrow,
+    heading: normalizedSection.heading,
+    description: normalizedSection.description,
+
+    ctaButton: {
+      label: normalizedSection.ctaButton.label,
+
+      url: normalizedSection.ctaButton.url,
+    },
+  };
 }
 
 function createSiteSettingsPayload(formValues = {}) {
@@ -398,58 +555,118 @@ function createSiteSettingsPayload(formValues = {}) {
   return {
     brand: {
       name: values.brand.name,
+
       shortName: values.brand.shortName,
+
       tagline: values.brand.tagline,
+
       logoUrl: values.brand.logoUrl,
+
       faviconUrl: values.brand.faviconUrl,
     },
 
     owner: {
       name: values.owner.name,
+
       professionalTitle: values.owner.professionalTitle,
+
       location: values.owner.location,
+
       profileImageUrl: values.owner.profileImageUrl,
+
       resumeUrl: values.owner.resumeUrl,
     },
 
     hero: {
       eyebrow: values.hero.eyebrow,
+
       heading: values.hero.heading,
+
       description: values.hero.description,
 
       primaryButton: {
         label: values.hero.primaryButton.label,
+
         url: values.hero.primaryButton.url,
       },
 
       secondaryButton: {
         label: values.hero.secondaryButton.label,
+
         url: values.hero.secondaryButton.url,
       },
     },
 
     about: {
       heading: values.about.heading,
+
       description: values.about.description,
 
       highlights: createArrayFromLines(values.about.highlightsText),
     },
 
+    servicesSection: createListingSectionPayload(values.servicesSection),
+
+    projectsSection: createListingSectionPayload(values.projectsSection),
+
+    companiesSection: createListingSectionPayload(values.companiesSection),
+
+    contactSection: {
+      eyebrow: values.contactSection.eyebrow,
+
+      heading: values.contactSection.heading,
+
+      description: values.contactSection.description,
+
+      enquiryEyebrow: values.contactSection.enquiryEyebrow,
+
+      enquiryHeading: values.contactSection.enquiryHeading,
+
+      enquiryDescription: values.contactSection.enquiryDescription,
+    },
+
     contact: {
       email: values.contact.email,
+
       phone: values.contact.phone,
+
       whatsapp: values.contact.whatsapp,
+
       location: values.contact.location,
+
       availability: values.contact.availability,
     },
 
     seo: {
       title: values.seo.title,
+
       description: values.seo.description,
 
       keywords: createKeywordsArray(values.seo.keywordsText),
 
       ogImageUrl: values.seo.ogImageUrl,
+    },
+
+    footer: {
+      introduction: values.footer.introduction,
+
+      quickLinksHeading: values.footer.quickLinksHeading,
+
+      servicesHeading: values.footer.servicesHeading,
+
+      platformsHeading: values.footer.platformsHeading,
+
+      platformNote: values.footer.platformNote,
+
+      projectButton: {
+        label: values.footer.projectButton.label,
+
+        url: values.footer.projectButton.url,
+      },
+
+      legalLinks: createLegalLinksPayload(values.footer.legalLinks),
+
+      copyrightText: values.footer.copyrightText,
     },
 
     socialPlatforms: createPlatformPayload(values.socialPlatforms),
@@ -461,7 +678,9 @@ function createSiteSettingsPayload(formValues = {}) {
     sections: normalizeSections(values.sections).map((section, index) => ({
       key: section.key,
       label: section.label,
+
       isVisible: section.isVisible,
+
       order: index + 1,
     })),
 
@@ -471,11 +690,14 @@ function createSiteSettingsPayload(formValues = {}) {
 
 export {
   createArrayFromLines,
+  createEmptyLegalLink,
   createEmptyPlatform,
   createKeywordsArray,
   createSiteSettingsFormValues,
   createSiteSettingsPayload,
+  defaultFooterLegalLinks,
   defaultPlatformGroups,
   defaultSections,
+  normalizeLegalLinks,
   normalizePlatforms,
 };

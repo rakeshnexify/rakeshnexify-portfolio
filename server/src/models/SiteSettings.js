@@ -162,6 +162,196 @@ const aboutSchema = new mongoose.Schema(
   },
 );
 
+const listingSectionContentSchema = new mongoose.Schema(
+  {
+    eyebrow: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "",
+    },
+
+    heading: {
+      type: String,
+      trim: true,
+      maxlength: 200,
+      default: "",
+    },
+
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 1200,
+      default: "",
+    },
+
+    ctaButton: {
+      type: buttonSchema,
+      default: () => ({}),
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const contactSectionContentSchema = new mongoose.Schema(
+  {
+    eyebrow: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "",
+    },
+
+    heading: {
+      type: String,
+      trim: true,
+      maxlength: 200,
+      default: "",
+    },
+
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 1200,
+      default: "",
+    },
+
+    enquiryEyebrow: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "",
+    },
+
+    enquiryHeading: {
+      type: String,
+      trim: true,
+      maxlength: 200,
+      default: "",
+    },
+
+    enquiryDescription: {
+      type: String,
+      trim: true,
+      maxlength: 1500,
+      default: "",
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const legalLinkSchema = new mongoose.Schema(
+  {
+    label: {
+      type: String,
+      required: [true, "Legal link label is required."],
+      trim: true,
+      maxlength: [100, "Legal link label cannot exceed 100 characters."],
+    },
+
+    url: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Legal link URL cannot exceed 500 characters."],
+      default: "",
+    },
+
+    isVisible: {
+      type: Boolean,
+      default: true,
+    },
+
+    order: {
+      type: Number,
+      min: [0, "Legal link order cannot be negative."],
+      default: 0,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const footerSchema = new mongoose.Schema(
+  {
+    introduction: {
+      type: String,
+      trim: true,
+      maxlength: 1000,
+      default: "",
+    },
+
+    quickLinksHeading: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "Quick Links",
+    },
+
+    servicesHeading: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "Services",
+    },
+
+    platformsHeading: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "Platforms",
+    },
+
+    platformNote: {
+      type: String,
+      trim: true,
+      maxlength: 300,
+      default: "Profiles without official URLs remain disabled.",
+    },
+
+    projectButton: {
+      type: buttonSchema,
+      default: () => ({
+        label: "Start a project with me",
+        url: "#contact",
+      }),
+    },
+
+    legalLinks: {
+      type: [legalLinkSchema],
+
+      default: () => [
+        {
+          label: "Privacy Policy",
+          url: "#privacy",
+          isVisible: true,
+          order: 1,
+        },
+        {
+          label: "Terms",
+          url: "#terms",
+          isVisible: true,
+          order: 2,
+        },
+      ],
+    },
+
+    copyrightText: {
+      type: String,
+      trim: true,
+      maxlength: 250,
+      default: "All rights reserved.",
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
 const contactSchema = new mongoose.Schema(
   {
     email: {
@@ -453,6 +643,26 @@ const siteSettingsSchema = new mongoose.Schema(
       default: () => ({}),
     },
 
+    servicesSection: {
+      type: listingSectionContentSchema,
+      default: () => ({}),
+    },
+
+    projectsSection: {
+      type: listingSectionContentSchema,
+      default: () => ({}),
+    },
+
+    companiesSection: {
+      type: listingSectionContentSchema,
+      default: () => ({}),
+    },
+
+    contactSection: {
+      type: contactSectionContentSchema,
+      default: () => ({}),
+    },
+
     contact: {
       type: contactSchema,
       default: () => ({}),
@@ -460,6 +670,11 @@ const siteSettingsSchema = new mongoose.Schema(
 
     seo: {
       type: seoSchema,
+      default: () => ({}),
+    },
+
+    footer: {
+      type: footerSchema,
       default: () => ({}),
     },
 

@@ -3,9 +3,24 @@ import { Link } from "react-router";
 
 import siteData from "../../data/siteData";
 import useProjects from "../../hooks/useProjects";
+import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
+
+const defaultSectionContent = {
+  eyebrow: "Featured Projects",
+
+  heading: "Selected websites, applications and digital products",
+
+  description:
+    "Explore my MERN applications, e-commerce websites, business platforms and frontend projects. Each project is built with a focus on clean design, useful features and responsive performance.",
+
+  ctaButton: {
+    label: "Discuss Your Project",
+    url: "#contact",
+  },
+};
 
 const statusLabels = {
   planning: "Planning",
@@ -22,6 +37,84 @@ const statusClasses = {
   "In Development": "bg-amber-100 text-amber-700",
   Archived: "bg-slate-200 text-slate-700",
 };
+
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
+
+  for (let index = 0; index < text.length; index += 1) {
+    const characterCode = text.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getSafePublicUrl(value, fallbackUrl = "#contact") {
+  const url = String(value || "").trim();
+
+  if (!url || containsControlCharacters(url)) {
+    return fallbackUrl;
+  }
+
+  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(url)) {
+    return url;
+  }
+
+  if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
+    return url;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return url;
+    }
+  } catch {
+    return fallbackUrl;
+  }
+
+  return fallbackUrl;
+}
+
+function DynamicActionLink({ url, children, className = "" }) {
+  const safeUrl = getSafePublicUrl(url);
+
+  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
+    return (
+      <a
+        href={safeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+      >
+        {children}
+      </a>
+    );
+  }
+
+  if (safeUrl.startsWith("/")) {
+    return (
+      <Link to={safeUrl} className={className}>
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <a href={safeUrl} className={className}>
+      {children}
+    </a>
+  );
+}
 
 function formatProjectStatus(status) {
   if (!status) {
@@ -120,7 +213,12 @@ function ProjectAction({ href, children, variant = "primary" }) {
   }
 
   return (
-    <a href={href} target="_blank" rel="noreferrer" className={actionClasses}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={actionClasses}
+    >
       {children}
     </a>
   );
@@ -135,6 +233,33 @@ function ProjectsSection() {
   } = useProjects({
     fallbackProjects: siteData.projects,
   });
+
+  const { settings } = useSiteSettings();
+
+  const sectionContent = settings?.projectsSection || {};
+
+  const eyebrow =
+    String(sectionContent.eyebrow || "").trim() ||
+    defaultSectionContent.eyebrow;
+
+  const heading =
+    String(sectionContent.heading || sectionContent.title || "").trim() ||
+    defaultSectionContent.heading;
+
+  const description =
+    String(sectionContent.description || "").trim() ||
+    defaultSectionContent.description;
+
+  const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
+
+  const ctaLabel =
+    String(ctaButton.label || "").trim() ||
+    defaultSectionContent.ctaButton.label;
+
+  const ctaUrl = getSafePublicUrl(
+    ctaButton.url || ctaButton.href,
+    defaultSectionContent.ctaButton.url,
+  );
 
   const projects = useMemo(
     () =>
@@ -155,9 +280,9 @@ function ProjectsSection() {
     >
       <Container>
         <SectionHeading
-          eyebrow="Featured Projects"
-          title="Selected websites, applications and digital products"
-          description="Explore my MERN applications, e-commerce websites, business platforms and frontend projects. Each project is built with a focus on clean design, useful features and responsive performance."
+          eyebrow={eyebrow}
+          title={heading}
+          description={description}
         />
 
         <p aria-live="polite" className="sr-only">
@@ -373,12 +498,12 @@ function ProjectsSection() {
             will be connected as each project is completed and published.
           </p>
 
-          <a
-            href="#contact"
+          <DynamicActionLink
+            url={ctaUrl}
             className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
           >
-            Discuss Your Project
-          </a>
+            {ctaLabel}
+          </DynamicActionLink>
         </div>
       </Container>
     </Section>
