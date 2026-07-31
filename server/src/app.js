@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import helmet from "helmet";
 
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import adminCompanyRoutes from "./routes/adminCompany.routes.js";
@@ -18,6 +19,8 @@ const app = express();
 
 const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 
+app.use(helmet());
+
 app.use(
   cors({
     origin: clientUrl,
@@ -27,7 +30,13 @@ app.use(
 );
 
 app.use(express.json({ limit: "20kb" }));
-app.use(express.urlencoded({ extended: true, limit: "20kb" }));
+
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "20kb",
+  }),
+);
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -41,12 +50,19 @@ app.use("/api/site-settings", siteSettingsRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/companies", companyRoutes);
+
 app.use("/api/admin/auth", adminAuthRoutes);
+
 app.use("/api/admin/services", adminServiceRoutes);
+
 app.use("/api/admin/projects", adminProjectRoutes);
+
 app.use("/api/admin/companies", adminCompanyRoutes);
+
 app.use("/api/admin/contact-messages", adminContactMessageRoutes);
+
 app.use("/api/admin/site-settings", adminSiteSettingsRoutes);
+
 app.use("/api/contact-messages", contactMessageRoutes);
 
 app.use((req, res) => {

@@ -38,12 +38,31 @@ function sendFieldError(res, fieldName, fieldMessage) {
   });
 }
 
+function sendHoneypotSuccess(res) {
+  return res.status(201).json({
+    success: true,
+
+    message: "Your project enquiry has been submitted successfully.",
+  });
+}
+
 async function createContactMessage(req, res, next) {
   try {
     const requestBody =
       req.body && typeof req.body === "object" && !Array.isArray(req.body)
         ? req.body
         : {};
+
+    const website = cleanString(requestBody.website);
+
+    /*
+     * Real visitors never fill this hidden field.
+     * Return a normal-looking success response without
+     * saving the automated submission in MongoDB.
+     */
+    if (website) {
+      return sendHoneypotSuccess(res);
+    }
 
     const name = cleanString(requestBody.name);
 
