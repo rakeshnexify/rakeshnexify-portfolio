@@ -6,7 +6,7 @@ const dashboardModules = [
   {
     title: "Site Settings",
     description:
-      "Manage brand identity, owner profile, Hero and About content, contact information, SEO and homepage sections.",
+      "Manage the RakeshNexify brand identity, owner profile, Hero and About content, contact information, SEO and homepage sections.",
     status: "Management ready",
     path: "/admin/site-settings",
   },
@@ -29,13 +29,6 @@ const dashboardModules = [
       "Create and manage company profiles, business information, services, contact details and public visibility.",
     status: "Management ready",
     path: "/admin/companies",
-  },
-  {
-    title: "Brands",
-    description:
-      "Create and manage personal, creator, business, product and digital brand profiles.",
-    status: "Management ready",
-    path: "/admin/brands",
   },
   {
     title: "Contact Messages",
@@ -107,22 +100,22 @@ function AdminDashboardPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
         <div className="grid gap-6 rounded-3xl bg-slate-950 p-7 text-white sm:p-10 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-400">
               Administration
             </p>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h1 className="mt-3 break-words text-3xl font-bold tracking-tight sm:text-4xl">
               Welcome, {admin?.name || "Administrator"}
             </h1>
 
-            <p className="mt-4 max-w-2xl leading-7 text-slate-400">
+            <p className="mt-4 max-w-2xl break-words leading-7 text-slate-400">
               Manage your portfolio content, services, projects, companies,
               enquiries and website settings from this secure dashboard.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-700 bg-slate-900 p-4 lg:min-w-64">
+          <div className="min-w-0 rounded-2xl border border-slate-700 bg-slate-900 p-4 lg:min-w-64">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
               Signed in account
             </p>
@@ -131,48 +124,38 @@ function AdminDashboardPage() {
               {admin?.email}
             </p>
 
-            <span className="mt-3 inline-flex rounded-lg bg-brand-600/20 px-3 py-1.5 text-xs font-bold text-brand-300">
+            <span className="mt-3 inline-flex max-w-full break-words rounded-lg bg-brand-600/20 px-3 py-1.5 text-xs font-bold text-brand-300">
               {formatRole(admin?.role)}
             </span>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
+        <div className="mt-8 grid min-w-0 gap-6 [&>*]:min-w-0 md:grid-cols-2">
           {dashboardModules.map((module) => (
             <article
               key={module.title}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-brand-200 hover:shadow-lg"
+              className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-brand-200 hover:shadow-lg"
             >
-              <div className="flex items-start justify-between gap-4">
-                <h2 className="text-xl font-bold text-slate-950">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <h2 className="min-w-0 break-words text-xl font-bold text-slate-950">
                   {module.title}
                 </h2>
 
-                <span className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
+                <span className="shrink-0 self-start rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
                   {module.status}
                 </span>
               </div>
 
-              <p className="mt-3 leading-7 text-slate-600">
+              <p className="mt-3 flex-1 break-words leading-7 text-slate-600">
                 {module.description}
               </p>
 
-              {module.path ? (
-                <Link
-                  to={module.path}
-                  className="mt-6 inline-flex min-h-10 items-center rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
-                >
-                  Open management page →
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="mt-6 inline-flex min-h-10 cursor-not-allowed items-center rounded-lg bg-slate-100 px-4 text-sm font-semibold text-slate-400"
-                >
-                  Management page coming next
-                </button>
-              )}
+              <Link
+                to={module.path}
+                className="mt-6 inline-flex min-h-10 max-w-full self-start items-center justify-center rounded-lg bg-brand-600 px-4 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
+              >
+                Open management page →
+              </Link>
             </article>
           ))}
         </div>
