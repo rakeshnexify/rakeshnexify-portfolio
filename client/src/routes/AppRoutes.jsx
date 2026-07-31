@@ -4,6 +4,7 @@ import BrandDetailsPage from "../pages/BrandDetailsPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import HomePage from "../pages/HomePage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
+import ProjectsPage from "../pages/ProjectsPage";
 import ServicesPage from "../pages/ServicesPage";
 
 import AdminBrandEditorPage from "../pages/admin/AdminBrandEditorPage";
@@ -29,6 +30,8 @@ function AppRoutes() {
         <Route path="/" element={<HomePage />} />
 
         <Route path="/services" element={<ServicesPage />} />
+
+        <Route path="/projects" element={<ProjectsPage />} />
 
         <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
 
