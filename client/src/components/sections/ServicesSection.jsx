@@ -1,97 +1,150 @@
+import { Link } from "react-router";
+
 import useServices from "../../hooks/useServices";
+import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
+import ResponsiveCardRow from "../layout/ResponsiveCardRow";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
+import ServiceCard from "../services/ServiceCard";
 
-function ServiceCard({ service, index }) {
-  const serviceId =
-    service._id || service.id || service.slug || `${service.title}-${index}`;
+const defaultSectionContent = {
+  eyebrow: "My Services",
 
-  const features = Array.isArray(service.features) ? service.features : [];
+  heading: "Professional digital services for businesses and creators",
 
-  const technologies = Array.isArray(service.technologies)
-    ? service.technologies
-    : [];
+  description:
+    "From complete MERN applications to WordPress websites and e-commerce stores, I provide modern development solutions focused on design, usability and long-term growth.",
+
+  ctaButton: {
+    label: "View All Services",
+    url: "/services",
+  },
+};
+
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
+
+  for (let index = 0; index < text.length; index += 1) {
+    const characterCode = text.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getSafePublicUrl(value, fallbackUrl = "/services") {
+  const url = String(value || "").trim();
+
+  if (!url || containsControlCharacters(url)) {
+    return fallbackUrl;
+  }
+
+  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(url)) {
+    return url;
+  }
+
+  if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
+    return url;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return url;
+    }
+  } catch {
+    return fallbackUrl;
+  }
+
+  return fallbackUrl;
+}
+
+function sortServicesForPreview(firstService, secondService) {
+  const featuredDifference =
+    Number(Boolean(secondService?.isFeatured)) -
+    Number(Boolean(firstService?.isFeatured));
+
+  if (featuredDifference !== 0) {
+    return featuredDifference;
+  }
+
+  return Number(firstService?.order || 0) - Number(secondService?.order || 0);
+}
+
+function DynamicActionLink({ url, children, className = "" }) {
+  const safeUrl = getSafePublicUrl(url);
+
+  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
+    return (
+      <a
+        href={safeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+      >
+        {children}
+      </a>
+    );
+  }
+
+  if (safeUrl.startsWith("/")) {
+    return (
+      <Link to={safeUrl} className={className}>
+        {children}
+      </Link>
+    );
+  }
 
   return (
-    <article className="group flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-slate-200/70 sm:p-7">
-      <div className="flex items-start justify-between gap-4">
-        <div className="grid size-12 place-items-center rounded-2xl bg-brand-50 text-sm font-extrabold text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
-          {String(index + 1).padStart(2, "0")}
-        </div>
-
-        <span
-          className={`rounded-full border px-3 py-1 text-xs font-semibold ${
-            service.isFeatured
-              ? "border-amber-200 bg-amber-50 text-amber-700"
-              : "border-slate-200 text-slate-500"
-          }`}
-        >
-          {service.isFeatured ? "Featured" : "Service"}
-        </span>
-      </div>
-
-      <h3 className="mt-6 text-2xl font-bold tracking-tight text-slate-950">
-        {service.title}
-      </h3>
-
-      <p className="mt-4 leading-7 text-slate-600">
-        {service.shortDescription}
-      </p>
-
-      {features.length > 0 && (
-        <ul className="mt-6 space-y-3">
-          {features.map((feature, featureIndex) => (
-            <li
-              key={`${serviceId}-${feature}-${featureIndex}`}
-              className="flex items-start gap-3 text-sm leading-6 text-slate-600"
-            >
-              <span className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-700">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 20 20"
-                  className="size-3"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m5 10 3 3 7-7" />
-                </svg>
-              </span>
-
-              <span>{feature}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {technologies.length > 0 && (
-        <div className="mt-6 flex flex-wrap gap-2">
-          {technologies.map((technology, technologyIndex) => (
-            <span
-              key={`${serviceId}-${technology}-${technologyIndex}`}
-              className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
-            >
-              {technology}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <a
-        href="#contact"
-        className="mt-auto pt-8 text-sm font-bold text-brand-600 transition hover:text-brand-700"
-      >
-        Discuss this service →
-      </a>
-    </article>
+    <a href={safeUrl} className={className}>
+      {children}
+    </a>
   );
 }
 
 function ServicesSection() {
   const { services, isLoading, error } = useServices();
+
+  const { settings } = useSiteSettings();
+
+  const sectionContent = settings?.servicesSection || {};
+
+  const eyebrow =
+    String(sectionContent.eyebrow || "").trim() ||
+    defaultSectionContent.eyebrow;
+
+  const heading =
+    String(sectionContent.heading || sectionContent.title || "").trim() ||
+    defaultSectionContent.heading;
+
+  const description =
+    String(sectionContent.description || "").trim() ||
+    defaultSectionContent.description;
+
+  const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
+
+  const ctaLabel =
+    String(ctaButton.label || "").trim() ||
+    defaultSectionContent.ctaButton.label;
+
+  const ctaUrl = getSafePublicUrl(
+    ctaButton.url || ctaButton.href,
+    defaultSectionContent.ctaButton.url,
+  );
+
+  const previewServices = [...services]
+    .sort(sortServicesForPreview)
+    .slice(0, 3);
 
   return (
     <Section
@@ -100,9 +153,9 @@ function ServicesSection() {
     >
       <Container>
         <SectionHeading
-          eyebrow="My Services"
-          title="Professional digital services for businesses and creators"
-          description="From complete MERN applications to WordPress websites and e-commerce stores, I provide modern development solutions focused on design, usability and long-term growth."
+          eyebrow={eyebrow}
+          title={heading}
+          description={description}
         />
 
         {error && (
@@ -118,16 +171,20 @@ function ServicesSection() {
         )}
 
         {!isLoading && services.length === 0 && (
-          <div className="mt-12 rounded-3xl border border-slate-200 bg-white p-8 text-center">
+          <div className="mt-10 rounded-3xl border border-slate-200 bg-white p-8 text-center">
             <p className="font-semibold text-slate-700">
               Services will be added soon.
             </p>
           </div>
         )}
 
-        {services.length > 0 && (
-          <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {services.map((service, index) => (
+        {previewServices.length > 0 && (
+          <ResponsiveCardRow
+            desktopColumns={3}
+            ariaLabel="Featured services"
+            className="mt-10"
+          >
+            {previewServices.map((service, index) => (
               <ServiceCard
                 key={
                   service._id ||
@@ -137,29 +194,33 @@ function ServicesSection() {
                 }
                 service={service}
                 index={index}
+                compact
               />
             ))}
-          </div>
+          </ResponsiveCardRow>
         )}
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-5 rounded-3xl bg-slate-950 px-6 py-8 text-center sm:px-8 lg:flex-row lg:text-left">
-          <div>
-            <p className="text-xl font-bold text-white">
-              Need a customised digital solution?
-            </p>
+        {previewServices.length > 0 && (
+          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-bold text-slate-950">
+                Explore complete development services
+              </p>
 
-            <p className="mt-2 text-sm leading-6 text-slate-400">
-              Tell me about your business, project requirements and goals.
-            </p>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                The homepage shows selected services only. Open the complete
+                Services page to view all available options.
+              </p>
+            </div>
+
+            <DynamicActionLink
+              url={ctaUrl}
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            >
+              {ctaLabel} →
+            </DynamicActionLink>
           </div>
-
-          <a
-            href="#contact"
-            className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-700"
-          >
-            Start Your Project
-          </a>
-        </div>
+        )}
       </Container>
     </Section>
   );

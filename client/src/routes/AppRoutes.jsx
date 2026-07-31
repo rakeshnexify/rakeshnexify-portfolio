@@ -4,6 +4,7 @@ import BrandDetailsPage from "../pages/BrandDetailsPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import HomePage from "../pages/HomePage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
+import ServicesPage from "../pages/ServicesPage";
 
 import AdminBrandEditorPage from "../pages/admin/AdminBrandEditorPage";
 import AdminBrandsPage from "../pages/admin/AdminBrandsPage";
@@ -27,6 +28,8 @@ function AppRoutes() {
       <Route element={<PublicSiteRoute />}>
         <Route path="/" element={<HomePage />} />
 
+        <Route path="/services" element={<ServicesPage />} />
+
         <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
 
         <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
@@ -43,10 +46,12 @@ function AppRoutes() {
 
       <Route element={<ProtectedAdminRoute />}>
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+
         <Route
           path="/admin/site-settings"
           element={<AdminSiteSettingsPage />}
         />
+
         <Route
           path="/admin/contact-messages"
           element={<AdminContactMessagesPage />}
