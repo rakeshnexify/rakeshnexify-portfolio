@@ -45,14 +45,14 @@ function ServicesLoadingState() {
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <Container>
-          <div className="flex min-h-20 items-center justify-between gap-5">
-            <Link to="/" className="inline-flex">
+          <div className="flex min-h-20 min-w-0 flex-col items-start justify-center gap-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:py-0">
+            <Link to="/" className="inline-flex min-w-0 max-w-full">
               <Logo />
             </Link>
 
             <Link
               to="/#services"
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700"
+              className="inline-flex min-h-10 max-w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700"
             >
               ← Back Home
             </Link>
@@ -68,7 +68,7 @@ function ServicesLoadingState() {
 
           <div className="mt-5 h-24 max-w-2xl animate-pulse rounded-xl bg-slate-200" />
 
-          <div className="mt-12 grid gap-7 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-12 grid min-w-0 gap-7 [&>*]:min-w-0 md:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((item) => (
               <div
                 key={item}
@@ -160,21 +160,21 @@ function ServicesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen overflow-x-hidden bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <Container>
-          <div className="flex min-h-20 items-center justify-between gap-5">
+          <div className="flex min-h-20 min-w-0 flex-col items-start justify-center gap-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:py-0">
             <Link
               to="/"
               aria-label={`Go to ${brandName} homepage`}
-              className="inline-flex"
+              className="inline-flex min-w-0 max-w-full"
             >
               <Logo showTagline />
             </Link>
 
             <Link
               to="/#services"
-              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-600 hover:text-brand-600"
+              className="inline-flex min-h-10 max-w-full shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-600 hover:text-brand-600"
             >
               ← Back Home
             </Link>
@@ -188,28 +188,28 @@ function ServicesPage() {
         <div className="absolute -bottom-40 left-10 size-96 rounded-full bg-cyan-500/10 blur-3xl" />
 
         <Container>
-          <div className="relative max-w-4xl">
+          <div className="relative min-w-0 max-w-4xl">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-brand-400">
               {eyebrow}
             </p>
 
-            <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="mt-4 break-words text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
               {heading}
             </h1>
 
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+            <p className="mt-6 max-w-3xl break-words text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
               {description}
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <span className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-slate-200">
+            <div className="mt-8 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <span className="inline-flex max-w-full items-center justify-center rounded-full border border-white/10 bg-white/10 px-4 py-2 text-center text-sm font-semibold text-slate-200">
                 {services.length}{" "}
                 {services.length === 1 ? "Public Service" : "Public Services"}
               </span>
 
               <Link
                 to="/#contact"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+                className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl bg-brand-600 px-5 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
               >
                 Discuss Your Project
               </Link>
@@ -233,7 +233,7 @@ function ServicesPage() {
           )}
 
           {services.length > 0 ? (
-            <div className="grid gap-7 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid min-w-0 gap-7 [&>*]:min-w-0 md:grid-cols-2 xl:grid-cols-3">
               {services.map((service, index) => (
                 <ServiceCard
                   key={
@@ -282,7 +282,7 @@ function ServicesPage() {
               Custom Development
             </p>
 
-            <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="mx-auto mt-4 max-w-3xl break-words text-2xl font-bold tracking-tight sm:text-4xl">
               Need a customised service package for your business?
             </h2>
 
@@ -294,7 +294,7 @@ function ServicesPage() {
 
             <Link
               to="/#contact"
-              className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
+              className="mt-7 inline-flex min-h-12 max-w-full items-center justify-center rounded-xl bg-brand-600 px-6 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
             >
               Start Your Project
             </Link>
