@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 import CompaniesPage from "../pages/CompaniesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import HomePage from "../pages/HomePage";
+import NotFoundPage from "../pages/NotFoundPage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ServicesPage from "../pages/ServicesPage";
@@ -196,6 +197,8 @@ function AppRoutes() {
           <Route path="/companies" element={<CompaniesPage />} />
 
           <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
+
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
 
         <Route
@@ -255,7 +258,11 @@ function AppRoutes() {
           />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="/admin/*"
+          element={<Navigate to="/admin/dashboard" replace />}
+        />
+
       </Routes>
     </>
   );
