@@ -1,7 +1,6 @@
-const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { createApiUrl } from "../config/apiConfig";
 
-const API_URL = configuredApiUrl.replace(/\/+$/, "");
+const COMPANIES_API_BASE_URL = createApiUrl("/api/companies");
 
 function createCompaniesApiError(responseData, response) {
   const error = new Error(
@@ -32,11 +31,8 @@ function buildCompaniesQuery(filters = {}) {
   const query = new URLSearchParams();
 
   const search = String(filters.search || "").trim();
-
   const industry = String(filters.industry || "").trim();
-
   const relationship = String(filters.relationship || "").trim();
-
   const status = String(filters.status || "").trim();
 
   if (search) {
@@ -66,7 +62,7 @@ function buildCompaniesQuery(filters = {}) {
 
 async function fetchPublicCompanies(filters = {}, { signal } = {}) {
   const response = await fetch(
-    `${API_URL}/api/companies${buildCompaniesQuery(filters)}`,
+    `${COMPANIES_API_BASE_URL}${buildCompaniesQuery(filters)}`,
     {
       method: "GET",
       headers: {
@@ -84,7 +80,6 @@ async function fetchPublicCompanies(filters = {}, { signal } = {}) {
 
   return {
     count: responseData.count ?? responseData.data.length,
-
     companies: responseData.data,
   };
 }
@@ -99,7 +94,7 @@ async function fetchPublicCompanyBySlug(slug, { signal } = {}) {
   }
 
   const response = await fetch(
-    `${API_URL}/api/companies/${encodeURIComponent(normalisedSlug)}`,
+    createApiUrl(`/api/companies/${encodeURIComponent(normalisedSlug)}`),
     {
       method: "GET",
       headers: {

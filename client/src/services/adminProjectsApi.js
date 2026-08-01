@@ -1,7 +1,6 @@
-const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { createApiUrl } from "../config/apiConfig";
 
-const API_URL = configuredApiUrl.replace(/\/+$/, "");
+const ADMIN_PROJECTS_PATH = "/api/admin/projects";
 
 function createAdminProjectsApiError(responseData, response) {
   const error = new Error(
@@ -81,11 +80,15 @@ function buildAdminProjectsQuery(filters = {}) {
 }
 
 async function fetchAdminProjects(accessToken, filters = {}, { signal } = {}) {
+  const queryString = buildAdminProjectsQuery(filters);
+
   const response = await fetch(
-    `${API_URL}/api/admin/projects${buildAdminProjectsQuery(filters)}`,
+    createApiUrl(`${ADMIN_PROJECTS_PATH}${queryString}`),
     {
       method: "GET",
+
       headers: createAuthorizationHeaders(accessToken),
+
       signal,
     },
   );
@@ -104,11 +107,16 @@ async function fetchAdminProjectById(accessToken, projectId, { signal } = {}) {
     throw new Error("Project ID is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/projects/${projectId}`, {
-    method: "GET",
-    headers: createAuthorizationHeaders(accessToken),
-    signal,
-  });
+  const response = await fetch(
+    createApiUrl(`${ADMIN_PROJECTS_PATH}/${projectId}`),
+    {
+      method: "GET",
+
+      headers: createAuthorizationHeaders(accessToken),
+
+      signal,
+    },
+  );
 
   const responseData = await readAdminProjectsResponse(response);
 
@@ -116,12 +124,15 @@ async function fetchAdminProjectById(accessToken, projectId, { signal } = {}) {
 }
 
 async function createAdminProject(accessToken, projectData) {
-  const response = await fetch(`${API_URL}/api/admin/projects`, {
+  const response = await fetch(createApiUrl(ADMIN_PROJECTS_PATH), {
     method: "POST",
+
     headers: {
       ...createAuthorizationHeaders(accessToken),
+
       "Content-Type": "application/json",
     },
+
     body: JSON.stringify(projectData),
   });
 
@@ -138,14 +149,20 @@ async function updateAdminProject(accessToken, projectId, projectData) {
     throw new Error("Project ID is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/projects/${projectId}`, {
-    method: "PATCH",
-    headers: {
-      ...createAuthorizationHeaders(accessToken),
-      "Content-Type": "application/json",
+  const response = await fetch(
+    createApiUrl(`${ADMIN_PROJECTS_PATH}/${projectId}`),
+    {
+      method: "PATCH",
+
+      headers: {
+        ...createAuthorizationHeaders(accessToken),
+
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(projectData),
     },
-    body: JSON.stringify(projectData),
-  });
+  );
 
   const responseData = await readAdminProjectsResponse(response);
 
@@ -160,10 +177,14 @@ async function deleteAdminProject(accessToken, projectId) {
     throw new Error("Project ID is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/projects/${projectId}`, {
-    method: "DELETE",
-    headers: createAuthorizationHeaders(accessToken),
-  });
+  const response = await fetch(
+    createApiUrl(`${ADMIN_PROJECTS_PATH}/${projectId}`),
+    {
+      method: "DELETE",
+
+      headers: createAuthorizationHeaders(accessToken),
+    },
+  );
 
   const responseData = await readAdminProjectsResponse(response);
 

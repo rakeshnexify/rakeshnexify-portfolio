@@ -1,7 +1,6 @@
-const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { createApiUrl } from "../config/apiConfig";
 
-const API_URL = configuredApiUrl.replace(/\/+$/, "");
+const ADMIN_CONTACT_MESSAGES_PATH = "/api/admin/contact-messages";
 
 const contactMessageStatuses = ["new", "read", "replied", "archived"];
 
@@ -12,6 +11,7 @@ function createAdminContactMessagesApiError(responseData, response) {
   );
 
   error.status = response.status;
+
   error.fieldErrors = responseData?.fieldErrors || responseData?.errors || {};
 
   return error;
@@ -52,11 +52,15 @@ function buildAdminContactMessagesQuery(filters = {}) {
   const query = new URLSearchParams();
 
   const search = String(filters.search || "").trim();
+
   const status = String(filters.status || "")
     .trim()
     .toLowerCase();
+
   const service = String(filters.service || "").trim();
+
   const source = String(filters.source || "").trim();
+
   const sort =
     filters.sort === "oldest"
       ? "oldest"
@@ -65,6 +69,7 @@ function buildAdminContactMessagesQuery(filters = {}) {
         : "";
 
   const page = cleanPositiveInteger(filters.page);
+
   const limit = cleanPositiveInteger(filters.limit);
 
   if (search) {
@@ -138,10 +143,12 @@ async function fetchAdminContactMessages(
   const queryString = buildAdminContactMessagesQuery(filters);
 
   const response = await fetch(
-    `${API_URL}/api/admin/contact-messages${queryString}`,
+    createApiUrl(`${ADMIN_CONTACT_MESSAGES_PATH}${queryString}`),
     {
       method: "GET",
+
       headers: createAuthorizationHeaders(accessToken),
+
       signal,
     },
   );
@@ -177,10 +184,12 @@ async function fetchAdminContactMessageById(
   }
 
   const response = await fetch(
-    `${API_URL}/api/admin/contact-messages/${messageId}`,
+    createApiUrl(`${ADMIN_CONTACT_MESSAGES_PATH}/${messageId}`),
     {
       method: "GET",
+
       headers: createAuthorizationHeaders(accessToken),
+
       signal,
     },
   );
@@ -196,12 +205,13 @@ async function updateAdminContactMessage(accessToken, messageId, messageData) {
   }
 
   const response = await fetch(
-    `${API_URL}/api/admin/contact-messages/${messageId}`,
+    createApiUrl(`${ADMIN_CONTACT_MESSAGES_PATH}/${messageId}`),
     {
       method: "PATCH",
 
       headers: {
         ...createAuthorizationHeaders(accessToken),
+
         "Content-Type": "application/json",
       },
 
@@ -213,6 +223,7 @@ async function updateAdminContactMessage(accessToken, messageId, messageData) {
 
   return {
     message: responseData.message,
+
     contactMessage: responseData.data,
   };
 }
@@ -223,9 +234,10 @@ async function deleteAdminContactMessage(accessToken, messageId) {
   }
 
   const response = await fetch(
-    `${API_URL}/api/admin/contact-messages/${messageId}`,
+    createApiUrl(`${ADMIN_CONTACT_MESSAGES_PATH}/${messageId}`),
     {
       method: "DELETE",
+
       headers: createAuthorizationHeaders(accessToken),
     },
   );
@@ -234,6 +246,7 @@ async function deleteAdminContactMessage(accessToken, messageId) {
 
   return {
     message: responseData.message,
+
     deletedContactMessage: responseData.data,
   };
 }

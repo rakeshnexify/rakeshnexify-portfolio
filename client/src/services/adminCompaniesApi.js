@@ -1,7 +1,6 @@
-const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { createApiUrl } from "../config/apiConfig";
 
-const API_URL = configuredApiUrl.replace(/\/+$/, "");
+const ADMIN_COMPANIES_PATH = "/api/admin/companies";
 
 function createAdminCompaniesApiError(responseData, response) {
   const error = new Error(
@@ -82,8 +81,10 @@ function buildAdminCompaniesQuery(filters = {}) {
 }
 
 async function fetchAdminCompanies(accessToken, filters = {}, { signal } = {}) {
+  const queryString = buildAdminCompaniesQuery(filters);
+
   const response = await fetch(
-    `${API_URL}/api/admin/companies${buildAdminCompaniesQuery(filters)}`,
+    createApiUrl(`${ADMIN_COMPANIES_PATH}${queryString}`),
     {
       method: "GET",
 
@@ -107,13 +108,16 @@ async function fetchAdminCompanyById(accessToken, companyId, { signal } = {}) {
     throw new Error("Company ID is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/companies/${companyId}`, {
-    method: "GET",
+  const response = await fetch(
+    createApiUrl(`${ADMIN_COMPANIES_PATH}/${companyId}`),
+    {
+      method: "GET",
 
-    headers: createAuthorizationHeaders(accessToken),
+      headers: createAuthorizationHeaders(accessToken),
 
-    signal,
-  });
+      signal,
+    },
+  );
 
   const responseData = await readAdminCompaniesResponse(response);
 
@@ -121,7 +125,7 @@ async function fetchAdminCompanyById(accessToken, companyId, { signal } = {}) {
 }
 
 async function createAdminCompany(accessToken, companyData) {
-  const response = await fetch(`${API_URL}/api/admin/companies`, {
+  const response = await fetch(createApiUrl(ADMIN_COMPANIES_PATH), {
     method: "POST",
 
     headers: {
@@ -137,7 +141,6 @@ async function createAdminCompany(accessToken, companyData) {
 
   return {
     message: responseData.message,
-
     company: responseData.data,
   };
 }
@@ -147,23 +150,25 @@ async function updateAdminCompany(accessToken, companyId, companyData) {
     throw new Error("Company ID is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/companies/${companyId}`, {
-    method: "PATCH",
+  const response = await fetch(
+    createApiUrl(`${ADMIN_COMPANIES_PATH}/${companyId}`),
+    {
+      method: "PATCH",
 
-    headers: {
-      ...createAuthorizationHeaders(accessToken),
+      headers: {
+        ...createAuthorizationHeaders(accessToken),
 
-      "Content-Type": "application/json",
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(companyData),
     },
-
-    body: JSON.stringify(companyData),
-  });
+  );
 
   const responseData = await readAdminCompaniesResponse(response);
 
   return {
     message: responseData.message,
-
     company: responseData.data,
   };
 }
@@ -173,11 +178,14 @@ async function deleteAdminCompany(accessToken, companyId) {
     throw new Error("Company ID is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/companies/${companyId}`, {
-    method: "DELETE",
+  const response = await fetch(
+    createApiUrl(`${ADMIN_COMPANIES_PATH}/${companyId}`),
+    {
+      method: "DELETE",
 
-    headers: createAuthorizationHeaders(accessToken),
-  });
+      headers: createAuthorizationHeaders(accessToken),
+    },
+  );
 
   const responseData = await readAdminCompaniesResponse(response);
 

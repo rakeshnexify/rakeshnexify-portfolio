@@ -1,6 +1,4 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
+import { createApiUrl } from "../config/apiConfig";
 
 const REQUEST_TIMEOUT_IN_MILLISECONDS = 15000;
 
@@ -75,7 +73,7 @@ async function submitContactMessage(messageData) {
   }, REQUEST_TIMEOUT_IN_MILLISECONDS);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/contact-messages`, {
+    const response = await fetch(createApiUrl("/api/contact-messages"), {
       method: "POST",
 
       headers: {

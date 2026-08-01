@@ -1,7 +1,6 @@
-const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { createApiUrl } from "../config/apiConfig";
 
-const API_URL = configuredApiUrl.replace(/\/+$/, "");
+const ADMIN_SERVICES_PATH = "/api/admin/services";
 
 function createAdminApiError(responseData, response) {
   const error = new Error(
@@ -10,6 +9,7 @@ function createAdminApiError(responseData, response) {
   );
 
   error.status = response.status;
+
   error.fieldErrors = responseData?.fieldErrors || {};
 
   return error;
@@ -63,11 +63,15 @@ function buildServicesQuery(filters = {}) {
 }
 
 async function fetchAdminServices(accessToken, filters = {}, { signal } = {}) {
+  const queryString = buildServicesQuery(filters);
+
   const response = await fetch(
-    `${API_URL}/api/admin/services${buildServicesQuery(filters)}`,
+    createApiUrl(`${ADMIN_SERVICES_PATH}${queryString}`),
     {
       method: "GET",
+
       headers: createAuthorizationHeaders(accessToken),
+
       signal,
     },
   );
@@ -76,6 +80,7 @@ async function fetchAdminServices(accessToken, filters = {}, { signal } = {}) {
 
   return {
     count: responseData.count || 0,
+
     services: Array.isArray(responseData.data) ? responseData.data : [],
   };
 }
@@ -85,11 +90,16 @@ async function fetchAdminServiceById(accessToken, serviceId, { signal } = {}) {
     throw new Error("Service ID is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/services/${serviceId}`, {
-    method: "GET",
-    headers: createAuthorizationHeaders(accessToken),
-    signal,
-  });
+  const response = await fetch(
+    createApiUrl(`${ADMIN_SERVICES_PATH}/${serviceId}`),
+    {
+      method: "GET",
+
+      headers: createAuthorizationHeaders(accessToken),
+
+      signal,
+    },
+  );
 
   const responseData = await readAdminApiResponse(response);
 
@@ -97,12 +107,15 @@ async function fetchAdminServiceById(accessToken, serviceId, { signal } = {}) {
 }
 
 async function createAdminService(accessToken, serviceData) {
-  const response = await fetch(`${API_URL}/api/admin/services`, {
+  const response = await fetch(createApiUrl(ADMIN_SERVICES_PATH), {
     method: "POST",
+
     headers: {
       ...createAuthorizationHeaders(accessToken),
+
       "Content-Type": "application/json",
     },
+
     body: JSON.stringify(serviceData),
   });
 
@@ -119,14 +132,20 @@ async function updateAdminService(accessToken, serviceId, serviceData) {
     throw new Error("Service ID is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/services/${serviceId}`, {
-    method: "PATCH",
-    headers: {
-      ...createAuthorizationHeaders(accessToken),
-      "Content-Type": "application/json",
+  const response = await fetch(
+    createApiUrl(`${ADMIN_SERVICES_PATH}/${serviceId}`),
+    {
+      method: "PATCH",
+
+      headers: {
+        ...createAuthorizationHeaders(accessToken),
+
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(serviceData),
     },
-    body: JSON.stringify(serviceData),
-  });
+  );
 
   const responseData = await readAdminApiResponse(response);
 
@@ -141,15 +160,20 @@ async function deleteAdminService(accessToken, serviceId) {
     throw new Error("Service ID is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/services/${serviceId}`, {
-    method: "DELETE",
-    headers: createAuthorizationHeaders(accessToken),
-  });
+  const response = await fetch(
+    createApiUrl(`${ADMIN_SERVICES_PATH}/${serviceId}`),
+    {
+      method: "DELETE",
+
+      headers: createAuthorizationHeaders(accessToken),
+    },
+  );
 
   const responseData = await readAdminApiResponse(response);
 
   return {
     message: responseData.message,
+
     deletedService: responseData.data,
   };
 }

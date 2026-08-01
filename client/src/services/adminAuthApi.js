@@ -1,7 +1,4 @@
-const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-const API_URL = configuredApiUrl.replace(/\/+$/, "");
+import { createApiUrl } from "../config/apiConfig";
 
 function createApiError(responseData, response) {
   const error = new Error(
@@ -10,7 +7,9 @@ function createApiError(responseData, response) {
   );
 
   error.status = response.status;
+
   error.fieldErrors = responseData?.fieldErrors || {};
+
   error.retryAfterSeconds = responseData?.retryAfterSeconds || 0;
 
   return error;
@@ -31,18 +30,22 @@ async function readApiResponse(response) {
 }
 
 async function loginAdmin(credentials, { signal } = {}) {
-  const response = await fetch(`${API_URL}/api/admin/auth/login`, {
+  const response = await fetch(createApiUrl("/api/admin/auth/login"), {
     method: "POST",
+
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
+
     body: JSON.stringify({
       email: String(credentials?.email || "")
         .trim()
         .toLowerCase(),
+
       password: String(credentials?.password || ""),
     }),
+
     signal,
   });
 
@@ -54,12 +57,14 @@ async function fetchCurrentAdmin(accessToken, { signal } = {}) {
     throw new Error("Admin access token is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/auth/me`, {
+  const response = await fetch(createApiUrl("/api/admin/auth/me"), {
     method: "GET",
+
     headers: {
       Accept: "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
+
     signal,
   });
 

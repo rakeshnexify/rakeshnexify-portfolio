@@ -1,7 +1,4 @@
-const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-const API_URL = configuredApiUrl.replace(/\/+$/, "");
+import { createApiUrl } from "../config/apiConfig";
 
 function createProjectsApiError(responseData, response) {
   const error = new Error(
@@ -53,16 +50,17 @@ function buildProjectsQuery(filters = {}) {
 }
 
 async function fetchPublicProjects(filters = {}, { signal } = {}) {
-  const response = await fetch(
-    `${API_URL}/api/projects${buildProjectsQuery(filters)}`,
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-      signal,
+  const queryString = buildProjectsQuery(filters);
+
+  const response = await fetch(createApiUrl(`/api/projects${queryString}`), {
+    method: "GET",
+
+    headers: {
+      Accept: "application/json",
     },
-  );
+
+    signal,
+  });
 
   const responseData = await readProjectsResponse(response);
 
@@ -87,12 +85,14 @@ async function fetchPublicProjectBySlug(slug, { signal } = {}) {
   }
 
   const response = await fetch(
-    `${API_URL}/api/projects/${encodeURIComponent(normalisedSlug)}`,
+    createApiUrl(`/api/projects/${encodeURIComponent(normalisedSlug)}`),
     {
       method: "GET",
+
       headers: {
         Accept: "application/json",
       },
+
       signal,
     },
   );

@@ -1,7 +1,6 @@
-const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { createApiUrl } from "../config/apiConfig";
 
-const API_URL = configuredApiUrl.replace(/\/+$/, "");
+const ADMIN_SITE_SETTINGS_PATH = "/api/admin/site-settings";
 
 function createAdminSiteSettingsApiError(responseData, response) {
   const error = new Error(
@@ -41,7 +40,7 @@ function createAuthorizationHeaders(accessToken) {
 }
 
 async function fetchAdminSiteSettings(accessToken, { signal } = {}) {
-  const response = await fetch(`${API_URL}/api/admin/site-settings`, {
+  const response = await fetch(createApiUrl(ADMIN_SITE_SETTINGS_PATH), {
     method: "GET",
 
     headers: createAuthorizationHeaders(accessToken),
@@ -63,7 +62,7 @@ async function updateAdminSiteSettings(accessToken, settingsData) {
     throw new Error("Valid site settings data is required.");
   }
 
-  const response = await fetch(`${API_URL}/api/admin/site-settings`, {
+  const response = await fetch(createApiUrl(ADMIN_SITE_SETTINGS_PATH), {
     method: "PATCH",
 
     headers: {

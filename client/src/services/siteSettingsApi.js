@@ -1,7 +1,4 @@
-const configuredApiUrl =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-const API_URL = configuredApiUrl.replace(/\/+$/, "");
+import { createApiUrl } from "../config/apiConfig";
 
 async function readApiResponse(response) {
   const responseData = await response.json().catch(() => null);
@@ -21,11 +18,13 @@ async function readApiResponse(response) {
 }
 
 export async function fetchPublicSiteSettings({ signal } = {}) {
-  const response = await fetch(`${API_URL}/api/site-settings`, {
+  const response = await fetch(createApiUrl("/api/site-settings"), {
     method: "GET",
+
     headers: {
       Accept: "application/json",
     },
+
     signal,
   });
 
