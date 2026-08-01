@@ -1,9 +1,9 @@
-import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 
 import Container from "../components/layout/Container";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
+import PageSeo from "../components/seo/PageSeo";
 import useProject from "../hooks/useProject";
 import useSiteSettings from "../hooks/useSiteSettings";
 
@@ -29,6 +29,24 @@ const projectTypeLabels = {
   company: "Company Project",
   "open-source": "Open-Source Project",
   practice: "Practice Project",
+};
+
+const defaultProjectSeo = {
+  description:
+    "Explore this professional website or web application project, including its features, technologies, development process and project results.",
+
+  keywords: [
+    "web development project",
+    "MERN project",
+    "WordPress project",
+    "web application project",
+    "custom website project",
+    "full stack development",
+    "React project",
+    "Node.js project",
+    "MongoDB project",
+    "web development portfolio",
+  ],
 };
 
 function formatDate(value) {
@@ -239,40 +257,120 @@ function ProjectDetailsPage() {
   const brandName =
     String(settings?.brand?.name || "").trim() || "RakeshNexify";
 
-  useEffect(() => {
-    const previousTitle = document.title;
+  const globalSeo =
+    settings?.seo && typeof settings.seo === "object" ? settings.seo : {};
 
-    if (project?.seo?.title) {
-      document.title = project.seo.title;
-    } else if (project?.title) {
-      document.title = `${project.title} | ${brandName}`;
-    } else {
-      document.title = `Project | ${brandName}`;
-    }
+  const projectSeo =
+    project?.seo && typeof project.seo === "object" ? project.seo : {};
 
-    return () => {
-      document.title = previousTitle;
-    };
-  }, [project, brandName]);
+  const safeSlug = String(slug || "").trim();
+
+  const canonicalPath = safeSlug
+    ? `/projects/${encodeURIComponent(safeSlug)}`
+    : "/projects";
+
+  const globalSeoKeywords = Array.isArray(globalSeo.keywords)
+    ? globalSeo.keywords
+    : String(globalSeo.keywords || "")
+        .split(/[,\n]/)
+        .map((keyword) => keyword.trim())
+        .filter(Boolean);
+
+  const projectSeoKeywords = Array.isArray(projectSeo.keywords)
+    ? projectSeo.keywords
+    : String(projectSeo.keywords || "")
+        .split(/[,\n]/)
+        .map((keyword) => keyword.trim())
+        .filter(Boolean);
+
+  const projectTechnologies = Array.isArray(project?.technologies)
+    ? project.technologies
+    : [];
+
+  const seoTitle =
+    String(projectSeo.title || "").trim() ||
+    (project?.title
+      ? `${project.title} | ${brandName}`
+      : `Project | ${brandName}`);
+
+  const seoDescription =
+    String(
+      projectSeo.description ||
+        project?.shortDescription ||
+        project?.description ||
+        "",
+    ).trim() || defaultProjectSeo.description;
+
+  const seoKeywords = [
+    ...globalSeoKeywords,
+    ...projectSeoKeywords,
+    ...projectTechnologies,
+    project?.category,
+    project?.title ? `${project.title} project` : "",
+    project?.projectType ? projectTypeLabels[project.projectType] : "",
+    ...defaultProjectSeo.keywords,
+  ].filter(Boolean);
+
+  const socialSharingImage = String(
+    projectSeo.ogImageUrl ||
+      project?.coverImageUrl ||
+      globalSeo.ogImageUrl ||
+      "",
+  ).trim();
 
   if (isLoading) {
-    return <ProjectLoadingState />;
-  }
-
-  if (error || !project) {
     return (
-      <ProjectErrorState
-        error={error}
-        status={status}
-        onRetry={refreshProject}
-        isRetrying={isLoading}
-      />
+      <>
+        <PageSeo
+          title={`Project | ${brandName}`}
+          description={defaultProjectSeo.description}
+          keywords={[...globalSeoKeywords, ...defaultProjectSeo.keywords]}
+          canonicalPath={canonicalPath}
+          image={String(globalSeo.ogImageUrl || "").trim()}
+          type="website"
+          brandName={brandName}
+        />
+
+        <ProjectLoadingState />
+      </>
     );
   }
 
-  const technologies = Array.isArray(project.technologies)
-    ? project.technologies
-    : [];
+  if (error || !project) {
+    const isNotFound = status === 404;
+
+    return (
+      <>
+        <PageSeo
+          title={
+            isNotFound
+              ? `Project Not Found | ${brandName}`
+              : `Project Error | ${brandName}`
+          }
+          description={
+            isNotFound
+              ? "The requested project is unavailable, hidden, deleted or the project URL is incorrect."
+              : "The requested project could not be loaded at this time."
+          }
+          keywords={[...globalSeoKeywords, ...defaultProjectSeo.keywords]}
+          canonicalPath={canonicalPath}
+          image={String(globalSeo.ogImageUrl || "").trim()}
+          type="website"
+          noIndex={isNotFound}
+          brandName={brandName}
+        />
+
+        <ProjectErrorState
+          error={error}
+          status={status}
+          onRetry={refreshProject}
+          isRetrying={isLoading}
+        />
+      </>
+    );
+  }
+
+  const technologies = projectTechnologies;
 
   const features = Array.isArray(project.features) ? project.features : [];
 
@@ -299,6 +397,16 @@ function ProjectDetailsPage() {
 
   return (
     <>
+      <PageSeo
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        canonicalPath={canonicalPath}
+        image={socialSharingImage}
+        type="article"
+        brandName={brandName}
+      />
+
       <PublicPageHeader />
 
       <main

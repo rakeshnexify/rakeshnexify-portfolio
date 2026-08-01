@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router";
 
 import Container from "../components/layout/Container";
@@ -6,6 +6,7 @@ import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import ServiceCard from "../components/services/ServiceCard";
 import useServices from "../hooks/useServices";
+import PageSeo from "../components/seo/PageSeo";
 import useSiteSettings from "../hooks/useSiteSettings";
 
 const defaultPageContent = {
@@ -16,6 +17,19 @@ const defaultPageContent = {
   description:
     "Explore all available website development, MERN application, WordPress and e-commerce services. Each service can be customised according to your business requirements.",
 };
+
+const defaultServiceKeywords = [
+  "MERN development services",
+  "WordPress development services",
+  "custom website development",
+  "web application development",
+  "full stack development",
+  "business website development",
+  "React development",
+  "Node.js development",
+  "MongoDB development",
+  "e-commerce development",
+];
 
 function sortServices(firstService, secondService) {
   const firstFeatured = Boolean(
@@ -76,7 +90,7 @@ function ServicesLoadingState() {
           </div>
         </Container>
       </main>
-        <Footer />
+      <Footer />
     </>
   );
 }
@@ -125,7 +139,7 @@ function ServicesErrorState({ error }) {
           </div>
         </div>
       </main>
-        <Footer />
+      <Footer />
     </>
   );
 }
@@ -152,32 +166,76 @@ function ServicesPage() {
     String(sectionContent.description || "").trim() ||
     defaultPageContent.description;
 
+  const seo =
+    settings?.seo && typeof settings.seo === "object" ? settings.seo : {};
+
+  const globalSeoKeywords = Array.isArray(seo.keywords)
+    ? seo.keywords
+    : String(seo.keywords || "")
+        .split(/[,\n]/)
+        .map((keyword) => keyword.trim())
+        .filter(Boolean);
+
+  const seoKeywords = [...globalSeoKeywords, ...defaultServiceKeywords];
+
+  const socialSharingImage = String(seo.ogImageUrl || "").trim();
+
+  const seoTitle = `Services | ${brandName}`;
+
   const services = useMemo(() => {
     const sourceServices = Array.isArray(loadedServices) ? loadedServices : [];
 
     return [...sourceServices].sort(sortServices);
   }, [loadedServices]);
 
-  useEffect(() => {
-    const previousTitle = document.title;
-
-    document.title = `Services | ${brandName}`;
-
-    return () => {
-      document.title = previousTitle;
-    };
-  }, [brandName]);
-
   if (isLoading && services.length === 0) {
-    return <ServicesLoadingState />;
+    return (
+      <>
+        <PageSeo
+          title={seoTitle}
+          description={description}
+          keywords={seoKeywords}
+          canonicalPath="/services"
+          image={socialSharingImage}
+          type="website"
+          brandName={brandName}
+        />
+
+        <ServicesLoadingState />
+      </>
+    );
   }
 
   if (error && services.length === 0) {
-    return <ServicesErrorState error={error} />;
+    return (
+      <>
+        <PageSeo
+          title={seoTitle}
+          description={description}
+          keywords={seoKeywords}
+          canonicalPath="/services"
+          image={socialSharingImage}
+          type="website"
+          brandName={brandName}
+        />
+
+        <ServicesErrorState error={error} />
+      </>
+    );
   }
 
   return (
     <>
+      <PageSeo
+        title={seoTitle}
+        description={description}
+        keywords={seoKeywords}
+        canonicalPath="/services"
+        image={socialSharingImage}
+        type="website"
+        brandName={brandName}
+      />
+
       <PublicPageHeader />
 
       <main

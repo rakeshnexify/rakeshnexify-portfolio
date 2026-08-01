@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
+import PageSeo from "../components/seo/PageSeo";
 import CompaniesPage from "../pages/CompaniesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import HomePage from "../pages/HomePage";
@@ -22,6 +23,37 @@ import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import PublicSiteRoute from "./PublicSiteRoute";
+
+function AdminSeoManager() {
+  const { pathname } = useLocation();
+
+  const isAdminRoute = pathname === "/admin" || pathname.startsWith("/admin/");
+
+  if (!isAdminRoute) {
+    return null;
+  }
+
+  const isLoginPage = pathname === "/admin/login";
+
+  return (
+    <PageSeo
+      title={
+        isLoginPage
+          ? "Admin Login | RakeshNexify"
+          : "Admin Panel | RakeshNexify"
+      }
+      description={
+        isLoginPage
+          ? "Secure administrator login for the RakeshNexify website management system."
+          : "Secure RakeshNexify website administration and content management area."
+      }
+      canonicalPath={pathname}
+      type="website"
+      noIndex
+      brandName="RakeshNexify"
+    />
+  );
+}
 
 function RouteScrollManager() {
   const { pathname, search, hash } = useLocation();
@@ -184,6 +216,8 @@ function AppRoutes() {
     <>
       <RouteScrollManager />
 
+      <AdminSeoManager />
+
       <Routes>
         <Route element={<PublicSiteRoute />}>
           <Route path="/" element={<HomePage />} />
@@ -262,7 +296,6 @@ function AppRoutes() {
           path="/admin/*"
           element={<Navigate to="/admin/dashboard" replace />}
         />
-
       </Routes>
     </>
   );

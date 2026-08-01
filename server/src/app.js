@@ -13,6 +13,7 @@ import contactMessageRoutes from "./routes/contactMessage.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
+import sitemapRoutes from "./routes/sitemap.routes.js";
 import siteSettingsRoutes from "./routes/siteSettings.routes.js";
 
 const app = express();
@@ -44,6 +45,8 @@ app.get("/", (req, res) => {
     message: "Welcome to the RakeshNexify Portfolio API.",
   });
 });
+
+app.use("/", sitemapRoutes);
 
 app.use("/api/health", healthRoutes);
 app.use("/api/site-settings", siteSettingsRoutes);

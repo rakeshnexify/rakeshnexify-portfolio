@@ -8,6 +8,7 @@ import ContactSection from "../components/sections/ContactSection";
 import HeroSection from "../components/sections/HeroSection";
 import ProjectsSection from "../components/sections/ProjectsSection";
 import ServicesSection from "../components/sections/ServicesSection";
+import PageSeo from "../components/seo/PageSeo";
 import useSiteSettings from "../hooks/useSiteSettings";
 
 const sectionComponents = {
@@ -56,6 +57,25 @@ const defaultOrderByKey = Object.fromEntries(
   defaultSections.map((section) => [section.key, section.order]),
 );
 
+const defaultSeoContent = {
+  title: "RakeshNexify | MERN & WordPress Developer",
+
+  description:
+    "Professional MERN applications, WordPress websites, custom websites, web applications, business platforms, e-commerce solutions and modern digital products.",
+
+  keywords: [
+    "MERN developer",
+    "WordPress developer",
+    "full stack developer",
+    "custom website development",
+    "web application development",
+    "business website development",
+    "e-commerce development",
+    "React developer",
+    "Node.js developer",
+    "MongoDB developer",
+  ],
+};
 function normaliseSectionKey(value) {
   return String(value || "")
     .trim()
@@ -90,10 +110,6 @@ function createVisibleSections(databaseSections, allowDefaultFallback = true) {
     });
   });
 
-  /*
-   * Use the safe defaults when the database
-   * contains only invalid or unsupported keys.
-   */
   if (sectionsByKey.size === 0 && allowDefaultFallback) {
     return createVisibleSections(defaultSections, false);
   }
@@ -122,8 +138,41 @@ function HomePage() {
     [settings?.sections],
   );
 
+  const brandName =
+    String(settings?.brand?.name || "").trim() || "RakeshNexify";
+
+  const seo =
+    settings?.seo && typeof settings.seo === "object" ? settings.seo : {};
+
+  const seoTitle =
+    String(seo.title || "").trim() ||
+    (brandName === "RakeshNexify"
+      ? defaultSeoContent.title
+      : `${brandName} | MERN & WordPress Developer`);
+
+  const seoDescription =
+    String(seo.description || "").trim() || defaultSeoContent.description;
+
+  const socialSharingImage = String(seo.ogImageUrl || "").trim();
+
+  const seoKeywords = Array.isArray(seo.keywords)
+    ? seo.keywords.length > 0
+      ? seo.keywords
+      : defaultSeoContent.keywords
+    : String(seo.keywords || "").trim() || defaultSeoContent.keywords;
+
   return (
     <>
+      <PageSeo
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        canonicalPath="/"
+        image={socialSharingImage}
+        type="website"
+        brandName={brandName}
+      />
+
       <Navbar />
 
       <main

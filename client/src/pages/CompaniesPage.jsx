@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router";
 
 import CompanyCard from "../components/companies/CompanyCard";
 import Container from "../components/layout/Container";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
+import PageSeo from "../components/seo/PageSeo";
 import siteData from "../data/siteData";
 import useCompanies from "../hooks/useCompanies";
 import useSiteSettings from "../hooks/useSiteSettings";
@@ -17,6 +18,20 @@ const defaultPageContent = {
   description:
     "Explore all published companies, e-commerce businesses and digital ventures that I own, manage, partner with or help develop.",
 };
+
+const defaultCompanyKeywords = [
+  "business website development",
+  "company website development",
+  "MERN business applications",
+  "WordPress business websites",
+  "custom business platforms",
+  "startup website development",
+  "business web application development",
+  "digital product development",
+  "company portfolio",
+  "business ventures",
+  "e-commerce business solutions",
+];
 
 function sortCompanies(firstCompany, secondCompany) {
   const firstFeatured = Boolean(
@@ -173,6 +188,22 @@ function CompaniesPage() {
     String(sectionContent.description || "").trim() ||
     defaultPageContent.description;
 
+  const seo =
+    settings?.seo && typeof settings.seo === "object" ? settings.seo : {};
+
+  const globalSeoKeywords = Array.isArray(seo.keywords)
+    ? seo.keywords
+    : String(seo.keywords || "")
+        .split(/[,\n]/)
+        .map((keyword) => keyword.trim())
+        .filter(Boolean);
+
+  const seoKeywords = [...globalSeoKeywords, ...defaultCompanyKeywords];
+
+  const socialSharingImage = String(seo.ogImageUrl || "").trim();
+
+  const seoTitle = `Companies | ${brandName}`;
+
   const companies = useMemo(() => {
     const sourceCompanies = Array.isArray(loadedCompanies)
       ? loadedCompanies
@@ -181,32 +212,58 @@ function CompaniesPage() {
     return [...sourceCompanies].sort(sortCompanies);
   }, [loadedCompanies]);
 
-  useEffect(() => {
-    const previousTitle = document.title;
-
-    document.title = `Companies | ${brandName}`;
-
-    return () => {
-      document.title = previousTitle;
-    };
-  }, [brandName]);
-
   if (isLoading && companies.length === 0) {
-    return <CompaniesLoadingState />;
+    return (
+      <>
+        <PageSeo
+          title={seoTitle}
+          description={description}
+          keywords={seoKeywords}
+          canonicalPath="/companies"
+          image={socialSharingImage}
+          type="website"
+          brandName={brandName}
+        />
+
+        <CompaniesLoadingState />
+      </>
+    );
   }
 
   if (error && companies.length === 0) {
     return (
-      <CompaniesErrorState
-        error={error}
-        onRetry={refreshCompanies}
-        isRetrying={isLoading}
-      />
+      <>
+        <PageSeo
+          title={seoTitle}
+          description={description}
+          keywords={seoKeywords}
+          canonicalPath="/companies"
+          image={socialSharingImage}
+          type="website"
+          brandName={brandName}
+        />
+
+        <CompaniesErrorState
+          error={error}
+          onRetry={refreshCompanies}
+          isRetrying={isLoading}
+        />
+      </>
     );
   }
 
   return (
     <>
+      <PageSeo
+        title={seoTitle}
+        description={description}
+        keywords={seoKeywords}
+        canonicalPath="/companies"
+        image={socialSharingImage}
+        type="website"
+        brandName={brandName}
+      />
+
       <PublicPageHeader />
 
       <main

@@ -1,9 +1,9 @@
-import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 
 import Container from "../components/layout/Container";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
+import PageSeo from "../components/seo/PageSeo";
 import useCompany from "../hooks/useCompany";
 import useSiteSettings from "../hooks/useSiteSettings";
 
@@ -51,6 +51,24 @@ const socialPlatforms = [
     label: "X",
   },
 ];
+
+const defaultCompanySeo = {
+  description:
+    "Explore this company profile, including its business areas, products, services, company information and digital presence.",
+
+  keywords: [
+    "company profile",
+    "business company",
+    "business website",
+    "company website development",
+    "MERN business application",
+    "WordPress business website",
+    "custom business platform",
+    "digital business",
+    "e-commerce business",
+    "business development",
+  ],
+};
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -155,6 +173,14 @@ function getTextItems(items) {
       return String(item).trim();
     })
     .filter(Boolean);
+}
+
+function getKeywordItems(value) {
+  const sourceItems = Array.isArray(value)
+    ? value
+    : String(value || "").split(/[,\n]/);
+
+  return sourceItems.map((item) => String(item || "").trim()).filter(Boolean);
 }
 
 function getStatistics(statistics) {
@@ -409,36 +435,103 @@ function CompanyDetailsPage() {
 
   const companyName = String(company?.name || "").trim() || "Company";
 
-  useEffect(() => {
-    const previousTitle = document.title;
+  const globalSeo =
+    settings?.seo && typeof settings.seo === "object" ? settings.seo : {};
 
-    const seoTitle = String(company?.seo?.title || "").trim();
+  const companySeo =
+    company?.seo && typeof company.seo === "object" ? company.seo : {};
 
-    if (seoTitle) {
-      document.title = seoTitle;
-    } else if (company?.name) {
-      document.title = `${companyName} | ${brandName}`;
-    } else {
-      document.title = `Company | ${brandName}`;
-    }
+  const safeSlug = String(slug || "").trim();
 
-    return () => {
-      document.title = previousTitle;
-    };
-  }, [company?.seo?.title, company?.name, companyName, brandName]);
+  const canonicalPath = safeSlug
+    ? `/companies/${encodeURIComponent(safeSlug)}`
+    : "/companies";
+
+  const globalSeoKeywords = getKeywordItems(globalSeo.keywords);
+
+  const companySeoKeywords = getKeywordItems(companySeo.keywords);
+
+  const companyBusinessAreas = getTextItems(company?.businessAreas);
+
+  const companyServices = getTextItems(company?.services);
+
+  const seoTitle =
+    String(companySeo.title || "").trim() ||
+    (company?.name
+      ? `${companyName} | ${brandName}`
+      : `Company | ${brandName}`);
+
+  const seoDescription =
+    String(
+      companySeo.description || company?.tagline || company?.description || "",
+    ).trim() || defaultCompanySeo.description;
+
+  const seoKeywords = [
+    ...globalSeoKeywords,
+    ...companySeoKeywords,
+    ...companyBusinessAreas,
+    ...companyServices,
+    company?.industry,
+    company?.name ? `${companyName} company` : "",
+    relationshipLabels[company?.relationship],
+    ...defaultCompanySeo.keywords,
+  ].filter(Boolean);
+
+  const socialSharingImage =
+    getSafeMediaUrl(companySeo.ogImageUrl) ||
+    getSafeMediaUrl(company?.coverImageUrl) ||
+    getSafeMediaUrl(company?.logoUrl) ||
+    getSafeMediaUrl(globalSeo.ogImageUrl);
 
   if (isLoading && !company) {
-    return <CompanyLoadingState />;
+    return (
+      <>
+        <PageSeo
+          title={`Company | ${brandName}`}
+          description={defaultCompanySeo.description}
+          keywords={[...globalSeoKeywords, ...defaultCompanySeo.keywords]}
+          canonicalPath={canonicalPath}
+          image={getSafeMediaUrl(globalSeo.ogImageUrl)}
+          type="website"
+          brandName={brandName}
+        />
+
+        <CompanyLoadingState />
+      </>
+    );
   }
 
   if (error || !company) {
+    const isNotFound = status === 404;
+
     return (
-      <CompanyErrorState
-        error={error}
-        status={status}
-        onRetry={refreshCompany}
-        isRetrying={isLoading}
-      />
+      <>
+        <PageSeo
+          title={
+            isNotFound
+              ? `Company Not Found | ${brandName}`
+              : `Company Error | ${brandName}`
+          }
+          description={
+            isNotFound
+              ? "The requested company is unavailable, hidden, deleted or the company URL is incorrect."
+              : "The requested company could not be loaded at this time."
+          }
+          keywords={[...globalSeoKeywords, ...defaultCompanySeo.keywords]}
+          canonicalPath={canonicalPath}
+          image={getSafeMediaUrl(globalSeo.ogImageUrl)}
+          type="website"
+          noIndex={isNotFound}
+          brandName={brandName}
+        />
+
+        <CompanyErrorState
+          error={error}
+          status={status}
+          onRetry={refreshCompany}
+          isRetrying={isLoading}
+        />
+      </>
     );
   }
 
@@ -494,6 +587,16 @@ function CompanyDetailsPage() {
 
   return (
     <>
+      <PageSeo
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        canonicalPath={canonicalPath}
+        image={socialSharingImage}
+        type="website"
+        brandName={brandName}
+      />
+
       <PublicPageHeader />
 
       <main

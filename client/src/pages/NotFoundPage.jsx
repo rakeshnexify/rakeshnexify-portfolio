@@ -1,9 +1,11 @@
-import { useEffect } from "react";
 import { Link, useLocation } from "react-router";
 
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
+import PageSeo from "../components/seo/PageSeo";
 import useSiteSettings from "../hooks/useSiteSettings";
+
+const defaultNotFoundKeywords = ["page not found", "404 page", "RakeshNexify"];
 
 function NotFoundPage() {
   const { pathname } = useLocation();
@@ -13,18 +15,33 @@ function NotFoundPage() {
   const brandName =
     String(settings?.brand?.name || "").trim() || "RakeshNexify";
 
-  useEffect(() => {
-    const previousTitle = document.title;
+  const globalSeo =
+    settings?.seo && typeof settings.seo === "object" ? settings.seo : {};
 
-    document.title = `Page Not Found | ${brandName}`;
+  const globalKeywords = Array.isArray(globalSeo.keywords)
+    ? globalSeo.keywords
+    : String(globalSeo.keywords || "")
+        .split(/[,\n]/)
+        .map((keyword) => keyword.trim())
+        .filter(Boolean);
 
-    return () => {
-      document.title = previousTitle;
-    };
-  }, [brandName]);
+  const socialSharingImage = String(globalSeo.ogImageUrl || "").trim();
+
+  const canonicalPath = String(pathname || "").trim() || "/404";
 
   return (
     <>
+      <PageSeo
+        title={`Page Not Found | ${brandName}`}
+        description="The requested page could not be found. It may have been moved, removed or the entered URL may be incorrect."
+        keywords={[...globalKeywords, ...defaultNotFoundKeywords]}
+        canonicalPath={canonicalPath}
+        image={socialSharingImage}
+        type="website"
+        noIndex
+        brandName={brandName}
+      />
+
       <PublicPageHeader />
 
       <main

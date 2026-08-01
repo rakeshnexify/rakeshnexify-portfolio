@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router";
 
 import Container from "../components/layout/Container";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import ProjectCard from "../components/projects/ProjectCard";
+import PageSeo from "../components/seo/PageSeo";
 import siteData from "../data/siteData";
 import useProjects from "../hooks/useProjects";
 import useSiteSettings from "../hooks/useSiteSettings";
@@ -18,6 +19,20 @@ const defaultPageContent = {
   description:
     "Explore all published MERN applications, e-commerce platforms, WordPress websites and frontend projects, including live demonstrations, source code and detailed case studies.",
 };
+
+const defaultProjectKeywords = [
+  "MERN projects",
+  "WordPress projects",
+  "web application projects",
+  "custom website projects",
+  "full stack development projects",
+  "React projects",
+  "Node.js projects",
+  "MongoDB projects",
+  "business website projects",
+  "e-commerce projects",
+  "web development portfolio",
+];
 
 function sortProjects(firstProject, secondProject) {
   const firstFeatured = Boolean(
@@ -78,7 +93,7 @@ function ProjectsLoadingState() {
           </div>
         </Container>
       </main>
-       <Footer />
+      <Footer />
     </>
   );
 }
@@ -136,7 +151,7 @@ function ProjectsErrorState({ error, onRetry, isRetrying }) {
           </div>
         </div>
       </main>
-       <Footer />
+      <Footer />
     </>
   );
 }
@@ -170,38 +185,80 @@ function ProjectsPage() {
     String(sectionContent.description || "").trim() ||
     defaultPageContent.description;
 
+  const seo =
+    settings?.seo && typeof settings.seo === "object" ? settings.seo : {};
+
+  const globalSeoKeywords = Array.isArray(seo.keywords)
+    ? seo.keywords
+    : String(seo.keywords || "")
+        .split(/[,\n]/)
+        .map((keyword) => keyword.trim())
+        .filter(Boolean);
+
+  const seoKeywords = [...globalSeoKeywords, ...defaultProjectKeywords];
+
+  const socialSharingImage = String(seo.ogImageUrl || "").trim();
+
+  const seoTitle = `Projects | ${brandName}`;
+
   const projects = useMemo(() => {
     const sourceProjects = Array.isArray(loadedProjects) ? loadedProjects : [];
 
     return [...sourceProjects].sort(sortProjects);
   }, [loadedProjects]);
 
-  useEffect(() => {
-    const previousTitle = document.title;
-
-    document.title = `Projects | ${brandName}`;
-
-    return () => {
-      document.title = previousTitle;
-    };
-  }, [brandName]);
-
   if (isLoading && projects.length === 0) {
-    return <ProjectsLoadingState />;
+    return (
+      <>
+        <PageSeo
+          title={seoTitle}
+          description={description}
+          keywords={seoKeywords}
+          canonicalPath="/projects"
+          image={socialSharingImage}
+          type="website"
+          brandName={brandName}
+        />
+
+        <ProjectsLoadingState />
+      </>
+    );
   }
 
   if (error && projects.length === 0) {
     return (
-      <ProjectsErrorState
-        error={error}
-        onRetry={refreshProjects}
-        isRetrying={isLoading}
-      />
+      <>
+        <PageSeo
+          title={seoTitle}
+          description={description}
+          keywords={seoKeywords}
+          canonicalPath="/projects"
+          image={socialSharingImage}
+          type="website"
+          brandName={brandName}
+        />
+
+        <ProjectsErrorState
+          error={error}
+          onRetry={refreshProjects}
+          isRetrying={isLoading}
+        />
+      </>
     );
   }
 
   return (
     <>
+      <PageSeo
+        title={seoTitle}
+        description={description}
+        keywords={seoKeywords}
+        canonicalPath="/projects"
+        image={socialSharingImage}
+        type="website"
+        brandName={brandName}
+      />
+
       <PublicPageHeader />
 
       <main
