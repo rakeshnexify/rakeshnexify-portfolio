@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router";
 
 import siteData from "../../data/siteData";
 import useSiteSettings from "../../hooks/useSiteSettings";
@@ -6,71 +7,223 @@ import Button from "../ui/Button";
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
-const supportedNavigationSections = new Set([
-  "hero",
-  "about",
-  "services",
-  "projects",
-  "companies",
-  "contact",
-]);
+const defaultNavigationSections = [
+  {
+    key: "hero",
+    label: "Home",
+    isVisible: true,
+    order: 1,
+  },
+  {
+    key: "about",
+    label: "About",
+    isVisible: true,
+    order: 2,
+  },
+  {
+    key: "services",
+    label: "Services",
+    isVisible: true,
+    order: 3,
+  },
+  {
+    key: "projects",
+    label: "Projects",
+    isVisible: true,
+    order: 4,
+  },
+  {
+    key: "companies",
+    label: "Companies",
+    isVisible: true,
+    order: 5,
+  },
+  {
+    key: "contact",
+    label: "Contact",
+    isVisible: true,
+    order: 6,
+  },
+];
 
-function getSectionHref(sectionKey) {
-  return sectionKey === "hero" ? "#home" : `#${sectionKey}`;
+const sectionDestinations = {
+  hero: {
+    type: "section",
+    target: "home",
+  },
+  about: {
+    type: "section",
+    target: "about",
+  },
+  services: {
+    type: "page",
+    target: "/services",
+  },
+  projects: {
+    type: "page",
+    target: "/projects",
+  },
+  companies: {
+    type: "page",
+    target: "/companies",
+  },
+  contact: {
+    type: "section",
+    target: "contact",
+  },
+};
+
+const supportedNavigationSections = new Set(
+  defaultNavigationSections.map((section) => section.key),
+);
+
+const defaultSectionByKey = Object.fromEntries(
+  defaultNavigationSections.map((section) => [section.key, section]),
+);
+
+function normaliseSectionKey(value) {
+  const key = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  return key === "home" ? "hero" : key;
 }
 
-function getSectionLabel(section) {
-  if (section.key === "hero" && section.label === "Hero") {
+function getSafeSectionLabel(sectionKey, value) {
+  const label = String(value || "").trim();
+
+  if (sectionKey === "hero" && label.toLowerCase() === "hero") {
     return "Home";
   }
 
-  return section.label;
+  return label || defaultSectionByKey[sectionKey]?.label || sectionKey;
 }
 
-function getFallbackSections() {
-  return siteData.navigation.map((link, index) => ({
-    key: link.href === "#home" ? "hero" : link.href.replace("#", ""),
-    label: link.label,
-    isVisible: true,
-    order: index + 1,
-  }));
+function createVisibleSections(settingsSections, allowDefaultFallback = true) {
+  const sourceSections =
+    Array.isArray(settingsSections) && settingsSections.length > 0
+      ? settingsSections
+      : defaultNavigationSections;
+
+  const sectionsByKey = new Map();
+
+  sourceSections.forEach((section, index) => {
+    const key = normaliseSectionKey(section?.key);
+
+    if (!key || !supportedNavigationSections.has(key)) {
+      return;
+    }
+
+    const numericOrder = Number(section?.order);
+
+    const fallbackOrder = defaultSectionByKey[key]?.order ?? index + 1;
+
+    sectionsByKey.set(key, {
+      key,
+
+      label: getSafeSectionLabel(key, section?.label),
+
+      isVisible: section?.isVisible !== false,
+
+      order: Number.isFinite(numericOrder) ? numericOrder : fallbackOrder,
+    });
+  });
+
+  if (sectionsByKey.size === 0 && allowDefaultFallback) {
+    return createVisibleSections(defaultNavigationSections, false);
+  }
+
+  return [...sectionsByKey.values()]
+    .filter((section) => section.isVisible !== false)
+    .sort((firstSection, secondSection) => {
+      const orderDifference = firstSection.order - secondSection.order;
+
+      if (orderDifference !== 0) {
+        return orderDifference;
+      }
+
+      return (
+        (defaultSectionByKey[firstSection.key]?.order || 0) -
+        (defaultSectionByKey[secondSection.key]?.order || 0)
+      );
+    });
+}
+
+function NavbarLink({ section, isActive, isMobile = false, onNavigate }) {
+  const destination = sectionDestinations[section.key];
+
+  if (!destination) {
+    return null;
+  }
+
+  const baseClasses = isMobile
+    ? "min-w-0 break-words rounded-xl px-4 py-3 text-sm font-semibold transition"
+    : "max-w-32 truncate border-b-2 py-2 text-sm font-semibold transition-colors xl:max-w-40";
+
+  const stateClasses = isMobile
+    ? isActive
+      ? "bg-brand-50 text-brand-600"
+      : "text-slate-700 hover:bg-brand-50 hover:text-brand-600"
+    : isActive
+      ? "border-brand-600 text-brand-600"
+      : "border-transparent text-slate-600 hover:text-brand-600";
+
+  if (destination.type === "page") {
+    return (
+      <Link
+        to={destination.target}
+        onClick={onNavigate}
+        className={`${baseClasses} ${stateClasses}`}
+        title={section.label}
+      >
+        {section.label}
+      </Link>
+    );
+  }
+
+  return (
+    <a
+      href={`#${destination.target}`}
+      aria-current={isActive ? "location" : undefined}
+      onClick={(event) => {
+        event.preventDefault();
+
+        onNavigate(destination.target, section.key);
+      }}
+      className={`${baseClasses} ${stateClasses}`}
+      title={section.label}
+    >
+      {section.label}
+    </a>
+  );
 }
 
 function Navbar() {
   const { settings } = useSiteSettings();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const [activeSectionKey, setActiveSectionKey] = useState("hero");
+
   const mobileMenuRef = useRef(null);
 
+  const mobileMenuButtonRef = useRef(null);
+
   const brandName =
-    settings?.brand?.name || siteData.brand.name || "RakeshNexify";
+    String(settings?.brand?.name || siteData.brand?.name || "").trim() ||
+    "RakeshNexify";
 
-  const settingsSections = Array.isArray(settings?.sections)
-    ? settings.sections
-    : [];
+  const visibleSections = useMemo(
+    () => createVisibleSections(settings?.sections),
+    [settings?.sections],
+  );
 
-  const availableSections =
-    settingsSections.length > 0 ? settingsSections : getFallbackSections();
+  const navigationSections = useMemo(
+    () => visibleSections.filter((section) => section.key !== "contact"),
+    [visibleSections],
+  );
 
-  const visibleSections = [...availableSections]
-    .filter(
-      (section) =>
-        section.isVisible !== false &&
-        supportedNavigationSections.has(section.key),
-    )
-    .sort(
-      (firstSection, secondSection) => firstSection.order - secondSection.order,
-    );
-
-  const navigationLinks = visibleSections
-    .filter((section) => section.key !== "contact")
-    .map((section) => ({
-      key: section.key,
-      label: getSectionLabel(section),
-      href: getSectionHref(section.key),
-    }));
-
-  const isContactVisible = visibleSections.some(
+  const contactSection = visibleSections.find(
     (section) => section.key === "contact",
   );
 
@@ -78,7 +231,7 @@ function Navbar() {
     setIsMenuOpen(false);
   }
 
-  function goToSection(sectionId) {
+  function goToHomepageSection(sectionId, sectionKey) {
     const targetSection = document.getElementById(sectionId);
 
     if (targetSection) {
@@ -86,26 +239,34 @@ function Navbar() {
         behavior: "smooth",
         block: "start",
       });
-
-      window.history.replaceState(
-        null,
-        "",
-        sectionId === "home" ? "#home" : `#${sectionId}`,
-      );
+    } else if (sectionKey === "hero") {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     }
 
-    closeMobileMenu();
-  }
+    const nextHash = `#${sectionId}`;
 
-  function goToContactSection() {
-    goToSection("contact");
+    if (window.location.hash !== nextHash) {
+      window.history.replaceState(null, "", nextHash);
+    }
+
+    setActiveSectionKey(sectionKey);
+    closeMobileMenu();
   }
 
   useEffect(() => {
     function handleEscapeKey(event) {
-      if (event.key === "Escape") {
-        setIsMenuOpen(false);
+      if (event.key !== "Escape" || !isMenuOpen) {
+        return;
       }
+
+      setIsMenuOpen(false);
+
+      requestAnimationFrame(() => {
+        mobileMenuButtonRef.current?.focus();
+      });
     }
 
     function handleWindowResize() {
@@ -115,13 +276,15 @@ function Navbar() {
     }
 
     document.addEventListener("keydown", handleEscapeKey);
+
     window.addEventListener("resize", handleWindowResize);
 
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
+
       window.removeEventListener("resize", handleWindowResize);
     };
-  }, []);
+  }, [isMenuOpen]);
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -140,148 +303,248 @@ function Navbar() {
     }
 
     document.body.style.overflow = "hidden";
+
     document.addEventListener("pointerdown", handleOutsideClick);
 
     return () => {
       document.body.style.overflow = previousOverflow;
+
       document.removeEventListener("pointerdown", handleOutsideClick);
     };
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    let animationFrameId = 0;
+
+    const sectionElements = visibleSections
+      .map((section) => {
+        const destination = sectionDestinations[section.key];
+
+        if (destination?.type !== "section") {
+          return null;
+        }
+
+        return {
+          key: section.key,
+
+          element: document.getElementById(destination.target),
+        };
+      })
+      .filter((section) => section?.element);
+
+    function updateActiveSection() {
+      if (sectionElements.length === 0) {
+        return;
+      }
+
+      const navigationOffset = Math.min(160, window.innerHeight * 0.3);
+
+      let nextActiveSection = sectionElements[0].key;
+
+      sectionElements.forEach((section) => {
+        const position = section.element.getBoundingClientRect();
+
+        if (position.top <= navigationOffset) {
+          nextActiveSection = section.key;
+        }
+      });
+
+      const reachedPageBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 4;
+
+      if (reachedPageBottom) {
+        nextActiveSection = sectionElements[sectionElements.length - 1].key;
+      }
+
+      setActiveSectionKey((currentSection) =>
+        currentSection === nextActiveSection
+          ? currentSection
+          : nextActiveSection,
+      );
+    }
+
+    function scheduleUpdate() {
+      if (animationFrameId) {
+        return;
+      }
+
+      animationFrameId = window.requestAnimationFrame(() => {
+        animationFrameId = 0;
+        updateActiveSection();
+      });
+    }
+
+    scheduleUpdate();
+
+    window.addEventListener("scroll", scheduleUpdate, {
+      passive: true,
+    });
+
+    window.addEventListener("resize", scheduleUpdate);
+
+    return () => {
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+
+      window.removeEventListener("scroll", scheduleUpdate);
+
+      window.removeEventListener("resize", scheduleUpdate);
+    };
+  }, [visibleSections]);
+
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <Container>
-        <div className="flex min-h-20 items-center justify-between gap-6">
-          <a
-            href="#home"
-            aria-label={`Go to ${brandName} homepage`}
-            onClick={(event) => {
-              event.preventDefault();
-              goToSection("home");
-            }}
-          >
-            <Logo />
-          </a>
+    <>
+      <a
+        href="#main-content"
+        className="fixed left-4 top-4 z-[100] -translate-y-24 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-xl transition focus:translate-y-0"
+      >
+        Skip to main content
+      </a>
 
-          <nav
-            className="hidden items-center gap-7 lg:flex"
-            aria-label="Main navigation"
-          >
-            {navigationLinks.map((link) => (
-              <a
-                key={link.key}
-                href={link.href}
-                onClick={(event) => {
-                  event.preventDefault();
-                  goToSection(
-                    link.href === "#home" ? "home" : link.href.slice(1),
-                  );
-                }}
-                className="text-sm font-semibold text-slate-600 transition-colors hover:text-brand-600"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
+      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+        <Container>
+          <div className="flex min-h-20 min-w-0 items-center justify-between gap-4 sm:gap-6">
+            <a
+              href="#home"
+              aria-label={`Go to ${brandName} homepage`}
+              onClick={(event) => {
+                event.preventDefault();
 
-          {isContactVisible && (
-            <div className="hidden lg:block">
-              <Button size="small" onClick={goToContactSection}>
-                Contact Me
-              </Button>
-            </div>
-          )}
-
-          <div ref={mobileMenuRef} className="lg:hidden">
-            <button
-              type="button"
-              aria-label={
-                isMenuOpen ? "Close navigation menu" : "Open navigation menu"
-              }
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-navigation"
-              onClick={() => {
-                setIsMenuOpen((currentValue) => !currentValue);
+                goToHomepageSection("home", "hero");
               }}
-              className="grid size-11 place-items-center rounded-xl border border-slate-200 bg-white text-slate-900 transition hover:border-brand-600 hover:text-brand-600"
+              className="inline-flex min-w-0 max-w-full shrink-0"
             >
-              {isMenuOpen ? (
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="size-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M6 6l12 12" />
-                  <path d="M18 6L6 18" />
-                </svg>
-              ) : (
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="size-6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M4 7h16" />
-                  <path d="M4 12h16" />
-                  <path d="M4 17h16" />
-                </svg>
-              )}
-            </button>
+              <Logo />
+            </a>
 
-            {isMenuOpen && (
-              <div
-                id="mobile-navigation"
-                className="absolute inset-x-0 top-full border-t border-slate-200 bg-white shadow-xl shadow-slate-950/10"
+            {navigationSections.length > 0 && (
+              <nav
+                className="hidden min-w-0 items-center gap-5 lg:flex xl:gap-7"
+                aria-label="Main navigation"
               >
-                <Container>
-                  <nav
-                    className="max-h-[calc(100vh-5rem)] overflow-y-auto py-5"
-                    aria-label="Mobile navigation"
-                  >
-                    <div className="flex flex-col gap-2">
-                      {navigationLinks.map((link) => (
-                        <a
-                          key={link.key}
-                          href={link.href}
-                          onClick={(event) => {
-                            event.preventDefault();
+                {navigationSections.map((section) => (
+                  <NavbarLink
+                    key={section.key}
+                    section={section}
+                    isActive={activeSectionKey === section.key}
+                    onNavigate={
+                      sectionDestinations[section.key]?.type === "page"
+                        ? closeMobileMenu
+                        : goToHomepageSection
+                    }
+                  />
+                ))}
+              </nav>
+            )}
 
-                            goToSection(
-                              link.href === "#home"
-                                ? "home"
-                                : link.href.slice(1),
-                            );
-                          }}
-                          className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-brand-50 hover:text-brand-600"
-                        >
-                          {link.label}
-                        </a>
-                      ))}
-
-                      {isContactVisible && (
-                        <Button
-                          className="mt-3 w-full"
-                          onClick={goToContactSection}
-                        >
-                          Contact Me
-                        </Button>
-                      )}
-                    </div>
-                  </nav>
-                </Container>
+            {contactSection && (
+              <div className="hidden shrink-0 lg:block">
+                <Button
+                  size="small"
+                  onClick={() => goToHomepageSection("contact", "contact")}
+                  className={
+                    activeSectionKey === "contact"
+                      ? "ring-4 ring-brand-500/15"
+                      : ""
+                  }
+                >
+                  Contact Me
+                </Button>
               </div>
             )}
+
+            <div ref={mobileMenuRef} className="shrink-0 lg:hidden">
+              <button
+                ref={mobileMenuButtonRef}
+                type="button"
+                aria-label={
+                  isMenuOpen ? "Close navigation menu" : "Open navigation menu"
+                }
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-navigation"
+                aria-haspopup="true"
+                onClick={() => {
+                  setIsMenuOpen((currentValue) => !currentValue);
+                }}
+                className="grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-900 transition hover:border-brand-600 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20"
+              >
+                {isMenuOpen ? (
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="size-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <path d="M6 6l12 12" />
+                    <path d="M18 6L6 18" />
+                  </svg>
+                ) : (
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="size-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <path d="M4 7h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 17h16" />
+                  </svg>
+                )}
+              </button>
+
+              {isMenuOpen && (
+                <div
+                  id="mobile-navigation"
+                  className="absolute inset-x-0 top-full min-w-0 border-t border-slate-200 bg-white shadow-xl shadow-slate-950/10"
+                >
+                  <Container>
+                    <nav
+                      className="max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain py-5"
+                      aria-label="Mobile navigation"
+                    >
+                      <div className="flex min-w-0 flex-col gap-2">
+                        {navigationSections.map((section) => (
+                          <NavbarLink
+                            key={section.key}
+                            section={section}
+                            isActive={activeSectionKey === section.key}
+                            isMobile
+                            onNavigate={
+                              sectionDestinations[section.key]?.type === "page"
+                                ? closeMobileMenu
+                                : goToHomepageSection
+                            }
+                          />
+                        ))}
+
+                        {contactSection && (
+                          <Button
+                            className="mt-3 w-full max-w-full"
+                            onClick={() =>
+                              goToHomepageSection("contact", "contact")
+                            }
+                          >
+                            Contact Me
+                          </Button>
+                        )}
+                      </div>
+                    </nav>
+                  </Container>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </Container>
-    </header>
+        </Container>
+      </header>
+    </>
   );
 }
 

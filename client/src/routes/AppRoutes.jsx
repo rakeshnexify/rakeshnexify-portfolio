@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes } from "react-router";
+import { useEffect, useLayoutEffect } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import CompaniesPage from "../pages/CompaniesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
@@ -21,82 +22,242 @@ import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import PublicSiteRoute from "./PublicSiteRoute";
 
+function RouteScrollManager() {
+  const { pathname, search, hash } = useLocation();
+
+  useEffect(() => {
+    if (!("scrollRestoration" in window.history)) {
+      return undefined;
+    }
+
+    const previousScrollRestoration = window.history.scrollRestoration;
+
+    window.history.scrollRestoration = "manual";
+
+    return () => {
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    let animationFrameId = 0;
+    let retryTimerId = 0;
+    let stopObserverTimerId = 0;
+    let resizeObserver = null;
+    let isCancelled = false;
+
+    function cancelScheduledFrame() {
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId);
+
+        animationFrameId = 0;
+      }
+    }
+
+    function scrollToPageTop() {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "auto",
+      });
+    }
+
+    if (!hash) {
+      animationFrameId = window.requestAnimationFrame(() => {
+        scrollToPageTop();
+      });
+
+      return () => {
+        isCancelled = true;
+
+        cancelScheduledFrame();
+      };
+    }
+
+    let sectionId = "";
+
+    try {
+      sectionId = decodeURIComponent(hash.slice(1));
+    } catch {
+      sectionId = hash.slice(1);
+    }
+
+    function alignHashSection() {
+      if (isCancelled) {
+        return false;
+      }
+
+      const targetSection = document.getElementById(sectionId);
+
+      if (!targetSection) {
+        return false;
+      }
+
+      cancelScheduledFrame();
+
+      animationFrameId = window.requestAnimationFrame(() => {
+        if (isCancelled) {
+          return;
+        }
+
+        targetSection.scrollIntoView({
+          behavior: "auto",
+          block: "start",
+        });
+      });
+
+      return true;
+    }
+
+    function watchHomepageLayout() {
+      if (!("ResizeObserver" in window)) {
+        return;
+      }
+
+      const layoutRoot =
+        document.getElementById("main-content") || document.body;
+
+      resizeObserver = new ResizeObserver(() => {
+        alignHashSection();
+      });
+
+      resizeObserver.observe(layoutRoot);
+
+      /*
+       * Services, Projects and Companies data
+       * load hone ke baad layout height change
+       * ho sakti hai. Kuch seconds tak target
+       * section ko aligned rakhenge.
+       */
+      stopObserverTimerId = window.setTimeout(() => {
+        resizeObserver?.disconnect();
+        resizeObserver = null;
+      }, 5000);
+    }
+
+    let retryCount = 0;
+    const maximumRetries = 80;
+
+    function findAndAlignHashSection() {
+      if (isCancelled) {
+        return;
+      }
+
+      const sectionFound = alignHashSection();
+
+      if (sectionFound) {
+        watchHomepageLayout();
+        return;
+      }
+
+      retryCount += 1;
+
+      if (retryCount >= maximumRetries) {
+        scrollToPageTop();
+        return;
+      }
+
+      retryTimerId = window.setTimeout(findAndAlignHashSection, 50);
+    }
+
+    findAndAlignHashSection();
+
+    return () => {
+      isCancelled = true;
+
+      cancelScheduledFrame();
+
+      window.clearTimeout(retryTimerId);
+
+      window.clearTimeout(stopObserverTimerId);
+
+      resizeObserver?.disconnect();
+    };
+  }, [pathname, search, hash]);
+
+  return null;
+}
+
 function AppRoutes() {
   return (
-    <Routes>
-      <Route element={<PublicSiteRoute />}>
-        <Route path="/" element={<HomePage />} />
+    <>
+      <RouteScrollManager />
 
-        <Route path="/services" element={<ServicesPage />} />
+      <Routes>
+        <Route element={<PublicSiteRoute />}>
+          <Route path="/" element={<HomePage />} />
 
-        <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/services" element={<ServicesPage />} />
 
-        <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
 
-        <Route path="/companies" element={<CompaniesPage />} />
+          <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
 
-        <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
-      </Route>
+          <Route path="/companies" element={<CompaniesPage />} />
 
-      <Route
-        path="/admin"
-        element={<Navigate to="/admin/dashboard" replace />}
-      />
-
-      <Route path="/admin/login" element={<AdminLoginPage />} />
-
-      <Route element={<ProtectedAdminRoute />}>
-        <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
+        </Route>
 
         <Route
-          path="/admin/site-settings"
-          element={<AdminSiteSettingsPage />}
+          path="/admin"
+          element={<Navigate to="/admin/dashboard" replace />}
         />
 
-        <Route
-          path="/admin/contact-messages"
-          element={<AdminContactMessagesPage />}
-        />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
 
-        <Route path="/admin/services" element={<AdminServicesPage />} />
+        <Route element={<ProtectedAdminRoute />}>
+          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
 
-        <Route
-          path="/admin/services/new"
-          element={<AdminServiceEditorPage mode="create" />}
-        />
+          <Route
+            path="/admin/site-settings"
+            element={<AdminSiteSettingsPage />}
+          />
 
-        <Route
-          path="/admin/services/:id/edit"
-          element={<AdminServiceEditorPage mode="edit" />}
-        />
+          <Route
+            path="/admin/contact-messages"
+            element={<AdminContactMessagesPage />}
+          />
 
-        <Route path="/admin/projects" element={<AdminProjectsPage />} />
+          <Route path="/admin/services" element={<AdminServicesPage />} />
 
-        <Route
-          path="/admin/projects/new"
-          element={<AdminProjectEditorPage mode="create" />}
-        />
+          <Route
+            path="/admin/services/new"
+            element={<AdminServiceEditorPage mode="create" />}
+          />
 
-        <Route
-          path="/admin/projects/:id/edit"
-          element={<AdminProjectEditorPage mode="edit" />}
-        />
+          <Route
+            path="/admin/services/:id/edit"
+            element={<AdminServiceEditorPage mode="edit" />}
+          />
 
-        <Route path="/admin/companies" element={<AdminCompaniesPage />} />
+          <Route path="/admin/projects" element={<AdminProjectsPage />} />
 
-        <Route
-          path="/admin/companies/new"
-          element={<AdminCompanyEditorPage mode="create" />}
-        />
+          <Route
+            path="/admin/projects/new"
+            element={<AdminProjectEditorPage mode="create" />}
+          />
 
-        <Route
-          path="/admin/companies/:id/edit"
-          element={<AdminCompanyEditorPage mode="edit" />}
-        />
-      </Route>
+          <Route
+            path="/admin/projects/:id/edit"
+            element={<AdminProjectEditorPage mode="edit" />}
+          />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+          <Route path="/admin/companies" element={<AdminCompaniesPage />} />
+
+          <Route
+            path="/admin/companies/new"
+            element={<AdminCompanyEditorPage mode="create" />}
+          />
+
+          <Route
+            path="/admin/companies/:id/edit"
+            element={<AdminCompanyEditorPage mode="edit" />}
+          />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 
