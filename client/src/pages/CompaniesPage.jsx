@@ -3,6 +3,7 @@ import { Link } from "react-router";
 
 import CompanyCard from "../components/companies/CompanyCard";
 import Container from "../components/layout/Container";
+import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import siteData from "../data/siteData";
 import useCompanies from "../hooks/useCompanies";
@@ -76,6 +77,7 @@ function CompaniesLoadingState() {
           </div>
         </Container>
       </main>
+      <Footer />
     </>
   );
 }
@@ -133,6 +135,7 @@ function CompaniesErrorState({ error, onRetry, isRetrying }) {
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }
@@ -343,6 +346,7 @@ function CompaniesPage() {
           </Container>
         </section>
       </main>
+      <Footer />
     </>
   );
 }

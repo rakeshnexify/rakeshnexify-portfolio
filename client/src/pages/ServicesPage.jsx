@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { Link } from "react-router";
 
 import Container from "../components/layout/Container";
+import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import ServiceCard from "../components/services/ServiceCard";
 import useServices from "../hooks/useServices";
@@ -75,6 +76,7 @@ function ServicesLoadingState() {
           </div>
         </Container>
       </main>
+        <Footer />
     </>
   );
 }
@@ -123,6 +125,7 @@ function ServicesErrorState({ error }) {
           </div>
         </div>
       </main>
+        <Footer />
     </>
   );
 }
@@ -302,6 +305,7 @@ function ServicesPage() {
           </Container>
         </section>
       </main>
+      <Footer />
     </>
   );
 }

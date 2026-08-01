@@ -6,14 +6,58 @@ import useSiteSettings from "../../hooks/useSiteSettings";
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
-const supportedFooterSections = new Set([
-  "hero",
-  "about",
-  "services",
-  "projects",
-  "companies",
-  "contact",
-]);
+const defaultNavigationSections = [
+  {
+    key: "hero",
+    label: "Home",
+    href: "/",
+    isVisible: true,
+    order: 1,
+  },
+  {
+    key: "about",
+    label: "About",
+    href: "/#about",
+    isVisible: true,
+    order: 2,
+  },
+  {
+    key: "services",
+    label: "Services",
+    href: "/services",
+    isVisible: true,
+    order: 3,
+  },
+  {
+    key: "projects",
+    label: "Projects",
+    href: "/projects",
+    isVisible: true,
+    order: 4,
+  },
+  {
+    key: "companies",
+    label: "Companies",
+    href: "/companies",
+    isVisible: true,
+    order: 5,
+  },
+  {
+    key: "contact",
+    label: "Contact",
+    href: "/#contact",
+    isVisible: true,
+    order: 6,
+  },
+];
+
+const defaultSectionByKey = Object.fromEntries(
+  defaultNavigationSections.map((section) => [section.key, section]),
+);
+
+const supportedFooterSections = new Set(
+  defaultNavigationSections.map((section) => section.key),
+);
 
 const defaultFooterContent = {
   introduction:
@@ -29,29 +73,36 @@ const defaultFooterContent = {
 
   projectButton: {
     label: "Start a project with me",
-    url: "#contact",
+    url: "/#contact",
   },
 
-  legalLinks: [
-    {
-      label: "Privacy Policy",
-      url: "#privacy",
-      isVisible: true,
-      order: 1,
-    },
-    {
-      label: "Terms",
-      url: "#terms",
-      isVisible: true,
-      order: 2,
-    },
-  ],
+  /*
+   * Legal links tabhi show honge jab Admin
+   * Panel me valid URL ke saath add honge.
+   */
+  legalLinks: [],
 
   copyrightText: "All rights reserved.",
 };
 
+function normaliseSectionKey(value) {
+  const key = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  return key === "home" ? "hero" : key;
+}
+
 function sortByOrder(firstItem, secondItem) {
-  return Number(firstItem?.order || 0) - Number(secondItem?.order || 0);
+  const firstOrder = Number(firstItem?.order);
+
+  const secondOrder = Number(secondItem?.order);
+
+  const safeFirstOrder = Number.isFinite(firstOrder) ? firstOrder : 0;
+
+  const safeSecondOrder = Number.isFinite(secondOrder) ? secondOrder : 0;
+
+  return safeFirstOrder - safeSecondOrder;
 }
 
 function containsControlCharacters(value) {
@@ -111,28 +162,77 @@ function getSafeHttpUrl(value) {
   return "";
 }
 
-function getSectionHref(sectionKey) {
-  return sectionKey === "hero" ? "#home" : `#${sectionKey}`;
-}
+function getSafeSectionLabel(key, value) {
+  const label = String(value || "").trim();
 
-function getSectionLabel(section) {
-  if (section.key === "hero" && section.label === "Hero") {
+  if (key === "hero" && label.toLowerCase() === "hero") {
     return "Home";
   }
 
-  return section.label;
+  return label || defaultSectionByKey[key]?.label || key;
 }
 
-function getFallbackSections() {
-  return (siteData.navigation || []).map((link, index) => ({
-    key: link.href === "#home" ? "hero" : link.href.replace("#", ""),
+function createNavigationLinks(settingsSections) {
+  const hasSettingsSections =
+    Array.isArray(settingsSections) && settingsSections.length > 0;
 
-    label: link.label,
+  const sourceSections = hasSettingsSections
+    ? settingsSections
+    : defaultNavigationSections;
 
-    isVisible: true,
+  const sectionsByKey = new Map();
 
-    order: index + 1,
-  }));
+  sourceSections.forEach((section, index) => {
+    const key = normaliseSectionKey(section?.key);
+
+    if (!key || !supportedFooterSections.has(key)) {
+      return;
+    }
+
+    const defaultSection = defaultSectionByKey[key];
+
+    const numericOrder = Number(section?.order);
+
+    sectionsByKey.set(key, {
+      key,
+
+      label: getSafeSectionLabel(key, section?.label),
+
+      href: defaultSection.href,
+
+      /*
+       * Home route always available rahega,
+       * chahe Hero section hidden ho.
+       */
+      isVisible: key === "hero" || section?.isVisible !== false,
+
+      order: Number.isFinite(numericOrder)
+        ? numericOrder
+        : (defaultSection.order ?? index + 1),
+    });
+  });
+
+  if (!sectionsByKey.has("hero")) {
+    sectionsByKey.set("hero", {
+      ...defaultSectionByKey.hero,
+      isVisible: true,
+    });
+  }
+
+  return [...sectionsByKey.values()]
+    .filter((section) => section.isVisible !== false)
+    .sort((firstSection, secondSection) => {
+      const orderDifference = sortByOrder(firstSection, secondSection);
+
+      if (orderDifference !== 0) {
+        return orderDifference;
+      }
+
+      return (
+        (defaultSectionByKey[firstSection.key]?.order || 0) -
+        (defaultSectionByKey[secondSection.key]?.order || 0)
+      );
+    });
 }
 
 function getVisiblePlatforms(settingsPlatforms, fallbackPlatforms = []) {
@@ -140,14 +240,27 @@ function getVisiblePlatforms(settingsPlatforms, fallbackPlatforms = []) {
     ? settingsPlatforms
     : fallbackPlatforms;
 
-  return sourcePlatforms
-    .filter(
-      (platform) =>
-        platform &&
-        platform.isVisible !== false &&
-        String(platform.name || "").trim(),
-    )
-    .sort(sortByOrder);
+  const platformsByName = new Map();
+
+  sourcePlatforms.forEach((platform, index) => {
+    const name = String(platform?.name || "").trim();
+
+    if (!platform || platform.isVisible === false || !name) {
+      return;
+    }
+
+    const duplicateKey = name.toLowerCase();
+
+    const numericOrder = Number(platform?.order);
+
+    platformsByName.set(duplicateKey, {
+      ...platform,
+      name,
+      order: Number.isFinite(numericOrder) ? numericOrder : index + 1,
+    });
+  });
+
+  return [...platformsByName.values()].sort(sortByOrder);
 }
 
 function getFooterServices(services) {
@@ -155,10 +268,29 @@ function getFooterServices(services) {
     return [];
   }
 
-  return services
-    .filter((service) => String(service?.title || "").trim())
-    .sort(sortByOrder)
-    .slice(0, 6);
+  const servicesByKey = new Map();
+
+  services.forEach((service, index) => {
+    const title = String(service?.title || "").trim();
+
+    if (!title) {
+      return;
+    }
+
+    const duplicateKey = String(
+      service?._id || service?.id || service?.slug || title.toLowerCase(),
+    );
+
+    const numericOrder = Number(service?.order);
+
+    servicesByKey.set(duplicateKey, {
+      ...service,
+      title,
+      order: Number.isFinite(numericOrder) ? numericOrder : index + 1,
+    });
+  });
+
+  return [...servicesByKey.values()].sort(sortByOrder).slice(0, 6);
 }
 
 function getLegalLinks(footer) {
@@ -166,22 +298,96 @@ function getLegalLinks(footer) {
     ? footer.legalLinks
     : defaultFooterContent.legalLinks;
 
-  return sourceLegalLinks
-    .filter(
-      (link) =>
-        link && link.isVisible !== false && String(link.label || "").trim(),
-    )
-    .map((link, index) => ({
-      label: String(link.label || "").trim(),
+  const legalLinksByKey = new Map();
 
-      url: getSafePublicUrl(link.url),
+  sourceLegalLinks.forEach((link, index) => {
+    const label = String(link?.label || "").trim();
 
-      order: Number.isFinite(Number(link.order))
-        ? Number(link.order)
-        : index + 1,
-    }))
-    .filter((link) => link.url)
-    .sort(sortByOrder);
+    const url = getSafePublicUrl(link?.url || link?.href);
+
+    if (!link || link.isVisible === false || !label || !url) {
+      return;
+    }
+
+    const numericOrder = Number(link?.order);
+
+    const duplicateKey = `${label.toLowerCase()}|${url}`;
+
+    legalLinksByKey.set(duplicateKey, {
+      label,
+      url,
+      order: Number.isFinite(numericOrder) ? numericOrder : index + 1,
+    });
+  });
+
+  return [...legalLinksByKey.values()].sort(sortByOrder);
+}
+
+function handleSamePageNavigation(event, href) {
+  let targetUrl;
+
+  try {
+    targetUrl = new URL(href, window.location.origin);
+  } catch {
+    return;
+  }
+
+  const isSamePage =
+    targetUrl.pathname === window.location.pathname &&
+    targetUrl.search === window.location.search;
+
+  if (!isSamePage) {
+    return;
+  }
+
+  if (!targetUrl.hash) {
+    event.preventDefault();
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+
+    if (window.location.hash) {
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}`,
+      );
+    }
+
+    return;
+  }
+
+  let targetId = "";
+
+  try {
+    targetId = decodeURIComponent(targetUrl.hash.slice(1));
+  } catch {
+    targetId = targetUrl.hash.slice(1);
+  }
+
+  const targetElement = document.getElementById(targetId);
+
+  if (!targetElement) {
+    return;
+  }
+
+  event.preventDefault();
+
+  targetElement.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+
+  if (window.location.hash !== targetUrl.hash) {
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}${targetUrl.hash}`,
+    );
+  }
 }
 
 function FooterLink({ href, children, className = "", ariaLabel }) {
@@ -191,7 +397,10 @@ function FooterLink({ href, children, className = "", ariaLabel }) {
     return null;
   }
 
-  if (safeHref.startsWith("http://") || safeHref.startsWith("https://")) {
+  const isExternal =
+    safeHref.startsWith("http://") || safeHref.startsWith("https://");
+
+  if (isExternal) {
     return (
       <a
         href={safeHref}
@@ -201,13 +410,22 @@ function FooterLink({ href, children, className = "", ariaLabel }) {
         className={className}
       >
         {children}
+
+        <span className="sr-only"> opens in a new tab</span>
       </a>
     );
   }
 
   if (safeHref.startsWith("/")) {
     return (
-      <Link to={safeHref} aria-label={ariaLabel} className={className}>
+      <Link
+        to={safeHref}
+        aria-label={ariaLabel}
+        onClick={(event) => {
+          handleSamePageNavigation(event, safeHref);
+        }}
+        className={className}
+      >
         {children}
       </Link>
     );
@@ -221,18 +439,19 @@ function FooterLink({ href, children, className = "", ariaLabel }) {
 }
 
 function PlatformLink({ platform }) {
-  const name = String(platform?.name || "Platform").trim();
+  const name = String(platform?.name || "Platform").trim() || "Platform";
 
   const username = String(platform?.username || "").trim();
 
   const url = getSafeHttpUrl(platform?.url);
 
   const commonClasses =
-    "rounded-lg border border-slate-800 px-3 py-2 text-xs font-semibold transition";
+    "max-w-full break-words rounded-lg border border-slate-800 px-3 py-2 text-xs font-semibold transition";
 
   if (!url) {
     return (
       <span
+        aria-disabled="true"
         className={`${commonClasses} cursor-not-allowed text-slate-600`}
         title={`${name} profile link will be added soon`}
       >
@@ -246,7 +465,9 @@ function PlatformLink({ platform }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`Open ${name}${username ? ` profile for ${username}` : ""}`}
+      aria-label={`Open ${name}${
+        username ? ` profile for ${username}` : ""
+      } in a new tab`}
       title={username ? `${name}: ${username}` : name}
       className={`${commonClasses} text-slate-400 hover:border-brand-500 hover:bg-brand-500/10 hover:text-white`}
     >
@@ -316,46 +537,23 @@ function Footer() {
     defaultFooterContent.projectButton.url,
   );
 
-  const legalLinks = getLegalLinks(footer);
+  const navigationLinks = createNavigationLinks(settings?.sections);
 
-  const settingsSections = Array.isArray(settings?.sections)
-    ? settings.sections
-    : [];
+  const visibleSectionKeys = new Set(navigationLinks.map((link) => link.key));
 
-  const availableSections =
-    settingsSections.length > 0 ? settingsSections : getFallbackSections();
+  const isServicesVisible = visibleSectionKeys.has("services");
 
-  const visibleSections = [...availableSections]
-    .filter(
-      (section) =>
-        section.isVisible !== false && supportedFooterSections.has(section.key),
-    )
-    .sort(sortByOrder);
-
-  const navigationLinks = visibleSections.map((section) => ({
-    key: section.key,
-
-    label: getSectionLabel(section),
-
-    href: getSectionHref(section.key),
-  }));
-
-  const isServicesSectionVisible = visibleSections.some(
-    (section) => section.key === "services",
-  );
-
-  const isContactVisible = visibleSections.some(
-    (section) => section.key === "contact",
-  );
+  const isContactVisible = visibleSectionKeys.has("contact");
 
   const services = getFooterServices(loadedServices);
 
-  const showServicesColumn = isServicesSectionVisible && services.length > 0;
+  const showServicesColumn = isServicesVisible && services.length > 0;
+
+  const legalLinks = getLegalLinks(footer);
 
   const platformGroups = [
     {
       key: "social",
-
       title: "Social",
 
       platforms: getVisiblePlatforms(
@@ -365,7 +563,6 @@ function Footer() {
     },
     {
       key: "developer",
-
       title: "Developer",
 
       platforms: getVisiblePlatforms(
@@ -375,7 +572,6 @@ function Footer() {
     },
     {
       key: "freelance",
-
       title: "Freelance",
 
       platforms: getVisiblePlatforms(
@@ -387,12 +583,15 @@ function Footer() {
 
   const showPlatformsColumn = platformGroups.length > 0;
 
+  const projectButtonTargetsContact =
+    projectButtonUrl === "/#contact" || projectButtonUrl === "#contact";
+
   const showProjectButton =
     Boolean(projectButtonLabel && projectButtonUrl) &&
-    !(projectButtonUrl === "#contact" && !isContactVisible);
+    !(projectButtonTargetsContact && !isContactVisible);
 
   const hasContactLegalLink = legalLinks.some(
-    (link) => link.url === "#contact",
+    (link) => link.url === "/#contact" || link.url === "#contact",
   );
 
   const gridClasses =
@@ -403,47 +602,52 @@ function Footer() {
         : "lg:grid-cols-[1.4fr_1fr]";
 
   return (
-    <footer className="border-t border-slate-800 bg-slate-950 text-slate-300">
+    <footer className="overflow-x-hidden border-t border-slate-800 bg-slate-950 text-slate-300">
       <Container>
-        <div className={`grid gap-12 py-16 sm:py-20 ${gridClasses}`}>
-          <div>
-            <a
-              href="#home"
-              aria-label={`Go to ${brandName} homepage`}
-              className="inline-flex"
+        <div className={`grid min-w-0 gap-12 py-16 sm:py-20 ${gridClasses}`}>
+          <div className="min-w-0">
+            <FooterLink
+              href="/"
+              ariaLabel={`Go to ${brandName} homepage`}
+              className="inline-flex max-w-full"
             >
               <Logo showTagline textClassName="text-white" />
-            </a>
+            </FooterLink>
 
-            <p className="mt-6 max-w-md text-sm leading-7 text-slate-400">
+            <p className="mt-6 max-w-md break-words text-sm leading-7 text-slate-400">
               {introduction}
             </p>
 
             {location && (
-              <p className="mt-4 text-sm text-slate-500">{location}</p>
+              <p className="mt-4 break-words text-sm leading-6 text-slate-500">
+                {location}
+              </p>
             )}
 
             {showProjectButton && (
               <FooterLink
                 href={projectButtonUrl}
-                className="mt-6 inline-flex text-sm font-semibold text-brand-500 transition hover:text-brand-400"
+                className="mt-6 inline-flex max-w-full break-words text-sm font-semibold text-brand-500 transition hover:text-brand-400"
               >
-                {projectButtonLabel} →
+                {projectButtonLabel}
+                <span aria-hidden="true" className="ml-1">
+                  →
+                </span>
               </FooterLink>
             )}
           </div>
 
-          <div>
-            <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">
+          <div className="min-w-0">
+            <h2 className="break-words text-sm font-bold uppercase tracking-[0.18em] text-white">
               {quickLinksHeading}
             </h2>
 
             <ul className="mt-5 space-y-3">
               {navigationLinks.map((link) => (
-                <li key={link.key}>
+                <li key={link.key} className="min-w-0">
                   <FooterLink
                     href={link.href}
-                    className="text-sm text-slate-400 transition hover:text-white"
+                    className="inline-flex max-w-full break-words text-sm text-slate-400 transition hover:text-white"
                   >
                     {link.label}
                   </FooterLink>
@@ -453,8 +657,8 @@ function Footer() {
           </div>
 
           {showServicesColumn && (
-            <div>
-              <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">
+            <div className="min-w-0">
+              <h2 className="break-words text-sm font-bold uppercase tracking-[0.18em] text-white">
                 {servicesHeading}
               </h2>
 
@@ -467,10 +671,11 @@ function Footer() {
                       service.slug ||
                       `${service.title}-${index}`
                     }
+                    className="min-w-0"
                   >
                     <FooterLink
-                      href="#services"
-                      className="text-sm text-slate-400 transition hover:text-white"
+                      href="/services"
+                      className="inline-flex max-w-full break-words text-sm text-slate-400 transition hover:text-white"
                     >
                       {service.title}
                     </FooterLink>
@@ -481,19 +686,19 @@ function Footer() {
           )}
 
           {showPlatformsColumn && (
-            <div>
-              <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-white">
+            <div className="min-w-0">
+              <h2 className="break-words text-sm font-bold uppercase tracking-[0.18em] text-white">
                 {platformsHeading}
               </h2>
 
               <div className="mt-5 space-y-6">
                 {platformGroups.map((group) => (
-                  <div key={group.key}>
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <div key={group.key} className="min-w-0">
+                    <p className="mb-3 break-words text-xs font-semibold uppercase tracking-wider text-slate-500">
                       {group.title}
                     </p>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex min-w-0 flex-wrap gap-2">
                       {group.platforms.map((platform, index) => (
                         <PlatformLink
                           key={`${group.key}-${platform.name}-${index}`}
@@ -506,7 +711,7 @@ function Footer() {
               </div>
 
               {platformNote && (
-                <p className="mt-6 text-sm leading-6 text-slate-500">
+                <p className="mt-6 break-words text-sm leading-6 text-slate-500">
                   {platformNote}
                 </p>
               )}
@@ -514,17 +719,17 @@ function Footer() {
           )}
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-slate-800 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>
+        <div className="flex min-w-0 flex-col gap-4 border-t border-slate-800 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+          <p className="min-w-0 break-words">
             © {currentYear} {brandName}. {copyrightText}
           </p>
 
-          <div className="flex flex-wrap gap-x-5 gap-y-2">
+          <div className="flex min-w-0 flex-wrap gap-x-5 gap-y-2">
             {legalLinks.map((link, index) => (
               <FooterLink
                 key={`${link.label}-${link.url}-${index}`}
                 href={link.url}
-                className="transition hover:text-white"
+                className="max-w-full break-words transition hover:text-white"
               >
                 {link.label}
               </FooterLink>
@@ -532,8 +737,8 @@ function Footer() {
 
             {isContactVisible && !hasContactLegalLink && (
               <FooterLink
-                href="#contact"
-                className="transition hover:text-white"
+                href="/#contact"
+                className="max-w-full break-words transition hover:text-white"
               >
                 Contact
               </FooterLink>

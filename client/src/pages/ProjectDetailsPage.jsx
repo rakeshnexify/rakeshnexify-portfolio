@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 
 import Container from "../components/layout/Container";
+import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import useProject from "../hooks/useProject";
 import useSiteSettings from "../hooks/useSiteSettings";
@@ -156,6 +157,7 @@ function ProjectLoadingState() {
           </div>
         </Container>
       </main>
+      <Footer />
     </>
   );
 }
@@ -221,6 +223,7 @@ function ProjectErrorState({ error, status, onRetry, isRetrying }) {
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }
@@ -630,6 +633,7 @@ function ProjectDetailsPage() {
           </Container>
         </section>
       </main>
+      <Footer />
     </>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { Link } from "react-router";
 
 import Container from "../components/layout/Container";
+import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import ProjectCard from "../components/projects/ProjectCard";
 import siteData from "../data/siteData";
@@ -77,6 +78,7 @@ function ProjectsLoadingState() {
           </div>
         </Container>
       </main>
+       <Footer />
     </>
   );
 }
@@ -134,6 +136,7 @@ function ProjectsErrorState({ error, onRetry, isRetrying }) {
           </div>
         </div>
       </main>
+       <Footer />
     </>
   );
 }
@@ -335,6 +338,7 @@ function ProjectsPage() {
           </Container>
         </section>
       </main>
+      <Footer />
     </>
   );
 }
