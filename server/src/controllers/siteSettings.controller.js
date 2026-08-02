@@ -1,9 +1,9 @@
 import SiteSettings from "../models/SiteSettings.js";
+import { mergeHomepageSections } from "../config/homepageSections.js";
 
 const MAIN_SITE_KEY = "main";
 
 const orderedArrayFields = [
-  "sections",
   "socialPlatforms",
   "developerPlatforms",
   "freelancerPlatforms",
@@ -26,6 +26,8 @@ function serializePublicSettings(settings) {
     typeof settings?.toObject === "function"
       ? settings.toObject()
       : { ...settings };
+
+      publicSettings.sections = mergeHomepageSections(publicSettings.sections);
 
   orderedArrayFields.forEach((fieldName) => {
     publicSettings[fieldName] = getOrderedArray(publicSettings[fieldName]);

@@ -10,7 +10,7 @@
     "build": "npm run build --prefix client",
     "start": "npm run start --prefix server",
     "setup:dependencies": "npm install --prefix client && npm install --prefix server",
-   "check": "npm run build && node --check server/src/config/environment.js && node --check server/src/config/cors.js && node --check server/src/config/helmet.js && node --check server/src/app.js && node --check server/src/server.js",
+    "check": "npm run build && node --check server/src/config/environment.js && node --check server/src/config/cors.js && node --check server/src/config/helmet.js && node --check server/src/config/homepageSections.js && node --check server/src/models/SiteSettings.js && node --check server/src/controllers/siteSettings.controller.js && node --check server/src/controllers/adminSiteSettings.controller.js && node --check server/src/app.js && node --check server/src/server.js",
     "test": "npm run check"
   },
   "keywords": [

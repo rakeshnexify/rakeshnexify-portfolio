@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { homepageSectionDefinitions } from "../config/homepageSections.js";
 
 const buttonSchema = new mongoose.Schema(
   {
@@ -698,44 +699,11 @@ const siteSettingsSchema = new mongoose.Schema(
 
     sections: {
       type: [sectionSchema],
-      default: () => [
-        {
-          key: "hero",
-          label: "Hero",
-          isVisible: true,
-          order: 1,
-        },
-        {
-          key: "about",
-          label: "About",
-          isVisible: true,
-          order: 2,
-        },
-        {
-          key: "services",
-          label: "Services",
-          isVisible: true,
-          order: 3,
-        },
-        {
-          key: "projects",
-          label: "Projects",
-          isVisible: true,
-          order: 4,
-        },
-        {
-          key: "companies",
-          label: "Companies",
-          isVisible: true,
-          order: 5,
-        },
-        {
-          key: "contact",
-          label: "Contact",
-          isVisible: true,
-          order: 6,
-        },
-      ],
+
+      default: () =>
+        homepageSectionDefinitions.map((section) => ({
+          ...section,
+        })),
     },
 
     isPublished: {

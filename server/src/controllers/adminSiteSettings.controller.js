@@ -1,4 +1,5 @@
 import SiteSettings from "../models/SiteSettings.js";
+import { mergeHomepageSections } from "../config/homepageSections.js";
 
 const MAIN_SITE_KEY = "main";
 
@@ -691,9 +692,7 @@ function serializeSettings(settings) {
       ? settings.toObject()
       : { ...settings };
 
-  data.sections = Array.isArray(data.sections)
-    ? [...data.sections].sort(sortByOrder)
-    : [];
+  data.sections = mergeHomepageSections(data.sections);
 
   platformGroupFields.forEach((fieldName) => {
     data[fieldName] = Array.isArray(data[fieldName])

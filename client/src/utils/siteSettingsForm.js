@@ -1,41 +1,11 @@
-const defaultSections = [
-  {
-    key: "hero",
-    label: "Hero",
-    isVisible: true,
-    order: 1,
-  },
-  {
-    key: "about",
-    label: "About",
-    isVisible: true,
-    order: 2,
-  },
-  {
-    key: "services",
-    label: "Services",
-    isVisible: true,
-    order: 3,
-  },
-  {
-    key: "projects",
-    label: "Projects",
-    isVisible: true,
-    order: 4,
-  },
-  {
-    key: "companies",
-    label: "Companies",
-    isVisible: true,
-    order: 5,
-  },
-  {
-    key: "contact",
-    label: "Contact",
-    isVisible: true,
-    order: 6,
-  },
-];
+import {
+  homepageSectionDefinitions,
+  mergeHomepageSections,
+} from "../config/homepageSections";
+
+const defaultSections = homepageSectionDefinitions.map((section) => ({
+  ...section,
+}));
 
 const defaultPlatformGroups = {
   socialPlatforms: [
@@ -274,10 +244,7 @@ function normalizeSection(section, index) {
 }
 
 function normalizeSections(value) {
-  const source =
-    Array.isArray(value) && value.length > 0 ? value : defaultSections;
-
-  return source
+  return mergeHomepageSections(value)
     .map((section, index) => normalizeSection(section, index))
     .filter((section) => section.key)
     .sort(
