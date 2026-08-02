@@ -16,6 +16,14 @@ const dashboardModules = [
     status: "Management ready",
     path: "/admin/services",
   },
+
+  {
+    title: "Statistics",
+    description:
+      "Create, edit, reorder, feature and control the visibility of portfolio statistics.",
+    status: "Management ready",
+    path: "/admin/statistics",
+  },
   {
     title: "Projects",
     description:

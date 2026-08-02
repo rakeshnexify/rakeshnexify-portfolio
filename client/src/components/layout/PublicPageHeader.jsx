@@ -11,37 +11,78 @@ const defaultNavigationItems = [
     key: "hero",
     label: "Home",
     href: "/",
+    type: "section",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
     order: 1,
+    navigationOrder: 1,
   },
   {
     key: "about",
     label: "About",
     href: "/#about",
+    type: "section",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
     order: 2,
+    navigationOrder: 2,
+  },
+  {
+    key: "statistics",
+    label: "Statistics",
+    href: "/statistics",
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 3,
+    navigationOrder: 3,
   },
   {
     key: "services",
     label: "Services",
     href: "/services",
-    order: 3,
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 4,
+    navigationOrder: 4,
   },
   {
     key: "projects",
     label: "Projects",
     href: "/projects",
-    order: 4,
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 5,
+    navigationOrder: 5,
   },
   {
     key: "companies",
     label: "Companies",
     href: "/companies",
-    order: 5,
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 6,
+    navigationOrder: 6,
   },
   {
     key: "contact",
     label: "Contact",
     href: "/#contact",
-    order: 6,
+    type: "section",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 7,
+    navigationOrder: 7,
   },
 ];
 
@@ -86,34 +127,71 @@ function createNavigationItems(settingsSections) {
     .map((defaultItem) => {
       const settingsItem = settingsByKey.get(defaultItem.key);
 
-      const numericOrder = Number(settingsItem?.order);
+      const homepageOrder = Number(settingsItem?.order);
+
+      const normalizedHomepageOrder = Number.isFinite(homepageOrder)
+        ? homepageOrder
+        : defaultItem.order;
+
+      const navigationOrder = Number(settingsItem?.navigationOrder);
+
+      const normalizedNavigationOrder = Number.isFinite(navigationOrder)
+        ? navigationOrder
+        : normalizedHomepageOrder;
+
+      const isHomepageVisible = settingsItem?.isVisible !== false;
+
+      const isNavigationVisible = settingsItem?.isNavigationVisible !== false;
+
+      const isPageVisible = settingsItem?.isPageVisible !== false;
+
+      /*
+       * Home always remains a valid destination.
+       *
+       * About and Contact require their homepage
+       * sections to remain visible.
+       *
+       * Dedicated page items require their
+       * public pages to remain enabled.
+       */
+      const isDestinationAvailable =
+        defaultItem.key === "hero" ||
+        (defaultItem.type === "page" ? isPageVisible : isHomepageVisible);
 
       return {
         ...defaultItem,
 
         label: getSafeLabel(defaultItem.key, settingsItem?.label),
 
-        /*
-         * Home remains available even when
-         * the Hero section is hidden.
-         */
-        isVisible:
-          defaultItem.key === "hero" || settingsItem?.isVisible !== false,
+        isHomepageVisible,
 
-        order: Number.isFinite(numericOrder) ? numericOrder : defaultItem.order,
+        isNavigationVisible,
+
+        isPageVisible,
+
+        isDestinationAvailable,
+
+        order: normalizedHomepageOrder,
+
+        navigationOrder: normalizedNavigationOrder,
       };
     })
-    .filter((item) => item.isVisible !== false)
+    .filter(
+      (item) =>
+        item.isNavigationVisible !== false &&
+        item.isDestinationAvailable !== false,
+    )
     .sort((firstItem, secondItem) => {
-      const orderDifference = firstItem.order - secondItem.order;
+      const orderDifference =
+        firstItem.navigationOrder - secondItem.navigationOrder;
 
       if (orderDifference !== 0) {
         return orderDifference;
       }
 
       return (
-        defaultItemByKey[firstItem.key].order -
-        defaultItemByKey[secondItem.key].order
+        defaultItemByKey[firstItem.key].navigationOrder -
+        defaultItemByKey[secondItem.key].navigationOrder
       );
     });
 }
@@ -296,7 +374,7 @@ function PublicPageHeader() {
                 onClick={closeMobileMenu}
                 className="hidden min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 lg:inline-flex"
               >
-                Contact Me
+                {contactItem.label}
               </Link>
             )}
 
@@ -376,7 +454,7 @@ function PublicPageHeader() {
                             onClick={closeMobileMenu}
                             className="mt-3 inline-flex min-h-11 w-full max-w-full items-center justify-center rounded-xl bg-brand-600 px-5 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
                           >
-                            Contact Me
+                            {contactItem.label}
                           </Link>
                         )}
                       </div>

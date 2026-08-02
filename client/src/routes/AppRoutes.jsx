@@ -9,6 +9,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ServicesPage from "../pages/ServicesPage";
+import StatisticsPage from "../pages/StatisticsPage";
 
 import AdminCompaniesPage from "../pages/admin/AdminCompaniesPage";
 import AdminCompanyEditorPage from "../pages/admin/AdminCompanyEditorPage";
@@ -19,9 +20,13 @@ import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
 import AdminProjectsPage from "../pages/admin/AdminProjectsPage";
 import AdminServiceEditorPage from "../pages/admin/AdminServiceEditorPage";
 import AdminServicesPage from "../pages/admin/AdminServicesPage";
+import AdminStatisticEditorPage from "../pages/admin/AdminStatisticEditorPage";
+import AdminStatisticsPage from "../pages/admin/AdminStatisticsPage";
 import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
+import AdminSiteSettingsEditorPage from "../pages/admin/AdminSiteSettingsEditorPage";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
+import PublicPageVisibilityRoute from "./PublicPageVisibilityRoute";
 import PublicSiteRoute from "./PublicSiteRoute";
 
 function AdminSeoManager() {
@@ -222,15 +227,27 @@ function AppRoutes() {
         <Route element={<PublicSiteRoute />}>
           <Route path="/" element={<HomePage />} />
 
-          <Route path="/services" element={<ServicesPage />} />
+          <Route
+            element={<PublicPageVisibilityRoute sectionKey="statistics" />}
+          >
+            <Route path="/statistics" element={<StatisticsPage />} />
+          </Route>
 
-          <Route path="/projects" element={<ProjectsPage />} />
+          <Route element={<PublicPageVisibilityRoute sectionKey="services" />}>
+            <Route path="/services" element={<ServicesPage />} />
+          </Route>
 
-          <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
+          <Route element={<PublicPageVisibilityRoute sectionKey="projects" />}>
+            <Route path="/projects" element={<ProjectsPage />} />
 
-          <Route path="/companies" element={<CompaniesPage />} />
+            <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
+          </Route>
 
-          <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
+          <Route element={<PublicPageVisibilityRoute sectionKey="companies" />}>
+            <Route path="/companies" element={<CompaniesPage />} />
+
+            <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
+          </Route>
 
           <Route path="*" element={<NotFoundPage />} />
         </Route>
@@ -251,6 +268,11 @@ function AppRoutes() {
           />
 
           <Route
+            path="/admin/site-settings/:pageKey"
+            element={<AdminSiteSettingsEditorPage />}
+          />
+
+          <Route
             path="/admin/contact-messages"
             element={<AdminContactMessagesPage />}
           />
@@ -265,6 +287,18 @@ function AppRoutes() {
           <Route
             path="/admin/services/:id/edit"
             element={<AdminServiceEditorPage mode="edit" />}
+          />
+
+          <Route path="/admin/statistics" element={<AdminStatisticsPage />} />
+
+          <Route
+            path="/admin/statistics/new"
+            element={<AdminStatisticEditorPage mode="create" />}
+          />
+
+          <Route
+            path="/admin/statistics/:id/edit"
+            element={<AdminStatisticEditorPage mode="edit" />}
           />
 
           <Route path="/admin/projects" element={<AdminProjectsPage />} />

@@ -27,6 +27,17 @@ const platformGroupFields = [
   "freelancerPlatforms",
 ];
 
+/*
+ * Sirf in sections ke dedicated
+ * public listing pages available hain.
+ */
+const dedicatedPageSectionKeys = new Set([
+  "statistics",
+  "services",
+  "projects",
+  "companies",
+]);
+
 function containsControlCharacters(value) {
   const text = String(value ?? "");
 
@@ -180,6 +191,10 @@ function validateLegalLinks(formValues, errors) {
 function validateDynamicContentUrls(formValues, errors) {
   const urlFields = [
     {
+      fieldName: "statisticsSection.ctaButton.url",
+      value: formValues?.statisticsSection?.ctaButton?.url,
+    },
+    {
       fieldName: "servicesSection.ctaButton.url",
       value: formValues?.servicesSection?.ctaButton?.url,
     },
@@ -218,6 +233,14 @@ function prepareInitialValues(initialValues = {}) {
         typeof initialValues.about?.highlightsText === "string"
           ? initialValues.about.highlightsText
           : normalizedValues.about.highlightsText,
+    },
+
+    statisticsSection: {
+      ...normalizedValues.statisticsSection,
+
+      ctaButton: {
+        ...normalizedValues.statisticsSection.ctaButton,
+      },
     },
 
     seo: {
@@ -370,6 +393,8 @@ function validateSiteSettingsForm(formValues) {
 
     const order = Number(section?.order);
 
+    const navigationOrder = Number(section?.navigationOrder);
+
     if (!key) {
       errors[`sections.${index}.key`] = "Section key is required.";
     }
@@ -388,7 +413,12 @@ function validateSiteSettingsForm(formValues) {
 
     if (!Number.isFinite(order) || order < 0) {
       errors[`sections.${index}.order`] =
-        "Section order must be a non-negative number.";
+        "Homepage order must be a non-negative number.";
+    }
+
+    if (!Number.isFinite(navigationOrder) || navigationOrder < 0) {
+      errors[`sections.${index}.navigationOrder`] =
+        "Navbar order must be a non-negative number.";
     }
   });
 
@@ -411,7 +441,11 @@ function FieldError({ message }) {
   return <p className="mt-2 text-sm font-medium text-red-600">{message}</p>;
 }
 
-function SettingsCard({ title, description, children }) {
+function SettingsCard({ title, description, children, isVisible = true }) {
+  if (!isVisible) {
+    return null;
+  }
+
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
       <h2 className="text-xl font-bold text-slate-950">{title}</h2>
@@ -562,9 +596,10 @@ function ListingSectionSettingsCard({
   disabled,
   onChange,
   getFieldError,
+  isVisible = true,
 }) {
   return (
-    <SettingsCard title={title} description={description}>
+    <SettingsCard title={title} description={description} isVisible={isVisible}>
       <div className="grid gap-5">
         <TextInput
           id={`settings-${fieldName}-eyebrow`}
@@ -644,6 +679,9 @@ function ListingSectionSettingsCard({
 function SiteSettingsForm({
   initialValues = defaultFormValues,
   onSubmit,
+  activePageKey = "all",
+  cancelPath = "/admin/dashboard",
+  cancelLabel = "Cancel",
   submitLabel = "Save Site Settings",
 }) {
   const [formValues, setFormValues] = useState(() =>
@@ -862,6 +900,10 @@ function SiteSettingsForm({
     ...localErrors,
   };
 
+  function isPanelActive(panelKey) {
+    return activePageKey === "all" || activePageKey === panelKey;
+  }
+
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-8">
       {submitError && (
@@ -874,6 +916,7 @@ function SiteSettingsForm({
       )}
 
       <SettingsCard
+        isVisible={isPanelActive("brand")}
         title="Brand Identity"
         description="Manage the main website name, short logo text, tagline and brand images."
       >
@@ -944,6 +987,7 @@ function SiteSettingsForm({
       </SettingsCard>
 
       <SettingsCard
+        isVisible={isPanelActive("owner")}
         title="Owner Profile"
         description="Manage the portfolio owner information shown in the Hero and About sections."
       >
@@ -1015,6 +1059,7 @@ function SiteSettingsForm({
       </SettingsCard>
 
       <SettingsCard
+        isVisible={isPanelActive("hero")}
         title="Hero Section"
         description="Control the main heading, introduction and call-to-action buttons."
       >
@@ -1126,6 +1171,7 @@ function SiteSettingsForm({
       </SettingsCard>
 
       <SettingsCard
+        isVisible={isPanelActive("about")}
         title="About Section"
         description="Manage the About heading, description and skill or business highlights."
       >
@@ -1177,6 +1223,18 @@ function SiteSettingsForm({
       </SettingsCard>
 
       <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Statistics Section Content"
+        description="Manage the heading, description and call-to-action displayed with your public portfolio statistics."
+        fieldName="statisticsSection"
+        values={formValues.statisticsSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
         title="Services Section Content"
         description="Manage the heading, description and call-to-action displayed above your public services."
         fieldName="servicesSection"
@@ -1187,6 +1245,7 @@ function SiteSettingsForm({
       />
 
       <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
         title="Projects Section Content"
         description="Manage the heading, description and call-to-action displayed above your public projects."
         fieldName="projectsSection"
@@ -1197,6 +1256,7 @@ function SiteSettingsForm({
       />
 
       <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
         title="Companies Section Content"
         description="Manage the heading, description and call-to-action displayed above your companies and brands."
         fieldName="companiesSection"
@@ -1207,6 +1267,7 @@ function SiteSettingsForm({
       />
 
       <SettingsCard
+        isVisible={isPanelActive("contact")}
         title="Contact Section Content"
         description="Manage the public Contact section heading and project-enquiry card content."
       >
@@ -1302,6 +1363,7 @@ function SiteSettingsForm({
       </SettingsCard>
 
       <SettingsCard
+        isVisible={isPanelActive("contact")}
         title="Contact Information"
         description="Manage the public email, phone, WhatsApp, location and availability message."
       >
@@ -1373,43 +1435,48 @@ function SiteSettingsForm({
         </div>
       </SettingsCard>
 
-      <PlatformSettingsEditor
-        title="Social Platforms"
-        description="Manage social media profiles displayed in the Contact section and website Footer."
-        fieldName="socialPlatforms"
-        platforms={formValues.socialPlatforms}
-        fieldErrors={combinedFieldErrors}
-        disabled={isSubmitting}
-        onChange={(nextPlatforms) =>
-          handlePlatformChange("socialPlatforms", nextPlatforms)
-        }
-      />
+      {isPanelActive("platforms") && (
+        <>
+          <PlatformSettingsEditor
+            title="Social Platforms"
+            description="Manage social media profiles displayed in the Contact section and website Footer."
+            fieldName="socialPlatforms"
+            platforms={formValues.socialPlatforms}
+            fieldErrors={combinedFieldErrors}
+            disabled={isSubmitting}
+            onChange={(nextPlatforms) =>
+              handlePlatformChange("socialPlatforms", nextPlatforms)
+            }
+          />
 
-      <PlatformSettingsEditor
-        title="Developer Platforms"
-        description="Manage coding and developer profile links such as GitHub, GitLab, StackBlitz and CodePen."
-        fieldName="developerPlatforms"
-        platforms={formValues.developerPlatforms}
-        fieldErrors={combinedFieldErrors}
-        disabled={isSubmitting}
-        onChange={(nextPlatforms) =>
-          handlePlatformChange("developerPlatforms", nextPlatforms)
-        }
-      />
+          <PlatformSettingsEditor
+            title="Developer Platforms"
+            description="Manage coding and developer profile links such as GitHub, GitLab, StackBlitz and CodePen."
+            fieldName="developerPlatforms"
+            platforms={formValues.developerPlatforms}
+            fieldErrors={combinedFieldErrors}
+            disabled={isSubmitting}
+            onChange={(nextPlatforms) =>
+              handlePlatformChange("developerPlatforms", nextPlatforms)
+            }
+          />
 
-      <PlatformSettingsEditor
-        title="Freelancer Platforms"
-        description="Manage public freelancing profiles such as Upwork, Fiverr, Freelancer, PeoplePerHour and Contra."
-        fieldName="freelancerPlatforms"
-        platforms={formValues.freelancerPlatforms}
-        fieldErrors={combinedFieldErrors}
-        disabled={isSubmitting}
-        onChange={(nextPlatforms) =>
-          handlePlatformChange("freelancerPlatforms", nextPlatforms)
-        }
-      />
+          <PlatformSettingsEditor
+            title="Freelancer Platforms"
+            description="Manage public freelancing profiles such as Upwork, Fiverr, Freelancer, PeoplePerHour and Contra."
+            fieldName="freelancerPlatforms"
+            platforms={formValues.freelancerPlatforms}
+            fieldErrors={combinedFieldErrors}
+            disabled={isSubmitting}
+            onChange={(nextPlatforms) =>
+              handlePlatformChange("freelancerPlatforms", nextPlatforms)
+            }
+          />
+        </>
+      )}
 
       <SettingsCard
+        isVisible={isPanelActive("footer")}
         title="Footer Content"
         description="Manage the Footer introduction, column headings, project button, legal links and copyright text."
       >
@@ -1534,6 +1601,7 @@ function SiteSettingsForm({
       </SettingsCard>
 
       <SettingsCard
+        isVisible={isPanelActive("seo")}
         title="SEO Settings"
         description="Control search-engine metadata and the social-sharing preview image."
       >
@@ -1591,19 +1659,47 @@ function SiteSettingsForm({
       </SettingsCard>
 
       <SettingsCard
-        title="Homepage Sections"
-        description="Show, hide and reorder the main public website sections."
+        isVisible={isPanelActive("navigation")}
+        title="Sections, Navbar & Public Pages"
+        description="Control homepage sections, navbar menu items and dedicated public pages independently."
       >
         <FieldError message={getFieldError("sections")} />
 
-        <div className="space-y-4">
-          {formValues.sections.map((section, index) => (
-            <div
-              key={section.key}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
-            >
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-end">
-                <div className="grid flex-1 gap-5 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_9rem]">
+        <div className="space-y-5">
+          {formValues.sections.map((section, index) => {
+            const hasDedicatedPage = dedicatedPageSectionKeys.has(section.key);
+
+            return (
+              <div
+                key={section.key}
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="break-words text-base font-bold text-slate-950">
+                      {section.label || section.key}
+                    </p>
+
+                    <p className="mt-1 break-words text-xs leading-5 text-slate-500">
+                      Section key:{" "}
+                      <span className="font-semibold text-slate-700">
+                        {section.key}
+                      </span>
+                    </p>
+                  </div>
+
+                  <span
+                    className={`inline-flex w-fit shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
+                      hasDedicatedPage
+                        ? "bg-brand-100 text-brand-700"
+                        : "bg-slate-200 text-slate-600"
+                    }`}
+                  >
+                    {hasDedicatedPage ? "Section + Page" : "Homepage Section"}
+                  </span>
+                </div>
+
+                <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_9rem_9rem]">
                   <TextInput
                     id={`settings-section-key-${index}`}
                     name={`sections.${index}.key`}
@@ -1620,7 +1716,7 @@ function SiteSettingsForm({
                       htmlFor={`settings-section-label-${index}`}
                       className="text-sm font-semibold text-slate-700"
                     >
-                      Section label
+                      Navbar menu label
                     </label>
 
                     <input
@@ -1632,6 +1728,7 @@ function SiteSettingsForm({
                       }
                       disabled={isSubmitting}
                       maxLength={100}
+                      placeholder="Statistics"
                       className={inputClasses}
                     />
 
@@ -1645,7 +1742,7 @@ function SiteSettingsForm({
                       htmlFor={`settings-section-order-${index}`}
                       className="text-sm font-semibold text-slate-700"
                     >
-                      Display order
+                      Homepage order
                     </label>
 
                     <input
@@ -1665,13 +1762,45 @@ function SiteSettingsForm({
                       message={getFieldError(`sections.${index}.order`)}
                     />
                   </div>
+
+                  <div>
+                    <label
+                      htmlFor={`settings-navigation-order-${index}`}
+                      className="text-sm font-semibold text-slate-700"
+                    >
+                      Navbar order
+                    </label>
+
+                    <input
+                      id={`settings-navigation-order-${index}`}
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={section.navigationOrder}
+                      onChange={(event) =>
+                        handleSectionChange(
+                          index,
+                          "navigationOrder",
+                          event.target.value,
+                        )
+                      }
+                      disabled={isSubmitting}
+                      className={inputClasses}
+                    />
+
+                    <FieldError
+                      message={getFieldError(
+                        `sections.${index}.navigationOrder`,
+                      )}
+                    />
+                  </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <label className="inline-flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4">
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
                     <input
                       type="checkbox"
-                      checked={section.isVisible}
+                      checked={section.isVisible !== false}
                       onChange={(event) =>
                         handleSectionChange(
                           index,
@@ -1680,41 +1809,123 @@ function SiteSettingsForm({
                         )
                       }
                       disabled={isSubmitting}
-                      className="size-4 accent-brand-600"
+                      className="size-4 shrink-0 accent-brand-600"
                     />
 
-                    <span className="text-sm font-semibold text-slate-700">
-                      Visible
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-slate-800">
+                        Show homepage section
+                      </span>
+
+                      <span className="mt-1 block text-xs leading-5 text-slate-500">
+                        Display this section on the homepage.
+                      </span>
                     </span>
                   </label>
 
-                  <button
-                    type="button"
-                    onClick={() => handleMoveSection(index, -1)}
-                    disabled={isSubmitting || index === 0}
-                    className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    Move Up
-                  </button>
+                  <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={section.isNavigationVisible !== false}
+                      onChange={(event) =>
+                        handleSectionChange(
+                          index,
+                          "isNavigationVisible",
+                          event.target.checked,
+                        )
+                      }
+                      disabled={isSubmitting}
+                      className="size-4 shrink-0 accent-brand-600"
+                    />
 
-                  <button
-                    type="button"
-                    onClick={() => handleMoveSection(index, 1)}
-                    disabled={
-                      isSubmitting || index === formValues.sections.length - 1
-                    }
-                    className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    Move Down
-                  </button>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-slate-800">
+                        Show in navbar
+                      </span>
+
+                      <span className="mt-1 block text-xs leading-5 text-slate-500">
+                        Display this menu item in desktop and mobile navigation.
+                      </span>
+                    </span>
+                  </label>
+
+                  {hasDedicatedPage ? (
+                    <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={section.isPageVisible !== false}
+                        onChange={(event) =>
+                          handleSectionChange(
+                            index,
+                            "isPageVisible",
+                            event.target.checked,
+                          )
+                        }
+                        disabled={isSubmitting}
+                        className="size-4 shrink-0 accent-brand-600"
+                      />
+
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-slate-800">
+                          Enable public page
+                        </span>
+
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          Allow visitors to open the dedicated public page.
+                        </span>
+                      </span>
+                    </label>
+                  ) : (
+                    <div className="flex min-h-16 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-4 py-3">
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-slate-600">
+                          No dedicated page
+                        </span>
+
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          This item is available as a homepage section only.
+                        </span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs leading-5 text-slate-500">
+                    Move buttons change only the homepage section order. Navbar
+                    order is controlled separately above.
+                  </p>
+
+                  <div className="flex shrink-0 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveSection(index, -1)}
+                      disabled={isSubmitting || index === 0}
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Move Up
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleMoveSection(index, 1)}
+                      disabled={
+                        isSubmitting || index === formValues.sections.length - 1
+                      }
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Move Down
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </SettingsCard>
 
       <SettingsCard
+        isVisible={isPanelActive("publication")}
         title="Publication Status"
         description="Control whether the main site settings are marked as published."
       >
@@ -1744,10 +1955,10 @@ function SiteSettingsForm({
 
       <div className="flex flex-col-reverse gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-end">
         <Link
-          to="/admin/dashboard"
+          to={cancelPath}
           className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600"
         >
-          Cancel
+          {cancelLabel}
         </Link>
 
         <button

@@ -5,6 +5,7 @@ import ContactSection from "../components/sections/ContactSection";
 import HeroSection from "../components/sections/HeroSection";
 import ProjectsSection from "../components/sections/ProjectsSection";
 import ServicesSection from "../components/sections/ServicesSection";
+import StatisticsSection from "../components/sections/StatisticsSection";
 import AboutSection from "../components/sections/AboutSection";
 import Footer from "../components/layout/Footer";
 import Navbar from "../components/layout/Navbar";
@@ -15,6 +16,7 @@ import useSiteSettings from "../hooks/useSiteSettings";
 const sectionComponents = {
   hero: HeroSection,
   about: AboutSection,
+  statistics: StatisticsSection,
   services: ServicesSection,
   projects: ProjectsSection,
   companies: CompaniesSection,

@@ -12,12 +12,14 @@ import adminCompanyRoutes from "./routes/adminCompany.routes.js";
 import adminContactMessageRoutes from "./routes/adminContactMessage.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
+import adminStatisticRoutes from "./routes/adminStatistic.routes.js";
 import adminSiteSettingsRoutes from "./routes/adminSiteSettings.routes.js";
 import companyRoutes from "./routes/company.routes.js";
 import contactMessageRoutes from "./routes/contactMessage.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
+import statisticRoutes from "./routes/statistic.routes.js";
 import sitemapRoutes from "./routes/sitemap.routes.js";
 import siteSettingsRoutes from "./routes/siteSettings.routes.js";
 
@@ -76,6 +78,7 @@ app.use("/api/health", healthRoutes);
 app.use("/api/site-settings", siteSettingsRoutes);
 
 app.use("/api/services", serviceRoutes);
+app.use("/api/statistics", statisticRoutes);
 
 app.use("/api/projects", projectRoutes);
 
@@ -84,6 +87,8 @@ app.use("/api/companies", companyRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
 
 app.use("/api/admin/services", adminServiceRoutes);
+
+app.use("/api/admin/statistics", adminStatisticRoutes);
 
 app.use("/api/admin/projects", adminProjectRoutes);
 
@@ -114,17 +119,19 @@ if (isProduction) {
     }),
   );
 
-  /*
-   * React Router deep routes:
-   * /projects
-   * /projects/:slug
-   * /companies
-   * /companies/:slug
-   * /admin/*
-   *
-   * Express 5 ke liye /{*splat}
-   * wildcard syntax use kiya gaya hai.
-   */
+ /*
+ * React Router deep routes:
+ * /services
+ * /statistics
+ * /projects
+ * /projects/:slug
+ * /companies
+ * /companies/:slug
+ * /admin/*
+ *
+ * Express 5 ke liye /{*splat}
+ * wildcard syntax use kiya gaya hai.
+ */
   app.get("/{*splat}", (req, res, next) => {
     const isApiRequest = req.path === "/api" || req.path.startsWith("/api/");
 

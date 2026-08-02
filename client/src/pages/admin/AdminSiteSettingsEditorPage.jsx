@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
+import { Link, Navigate, useNavigate, useParams } from "react-router";
 
-import { Link, useNavigate } from "react-router";
-
-import SiteSettingsOverview from "../../components/admin/site-settings/SiteSettingsOverview";
+import SiteSettingsForm from "../../components/admin/site-settings/SiteSettingsForm";
+import { getSiteSettingsPage } from "../../config/siteSettingsPages";
 import useAdminAuth from "../../hooks/useAdminAuth";
+import useSiteSettings from "../../hooks/useSiteSettings";
 
-import { fetchAdminSiteSettings } from "../../services/adminSiteSettingsApi";
+import {
+  fetchAdminSiteSettings,
+  updateAdminSiteSettings,
+} from "../../services/adminSiteSettingsApi";
 
 function formatDateTime(value) {
   if (!value) {
@@ -27,10 +31,16 @@ function formatDateTime(value) {
   }).format(date);
 }
 
-function AdminSiteSettingsPage() {
+function AdminSiteSettingsEditorPage() {
   const navigate = useNavigate();
 
+  const { pageKey = "" } = useParams();
+
+  const pageDefinition = getSiteSettingsPage(pageKey);
+
   const { accessToken, admin, logout } = useAdminAuth();
+
+  const { refreshSettings } = useSiteSettings();
 
   const [settings, setSettings] = useState(null);
 
@@ -38,10 +48,14 @@ function AdminSiteSettingsPage() {
 
   const [loadError, setLoadError] = useState("");
 
+  const [successMessage, setSuccessMessage] = useState("");
+
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const currentPagePath = pageDefinition?.path || "/admin/site-settings";
+
   useEffect(() => {
-    if (!accessToken) {
+    if (!accessToken || !pageDefinition) {
       return undefined;
     }
 
@@ -54,6 +68,7 @@ function AdminSiteSettingsPage() {
         });
 
         setSettings(loadedSettings);
+
         setLoadError("");
       } catch (requestError) {
         if (requestError?.name === "AbortError") {
@@ -68,7 +83,7 @@ function AdminSiteSettingsPage() {
 
             state: {
               from: {
-                pathname: "/admin/site-settings",
+                pathname: currentPagePath,
               },
             },
           });
@@ -76,7 +91,7 @@ function AdminSiteSettingsPage() {
           return;
         }
 
-        console.error("Admin site settings loading failed:", requestError);
+        console.error(`${pageDefinition.title} loading failed:`, requestError);
 
         setSettings(null);
 
@@ -97,13 +112,64 @@ function AdminSiteSettingsPage() {
     return () => {
       controller.abort();
     };
-  }, [accessToken, logout, navigate, refreshKey]);
+  }, [
+    accessToken,
+    currentPagePath,
+    logout,
+    navigate,
+    pageDefinition,
+    refreshKey,
+  ]);
+
+  if (!pageDefinition) {
+    return <Navigate to="/admin/site-settings" replace />;
+  }
 
   function handleRetry() {
     setIsLoading(true);
+
     setLoadError("");
 
+    setSuccessMessage("");
+
     setRefreshKey((currentKey) => currentKey + 1);
+  }
+
+  async function handleSubmit(settingsData) {
+    try {
+      setSuccessMessage("");
+
+      const response = await updateAdminSiteSettings(accessToken, settingsData);
+
+      setSettings(response.settings);
+
+      setSuccessMessage(
+        response.message || `${pageDefinition.title} updated successfully.`,
+      );
+
+      await refreshSettings();
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    } catch (requestError) {
+      if (requestError?.status === 401) {
+        logout();
+
+        navigate("/admin/login", {
+          replace: true,
+
+          state: {
+            from: {
+              pathname: currentPagePath,
+            },
+          },
+        });
+      }
+
+      throw requestError;
+    }
   }
 
   function handleLogout() {
@@ -119,7 +185,7 @@ function AdminSiteSettingsPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
           <Link
-            to="/admin/dashboard"
+            to="/admin/site-settings"
             className="flex min-w-0 items-center gap-3"
           >
             <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-600 font-extrabold text-white">
@@ -132,7 +198,7 @@ function AdminSiteSettingsPage() {
               </p>
 
               <p className="truncate text-xs font-medium text-slate-500">
-                Site Settings
+                {pageDefinition.shortTitle} Settings
               </p>
             </div>
           </Link>
@@ -164,32 +230,30 @@ function AdminSiteSettingsPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
-          to="/admin/dashboard"
+          to="/admin/site-settings"
           className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-brand-600"
         >
           <span aria-hidden="true">←</span>
-          Dashboard
+          All Site Settings
         </Link>
 
         <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
               Website Management
             </p>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-              Site Settings
+            <h1 className="mt-3 break-words text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+              {pageDefinition.title}
             </h1>
 
-            <p className="mt-3 max-w-3xl leading-7 text-slate-600">
-              Open a settings category to manage only the website fields you
-              need. All categories remain connected to the same dynamic Site
-              Settings database record.
+            <p className="mt-3 max-w-3xl break-words leading-7 text-slate-600">
+              {pageDefinition.description}
             </p>
           </div>
 
           {settings && (
-            <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+            <div className="shrink-0 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
                 Last updated
               </p>
@@ -211,9 +275,24 @@ function AdminSiteSettingsPage() {
           )}
         </div>
 
+        {successMessage && (
+          <div
+            role="status"
+            className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5"
+          >
+            <p className="text-sm font-semibold leading-6 text-emerald-700">
+              {successMessage}
+            </p>
+
+            <p className="mt-2 text-sm leading-6 text-emerald-700">
+              Public portfolio settings have also been refreshed.
+            </p>
+          </div>
+        )}
+
         {isLoading && (
           <div className="mt-8 space-y-6">
-            {[1, 2, 3, 4].map((placeholder) => (
+            {[1, 2].map((placeholder) => (
               <div
                 key={placeholder}
                 className="h-72 animate-pulse rounded-3xl border border-slate-200 bg-white"
@@ -228,7 +307,7 @@ function AdminSiteSettingsPage() {
             className="mt-8 rounded-3xl border border-red-200 bg-red-50 p-7"
           >
             <h2 className="text-lg font-bold text-red-800">
-              Site settings could not be loaded
+              {pageDefinition.title} could not be loaded
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-red-700">{loadError}</p>
@@ -245,7 +324,15 @@ function AdminSiteSettingsPage() {
 
         {!isLoading && !loadError && settings && (
           <div className="mt-8">
-            <SiteSettingsOverview />
+            <SiteSettingsForm
+              key={`${settings.updatedAt || settings._id || "main"}-${pageDefinition.key}`}
+              initialValues={settings}
+              activePageKey={pageDefinition.key}
+              cancelPath="/admin/site-settings"
+              cancelLabel="Back to Settings"
+              onSubmit={handleSubmit}
+              submitLabel={`Save ${pageDefinition.shortTitle} Settings`}
+            />
           </div>
         )}
       </section>
@@ -253,4 +340,4 @@ function AdminSiteSettingsPage() {
   );
 }
 
-export default AdminSiteSettingsPage;
+export default AdminSiteSettingsEditorPage;

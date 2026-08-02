@@ -3,37 +3,64 @@ const homepageSectionDefinitions = [
     key: "hero",
     label: "Hero",
     isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
     order: 1,
+    navigationOrder: 1,
   },
   {
     key: "about",
     label: "About",
     isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
     order: 2,
+    navigationOrder: 2,
+  },
+  {
+    key: "statistics",
+    label: "Statistics",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 3,
+    navigationOrder: 3,
   },
   {
     key: "services",
     label: "Services",
     isVisible: true,
-    order: 3,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 4,
+    navigationOrder: 4,
   },
   {
     key: "projects",
     label: "Projects",
     isVisible: true,
-    order: 4,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 5,
+    navigationOrder: 5,
   },
   {
     key: "companies",
     label: "Companies",
     isVisible: true,
-    order: 5,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 6,
+    navigationOrder: 6,
   },
   {
     key: "contact",
     label: "Contact",
     isVisible: true,
-    order: 6,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 7,
+    navigationOrder: 7,
   },
 ];
 
@@ -47,19 +74,50 @@ function cleanSectionText(value) {
 
 function normalizeHomepageSection(section, index) {
   const key = cleanSectionText(section?.key).toLowerCase();
+
   const numericOrder = Number(section?.order);
+
+  const normalizedOrder =
+    Number.isFinite(numericOrder) && numericOrder >= 0
+      ? numericOrder
+      : index + 1;
+
+  const numericNavigationOrder = Number(section?.navigationOrder);
 
   return {
     key,
 
     label: cleanSectionText(section?.label),
 
+    /*
+     * Homepage section visibility.
+     */
     isVisible: section?.isVisible !== false,
 
-    order:
-      Number.isFinite(numericOrder) && numericOrder >= 0
-        ? numericOrder
-        : index + 1,
+    /*
+     * Desktop aur mobile Navbar visibility.
+     */
+    isNavigationVisible: section?.isNavigationVisible !== false,
+
+    /*
+     * Dedicated public page accessibility.
+     */
+    isPageVisible: section?.isPageVisible !== false,
+
+    /*
+     * Homepage section display order.
+     */
+    order: normalizedOrder,
+
+    /*
+     * Navbar ka independent order.
+     * Purane records mein field absent hone par
+     * homepage order fallback rahega.
+     */
+    navigationOrder:
+      Number.isFinite(numericNavigationOrder) && numericNavigationOrder >= 0
+        ? numericNavigationOrder
+        : normalizedOrder,
   };
 }
 
@@ -110,8 +168,7 @@ function mergeHomepageSections(value) {
       return (
         (defaultOrderBySectionKey[firstSection.key] ??
           Number.MAX_SAFE_INTEGER) -
-        (defaultOrderBySectionKey[secondSection.key] ??
-          Number.MAX_SAFE_INTEGER)
+        (defaultOrderBySectionKey[secondSection.key] ?? Number.MAX_SAFE_INTEGER)
       );
     },
   );

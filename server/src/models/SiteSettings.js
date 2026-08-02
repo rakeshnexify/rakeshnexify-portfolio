@@ -438,13 +438,51 @@ const sectionSchema = new mongoose.Schema(
       trim: true,
       maxlength: 100,
     },
+    /*
+     * Homepage par section visible hoga ya nahi.
+     */
     isVisible: {
       type: Boolean,
       default: true,
     },
+
+    /*
+     * Desktop aur mobile Navbar mein
+     * menu item visible hoga ya nahi.
+     */
+    isNavigationVisible: {
+      type: Boolean,
+      default: true,
+    },
+
+    /*
+     * Dedicated public page accessible
+     * hogi ya nahi.
+     *
+     * Hero, About aur Contact jaise
+     * section-only items mein ye field
+     * ignore ki jayegi.
+     */
+    isPageVisible: {
+      type: Boolean,
+      default: true,
+    },
+
+    /*
+     * Homepage section ka display order.
+     */
     order: {
       type: Number,
-      min: 0,
+      min: [0, "Section display order cannot be negative."],
+      default: 0,
+    },
+
+    /*
+     * Navbar menu ka independent order.
+     */
+    navigationOrder: {
+      type: Number,
+      min: [0, "Navigation order cannot be negative."],
       default: 0,
     },
   },
@@ -641,6 +679,11 @@ const siteSettingsSchema = new mongoose.Schema(
 
     about: {
       type: aboutSchema,
+      default: () => ({}),
+    },
+
+    statisticsSection: {
+      type: listingSectionContentSchema,
       default: () => ({}),
     },
 

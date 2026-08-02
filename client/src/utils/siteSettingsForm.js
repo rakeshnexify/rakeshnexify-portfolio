@@ -229,17 +229,47 @@ function normalizeContactSection(section = {}) {
 function normalizeSection(section, index) {
   const numericOrder = Number(section?.order);
 
+  const normalizedOrder =
+    Number.isFinite(numericOrder) && numericOrder >= 0
+      ? numericOrder
+      : index + 1;
+
+  const numericNavigationOrder = Number(section?.navigationOrder);
+
   return {
     key: cleanString(section?.key).toLowerCase(),
 
     label: cleanString(section?.label),
 
+    /*
+     * Homepage section visibility.
+     */
     isVisible: section?.isVisible !== false,
 
-    order:
-      Number.isFinite(numericOrder) && numericOrder >= 0
-        ? numericOrder
-        : index + 1,
+    /*
+     * Desktop aur mobile Navbar visibility.
+     */
+    isNavigationVisible: section?.isNavigationVisible !== false,
+
+    /*
+     * Dedicated public page accessibility.
+     */
+    isPageVisible: section?.isPageVisible !== false,
+
+    /*
+     * Homepage section order.
+     */
+    order: normalizedOrder,
+
+    /*
+     * Navbar ka independent order.
+     * Purane records mein field na hone par
+     * homepage order fallback rahega.
+     */
+    navigationOrder:
+      Number.isFinite(numericNavigationOrder) && numericNavigationOrder >= 0
+        ? numericNavigationOrder
+        : normalizedOrder,
   };
 }
 
@@ -421,6 +451,8 @@ function createSiteSettingsFormValues(settings = {}) {
           : createMultilineValue(about.highlights),
     },
 
+    statisticsSection: normalizeListingSection(settings?.statisticsSection),
+
     servicesSection: normalizeListingSection(settings?.servicesSection),
 
     projectsSection: normalizeListingSection(settings?.projectsSection),
@@ -572,6 +604,8 @@ function createSiteSettingsPayload(formValues = {}) {
       highlights: createArrayFromLines(values.about.highlightsText),
     },
 
+    statisticsSection: createListingSectionPayload(values.statisticsSection),
+
     servicesSection: createListingSectionPayload(values.servicesSection),
 
     projectsSection: createListingSectionPayload(values.projectsSection),
@@ -644,11 +678,35 @@ function createSiteSettingsPayload(formValues = {}) {
 
     sections: normalizeSections(values.sections).map((section, index) => ({
       key: section.key,
+
       label: section.label,
 
+      /*
+       * Homepage section visibility.
+       */
       isVisible: section.isVisible,
 
+      /*
+       * Navbar menu visibility.
+       */
+      isNavigationVisible: section.isNavigationVisible,
+
+      /*
+       * Dedicated page accessibility.
+       */
+      isPageVisible: section.isPageVisible,
+
+      /*
+       * Current array order homepage section
+       * order ke roop mein save hoga.
+       */
       order: index + 1,
+
+      /*
+       * Navbar order homepage order se
+       * independently preserve hoga.
+       */
+      navigationOrder: section.navigationOrder,
     })),
 
     isPublished: values.isPublished,

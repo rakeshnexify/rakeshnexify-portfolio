@@ -1,6 +1,23 @@
 const SITE_URL = "https://rakeshnexify.com";
 
-const staticPaths = ["/", "/services", "/projects", "/companies"];
+const publicPageDefinitions = [
+  {
+    key: "statistics",
+    pathname: "/statistics",
+  },
+  {
+    key: "services",
+    pathname: "/services",
+  },
+  {
+    key: "projects",
+    pathname: "/projects",
+  },
+  {
+    key: "companies",
+    pathname: "/companies",
+  },
+];
 
 function removeTrailingSlash(value) {
   return String(value || "").replace(/\/+$/, "");
@@ -17,6 +34,49 @@ function escapeXml(value) {
 
 function normalizeSlug(value) {
   return String(value || "").trim();
+}
+
+function normalizeSectionKey(value) {
+  const key = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  return key === "home" ? "hero" : key;
+}
+
+function findSectionByKey(sections, requiredKey) {
+  if (!Array.isArray(sections)) {
+    return null;
+  }
+
+  const normalizedRequiredKey = normalizeSectionKey(requiredKey);
+
+  return (
+    sections.find(
+      (section) => normalizeSectionKey(section?.key) === normalizedRequiredKey,
+    ) || null
+  );
+}
+
+function isPublicPageVisible(sections, sectionKey) {
+  const section = findSectionByKey(sections, sectionKey);
+
+  /*
+   * Purane database records ya missing section
+   * backward compatibility ke liye visible rahenge.
+   */
+  return section?.isPageVisible !== false;
+}
+
+function createStaticPaths(sections) {
+  const enabledPagePaths = publicPageDefinitions
+    .filter((page) => isPublicPageVisible(sections, page.key))
+    .map((page) => page.pathname);
+
+  /*
+   * Homepage sitemap mein hamesha available rahega.
+   */
+  return ["/", ...enabledPagePaths];
 }
 
 function createAbsoluteUrl(pathname) {
@@ -113,20 +173,30 @@ function removeDuplicateEntries(entries) {
   return [...entriesByPath.values()];
 }
 
-export function createSitemapXml({ projects = [], companies = [] } = {}) {
+export function createSitemapXml({
+  projects = [],
+  companies = [],
+  sections = [],
+} = {}) {
+  const staticPaths = createStaticPaths(sections);
+
   const staticEntries = staticPaths.map((pathname) => ({
     pathname,
   }));
 
-  const projectEntries = createDynamicEntries({
-    items: projects,
-    basePath: "/projects",
-  });
+  const projectEntries = isPublicPageVisible(sections, "projects")
+    ? createDynamicEntries({
+        items: projects,
+        basePath: "/projects",
+      })
+    : [];
 
-  const companyEntries = createDynamicEntries({
-    items: companies,
-    basePath: "/companies",
-  });
+  const companyEntries = isPublicPageVisible(sections, "companies")
+    ? createDynamicEntries({
+        items: companies,
+        basePath: "/companies",
+      })
+    : [];
 
   const sitemapEntries = removeDuplicateEntries([
     ...staticEntries,

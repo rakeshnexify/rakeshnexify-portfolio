@@ -12,37 +12,64 @@ const defaultNavigationSections = [
     key: "hero",
     label: "Home",
     isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
     order: 1,
+    navigationOrder: 1,
   },
   {
     key: "about",
     label: "About",
     isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
     order: 2,
+    navigationOrder: 2,
+  },
+  {
+    key: "statistics",
+    label: "Statistics",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 3,
+    navigationOrder: 3,
   },
   {
     key: "services",
     label: "Services",
     isVisible: true,
-    order: 3,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 4,
+    navigationOrder: 4,
   },
   {
     key: "projects",
     label: "Projects",
     isVisible: true,
-    order: 4,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 5,
+    navigationOrder: 5,
   },
   {
     key: "companies",
     label: "Companies",
     isVisible: true,
-    order: 5,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 6,
+    navigationOrder: 6,
   },
   {
     key: "contact",
     label: "Contact",
     isVisible: true,
-    order: 6,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 7,
+    navigationOrder: 7,
   },
 ];
 
@@ -54,6 +81,10 @@ const sectionDestinations = {
   about: {
     type: "section",
     target: "about",
+  },
+  statistics: {
+    type: "page",
+    target: "/statistics",
   },
   services: {
     type: "page",
@@ -114,18 +145,66 @@ function createVisibleSections(settingsSections, allowDefaultFallback = true) {
       return;
     }
 
-    const numericOrder = Number(section?.order);
+    const destination = sectionDestinations[key];
 
-    const fallbackOrder = defaultSectionByKey[key]?.order ?? index + 1;
+    if (!destination) {
+      return;
+    }
+
+    const numericHomepageOrder = Number(section?.order);
+
+    const fallbackHomepageOrder = defaultSectionByKey[key]?.order ?? index + 1;
+
+    const homepageOrder = Number.isFinite(numericHomepageOrder)
+      ? numericHomepageOrder
+      : fallbackHomepageOrder;
+
+    const numericNavigationOrder = Number(section?.navigationOrder);
+
+    const fallbackNavigationOrder =
+      defaultSectionByKey[key]?.navigationOrder ?? homepageOrder;
+
+    const navigationOrder = Number.isFinite(numericNavigationOrder)
+      ? numericNavigationOrder
+      : fallbackNavigationOrder;
+
+    const isHomepageVisible = section?.isVisible !== false;
+
+    const isNavigationVisible = section?.isNavigationVisible !== false;
+
+    const isPageVisible = section?.isPageVisible !== false;
+
+    /*
+     * Hero/Home Navbar item homepage Hero
+     * hidden hone par bhi available reh sakta hai.
+     *
+     * About aur Contact jaise anchor items
+     * homepage section hidden hone par Navbar
+     * se bhi remove honge, taaki broken link na bane.
+     *
+     * Dedicated page items tabhi Navbar mein
+     * dikhenge jab public page enabled ho.
+     */
+    const isDestinationAvailable =
+      key === "hero" ||
+      (destination.type === "page" ? isPageVisible : isHomepageVisible);
 
     sectionsByKey.set(key, {
       key,
 
       label: getSafeSectionLabel(key, section?.label),
 
-      isVisible: section?.isVisible !== false,
+      isHomepageVisible,
 
-      order: Number.isFinite(numericOrder) ? numericOrder : fallbackOrder,
+      isNavigationVisible,
+
+      isPageVisible,
+
+      homepageOrder,
+
+      navigationOrder,
+
+      isDestinationAvailable,
     });
   });
 
@@ -134,17 +213,22 @@ function createVisibleSections(settingsSections, allowDefaultFallback = true) {
   }
 
   return [...sectionsByKey.values()]
-    .filter((section) => section.isVisible !== false)
+    .filter(
+      (section) =>
+        section.isNavigationVisible !== false &&
+        section.isDestinationAvailable !== false,
+    )
     .sort((firstSection, secondSection) => {
-      const orderDifference = firstSection.order - secondSection.order;
+      const orderDifference =
+        firstSection.navigationOrder - secondSection.navigationOrder;
 
       if (orderDifference !== 0) {
         return orderDifference;
       }
 
       return (
-        (defaultSectionByKey[firstSection.key]?.order || 0) -
-        (defaultSectionByKey[secondSection.key]?.order || 0)
+        (defaultSectionByKey[firstSection.key]?.navigationOrder || 0) -
+        (defaultSectionByKey[secondSection.key]?.navigationOrder || 0)
       );
     });
 }
@@ -450,7 +534,7 @@ function Navbar() {
                       : ""
                   }
                 >
-                  Contact Me
+                  {contactSection.label}
                 </Button>
               </div>
             )}
@@ -532,7 +616,7 @@ function Navbar() {
                               goToHomepageSection("contact", "contact")
                             }
                           >
-                            Contact Me
+                            {contactSection.label}
                           </Button>
                         )}
                       </div>

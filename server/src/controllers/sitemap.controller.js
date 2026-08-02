@@ -1,10 +1,13 @@
 import Company from "../models/Company.js";
 import Project from "../models/Project.js";
+import SiteSettings from "../models/SiteSettings.js";
 import createSitemapXml from "../utils/createSitemapXml.js";
+
+const MAIN_SITE_KEY = "main";
 
 async function getSitemapXml(req, res, next) {
   try {
-    const [projects, companies] = await Promise.all([
+    const [projects, companies, siteSettings] = await Promise.all([
       Project.find({
         isVisible: true,
       })
@@ -22,11 +25,23 @@ async function getSitemapXml(req, res, next) {
           updatedAt: 1,
         })
         .lean(),
+
+      SiteSettings.findOne({
+        siteKey: MAIN_SITE_KEY,
+      })
+        .select({
+          sections: 1,
+        })
+        .lean(),
     ]);
 
     const sitemapXml = createSitemapXml({
       projects,
       companies,
+
+      sections: Array.isArray(siteSettings?.sections)
+        ? siteSettings.sections
+        : [],
     });
 
     res.setHeader("Content-Type", "application/xml; charset=utf-8");

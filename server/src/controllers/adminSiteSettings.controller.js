@@ -13,6 +13,7 @@ const platformGroupFields = [
 ];
 
 const listingSectionFields = [
+  "statisticsSection",
   "servicesSection",
   "projectsSection",
   "companiesSection",
@@ -440,17 +441,45 @@ function cleanSections(value) {
       });
     }
 
+    const sectionOrder = hasOwnProperty(section, "order")
+      ? cleanOrder(section.order, `${fieldPrefix}.order`)
+      : index + 1;
+
+    const navigationOrder = hasOwnProperty(section, "navigationOrder")
+      ? cleanOrder(section.navigationOrder, `${fieldPrefix}.navigationOrder`)
+      : sectionOrder;
+
     return {
       key,
       label,
 
+      /*
+       * Homepage section visibility.
+       */
       isVisible: hasOwnProperty(section, "isVisible")
         ? cleanBoolean(section.isVisible, `${fieldPrefix}.isVisible`)
         : true,
 
-      order: hasOwnProperty(section, "order")
-        ? cleanOrder(section.order, `${fieldPrefix}.order`)
-        : index + 1,
+      /*
+       * Desktop aur mobile Navbar visibility.
+       */
+      isNavigationVisible: hasOwnProperty(section, "isNavigationVisible")
+        ? cleanBoolean(
+            section.isNavigationVisible,
+            `${fieldPrefix}.isNavigationVisible`,
+          )
+        : true,
+
+      /*
+       * Dedicated public page accessibility.
+       */
+      isPageVisible: hasOwnProperty(section, "isPageVisible")
+        ? cleanBoolean(section.isPageVisible, `${fieldPrefix}.isPageVisible`)
+        : true,
+
+      order: sectionOrder,
+
+      navigationOrder,
     };
   });
 }
