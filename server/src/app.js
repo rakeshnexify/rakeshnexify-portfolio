@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+import corsOptions from "./config/cors.js";
+import helmetOptions from "./config/helmet.js";
 
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import adminCompanyRoutes from "./routes/adminCompany.routes.js";
@@ -23,25 +25,15 @@ const app = express();
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-
 const currentFilePath = fileURLToPath(import.meta.url);
 
 const currentDirectoryPath = path.dirname(currentFilePath);
 
 const clientDistPath = path.resolve(currentDirectoryPath, "../../client/dist");
 
-app.use(helmet());
+app.use(helmet(helmetOptions));
 
-app.use(
-  cors({
-    origin: clientUrl,
-
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
-);
+app.use(cors(corsOptions));
 
 app.use(
   express.json({

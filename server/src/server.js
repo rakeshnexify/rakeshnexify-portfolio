@@ -2,8 +2,7 @@ import "dotenv/config";
 
 import app from "./app.js";
 import connectDatabase, { disconnectDatabase } from "./config/database.js";
-
-const PORT = process.env.PORT || 5000;
+import validateServerEnvironment from "./config/environment.js";
 
 const SHUTDOWN_TIMEOUT_MS = 10000;
 
@@ -80,10 +79,12 @@ async function shutdownServer({ reason, exitCode = 0 }) {
 
 async function startServer() {
   try {
+    const { port } = validateServerEnvironment();
+
     await connectDatabase();
 
-    httpServer = app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
+    httpServer = app.listen(port, () => {
+      console.log(`Server running at http://localhost:${port}`);
     });
 
     httpServer.on("error", (error) => {
