@@ -1,6 +1,6 @@
 ﻿# Bugs and Known Issues
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Purpose
 
@@ -28,6 +28,7 @@ None currently known.
 2. Client dependency audit vulnerability
 3. Site Settings default tagline encoding issue
 4. Limited automated test coverage
+5. Git line-ending warnings
 
 ## Resolved Recent Issues
 
@@ -37,6 +38,7 @@ None currently known.
 - Independent page visibility behavior
 - Dynamic sitemap visibility behavior
 - Modular Site Settings editor navigation
+- Team Admin frontend workflow validation
 
 ---
 
@@ -54,13 +56,19 @@ Vite reports:
 
 `Some chunks are larger than 500 kB after minification.`
 
-Latest observed main JavaScript bundle:
+Latest verified main JavaScript bundle:
 
-Approximately `703 kB` before gzip.
+`757.00 kB`
 
-Latest observed gzip size:
+Latest verified gzip size:
 
-Approximately `161 kB`.
+`171.07 kB`
+
+Latest verified build details:
+
+- Vite: `8.1.5`
+- Modules transformed: `117`
+- Build result: successful
 
 ## Current Impact
 
@@ -97,7 +105,7 @@ Type: Dependency security investigation
 
 ## Current Observation
 
-Running client dependency installation reported:
+A previous client dependency installation reported:
 
 `1 high severity vulnerability`
 
@@ -148,15 +156,15 @@ Type: Text encoding
 
 ## Current Default Text
 
-The model output currently displayed:
+The model output was previously observed as:
 
-`Developer Â· Creator Â· Entrepreneur`
+`Developer · Creator · Entrepreneur`
 
 ## Expected Text
 
-Likely intended value:
+The intended separator must be confirmed directly in the source file and browser output.
 
-`Developer · Creator · Entrepreneur`
+The earlier documentation contained corrupted replacement characters, so it must not be treated as proof of the intended value.
 
 ## Possible Cause
 
@@ -170,7 +178,7 @@ Possible causes include:
 
 ## Current Impact
 
-The incorrect characters may appear when the database uses the model default.
+Incorrect characters may appear when the database uses the model default.
 
 Existing MongoDB content may already contain either the correct or incorrect value.
 
@@ -203,7 +211,7 @@ The project currently relies mainly on:
 - Vite production build
 - Node syntax checks
 - Manual browser testing
-- API testing through development usage
+- Manual API runtime testing
 - Git whitespace validation
 
 ## Missing Coverage
@@ -219,7 +227,10 @@ Automated tests are still needed for:
 - Contact-message rate limiting
 - Form utilities
 - Site Settings merging
-- Team module after implementation
+- Team backend APIs
+- Team Admin form utilities
+- Team Admin authorization
+- Team public frontend after implementation
 
 ## Current Impact
 
@@ -266,6 +277,44 @@ Use:
 Wait for the PowerShell prompt to return.
 
 Do not enter `y` after the normal prompt has already returned.
+
+---
+
+# BUG-006 — Git Line-Ending Warning
+
+Status: Open
+
+Priority: Low
+
+Type: Development workflow
+
+## Current Observation
+
+Git may report:
+
+`CRLF will be replaced by LF the next time Git touches it`
+
+The warning has been observed for:
+
+- `client/src/pages/admin/AdminDashboardPage.jsx`
+- `client/src/routes/AppRoutes.jsx`
+
+## Current Impact
+
+- No current application failure
+- No whitespace error reported by `git diff --check`
+- The warning may create noisy Git output
+
+## Planned Investigation
+
+- Review `.gitattributes`
+- Confirm intended repository line-ending policy
+- Confirm VS Code end-of-line settings
+- Avoid unnecessary mass line-ending changes inside a feature commit
+
+## Temporary Decision
+
+Treat this warning as non-blocking unless Git shows a real whitespace error or an unexpected full-file rewrite.
 
 ---
 
@@ -431,6 +480,48 @@ Added:
 - Disabled page showed Not Found.
 - Disabled page was removed from sitemap.
 - Re-enabled page became accessible again.
+
+---
+
+# RESOLVED-007 — Team Admin Frontend Workflow Validation
+
+Status: Resolved and Verified
+
+## Previous Risk
+
+The newly added Team Admin frontend had not yet been verified through complete browser workflows.
+
+## Files Involved
+
+- `client/src/components/admin/team/TeamMemberForm.jsx`
+- `client/src/pages/admin/AdminTeamMembersPage.jsx`
+- `client/src/pages/admin/AdminTeamMemberEditorPage.jsx`
+- `client/src/services/adminTeamMembersApi.js`
+- `client/src/utils/teamMemberForm.js`
+- `client/src/pages/admin/AdminDashboardPage.jsx`
+- `client/src/routes/AppRoutes.jsx`
+
+## Verification
+
+The following workflows passed:
+
+- Dashboard Team navigation
+- Empty listing
+- Team member creation
+- Team member editing
+- Saved-data persistence
+- Project relationship selection
+- Company relationship selection
+- Service relationship selection
+- Search and filters
+- Hide and Show
+- Feature and Unfeature
+- Permanent deletion
+- Final empty state
+
+The temporary Team test member was deleted after verification.
+
+No blocking Team Admin frontend problem is currently known.
 
 ---
 

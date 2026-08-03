@@ -1,6 +1,6 @@
 ﻿# API Routes
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Project
 
@@ -382,6 +382,75 @@ Purpose:
 Returns one visible Company for its public details page.
 
 ---
+
+# Public Team API
+
+Route file:
+
+`server/src/routes/teamMember.routes.js`
+
+Mount path:
+
+`/api/team`
+
+## Get Public Team Members
+
+Endpoint:
+
+`GET /api/team`
+
+Authentication:
+
+Not required.
+
+Controller:
+
+`getPublicTeamMembers`
+
+Purpose:
+
+Returns publicly visible Team member records.
+
+The public listing always applies:
+
+- `isVisible: true`
+- Display order sorting
+- Created-date fallback sorting
+
+Supported query parameters:
+
+- `search` — Searches name, professional role, Team position, short introduction, skills and tools
+- `professionalRole` — Case-insensitive exact professional-role filter
+- `status` — Member status filter
+- `availabilityStatus` — Availability filter
+- `featured` — Boolean featured filter using `true` or `false`
+
+Supported `status` values:
+
+- `active`
+- `inactive`
+- `former`
+- `archived`
+
+Supported `availabilityStatus` values:
+
+- `available`
+- `limited`
+- `unavailable`
+- `on-leave`
+
+Successful response status:
+
+`200 OK`
+
+Response shape:
+
+```json
+{
+  "success": true,
+  "count": 0,
+  "data": []
+}
 
 # Public Contact Message API
 
@@ -1035,6 +1104,14 @@ Controller:
 - `PATCH /api/admin/companies/:id`
 - `DELETE /api/admin/companies/:id`
 
+## Admin Team
+
+- `GET /api/admin/team`
+- `POST /api/admin/team`
+- `GET /api/admin/team/:id`
+- `PATCH /api/admin/team/:id`
+- `DELETE /api/admin/team/:id`
+
 ## Admin Contact Messages
 
 - `GET /api/admin/contact-messages`
@@ -1044,38 +1121,12 @@ Controller:
 
 ---
 
-# Planned Team Routes
-
-Status:
-
-Not implemented.
-
-Suggested public routes:
-
-- `GET /api/team`
-- `GET /api/team/:slug`
-
-Suggested Admin routes:
-
-- `GET /api/admin/team`
-- `POST /api/admin/team`
-- `GET /api/admin/team/:id`
-- `PATCH /api/admin/team/:id`
-- `DELETE /api/admin/team/:id`
-
-Suggested permissions:
-
-- Read: authenticated Admin
-- Create and update: `super-admin`, `admin`, `editor`
-- Delete: `super-admin`, `admin`
-
-These routes must follow the existing Services, Statistics, Projects and Companies patterns.
 
 ## Query Parameter Documentation
 
-Some listing controllers may support search, filtering or pagination.
+Team listing query parameters have been audited and documented in their Public and Admin Team API sections.
 
-Those controller-specific query parameters have not yet been audited in this document.
+Other module-specific listing parameters should be documented only after their controllers are audited.
 
 Do not add undocumented query parameters based only on assumptions.
 
@@ -1091,3 +1142,4 @@ Whenever an API route is created, removed or changed:
 6. Document path parameters.
 7. Document important middleware.
 8. Update `docs/SESSION_HANDOFF.md`.
+```

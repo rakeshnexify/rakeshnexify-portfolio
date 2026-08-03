@@ -22,6 +22,8 @@ import AdminServiceEditorPage from "../pages/admin/AdminServiceEditorPage";
 import AdminServicesPage from "../pages/admin/AdminServicesPage";
 import AdminStatisticEditorPage from "../pages/admin/AdminStatisticEditorPage";
 import AdminStatisticsPage from "../pages/admin/AdminStatisticsPage";
+import AdminTeamMemberEditorPage from "../pages/admin/AdminTeamMemberEditorPage";
+import AdminTeamMembersPage from "../pages/admin/AdminTeamMembersPage";
 import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
 import AdminSiteSettingsEditorPage from "../pages/admin/AdminSiteSettingsEditorPage";
 
@@ -278,48 +280,50 @@ function AppRoutes() {
           />
 
           <Route path="/admin/services" element={<AdminServicesPage />} />
-
           <Route
             path="/admin/services/new"
             element={<AdminServiceEditorPage mode="create" />}
           />
-
           <Route
             path="/admin/services/:id/edit"
             element={<AdminServiceEditorPage mode="edit" />}
           />
 
           <Route path="/admin/statistics" element={<AdminStatisticsPage />} />
-
           <Route
             path="/admin/statistics/new"
             element={<AdminStatisticEditorPage mode="create" />}
           />
-
           <Route
             path="/admin/statistics/:id/edit"
             element={<AdminStatisticEditorPage mode="edit" />}
           />
 
-          <Route path="/admin/projects" element={<AdminProjectsPage />} />
+          <Route path="/admin/team" element={<AdminTeamMembersPage />} />
+          <Route
+            path="/admin/team/new"
+            element={<AdminTeamMemberEditorPage mode="create" />}
+          />
+          <Route
+            path="/admin/team/:id/edit"
+            element={<AdminTeamMemberEditorPage mode="edit" />}
+          />
 
+          <Route path="/admin/projects" element={<AdminProjectsPage />} />
           <Route
             path="/admin/projects/new"
             element={<AdminProjectEditorPage mode="create" />}
           />
-
           <Route
             path="/admin/projects/:id/edit"
             element={<AdminProjectEditorPage mode="edit" />}
           />
 
           <Route path="/admin/companies" element={<AdminCompaniesPage />} />
-
           <Route
             path="/admin/companies/new"
             element={<AdminCompanyEditorPage mode="create" />}
           />
-
           <Route
             path="/admin/companies/:id/edit"
             element={<AdminCompanyEditorPage mode="edit" />}

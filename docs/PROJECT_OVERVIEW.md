@@ -1,6 +1,6 @@
 ﻿# Project Overview
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Project Name
 
@@ -19,6 +19,10 @@ Main Git branch:
 Remote repository:
 
 `origin/main`
+
+Latest pushed Team backend commit:
+
+`90cb41b Add dynamic team backend APIs`
 
 ## Project Purpose
 
@@ -81,7 +85,7 @@ Public visitors should be able to:
 - Review available development services
 - See project work
 - View company information
-- Meet the team
+- Meet the Team
 - Review statistics and achievements
 - Contact the owner
 - Open related social and professional profiles
@@ -99,6 +103,8 @@ Authorized Admin users should be able to:
 - Manage public-page publication
 - Review contact messages
 - Update SEO and site-wide settings
+- Create and manage Team member profiles
+- Connect Team members with Projects, Companies and Services
 
 ## Technology Stack
 
@@ -189,9 +195,9 @@ MongoDB stores dynamic data for:
 - Statistics
 - Projects
 - Companies
+- Team members
 - Contact messages
 - Admin users
-- Future Team members
 - Future Testimonials
 - Future Experience records
 - Other future dynamic modules
@@ -208,6 +214,8 @@ The project currently includes:
 - Statistics management
 - Projects management
 - Companies management
+- Team backend APIs
+- Team Admin management
 - Contact messages management
 - Dynamic homepage section registry
 - Dynamic Navbar controls
@@ -217,6 +225,53 @@ The project currently includes:
 - Dynamic XML sitemap
 - Public Not Found page
 - Production server configuration
+- Repository-memory documentation system
+
+## Dynamic Team Management Status
+
+### Completed Backend
+
+- `TeamMember` MongoDB model
+- Explicit `teamMembers` collection
+- Public Team listing API
+- Public Team slug-details API
+- Protected Admin Team CRUD API
+- Search and filters
+- Role-based permissions
+- Profile, biography, contact and social fields
+- Project, Company and Service relationships
+- Visibility, featured and order controls
+- Member-specific SEO fields
+- Runtime API validation
+- Backend Git checkpoint pushed
+
+### Completed Admin Frontend
+
+- Admin dashboard Team module
+- Team members listing page
+- Search and filters
+- Create Team member page
+- Edit Team member page
+- Reusable Team form
+- Relationship selectors
+- Visibility and featured quick actions
+- Role-restricted deletion
+- Browser-tested create, update, filter and delete workflows
+
+### Pending Public Team Frontend
+
+- Public Team API service
+- Public Team hooks
+- Reusable Team member card
+- `/team` listing page
+- `/team/:slug` details page
+- Homepage Team section
+- Site Settings Team content
+- Team module publication controls
+- Navbar integration
+- Sitemap integration
+- Member-specific public SEO
+- Responsive and accessibility testing
 
 ## Current Homepage Sections
 
@@ -230,7 +285,7 @@ Currently implemented homepage sections include:
 6. Companies
 7. Contact
 
-The long-term homepage order should support:
+The approved long-term homepage order is:
 
 1. Hero
 2. Statistics
@@ -246,9 +301,11 @@ The long-term homepage order should support:
 
 The final order remains Admin-controlled.
 
+The Team homepage section is still pending and should be placed after Projects and before Companies when implemented.
+
 ## Existing Public Routes
 
-The project currently supports public routes for:
+The project currently supports public frontend routes for:
 
 - Homepage
 - Statistics
@@ -259,7 +316,15 @@ The project currently supports public routes for:
 - Company details
 - Public Not Found page
 
-Additional public routes will be added for future modules.
+The Team backend already exposes:
+
+- `GET /api/team`
+- `GET /api/team/:slug`
+
+The public frontend routes are still pending:
+
+- `/team`
+- `/team/:slug`
 
 ## Existing Admin Areas
 
@@ -269,12 +334,18 @@ The Admin Panel currently includes management areas for:
 - Services
 - Statistics
 - Projects
+- Team Members
 - Companies
 - Contact messages
 
+Current Team Admin routes:
+
+- `/admin/team`
+- `/admin/team/new`
+- `/admin/team/:id/edit`
+
 Future Admin areas should include:
 
-- Team
 - Skills
 - Experience
 - Testimonials
@@ -304,6 +375,16 @@ For example, a module may be:
 Or it may be completely disabled.
 
 Disabled pages should not remain accessible through direct routes or the sitemap.
+
+Team member records already support member-level:
+
+- `isVisible`
+- `isFeatured`
+- `order`
+- `status`
+- `availabilityStatus`
+
+Team module-level publication settings remain pending.
 
 ## Design Direction
 
@@ -353,23 +434,57 @@ Every development session should:
 10. Update documentation.
 11. Commit and push only verified work.
 
-## Current Major Warning
+## Current Major Warnings
+
+### Client Bundle Size
 
 Vite currently reports a JavaScript bundle larger than 500 kB after minification.
 
+Latest verified main JavaScript bundle:
+
+`757.00 kB`
+
+Latest verified gzip size:
+
+`171.07 kB`
+
 This warning is not blocking current development.
 
-A later performance phase should evaluate route-based code splitting.
+A later performance phase should evaluate route-based code splitting and Admin/public bundle separation.
 
-The client dependency audit has also reported one high-severity vulnerability. It must be inspected before applying any forced dependency update.
+### Client Dependency Audit
 
-## Next Major Feature
+The client dependency audit previously reported one high-severity vulnerability.
 
-The next major feature after the documentation phase is:
+It must be inspected before applying any forced dependency update.
 
-`Dynamic Team Management System`
+Do not run `npm audit fix --force` without reviewing the affected package and breaking changes.
 
-This feature will include Admin CRUD, public APIs, homepage integration, public listing and details pages, SEO, visibility controls, sitemap integration and responsive layouts.
+## Current Development Position
+
+Current phase:
+
+`Step 6.9C — Dynamic Team Admin Frontend`
+
+Status:
+
+`COMPLETE AND VALIDATED — DOCUMENTATION AND COMMIT PENDING`
+
+Latest pushed Team backend commit:
+
+`90cb41b Add dynamic team backend APIs`
+
+Recommended next checkpoint commit:
+
+`Add dynamic team admin management`
+
+## Next Major Feature Phase
+
+After the Team Admin frontend checkpoint is committed and pushed, continue with:
+
+`Step 6.9D — Public Team Website Integration`
+
+This phase includes public Team pages, homepage integration, module publication controls, navigation, sitemap, SEO, responsive testing and accessibility testing.
 
 ## Source of Truth
 

@@ -1,6 +1,6 @@
 # Project Structure
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Project
 
@@ -73,7 +73,7 @@ Frontend source path:
 
 Current frontend source file count:
 
-`93`
+`98`
 
 ## Client Source Tree
 
@@ -86,7 +86,8 @@ client/src/
 │   │   ├── projects/
 │   │   ├── services/
 │   │   ├── site-settings/
-│   │   └── statistics/
+│   │   ├── statistics/
+│   │   └── team/
 │   ├── companies/
 │   ├── layout/
 │   ├── projects/
@@ -151,6 +152,7 @@ Current feature folders:
 - `services`
 - `site-settings`
 - `statistics`
+- `team`
 
 Important files include:
 
@@ -158,6 +160,7 @@ Important files include:
 - `ProjectForm.jsx`
 - `ServiceForm.jsx`
 - `StatisticForm.jsx`
+- `TeamMemberForm.jsx`
 - `SiteSettingsForm.jsx`
 - `SiteSettingsOverview.jsx`
 - `LegalLinksEditor.jsx`
@@ -204,6 +207,16 @@ Path:
 Current component:
 
 - `StatisticCard.jsx`
+
+### Team
+
+Public Team components have not been created yet.
+
+Planned next-phase path:
+
+`client/src/components/team/`
+
+The public module is expected to include a reusable Team member card and related-content components.
 
 ## Layout Components
 
@@ -344,10 +357,12 @@ Purpose:
 
 Keeps API-loading and reusable state logic outside page components.
 
-Future Team hooks should follow this pattern:
+Planned public Team hooks for the next development phase:
 
 - `useTeamMembers.js`
 - `useTeamMember.js`
+
+These hooks have not been created yet because the current completed frontend scope is Admin Team management.
 
 ---
 
@@ -388,11 +403,13 @@ Current Admin pages:
 - `AdminStatisticEditorPage.jsx`
 - `AdminProjectsPage.jsx`
 - `AdminProjectEditorPage.jsx`
+- `AdminTeamMembersPage.jsx`
+- `AdminTeamMemberEditorPage.jsx`
 - `AdminCompaniesPage.jsx`
 - `AdminCompanyEditorPage.jsx`
 - `AdminContactMessagesPage.jsx`
 
-Future Team pages should follow the existing list-and-editor pattern.
+The Admin Team module follows the existing list-and-editor pattern.
 
 ---
 
@@ -406,7 +423,15 @@ Current files:
 
 ### `AppRoutes.jsx`
 
-Contains the main route definitions.
+Contains the main public and Admin route definitions.
+
+Current Admin Team routes:
+
+- `/admin/team`
+- `/admin/team/new`
+- `/admin/team/:id/edit`
+
+Public `/team` routes are still pending.
 
 ### `ProtectedAdminRoute.jsx`
 
@@ -444,13 +469,17 @@ Current Admin API services:
 - `adminServicesApi.js`
 - `adminStatisticsApi.js`
 - `adminProjectsApi.js`
+- `adminTeamMembersApi.js`
 - `adminCompaniesApi.js`
 - `adminContactMessagesApi.js`
 
-Future Team services should follow this structure:
+Completed Team Admin API service:
+
+- `adminTeamMembersApi.js`
+
+Planned public Team API service:
 
 - `teamApi.js`
-- `adminTeamApi.js`
 
 ---
 
@@ -467,15 +496,14 @@ Current files:
 - `serviceForm.js`
 - `statisticForm.js`
 - `projectForm.js`
+- `teamMemberForm.js`
 - `companyForm.js`
 
 Purpose:
 
 Handles form conversion, validation helpers, normalization and reusable data transformations.
 
-Future Team form utilities should be added in a dedicated file such as:
-
-`teamForm.js`
+`teamMemberForm.js` contains Team form defaults, API-data conversion, slug generation and payload normalization.
 
 ---
 
@@ -491,7 +519,7 @@ Backend source path:
 
 Current backend source file count:
 
-`52`
+`57`
 
 ## Server Source Tree
 
@@ -522,6 +550,8 @@ Responsibilities include:
 - JSON parsing
 - Rate limiting
 - Route mounting
+- Public Team API mounting
+- Protected Admin Team API mounting
 - Sitemap mounting
 - Production client delivery
 - Not Found handling
@@ -571,6 +601,7 @@ Path:
 - `service.controller.js`
 - `statistic.controller.js`
 - `project.controller.js`
+- `teamMember.controller.js`
 - `company.controller.js`
 - `contactMessage.controller.js`
 - `sitemap.controller.js`
@@ -582,15 +613,16 @@ Path:
 - `adminService.controller.js`
 - `adminStatistic.controller.js`
 - `adminProject.controller.js`
+- `adminTeamMember.controller.js`
 - `adminCompany.controller.js`
 - `adminContactMessage.controller.js`
 
 Controller responsibilities should remain separate from route mounting and database model definitions.
 
-Future Team controllers should be:
+Team controller files:
 
-- `team.controller.js`
-- `adminTeam.controller.js`
+- `teamMember.controller.js`
+- `adminTeamMember.controller.js`
 
 ---
 
@@ -611,7 +643,9 @@ Purpose:
 
 Provides safe default database records or fallback initialization data.
 
-Future Team defaults should only be added when genuinely required.
+No Team default-data file exists.
+
+Team members must be created dynamically through the protected Admin management interface. Fake or hard-coded Team records should not be introduced.
 
 ---
 
@@ -653,11 +687,10 @@ Current models:
 - `Statistic.js`
 - `Project.js`
 - `Company.js`
+- `TeamMember.js`
 - `ContactMessage.js`
 
-Future Team model:
-
-`TeamMember.js`
+`TeamMember.js` stores dynamic Team profiles, publication controls, SEO fields and cross-module relationships.
 
 All new models should document:
 
@@ -685,6 +718,7 @@ Path:
 - `service.routes.js`
 - `statistic.routes.js`
 - `project.routes.js`
+- `teamMember.routes.js`
 - `company.routes.js`
 - `contactMessage.routes.js`
 
@@ -695,13 +729,19 @@ Path:
 - `adminService.routes.js`
 - `adminStatistic.routes.js`
 - `adminProject.routes.js`
+- `adminTeamMember.routes.js`
 - `adminCompany.routes.js`
 - `adminContactMessage.routes.js`
 
-Future Team routes should be:
+Team route files:
 
-- `team.routes.js`
-- `adminTeam.routes.js`
+- `teamMember.routes.js`
+- `adminTeamMember.routes.js`
+
+Mounted API paths:
+
+- `/api/team`
+- `/api/admin/team`
 
 ---
 
@@ -762,6 +802,60 @@ Current files:
 All required repository-memory documentation files now exist.
 
 The documentation folder is the permanent continuation memory for future ChatGPT and Codex sessions.
+
+---
+
+# Current Team Module Structure
+
+## Completed Backend
+
+```text
+server/src/models/TeamMember.js
+server/src/controllers/teamMember.controller.js
+server/src/controllers/adminTeamMember.controller.js
+server/src/routes/teamMember.routes.js
+server/src/routes/adminTeamMember.routes.js
+```
+
+Integration file:
+
+```text
+server/src/app.js
+```
+
+## Completed Admin Frontend
+
+```text
+client/src/components/admin/team/TeamMemberForm.jsx
+client/src/pages/admin/AdminTeamMembersPage.jsx
+client/src/pages/admin/AdminTeamMemberEditorPage.jsx
+client/src/services/adminTeamMembersApi.js
+client/src/utils/teamMemberForm.js
+```
+
+Integration files:
+
+```text
+client/src/pages/admin/AdminDashboardPage.jsx
+client/src/routes/AppRoutes.jsx
+```
+
+## Pending Public Frontend
+
+Expected next-phase files may include:
+
+```text
+client/src/components/team/TeamMemberCard.jsx
+client/src/components/sections/TeamSection.jsx
+client/src/hooks/useTeamMembers.js
+client/src/hooks/useTeamMember.js
+client/src/services/teamApi.js
+client/src/pages/TeamPage.jsx
+client/src/pages/TeamMemberDetailsPage.jsx
+```
+
+Only create these files when their implementation step begins.
+
 ---
 
 # Feature File Pattern

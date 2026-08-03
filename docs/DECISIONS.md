@@ -1,6 +1,6 @@
 ﻿# Project Decisions
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Purpose
 
@@ -232,7 +232,7 @@ Status: Accepted
 
 ## Decision
 
-New major modules should follow the established Services, Statistics, Projects and Companies architecture.
+New major modules should follow the established Services, Statistics, Projects, Companies and Team architecture.
 
 ## Backend Pattern
 
@@ -638,7 +638,13 @@ Status: Accepted
 
 ## Current Warning
 
-The client build reports a main JavaScript chunk larger than 500 kB.
+The latest verified client build reports a main JavaScript chunk of:
+
+`757.00 kB`
+
+The latest verified gzip size is:
+
+`171.07 kB`
 
 ## Decision
 
@@ -661,40 +667,67 @@ Performance work should be handled carefully rather than mixed into unrelated fe
 
 ---
 
-# Decision 021 — Team Is the Next Major Module
+# Decision 021 — Implement the Dynamic Team Management System
 
-Status: Accepted
+Status: Implemented in Parts
 
 ## Decision
 
-After the repository-memory documentation phase is completed and committed, the next major feature will be:
+The Dynamic Team Management System is an approved major module.
 
-`Dynamic Team Management System`
+The backend and Admin management frontend are complete.
 
-## Planned Scope
+The public Team website integration is the next incomplete part.
 
-- TeamMember model
+## Completed Scope
+
+- `TeamMember` model
+- `teamMembers` MongoDB collection
 - Public Team API
-- Admin Team CRUD
-- Homepage Team section
-- Team listing page
-- Optional member details page
+- Public Team member-details API
+- Protected Admin Team CRUD API
+- Admin Team dashboard module
+- Admin Team listing page
+- Admin Team create page
+- Admin Team edit page
 - Visibility
 - Featured status
-- Order
+- Display order
 - Social links
-- Relations
-- SEO
-- Sitemap
+- Project relations
+- Company relations
+- Service relations
+- Member-specific SEO fields
+- Browser-tested Admin workflow
 
-## Dependency
+## Pending Scope
 
-Do not start Team implementation before:
+- Public Team API service
+- Public Team hooks
+- Homepage Team section
+- `/team` listing page
+- `/team/:slug` details page
+- Module-level publication settings
+- Navbar integration
+- Sitemap integration
+- Public Team SEO rendering
+- Responsive and accessibility testing
 
-- Documentation is complete
-- Documentation is validated
-- Documentation is committed
-- Documentation is pushed
+## Verified Backend Checkpoint
+
+`90cb41b Add dynamic team backend APIs`
+
+## Current Phase
+
+`Step 6.9C — Dynamic Team Admin Frontend`
+
+Status:
+
+`Complete and validated; documentation and Git checkpoint pending`
+
+## Next Phase
+
+`Step 6.9D — Public Team Website Integration`
 
 ---
 
@@ -749,6 +782,62 @@ Update:
 ## Reason
 
 Documentation must stay synchronized with the actual repository.
+
+---
+
+# Decision 023 — Use Consistent Team Naming
+
+Status: Accepted
+
+## Decision
+
+Use these Team names consistently:
+
+- Mongoose model: `TeamMember`
+- MongoDB collection: `teamMembers`
+- Public API base: `/api/team`
+- Admin API base: `/api/admin/team`
+- Public listing route: `/team`
+- Public details route: `/team/:slug`
+- Admin listing route: `/admin/team`
+- Admin create route: `/admin/team/new`
+- Admin edit route: `/admin/team/:id/edit`
+
+## Reason
+
+Consistent naming prevents duplicate models, routes, services and documentation.
+
+## Consequence
+
+Do not introduce alternative names such as:
+
+- `team_members`
+- `Team`
+- `/api/team-members`
+- `/admin/team-members`
+
+without reviewing and intentionally migrating the existing implementation.
+
+---
+
+# Decision 024 — Do Not Add Fake Team Members
+
+Status: Accepted
+
+## Decision
+
+The Team module must not use fake, hard-coded or automatically seeded Team member profiles.
+
+## Reason
+
+Team member information is real professional content and must be managed through the protected Admin interface.
+
+## Consequence
+
+- No default Team data file is required.
+- Testing may use temporary records.
+- Temporary test records must be deleted after validation.
+- Public Team pages must support a proper empty state.
 
 ---
 

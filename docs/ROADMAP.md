@@ -1,6 +1,6 @@
 ﻿# Project Roadmap
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Project
 
@@ -93,6 +93,7 @@ Completed:
 - Services management
 - Statistics management
 - Projects management
+- Team Members management
 - Companies management
 - Contact messages management
 
@@ -345,99 +346,238 @@ Completed:
 - Whitespace validation
 
 The documentation set is ready to serve as permanent repository memory.
+
 ## Phase 13 — Dynamic Team Management System
 
-Status: PLANNED
+Status: IN PROGRESS
 
-This is the next major development module.
+The Team backend and protected Admin management interface are complete and validated.
+
+The remaining work is the public Team website, module-level Site Settings, navigation, sitemap, SEO and final responsive accessibility validation.
 
 ### Backend
 
-Planned:
+Status: COMPLETE
 
-- TeamMember MongoDB model
-- Team member validation
-- Unique slug generation
-- Public Team API
-- Public member-details API
+Completed:
+
+- `TeamMember` MongoDB model
+- Explicit `teamMembers` collection
+- Required-field validation
+- Unique lowercase slug validation
+- Member status and availability enums
+- Skills and tools normalization
+- Contact, portfolio and social-link fields
+- Related Project ObjectId references
+- Related Company ObjectId references
+- Related Service ObjectId references
+- Visibility, featured and display-order controls
+- Member-specific SEO fields
+- Admin audit fields
+- Publication, status and text-search indexes
+- Public Team listing API
+- Public Team member-details API
+- Hidden-member protection on public endpoints
+- Visible-related-record filtering on public details
 - Protected Admin Team CRUD API
-- Search
-- Filtering
-- Pagination
-- Role-based deletion
-- Project relations
-- Company relations
-- Service relations
+- Admin search and filtering
+- Role-based create and update permissions
+- Role-based permanent deletion
+- Validation, duplicate and invalid-reference error responses
+- Root validation-script integration
+- Authenticated API runtime testing
+- Backend Git checkpoint pushed in commit `90cb41b`
+
+Deferred backend improvement:
+
+- Add pagination when Team record volume requires it
 
 ### Admin Panel
 
-Planned:
+Status: COMPLETE — COMMIT PENDING
 
-- Team dashboard module
+Completed:
+
+- Team Members dashboard module
 - Team members listing page
-- Search and filters
+- Search filter
+- Professional-role filter
+- Member-status filter
+- Availability-status filter
+- Visibility filter
+- Featured-status filter
+- Responsive Team member cards
 - Create Team member page
 - Edit Team member page
-- Delete confirmation
+- Reusable Team member form
+- Automatic slug generation
+- Local form validation
+- Server field-error display
+- Profile and cover image fields
+- Skills and tools editors
+- Contact and portfolio fields
+- Social-profile fields
+- Related Project selector
+- Related Company selector
+- Related Service selector
+- SEO fields
+- Member status control
+- Availability control
 - Visibility control
 - Featured control
 - Display order
-- Availability status
-- Relation selectors
-- SEO fields
+- Quick visibility action
+- Quick featured action
+- Role-restricted permanent deletion
+- Admin Team listing route
+- Admin Team create route
+- Admin Team edit route
+- Dashboard navigation integration
 
-### Team Member Fields
+Current Admin routes:
 
-Planned:
+- `/admin/team`
+- `/admin/team/new`
+- `/admin/team/:id/edit`
 
-- Full name
-- Slug
-- Professional role
-- Job title
-- Team position
-- Short introduction
-- Full biography
-- Responsibilities
-- Profile image URL
-- Cover image URL
-- Skills
-- Tools
-- Availability status
-- Personal website
-- Portfolio URL
-- Facebook
-- Instagram
-- LinkedIn
-- YouTube
-- X
-- Related Projects
-- Related Companies
-- Related Services
-- Display order
-- Featured status
-- Visibility status
-- SEO title
-- SEO description
-- SEO keywords
-- Open Graph image
+### Implemented Team Member Fields
+
+Identity and profile:
+
+- `name`
+- `slug`
+- `professionalRole`
+- `teamPosition`
+- `shortIntroduction`
+- `biography`
+- `profileImageUrl`
+- `profileImageAlt`
+- `coverImageUrl`
+
+Expertise:
+
+- `skills`
+- `tools`
+
+Status and availability:
+
+- `status`
+- `availabilityStatus`
+
+Contact and links:
+
+- `email`
+- `phone`
+- `websiteUrl`
+- `portfolioUrl`
+
+Social links:
+
+- `github`
+- `linkedin`
+- `facebook`
+- `instagram`
+- `youtube`
+- `x`
+
+Cross-module relations:
+
+- `relatedProjects`
+- `relatedCompanies`
+- `relatedServices`
+
+Publication:
+
+- `order`
+- `isFeatured`
+- `isVisible`
+
+SEO:
+
+- `seo.title`
+- `seo.description`
+- `seo.keywords`
+- `seo.ogImageUrl`
+
+Audit and timestamps:
+
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
+
+### Admin Validation Completed
+
+Verified browser workflows:
+
+- Empty Team listing
+- Team member creation
+- Team member editing
+- Saved-data persistence
+- Project relationship selection
+- Company relationship selection
+- Service relationship selection
+- Search filtering
+- Role filtering
+- Status filtering
+- Availability filtering
+- Visibility filtering
+- Featured filtering
+- Hide and show actions
+- Feature and unfeature actions
+- Permanent deletion
+- Temporary test-record cleanup
+- Dashboard-to-Team navigation
+
+Verified project checks:
+
+- Client production build
+- Root `npm run check`
+- Team backend syntax checks
+- `git diff --check`
+- No known blocking Team Admin issue
 
 ### Public Website
 
+Status: PLANNED — NEXT DEVELOPMENT PHASE
+
 Planned:
 
-- Homepage Team preview
-- Team member cards
+- Public Team API service
+- Public Team list hook
+- Public Team member-detail hook
+- Reusable Team member card
+- Homepage Team preview section
 - `/team` listing page
 - `/team/:slug` details page
+- Related Projects display
+- Related Companies display
+- Related Services display
 - Loading state
 - Error state
 - Empty state
 - Responsive mobile layout
-- Accessibility
+- Keyboard accessibility
+- Screen-reader-friendly labels
+- Homepage-section registry integration
+- Team Site Settings content
+- Module-level homepage visibility
+- Module-level Navbar visibility
+- Module-level public-page visibility
+- Homepage display order
+- Navbar display order
+- Dynamic public label
 - Navbar integration
-- Public-page visibility
 - Sitemap integration
-- Member-specific SEO
+- Member-specific page metadata
+- Canonical URL support
+- Open Graph image support
+
+### Team Data Policy
+
+- Do not add fake or hard-coded Team members.
+- Team records must be created dynamically through the protected Admin interface.
+- Temporary validation records must be deleted after testing.
 
 ## Phase 14 — Skills Management
 
@@ -655,10 +795,22 @@ Planned:
 
 ## Current Immediate Next Step
 
-Create and push the Git checkpoint for the completed repository-memory documentation phase.
+Synchronize the remaining repository documentation for the completed Team backend and Admin frontend work.
+
+Then:
+
+1. Run final project validation.
+2. Review the complete Team Admin frontend diff.
+3. Commit the completed Team Admin frontend phase.
+4. Push the checkpoint to `origin/main`.
+5. Begin the public Team website phase.
+
+Recommended Team Admin frontend commit message:
+
+`Add dynamic team admin management`
 
 ## Next Major Feature
 
-`Dynamic Team Management System`
+`Step 6.9D — Public Team Website Integration`
 
-Start Team development in a dedicated new module chat after reading the repository documentation and checking Git history.
+The next phase will build the public Team listing, Team member details, homepage Team section, Site Settings integration, navigation, sitemap, SEO and accessibility behavior.

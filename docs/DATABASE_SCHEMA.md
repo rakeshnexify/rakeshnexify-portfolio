@@ -1,6 +1,6 @@
 ﻿# Database Schema
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Database
 
@@ -44,9 +44,8 @@ The project currently contains these Mongoose models:
 4. `Statistic`
 5. `Project`
 6. `Company`
-7. `ContactMessage`
-
-The planned `TeamMember` model does not exist yet.
+7. `TeamMember`
+8. `ContactMessage`
 
 ---
 
@@ -720,6 +719,320 @@ Text-search fields:
 
 ---
 
+# TeamMember
+
+Model file:
+
+`server/src/models/TeamMember.js`
+
+Mongoose model:
+
+`TeamMember`
+
+MongoDB collection:
+
+`teamMembers`
+
+This collection stores fully dynamic Team member profiles.
+
+## Main Fields
+
+- `name`
+- `slug`
+- `professionalRole`
+- `teamPosition`
+- `shortIntroduction`
+- `biography`
+- `profileImageUrl`
+- `profileImageAlt`
+- `coverImageUrl`
+- `skills`
+- `tools`
+- `status`
+- `availabilityStatus`
+- `email`
+- `phone`
+- `websiteUrl`
+- `portfolioUrl`
+- `socialLinks`
+- `relatedProjects`
+- `relatedCompanies`
+- `relatedServices`
+- `order`
+- `isFeatured`
+- `isVisible`
+- `seo`
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
+
+## Required Fields
+
+### name
+
+- Type: String
+- Required
+- Minimum length: 2
+- Maximum length: 150
+- Trimmed
+
+### slug
+
+- Type: String
+- Required
+- Unique
+- Lowercase
+- Trimmed
+- Minimum length: 2
+- Maximum length: 180
+- Accepts lowercase letters, numbers and single hyphen separators
+
+### professionalRole
+
+- Type: String
+- Required
+- Minimum length: 2
+- Maximum length: 150
+- Indexed
+
+### shortIntroduction
+
+- Type: String
+- Required
+- Minimum length: 10
+- Maximum length: 400
+
+## Profile Content
+
+### teamPosition
+
+- Type: String
+- Maximum length: 150
+- Default: empty string
+
+### biography
+
+- Type: String
+- Maximum length: 10000
+- Default: empty string
+
+### profileImageUrl
+
+- Type: String
+- Maximum length: 500
+- Default: empty string
+
+### profileImageAlt
+
+- Type: String
+- Maximum length: 200
+- Default: empty string
+
+### coverImageUrl
+
+- Type: String
+- Maximum length: 500
+- Default: empty string
+
+## Expertise Arrays
+
+### skills
+
+- Type: String array
+- Default: empty array
+- Empty values are removed
+- Duplicate values are removed
+
+### tools
+
+- Type: String array
+- Default: empty array
+- Empty values are removed
+- Duplicate values are removed
+
+## Member Status Values
+
+Allowed `status` values:
+
+- `active`
+- `inactive`
+- `former`
+- `archived`
+
+Default:
+
+`active`
+
+The field is indexed.
+
+## Availability Status Values
+
+Allowed `availabilityStatus` values:
+
+- `available`
+- `limited`
+- `unavailable`
+- `on-leave`
+
+Default:
+
+`available`
+
+The field is indexed.
+
+## Contact and Portfolio Fields
+
+### email
+
+- Type: String
+- Lowercase
+- Maximum length: 254
+- Default: empty string
+
+### phone
+
+- Type: String
+- Maximum length: 50
+- Default: empty string
+
+### websiteUrl
+
+- Type: String
+- Maximum length: 500
+- Default: empty string
+
+### portfolioUrl
+
+- Type: String
+- Maximum length: 500
+- Default: empty string
+
+## Social-Link Fields
+
+The `socialLinks` object contains:
+
+- `github`
+- `linkedin`
+- `facebook`
+- `instagram`
+- `youtube`
+- `x`
+
+Each social URL:
+
+- Is trimmed
+- Has a maximum length of 500
+- Defaults to an empty string
+
+The nested social-link schema does not create its own `_id`.
+
+## SEO Fields
+
+The `seo` object contains:
+
+- `title`
+- `description`
+- `keywords`
+- `ogImageUrl`
+
+SEO rules:
+
+- `title` maximum length: 70
+- `description` maximum length: 180
+- `ogImageUrl` maximum length: 500
+- `keywords` is a String array
+- SEO keywords are cleaned, deduplicated and converted to lowercase
+
+The nested SEO schema does not create its own `_id`.
+
+## Cross-Module Relations
+
+### relatedProjects
+
+- Type: ObjectId array
+- References `Project`
+- Default: empty array
+
+### relatedCompanies
+
+- Type: ObjectId array
+- References `Company`
+- Default: empty array
+
+### relatedServices
+
+- Type: ObjectId array
+- References `Service`
+- Default: empty array
+
+### createdBy
+
+- Type: ObjectId
+- References `AdminUser`
+- Default: `null`
+
+### updatedBy
+
+- Type: ObjectId
+- References `AdminUser`
+- Default: `null`
+
+## Publication and Display Fields
+
+### order
+
+- Type: Number
+- Minimum: 0
+- Default: `0`
+- Indexed
+
+### isFeatured
+
+- Type: Boolean
+- Default: `false`
+- Indexed
+
+### isVisible
+
+- Type: Boolean
+- Default: `true`
+- Indexed
+
+## Schema Configuration
+
+- Automatic `createdAt`
+- Automatic `updatedAt`
+- `versionKey: false`
+- Explicit collection name: `teamMembers`
+
+## Indexes
+
+Publication and display index:
+
+- `isVisible`
+- `isFeatured`
+- `order`
+- `createdAt`
+
+Status and availability index:
+
+- `status`
+- `availabilityStatus`
+- `order`
+
+Text-search fields:
+
+- `name`
+- `professionalRole`
+- `teamPosition`
+- `shortIntroduction`
+- `biography`
+- `skills`
+- `tools`
+
+---
+
 # ContactMessage
 
 Model file:
@@ -807,64 +1120,26 @@ The following fields reference `AdminUser`:
 - Project `updatedBy`
 - Company `createdBy`
 - Company `updatedBy`
+- TeamMember `createdBy`
+- TeamMember `updatedBy`
 - ContactMessage `statusUpdatedBy`
 - SiteSettings `updatedBy`
 - AdminUser `createdBy`
 - AdminUser `updatedBy`
 
-## Current Missing Cross-Module Relations
+## Current Team Cross-Module Relations
 
-Projects, Companies and Services currently store most related information directly.
+The `TeamMember` model contains explicit ObjectId-array relations to:
 
-The future Team module is planned to introduce explicit relations between:
+- `Project` through `relatedProjects`
+- `Company` through `relatedCompanies`
+- `Service` through `relatedServices`
 
-- Team members and Projects
-- Team members and Companies
-- Team members and Services
+These relations allow a Team member details page to display related portfolio work, Companies and Services.
 
-These relations must be designed before implementing `TeamMember`.
+The public Team details API filters populated relations so that hidden related records are not exposed.
 
 ---
-
-# Planned TeamMember Collection
-
-Status:
-
-Not implemented.
-
-Suggested future collection:
-
-`team_members`
-
-Planned fields include:
-
-- `name`
-- `slug`
-- `professionalRole`
-- `jobTitle`
-- `position`
-- `shortIntro`
-- `bio`
-- `responsibilities`
-- `profileImageUrl`
-- `coverImageUrl`
-- `skills`
-- `tools`
-- `availabilityStatus`
-- `websiteUrl`
-- `portfolioUrl`
-- `socialLinks`
-- `relatedProjects`
-- `relatedCompanies`
-- `relatedServices`
-- `order`
-- `isFeatured`
-- `isVisible`
-- `seo`
-- `createdBy`
-- `updatedBy`
-
-This planned schema must be reviewed against existing Project, Company and Service models before implementation.
 
 ## Database Documentation Rule
 
