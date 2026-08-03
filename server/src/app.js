@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
+
 import corsOptions from "./config/cors.js";
 import helmetOptions from "./config/helmet.js";
 
@@ -13,36 +14,32 @@ import adminContactMessageRoutes from "./routes/adminContactMessage.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
 import adminStatisticRoutes from "./routes/adminStatistic.routes.js";
+import adminTeamMemberRoutes from "./routes/adminTeamMember.routes.js";
 import adminSiteSettingsRoutes from "./routes/adminSiteSettings.routes.js";
+
 import companyRoutes from "./routes/company.routes.js";
 import contactMessageRoutes from "./routes/contactMessage.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
 import statisticRoutes from "./routes/statistic.routes.js";
+import teamMemberRoutes from "./routes/teamMember.routes.js";
 import sitemapRoutes from "./routes/sitemap.routes.js";
 import siteSettingsRoutes from "./routes/siteSettings.routes.js";
 
 const app = express();
-
 const isProduction = process.env.NODE_ENV === "production";
-
 const currentFilePath = fileURLToPath(import.meta.url);
-
 const currentDirectoryPath = path.dirname(currentFilePath);
-
 const clientDistPath = path.resolve(currentDirectoryPath, "../../client/dist");
 
 app.use(helmet(helmetOptions));
-
 app.use(cors(corsOptions));
-
 app.use(
   express.json({
     limit: "20kb",
   }),
 );
-
 app.use(
   express.urlencoded({
     extended: true,
@@ -72,30 +69,21 @@ if (!isProduction) {
  * files se pehle mount karna zaruri hai.
  */
 app.use("/", sitemapRoutes);
-
 app.use("/api/health", healthRoutes);
-
 app.use("/api/site-settings", siteSettingsRoutes);
-
 app.use("/api/services", serviceRoutes);
 app.use("/api/statistics", statisticRoutes);
-
+app.use("/api/team", teamMemberRoutes);
 app.use("/api/projects", projectRoutes);
-
 app.use("/api/companies", companyRoutes);
 
 app.use("/api/admin/auth", adminAuthRoutes);
-
 app.use("/api/admin/services", adminServiceRoutes);
-
 app.use("/api/admin/statistics", adminStatisticRoutes);
-
+app.use("/api/admin/team", adminTeamMemberRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
-
 app.use("/api/admin/companies", adminCompanyRoutes);
-
 app.use("/api/admin/contact-messages", adminContactMessageRoutes);
-
 app.use("/api/admin/site-settings", adminSiteSettingsRoutes);
 
 app.use("/api/contact-messages", contactMessageRoutes);
