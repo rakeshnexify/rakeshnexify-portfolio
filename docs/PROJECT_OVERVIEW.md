@@ -20,7 +20,11 @@ Remote repository:
 
 `origin/main`
 
-Latest pushed Team backend commit:
+Latest pushed Team Admin frontend commit:
+
+`95578b5 Add dynamic team admin management`
+
+Previous Team backend commit:
 
 `90cb41b Add dynamic team backend APIs`
 
@@ -243,7 +247,7 @@ The project currently includes:
 - Visibility, featured and order controls
 - Member-specific SEO fields
 - Runtime API validation
-- Backend Git checkpoint pushed
+- Backend Git checkpoint pushed in commit `90cb41b`
 
 ### Completed Admin Frontend
 
@@ -257,6 +261,7 @@ The project currently includes:
 - Visibility and featured quick actions
 - Role-restricted deletion
 - Browser-tested create, update, filter and delete workflows
+- Admin frontend Git checkpoint pushed in commit `95578b5`
 
 ### Pending Public Team Frontend
 
@@ -464,23 +469,21 @@ Do not run `npm audit fix --force` without reviewing the affected package and br
 
 Current phase:
 
-`Step 6.9C — Dynamic Team Admin Frontend`
+`Step 6.9D — Public Team Website Integration`
 
 Status:
 
-`COMPLETE AND VALIDATED — DOCUMENTATION AND COMMIT PENDING`
+`READY TO START`
 
-Latest pushed Team backend commit:
+Latest pushed Team Admin frontend commit:
+
+`95578b5 Add dynamic team admin management`
+
+Previous Team backend commit:
 
 `90cb41b Add dynamic team backend APIs`
 
-Recommended next checkpoint commit:
-
-`Add dynamic team admin management`
-
-## Next Major Feature Phase
-
-After the Team Admin frontend checkpoint is committed and pushed, continue with:
+## Current Major Feature Phase
 
 `Step 6.9D — Public Team Website Integration`
 

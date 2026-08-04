@@ -717,17 +717,17 @@ The public Team website integration is the next incomplete part.
 
 `90cb41b Add dynamic team backend APIs`
 
+## Verified Admin Frontend Checkpoint
+
+`95578b5 Add dynamic team admin management`
+
 ## Current Phase
 
-`Step 6.9C — Dynamic Team Admin Frontend`
+`Step 6.9D — Public Team Website Integration`
 
 Status:
 
-`Complete and validated; documentation and Git checkpoint pending`
-
-## Next Phase
-
-`Step 6.9D — Public Team Website Integration`
+`Ready to start`
 
 ---
 

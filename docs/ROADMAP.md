@@ -394,7 +394,11 @@ Deferred backend improvement:
 
 ### Admin Panel
 
-Status: COMPLETE — COMMIT PENDING
+Status: COMPLETE
+
+Git checkpoint:
+
+`95578b5 Add dynamic team admin management`
 
 Completed:
 
@@ -539,7 +543,7 @@ Verified project checks:
 
 ### Public Website
 
-Status: PLANNED — NEXT DEVELOPMENT PHASE
+Status: READY TO START — CURRENT DEVELOPMENT PHASE
 
 Planned:
 
@@ -795,19 +799,20 @@ Planned:
 
 ## Current Immediate Next Step
 
-Synchronize the remaining repository documentation for the completed Team backend and Admin frontend work.
+Complete and push the small post-commit Team documentation synchronization.
 
-Then:
+Then begin:
 
-1. Run final project validation.
-2. Review the complete Team Admin frontend diff.
-3. Commit the completed Team Admin frontend phase.
-4. Push the checkpoint to `origin/main`.
-5. Begin the public Team website phase.
+`Step 6.9D — Public Team Website Integration`
 
-Recommended Team Admin frontend commit message:
+The first implementation file should be:
 
-`Add dynamic team admin management`
+`client/src/services/teamApi.js`
+
+This service will consume:
+
+- `GET /api/team`
+- `GET /api/team/:slug`
 
 ## Next Major Feature
 
