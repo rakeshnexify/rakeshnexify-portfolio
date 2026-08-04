@@ -63,6 +63,17 @@ const defaultNavigationItems = [
     navigationOrder: 5,
   },
   {
+    key: "team",
+    label: "Team",
+    href: "/team",
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 6,
+    navigationOrder: 6,
+  },
+  {
     key: "companies",
     label: "Companies",
     href: "/companies",
@@ -70,8 +81,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 6,
-    navigationOrder: 6,
+    order: 7,
+    navigationOrder: 7,
   },
   {
     key: "contact",
@@ -81,8 +92,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 7,
-    navigationOrder: 7,
+    order: 8,
+    navigationOrder: 8,
   },
 ];
 

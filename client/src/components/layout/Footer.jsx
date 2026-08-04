@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 
+import { mergeHomepageSections } from "../../config/homepageSections";
 import siteData from "../../data/siteData";
 import useServices from "../../hooks/useServices";
 import useSiteSettings from "../../hooks/useSiteSettings";
@@ -36,24 +37,38 @@ const defaultNavigationSections = [
     order: 4,
   },
   {
+    key: "team",
+    label: "Team",
+    href: "/team",
+    isVisible: true,
+    order: 5,
+  },
+  {
     key: "companies",
     label: "Companies",
     href: "/companies",
     isVisible: true,
-    order: 5,
+    order: 6,
   },
   {
     key: "contact",
     label: "Contact",
     href: "/#contact",
     isVisible: true,
-    order: 6,
+    order: 7,
   },
 ];
 
 const defaultSectionByKey = Object.fromEntries(
   defaultNavigationSections.map((section) => [section.key, section]),
 );
+
+const dedicatedPageSectionKeys = new Set([
+  "services",
+  "projects",
+  "team",
+  "companies",
+]);
 
 const supportedFooterSections = new Set(
   defaultNavigationSections.map((section) => section.key),
@@ -173,12 +188,7 @@ function getSafeSectionLabel(key, value) {
 }
 
 function createNavigationLinks(settingsSections) {
-  const hasSettingsSections =
-    Array.isArray(settingsSections) && settingsSections.length > 0;
-
-  const sourceSections = hasSettingsSections
-    ? settingsSections
-    : defaultNavigationSections;
+  const sourceSections = mergeHomepageSections(settingsSections);
 
   const sectionsByKey = new Map();
 
@@ -193,6 +203,14 @@ function createNavigationLinks(settingsSections) {
 
     const numericOrder = Number(section?.order);
 
+    const isHomepageVisible = section?.isVisible !== false;
+
+    const isPageVisible = section?.isPageVisible !== false;
+
+    const isDestinationAvailable =
+      key === "hero" ||
+      (dedicatedPageSectionKeys.has(key) ? isPageVisible : isHomepageVisible);
+
     sectionsByKey.set(key, {
       key,
 
@@ -200,11 +218,16 @@ function createNavigationLinks(settingsSections) {
 
       href: defaultSection.href,
 
+      isHomepageVisible,
+
+      isPageVisible,
+
       /*
-       * Home route always available rahega,
-       * chahe Hero section hidden ho.
+       * Homepage-only links ko homepage visibility
+       * aur dedicated page links ko public-page
+       * accessibility control karegi.
        */
-      isVisible: key === "hero" || section?.isVisible !== false,
+      isVisible: isDestinationAvailable,
 
       order: Number.isFinite(numericOrder)
         ? numericOrder

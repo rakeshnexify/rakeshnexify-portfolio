@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import siteData from "../../data/siteData";
+import { mergeHomepageSections } from "../../config/homepageSections";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import Button from "../ui/Button";
 import Logo from "../ui/Logo";
@@ -54,8 +55,8 @@ const defaultNavigationSections = [
     navigationOrder: 5,
   },
   {
-    key: "companies",
-    label: "Companies",
+    key: "team",
+    label: "Team",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -63,13 +64,22 @@ const defaultNavigationSections = [
     navigationOrder: 6,
   },
   {
-    key: "contact",
-    label: "Contact",
+    key: "companies",
+    label: "Companies",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
     order: 7,
     navigationOrder: 7,
+  },
+  {
+    key: "contact",
+    label: "Contact",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 8,
+    navigationOrder: 8,
   },
 ];
 
@@ -93,6 +103,10 @@ const sectionDestinations = {
   projects: {
     type: "page",
     target: "/projects",
+  },
+  team: {
+    type: "page",
+    target: "/team",
   },
   companies: {
     type: "page",
@@ -131,10 +145,7 @@ function getSafeSectionLabel(sectionKey, value) {
 }
 
 function createVisibleSections(settingsSections, allowDefaultFallback = true) {
-  const sourceSections =
-    Array.isArray(settingsSections) && settingsSections.length > 0
-      ? settingsSections
-      : defaultNavigationSections;
+  const sourceSections = mergeHomepageSections(settingsSections);
 
   const sectionsByKey = new Map();
 

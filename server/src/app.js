@@ -107,19 +107,21 @@ if (isProduction) {
     }),
   );
 
- /*
- * React Router deep routes:
- * /services
- * /statistics
- * /projects
- * /projects/:slug
- * /companies
- * /companies/:slug
- * /admin/*
- *
- * Express 5 ke liye /{*splat}
- * wildcard syntax use kiya gaya hai.
- */
+  /*
+   * React Router deep routes:
+   * /services
+   * /statistics
+   * /projects
+   * /projects/:slug
+   * /team
+   * /team/:slug
+   * /companies
+   * /companies/:slug
+   * /admin/*
+   *
+   * Express 5 ke liye /{*splat}
+   * wildcard syntax use kiya gaya hai.
+   */
   app.get("/{*splat}", (req, res, next) => {
     const isApiRequest = req.path === "/api" || req.path.startsWith("/api/");
 

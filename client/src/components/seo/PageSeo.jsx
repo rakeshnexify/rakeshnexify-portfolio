@@ -3,6 +3,7 @@ import { useLocation } from "react-router";
 
 const SITE_URL = "https://rakeshnexify.com";
 const DEFAULT_BRAND_NAME = "RakeshNexify";
+const STRUCTURED_DATA_ELEMENT_ID = "page-structured-data";
 
 const DEFAULT_TITLE = "RakeshNexify | MERN & WordPress Developer";
 
@@ -92,6 +93,51 @@ function updateCanonicalLink(url) {
   element.setAttribute("href", url);
 }
 
+function createStructuredDataJson(value) {
+  const structuredDataItems = Array.isArray(value)
+    ? value.filter(
+        (item) => item && typeof item === "object" && !Array.isArray(item),
+      )
+    : value && typeof value === "object"
+      ? [value]
+      : [];
+
+  if (structuredDataItems.length === 0) {
+    return "";
+  }
+
+  const structuredDataValue =
+    structuredDataItems.length === 1
+      ? structuredDataItems[0]
+      : structuredDataItems;
+
+  try {
+    return JSON.stringify(structuredDataValue).replaceAll("<", "\\u003c");
+  } catch {
+    return "";
+  }
+}
+
+function updateStructuredData(jsonValue) {
+  let element = document.getElementById(STRUCTURED_DATA_ELEMENT_ID);
+
+  if (!jsonValue) {
+    element?.remove();
+    return;
+  }
+
+  if (!element) {
+    element = document.createElement("script");
+
+    element.id = STRUCTURED_DATA_ELEMENT_ID;
+    element.type = "application/ld+json";
+
+    document.head.appendChild(element);
+  }
+
+  element.textContent = jsonValue;
+}
+
 function PageSeo({
   title = DEFAULT_TITLE,
   description = DEFAULT_DESCRIPTION,
@@ -101,6 +147,7 @@ function PageSeo({
   type = "website",
   noIndex = false,
   brandName = DEFAULT_BRAND_NAME,
+  structuredData = null,
 }) {
   const { pathname } = useLocation();
 
@@ -116,6 +163,8 @@ function PageSeo({
   const canonicalUrl = createAbsoluteUrl(canonicalPath || pathname || "/");
 
   const imageUrl = createAbsoluteUrl(image);
+
+  const structuredDataJson = createStructuredDataJson(structuredData);
 
   const robotsContent = noIndex ? "noindex, nofollow" : "index, follow";
 
@@ -149,7 +198,8 @@ function PageSeo({
     updateMeta({
       attribute: "property",
       value: "og:title",
-      content: safeTitle,
+      content:
+      structuredDataJson,
     });
 
     updateMeta({
@@ -173,7 +223,8 @@ function PageSeo({
     updateMeta({
       attribute: "name",
       value: "twitter:title",
-      content: safeTitle,
+      content:
+      structuredDataJson,
     });
 
     updateMeta({
@@ -183,6 +234,7 @@ function PageSeo({
     });
 
     updateCanonicalLink(canonicalUrl);
+    updateStructuredData(structuredDataJson);
 
     if (safeKeywords) {
       updateMeta({
@@ -220,6 +272,14 @@ function PageSeo({
         value: "twitter:image",
       });
     }
+
+    return () => {
+      const element = document.getElementById(STRUCTURED_DATA_ELEMENT_ID);
+
+      if (element?.textContent === structuredDataJson) {
+        element.remove();
+      }
+    };
   }, [
     canonicalUrl,
     imageUrl,
@@ -228,6 +288,7 @@ function PageSeo({
     safeDescription,
     safeKeywords,
     safeTitle,
+    structuredDataJson,
     type,
   ]);
 

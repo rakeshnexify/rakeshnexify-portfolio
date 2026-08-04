@@ -640,11 +640,11 @@ Status: Accepted
 
 The latest verified client build reports a main JavaScript chunk of:
 
-`757.00 kB`
+`802.82 kB`
 
 The latest verified gzip size is:
 
-`171.07 kB`
+`178.23 kB`
 
 ## Decision
 
@@ -669,57 +669,139 @@ Performance work should be handled carefully rather than mixed into unrelated fe
 
 # Decision 021 — Implement the Dynamic Team Management System
 
-Status: Implemented in Parts
+Status: Implemented
 
 ## Decision
 
-The Dynamic Team Management System is an approved major module.
+The Dynamic Team Management System is an approved and implemented major module.
 
-The backend and Admin management frontend are complete.
+The completed implementation includes:
 
-The public Team website integration is the next incomplete part.
+- Dynamic Team backend
+- Protected Admin Team management frontend
+- Public Team listing and member-details pages
+- Homepage Team section
+- Team Site Settings content
+- Module-level publication controls
+- Navbar, public-header and Footer integration
+- Visibility-aware public routes
+- XML sitemap integration
+- Member-specific SEO
+- JSON-LD structured data
+- Runtime and browser validation
 
 ## Completed Scope
+
+### Backend
 
 - `TeamMember` model
 - `teamMembers` MongoDB collection
 - Public Team API
 - Public Team member-details API
 - Protected Admin Team CRUD API
+- Hidden-member protection
+- Hidden related-record filtering
+- Search and filtering
+- Role-based permissions
+- Member-specific SEO fields
+
+### Admin Frontend
+
 - Admin Team dashboard module
 - Admin Team listing page
 - Admin Team create page
 - Admin Team edit page
-- Visibility
-- Featured status
-- Display order
-- Social links
-- Project relations
-- Company relations
-- Service relations
-- Member-specific SEO fields
-- Browser-tested Admin workflow
+- Reusable Team form
+- Relationship selectors
+- Visibility and featured quick actions
+- Role-restricted permanent deletion
+- Browser-tested create, edit, filter and delete workflows
 
-## Pending Scope
+### Public Website
 
 - Public Team API service
-- Public Team hooks
-- Homepage Team section
+- Public Team list hook
+- Public Team member-detail hook
+- Reusable `TeamMemberCard`
+- Homepage `TeamSection`
 - `/team` listing page
-- `/team/:slug` details page
-- Module-level publication settings
-- Navbar integration
-- Sitemap integration
-- Public Team SEO rendering
-- Responsive and accessibility testing
+- `/team/:slug` member-details page
+- Loading, error, empty and not-found states
+- Related Projects display
+- Related Companies display
+- Related Services display
+- Responsive related-record grids
+- Profile-image initials fallback
+- Portfolio, website and social-profile links
 
-## Verified Backend Checkpoint
+### Site Settings and Publication
+
+- Team section content in Site Settings
+- Independent homepage visibility
+- Independent Navbar visibility
+- Independent dedicated-page visibility
+- Homepage display order
+- Navbar display order
+- Dynamic navigation label
+- Visibility-aware Navbar, public header and Footer links
+
+### Sitemap and SEO
+
+- `/team` sitemap entry
+- Visible `/team/:slug` sitemap entries
+- Hidden-member sitemap filtering
+- Public-page visibility sitemap filtering
+- Canonical URLs
+- Open Graph metadata
+- Twitter metadata
+- Member-specific SEO title, description, keywords and sharing image
+- Reusable JSON-LD support in `PageSeo`
+- `/team` `CollectionPage` and `ItemList` JSON-LD
+- `/team/:slug` `ProfilePage` and `Person` JSON-LD
+- Invalid-member `noindex, nofollow` protection
+- Stale structured-data cleanup during route changes
+
+## Validation
+
+Verified behavior includes:
+
+- Public APIs return visible Team members only
+- Hidden members return `404`
+- Hidden related records are excluded from public details
+- Quick Hide and Show actions work
+- Homepage Team section renders live API data
+- Public Team routes respect publication settings
+- Disabling the Team public page removes all Team sitemap URLs
+- Restoring the Team public page restores Team sitemap URLs
+- Team listing metadata and JSON-LD were browser-tested
+- Team member metadata and JSON-LD were browser-tested
+- Invalid-member indexing protection was browser-tested
+- Temporary `Public Team Test` data was permanently deleted
+
+Current valid public Team record:
+
+- Name: `Rakesh Pandit`
+- Slug: `rakesh-pandit`
+- Visibility: enabled
+
+Current valid Team sitemap URLs:
+
+- `https://rakeshnexify.com/team`
+- `https://rakeshnexify.com/team/rakesh-pandit`
+
+## Verified Checkpoints
+
+Backend:
 
 `90cb41b Add dynamic team backend APIs`
 
-## Verified Admin Frontend Checkpoint
+Admin frontend:
 
 `95578b5 Add dynamic team admin management`
+
+Documentation checkpoint:
+
+`504705d Synchronize team phase documentation`
 
 ## Current Phase
 
@@ -727,7 +809,7 @@ The public Team website integration is the next incomplete part.
 
 Status:
 
-`Ready to start`
+`IMPLEMENTATION COMPLETE — FINAL DOCUMENTATION, VALIDATION, COMMIT AND PUSH PENDING`
 
 ---
 
@@ -838,6 +920,51 @@ Team member information is real professional content and must be managed through
 - Testing may use temporary records.
 - Temporary test records must be deleted after validation.
 - Public Team pages must support a proper empty state.
+
+---
+
+# Decision 025 — Use Visibility-Aware Team SEO, Sitemap and Structured Data
+
+Status: Accepted and Implemented
+
+## Decision
+
+The public Team module must use the same publication state across public routing, navigation and XML sitemap behavior.
+
+Individual Team member visibility and module-level public-page visibility are separate controls.
+
+The shared `PageSeo` component supports page-specific JSON-LD so structured data remains reusable and route-aware.
+
+## Rules
+
+- Hidden Team members must not appear in public Team APIs.
+- Hidden Team members must not appear in Team member sitemap URLs.
+- Hidden Team members must return `404` from public member-details APIs.
+- Disabling the Team public page must block `/team` and `/team/:slug`.
+- Disabling the Team public page must remove all Team URLs from the sitemap.
+- Homepage Team visibility must remain independent from dedicated-page visibility.
+- Team navigation links must respect publication settings.
+- Unavailable Team member profiles must use `noindex, nofollow`.
+- Valid Team listing pages use `CollectionPage` and `ItemList` JSON-LD.
+- Valid Team member pages use `ProfilePage` and `Person` JSON-LD.
+- Structured-data scripts must be removed when a route no longer supplies valid structured data.
+
+## Reason
+
+Using one consistent publication model prevents hidden or disabled Team content from remaining discoverable through direct routes, navigation, search metadata or sitemap URLs.
+
+Reusable JSON-LD support avoids duplicating document-head manipulation in individual pages.
+
+## Consequence
+
+Future dynamic public modules should follow the same separation between:
+
+- Record-level visibility
+- Homepage visibility
+- Navbar visibility
+- Dedicated-page visibility
+- Sitemap visibility
+- SEO indexing behavior
 
 ---
 

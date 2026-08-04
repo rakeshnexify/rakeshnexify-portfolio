@@ -6,6 +6,7 @@ import HeroSection from "../components/sections/HeroSection";
 import ProjectsSection from "../components/sections/ProjectsSection";
 import ServicesSection from "../components/sections/ServicesSection";
 import StatisticsSection from "../components/sections/StatisticsSection";
+import TeamSection from "../components/sections/TeamSection";
 import AboutSection from "../components/sections/AboutSection";
 import Footer from "../components/layout/Footer";
 import Navbar from "../components/layout/Navbar";
@@ -19,6 +20,7 @@ const sectionComponents = {
   statistics: StatisticsSection,
   services: ServicesSection,
   projects: ProjectsSection,
+  team: TeamSection,
   companies: CompaniesSection,
   contact: ContactSection,
 };

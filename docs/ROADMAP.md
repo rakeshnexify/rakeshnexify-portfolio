@@ -349,11 +349,11 @@ The documentation set is ready to serve as permanent repository memory.
 
 ## Phase 13 — Dynamic Team Management System
 
-Status: IN PROGRESS
+Status: IMPLEMENTATION COMPLETE — FINAL DOCUMENTATION, VALIDATION, COMMIT AND PUSH PENDING
 
-The Team backend and protected Admin management interface are complete and validated.
+The Team backend, protected Admin management interface and public Team website integration are complete and validated.
 
-The remaining work is the public Team website, module-level Site Settings, navigation, sitemap, SEO and final responsive accessibility validation.
+The current remaining work is final documentation synchronization, repository-wide validation, commit and push.
 
 ### Backend
 
@@ -543,9 +543,9 @@ Verified project checks:
 
 ### Public Website
 
-Status: READY TO START — CURRENT DEVELOPMENT PHASE
+Status: IMPLEMENTATION COMPLETE
 
-Planned:
+Completed:
 
 - Public Team API service
 - Public Team list hook
@@ -560,10 +560,12 @@ Planned:
 - Loading state
 - Error state
 - Empty state
-- Responsive mobile layout
-- Keyboard accessibility
-- Screen-reader-friendly labels
+- Not-found state
+- Responsive public layouts
+- Semantic buttons and links
+- Screen-reader helper text for external links
 - Homepage-section registry integration
+- Team placement after Projects and before Companies
 - Team Site Settings content
 - Module-level homepage visibility
 - Module-level Navbar visibility
@@ -572,10 +574,65 @@ Planned:
 - Navbar display order
 - Dynamic public label
 - Navbar integration
-- Sitemap integration
+- Public-page-header integration
+- Footer integration
+- Visibility-aware public routing
+- `/team` sitemap integration
+- Visible-member detail sitemap URLs
+- Hidden-member sitemap filtering
+- Public-page visibility sitemap filtering
 - Member-specific page metadata
 - Canonical URL support
-- Open Graph image support
+- Open Graph metadata
+- Twitter metadata
+- Open Graph image fallback support
+- Reusable JSON-LD support in `PageSeo`
+- `/team` `CollectionPage` structured data
+- `/team` `ItemList` structured data
+- `/team/:slug` `ProfilePage` structured data
+- `/team/:slug` `Person` structured data
+- Invalid-member `noindex, nofollow` protection
+- Stale structured-data cleanup during route changes
+
+Runtime validation completed:
+
+- Public listing displays visible members only
+- Public details return visible members only
+- Hidden members return `404`
+- Related hidden records are excluded
+- Quick Hide action works
+- Quick Show action works
+- Team homepage section renders API data
+- Team Navbar link respects publication settings
+- Team Footer link respects publication settings
+- Disabling the public Team page blocks Team public routes
+- Disabling the public Team page removes Team sitemap URLs
+- Restoring the public Team page restores Team sitemap URLs
+- Team listing SEO metadata was browser-tested
+- Team member SEO metadata was browser-tested
+- Team listing JSON-LD was browser-tested
+- Team member JSON-LD was browser-tested
+- Invalid-member SEO protection was browser-tested
+- Temporary `Public Team Test` record was permanently deleted
+
+Current valid public Team record:
+
+- Name: `Rakesh Pandit`
+- Slug: `rakesh-pandit`
+- Visibility: enabled
+
+Current valid Team sitemap URLs:
+
+- `https://rakeshnexify.com/team`
+- `https://rakeshnexify.com/team/rakesh-pandit`
+
+Final phase-close validation still required:
+
+- Run complete server syntax and configured project checks
+- Run the final production build
+- Review the complete implementation diff
+- Complete documentation synchronization
+- Commit and push the verified phase
 
 ### Team Data Policy
 
@@ -799,23 +856,23 @@ Planned:
 
 ## Current Immediate Next Step
 
-Complete and push the small post-commit Team documentation synchronization.
+Complete the final Phase 13 documentation synchronization.
 
-Then begin:
+Required order:
 
-`Step 6.9D — Public Team Website Integration`
+1. Update `docs/PROJECT_OVERVIEW.md`.
+2. Update `docs/PROJECT_STRUCTURE.md`.
+3. Update `docs/DECISIONS.md`.
+4. Search all project documentation for stale Team planning references.
+5. Run server syntax checks.
+6. Run `npm run check`.
+7. Run `npm run build`.
+8. Run `git diff --check`.
+9. Review `git status --short`.
+10. Review the complete diff.
+11. Stage only verified implementation and documentation files.
+12. Run staged-diff validation.
+13. Commit with:
 
-The first implementation file should be:
-
-`client/src/services/teamApi.js`
-
-This service will consume:
-
-- `GET /api/team`
-- `GET /api/team/:slug`
-
-## Next Major Feature
-
-`Step 6.9D — Public Team Website Integration`
-
-The next phase will build the public Team listing, Team member details, homepage Team section, Site Settings integration, navigation, sitemap, SEO and accessibility behavior.
+```text
+Add public team website integration

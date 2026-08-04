@@ -73,7 +73,7 @@ Frontend source path:
 
 Current frontend source file count:
 
-`98`
+`105`
 
 ## Client Source Tree
 
@@ -96,6 +96,7 @@ client/src/
 │   ├── seo/
 │   ├── services/
 │   ├── statistics/
+│   ├── team/
 │   └── ui/
 ├── config/
 ├── context/
@@ -210,13 +211,27 @@ Current component:
 
 ### Team
 
-Public Team components have not been created yet.
-
-Planned next-phase path:
+Path:
 
 `client/src/components/team/`
 
-The public module is expected to include a reusable Team member card and related-content components.
+Current component:
+
+- `TeamMemberCard.jsx`
+
+Purpose:
+
+Renders a reusable public Team member card with:
+
+- Profile image or initials fallback
+- Name and professional role
+- Team position
+- Short introduction
+- Skills and tools
+- Status and availability
+- Featured state
+- Social, website and portfolio links
+- Public member-details route
 
 ## Layout Components
 
@@ -234,7 +249,13 @@ Current files:
 - `Section.jsx`
 - `SectionHeading.jsx`
 
-These components provide shared page structure and responsive behavior.
+These components provide shared page structure, navigation and responsive behavior.
+
+Team integration exists in:
+
+- `Navbar.jsx`
+- `PublicPageHeader.jsx`
+- `Footer.jsx`
 
 ## Homepage Sections
 
@@ -249,8 +270,11 @@ Current sections:
 - `StatisticsSection.jsx`
 - `ServicesSection.jsx`
 - `ProjectsSection.jsx`
+- `TeamSection.jsx`
 - `CompaniesSection.jsx`
 - `ContactSection.jsx`
+
+`TeamSection.jsx` loads visible Team records, sorts featured members first, renders a homepage preview and links to the dedicated Team page.
 
 Contact form component:
 
@@ -264,7 +288,18 @@ Path:
 
 Purpose:
 
-Handles dynamic public-page SEO metadata.
+Handles dynamic public-page SEO metadata, including:
+
+- Page title
+- Description
+- Keywords
+- Canonical URL
+- Robots directives
+- Open Graph metadata
+- Twitter metadata
+- Social-sharing image
+- JSON-LD structured data
+- Structured-data cleanup during route changes
 
 ## Shared UI Components
 
@@ -294,6 +329,8 @@ Stores frontend API configuration behavior.
 ### `homepageSections.js`
 
 Defines and merges supported homepage-section settings.
+
+The Team section is registered after Projects and before Companies.
 
 ### `siteSettingsPages.js`
 
@@ -334,6 +371,8 @@ This folder should contain frontend fallback or static support data only where r
 
 Database-managed content should not be duplicated here unnecessarily.
 
+No fake or default Team member data should be added.
+
 ---
 
 # Client Hooks
@@ -352,17 +391,22 @@ Current hooks:
 - `useServices.js`
 - `useSiteSettings.js`
 - `useStatistics.js`
+- `useTeamMembers.js`
+- `useTeamMember.js`
 
 Purpose:
 
 Keeps API-loading and reusable state logic outside page components.
 
-Planned public Team hooks for the next development phase:
+Team hooks:
 
-- `useTeamMembers.js`
-- `useTeamMember.js`
+### `useTeamMembers.js`
 
-These hooks have not been created yet because the current completed frontend scope is Admin Team management.
+Loads the public visible Team member collection and exposes loading, error and refresh state.
+
+### `useTeamMember.js`
+
+Loads one public Team member by slug and exposes loading, error, HTTP status and refresh state.
 
 ---
 
@@ -381,9 +425,37 @@ Current public pages:
 - `ServicesPage.jsx`
 - `ProjectsPage.jsx`
 - `ProjectDetailsPage.jsx`
+- `TeamPage.jsx`
+- `TeamMemberDetailsPage.jsx`
 - `CompaniesPage.jsx`
 - `CompanyDetailsPage.jsx`
 - `NotFoundPage.jsx`
+
+Team pages:
+
+### `TeamPage.jsx`
+
+Provides:
+
+- Dedicated `/team` listing
+- Loading, error and empty states
+- Featured-first and display-order sorting
+- Reusable Team member cards
+- Canonical and social metadata
+- `CollectionPage` and `ItemList` JSON-LD
+
+### `TeamMemberDetailsPage.jsx`
+
+Provides:
+
+- Dedicated `/team/:slug` profile
+- Member biography, skills and tools
+- Contact, portfolio, website and social links
+- Related Projects, Companies and Services
+- Loading, error and not-found states
+- Member-specific metadata
+- `ProfilePage` and `Person` JSON-LD
+- `noindex, nofollow` for unavailable profiles
 
 ## Admin Pages
 
@@ -425,13 +497,18 @@ Current files:
 
 Contains the main public and Admin route definitions.
 
+Current public Team routes:
+
+- `/team`
+- `/team/:slug`
+
 Current Admin Team routes:
 
 - `/admin/team`
 - `/admin/team/new`
 - `/admin/team/:id/edit`
 
-Public `/team` routes are still pending.
+The public Team routes are wrapped by `PublicPageVisibilityRoute` with the `team` section key.
 
 ### `ProtectedAdminRoute.jsx`
 
@@ -459,6 +536,7 @@ Current public API services:
 - `servicesApi.js`
 - `statisticsApi.js`
 - `projectsApi.js`
+- `teamApi.js`
 - `companiesApi.js`
 - `contactMessageApi.js`
 
@@ -473,13 +551,20 @@ Current Admin API services:
 - `adminCompaniesApi.js`
 - `adminContactMessagesApi.js`
 
-Completed Team Admin API service:
+Team API services:
 
-- `adminTeamMembersApi.js`
+### `teamApi.js`
 
-Planned public Team API service:
+Consumes:
 
-- `teamApi.js`
+- `GET /api/team`
+- `GET /api/team/:slug`
+
+Supports public list filters and public member-details loading.
+
+### `adminTeamMembersApi.js`
+
+Consumes protected Admin Team CRUD endpoints.
 
 ---
 
@@ -504,6 +589,36 @@ Purpose:
 Handles form conversion, validation helpers, normalization and reusable data transformations.
 
 `teamMemberForm.js` contains Team form defaults, API-data conversion, slug generation and payload normalization.
+
+`siteSettingsForm.js` includes Team section content conversion and request-payload handling.
+
+---
+
+# Client Team Integration Files
+
+The completed public Team module also modifies these shared files:
+
+```text
+client/src/components/admin/site-settings/SiteSettingsForm.jsx
+client/src/components/layout/Footer.jsx
+client/src/components/layout/Navbar.jsx
+client/src/components/layout/PublicPageHeader.jsx
+client/src/components/seo/PageSeo.jsx
+client/src/config/homepageSections.js
+client/src/pages/HomePage.jsx
+client/src/routes/AppRoutes.jsx
+client/src/utils/siteSettingsForm.js
+```
+
+Responsibilities:
+
+- Register Team as a homepage and navigation module
+- Render the homepage Team section
+- Add Team links to public navigation surfaces
+- Add Team Site Settings fields
+- Control Team homepage, Navbar and public-page visibility
+- Add public Team routes
+- Support Team SEO and JSON-LD
 
 ---
 
@@ -554,6 +669,7 @@ Responsibilities include:
 - Protected Admin Team API mounting
 - Sitemap mounting
 - Production client delivery
+- Public Team deep-route fallback documentation
 - Not Found handling
 - Error handling
 
@@ -586,6 +702,8 @@ Responsibilities:
 - CORS origins
 - Helmet policies
 - Shared homepage-section definitions
+
+`homepageSections.js` registers Team after Projects and before Companies.
 
 ---
 
@@ -623,6 +741,17 @@ Team controller files:
 
 - `teamMember.controller.js`
 - `adminTeamMember.controller.js`
+
+Team-related shared controller files:
+
+- `adminSiteSettings.controller.js`
+- `sitemap.controller.js`
+
+Responsibilities:
+
+- Save `teamSection` Site Settings content
+- Load visible Team member slugs for sitemap generation
+- Respect Team public-page publication settings
 
 ---
 
@@ -691,6 +820,8 @@ Current models:
 - `ContactMessage.js`
 
 `TeamMember.js` stores dynamic Team profiles, publication controls, SEO fields and cross-module relationships.
+
+`SiteSettings.js` stores Team section content and the shared section publication settings.
 
 All new models should document:
 
@@ -779,6 +910,37 @@ Handles Admin access-token creation and verification.
 
 Builds dynamic XML sitemap output.
 
+Team sitemap responsibilities:
+
+- Add `/team` when the Team public page is enabled
+- Add visible `/team/:slug` member URLs
+- Exclude hidden Team members
+- Remove all Team URLs when the Team public page is disabled
+
+---
+
+# Server Team Integration Files
+
+The completed public Team integration modifies these shared server files:
+
+```text
+server/src/app.js
+server/src/config/homepageSections.js
+server/src/controllers/adminSiteSettings.controller.js
+server/src/controllers/sitemap.controller.js
+server/src/models/SiteSettings.js
+server/src/utils/createSitemapXml.js
+```
+
+Responsibilities:
+
+- Register Team in shared homepage-section configuration
+- Store Team section content
+- Save Team section content through Admin Site Settings
+- Add Team listing and detail URLs to the sitemap
+- Respect Team visibility and public-page settings
+- Document production deep-route support
+
 ---
 
 # Documentation Structure
@@ -807,6 +969,10 @@ The documentation folder is the permanent continuation memory for future ChatGPT
 
 # Current Team Module Structure
 
+Status:
+
+`IMPLEMENTATION COMPLETE — FINAL DOCUMENTATION, VALIDATION, COMMIT AND PUSH PENDING`
+
 ## Completed Backend
 
 ```text
@@ -817,7 +983,7 @@ server/src/routes/teamMember.routes.js
 server/src/routes/adminTeamMember.routes.js
 ```
 
-Integration file:
+Primary integration file:
 
 ```text
 server/src/app.js
@@ -833,16 +999,14 @@ client/src/services/adminTeamMembersApi.js
 client/src/utils/teamMemberForm.js
 ```
 
-Integration files:
+Admin integration files:
 
 ```text
 client/src/pages/admin/AdminDashboardPage.jsx
 client/src/routes/AppRoutes.jsx
 ```
 
-## Pending Public Frontend
-
-Expected next-phase files may include:
+## Completed Public Frontend
 
 ```text
 client/src/components/team/TeamMemberCard.jsx
@@ -854,7 +1018,69 @@ client/src/pages/TeamPage.jsx
 client/src/pages/TeamMemberDetailsPage.jsx
 ```
 
-Only create these files when their implementation step begins.
+## Completed Client Integration
+
+```text
+client/src/components/admin/site-settings/SiteSettingsForm.jsx
+client/src/components/layout/Footer.jsx
+client/src/components/layout/Navbar.jsx
+client/src/components/layout/PublicPageHeader.jsx
+client/src/components/seo/PageSeo.jsx
+client/src/config/homepageSections.js
+client/src/pages/HomePage.jsx
+client/src/routes/AppRoutes.jsx
+client/src/utils/siteSettingsForm.js
+```
+
+## Completed Server Integration
+
+```text
+server/src/app.js
+server/src/config/homepageSections.js
+server/src/controllers/adminSiteSettings.controller.js
+server/src/controllers/sitemap.controller.js
+server/src/models/SiteSettings.js
+server/src/utils/createSitemapXml.js
+```
+
+## Public Routes
+
+```text
+/team
+/team/:slug
+```
+
+## Admin Routes
+
+```text
+/admin/team
+/admin/team/new
+/admin/team/:id/edit
+```
+
+## API Routes
+
+```text
+GET    /api/team
+GET    /api/team/:slug
+GET    /api/admin/team
+POST   /api/admin/team
+GET    /api/admin/team/:id
+PATCH  /api/admin/team/:id
+DELETE /api/admin/team/:id
+```
+
+## Current Valid Team Data
+
+```text
+Name: Rakesh Pandit
+Slug: rakesh-pandit
+Public visibility: enabled
+```
+
+No fake or default Team member records should be added.
+
+Temporary test records must be permanently deleted after validation.
 
 ---
 

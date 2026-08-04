@@ -13,6 +13,11 @@ const publicPageDefinitions = [
     key: "projects",
     pathname: "/projects",
   },
+
+  {
+    key: "team",
+    pathname: "/team",
+  },
   {
     key: "companies",
     pathname: "/companies",
@@ -176,6 +181,7 @@ function removeDuplicateEntries(entries) {
 export function createSitemapXml({
   projects = [],
   companies = [],
+  teamMembers = [],
   sections = [],
 } = {}) {
   const staticPaths = createStaticPaths(sections);
@@ -191,6 +197,13 @@ export function createSitemapXml({
       })
     : [];
 
+  const teamMemberEntries = isPublicPageVisible(sections, "team")
+    ? createDynamicEntries({
+        items: teamMembers,
+        basePath: "/team",
+      })
+    : [];
+
   const companyEntries = isPublicPageVisible(sections, "companies")
     ? createDynamicEntries({
         items: companies,
@@ -201,6 +214,7 @@ export function createSitemapXml({
   const sitemapEntries = removeDuplicateEntries([
     ...staticEntries,
     ...projectEntries,
+    ...teamMemberEntries,
     ...companyEntries,
   ]);
 

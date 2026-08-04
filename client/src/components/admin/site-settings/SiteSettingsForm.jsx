@@ -35,6 +35,7 @@ const dedicatedPageSectionKeys = new Set([
   "statistics",
   "services",
   "projects",
+  "team",
   "companies",
 ]);
 
@@ -203,6 +204,10 @@ function validateDynamicContentUrls(formValues, errors) {
       value: formValues?.projectsSection?.ctaButton?.url,
     },
     {
+      fieldName: "teamSection.ctaButton.url",
+      value: formValues?.teamSection?.ctaButton?.url,
+    },
+    {
       fieldName: "companiesSection.ctaButton.url",
       value: formValues?.companiesSection?.ctaButton?.url,
     },
@@ -265,6 +270,14 @@ function prepareInitialValues(initialValues = {}) {
 
       ctaButton: {
         ...normalizedValues.projectsSection.ctaButton,
+      },
+    },
+
+    teamSection: {
+      ...normalizedValues.teamSection,
+
+      ctaButton: {
+        ...normalizedValues.teamSection.ctaButton,
       },
     },
 
@@ -1250,6 +1263,17 @@ function SiteSettingsForm({
         description="Manage the heading, description and call-to-action displayed above your public projects."
         fieldName="projectsSection"
         values={formValues.projectsSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Team Section Content"
+        description="Manage the heading, description and call-to-action displayed above your public Team members."
+        fieldName="teamSection"
+        values={formValues.teamSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}

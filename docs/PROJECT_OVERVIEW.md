@@ -1,4 +1,4 @@
-﻿# Project Overview
+# Project Overview
 
 Last updated: 2026-08-04
 
@@ -20,13 +20,16 @@ Remote repository:
 
 `origin/main`
 
-Latest pushed Team Admin frontend commit:
+Latest pushed documentation checkpoint:
 
-`95578b5 Add dynamic team admin management`
+`504705d Synchronize team phase documentation`
 
-Previous Team backend commit:
+Previous Team implementation commits:
 
-`90cb41b Add dynamic team backend APIs`
+- `95578b5 Add dynamic team admin management`
+- `90cb41b Add dynamic team backend APIs`
+
+The completed public Team website, Team Site Settings, navigation, sitemap, SEO and structured-data changes currently exist as uncommitted local work.
 
 ## Project Purpose
 
@@ -144,6 +147,8 @@ Authorized Admin users should be able to:
 - Production Express server
 - Dynamic sitemap
 - SEO metadata
+- JSON-LD structured data
+- Visibility-aware public routing
 
 ### Development Tools
 
@@ -173,6 +178,7 @@ The client handles:
 - Error states
 - Responsive layouts
 - SEO rendering
+- JSON-LD rendering
 - Public visibility behavior
 
 ### Server Responsibilities
@@ -220,18 +226,24 @@ The project currently includes:
 - Companies management
 - Team backend APIs
 - Team Admin management
+- Public Team website
 - Contact messages management
 - Dynamic homepage section registry
 - Dynamic Navbar controls
 - Independent public-page visibility
 - Dynamic Footer
 - Dynamic SEO metadata
-- Dynamic XML sitemap
+- Reusable JSON-LD support
+- Dynamic visibility-aware XML sitemap
 - Public Not Found page
 - Production server configuration
 - Repository-memory documentation system
 
 ## Dynamic Team Management Status
+
+Overall status:
+
+`IMPLEMENTATION COMPLETE — FINAL DOCUMENTATION, VALIDATION, COMMIT AND PUSH PENDING`
 
 ### Completed Backend
 
@@ -246,6 +258,8 @@ The project currently includes:
 - Project, Company and Service relationships
 - Visibility, featured and order controls
 - Member-specific SEO fields
+- Hidden-member protection on public endpoints
+- Hidden related-record protection on public details
 - Runtime API validation
 - Backend Git checkpoint pushed in commit `90cb41b`
 
@@ -263,20 +277,55 @@ The project currently includes:
 - Browser-tested create, update, filter and delete workflows
 - Admin frontend Git checkpoint pushed in commit `95578b5`
 
-### Pending Public Team Frontend
+### Completed Public Team Website
 
 - Public Team API service
-- Public Team hooks
-- Reusable Team member card
+- Public Team listing hook
+- Public Team member-detail hook
+- Reusable public Team member card
 - `/team` listing page
-- `/team/:slug` details page
+- `/team/:slug` member-details page
+- Loading, error, empty and not-found states
 - Homepage Team section
-- Site Settings Team content
-- Team module publication controls
+- Team placement after Projects and before Companies
+- Related Projects display
+- Related Companies display
+- Related Services display
+- Full-width responsive related-record grids
+- Profile-image fallback initials
+- Portfolio, website and social-profile links
+- Team Site Settings content
+- Independent homepage visibility
+- Independent Navbar visibility
+- Independent public-page visibility
 - Navbar integration
-- Sitemap integration
+- Public-page-header integration
+- Footer integration
+- Visibility-aware public routes
+- XML sitemap integration
+- Visible-member sitemap filtering
+- Hidden-member sitemap filtering
+- Team public-page sitemap filtering
 - Member-specific public SEO
-- Responsive and accessibility testing
+- Canonical URLs
+- Open Graph and Twitter metadata
+- Team listing `CollectionPage` and `ItemList` JSON-LD
+- Team member `ProfilePage` and `Person` JSON-LD
+- Invalid-member `noindex, nofollow` protection
+- Stale structured-data cleanup during route changes
+- API and browser runtime validation
+- Temporary Team test-record deletion
+
+Current valid public Team member:
+
+- Name: `Rakesh Pandit`
+- Slug: `rakesh-pandit`
+- Visibility: enabled
+
+Current valid Team sitemap URLs:
+
+- `https://rakeshnexify.com/team`
+- `https://rakeshnexify.com/team/rakesh-pandit`
 
 ## Current Homepage Sections
 
@@ -287,8 +336,9 @@ Currently implemented homepage sections include:
 3. Statistics
 4. Services
 5. Projects
-6. Companies
-7. Contact
+6. Team
+7. Companies
+8. Contact
 
 The approved long-term homepage order is:
 
@@ -306,30 +356,27 @@ The approved long-term homepage order is:
 
 The final order remains Admin-controlled.
 
-The Team homepage section is still pending and should be placed after Projects and before Companies when implemented.
+The current Team section is placed after Projects and before Companies.
 
 ## Existing Public Routes
 
 The project currently supports public frontend routes for:
 
-- Homepage
-- Statistics
-- Services
-- Projects
-- Project details
-- Companies
-- Company details
+- Homepage: `/`
+- Statistics: `/statistics`
+- Services: `/services`
+- Projects: `/projects`
+- Project details: `/projects/:slug`
+- Team: `/team`
+- Team member details: `/team/:slug`
+- Companies: `/companies`
+- Company details: `/companies/:slug`
 - Public Not Found page
 
-The Team backend already exposes:
+Public Team API routes:
 
 - `GET /api/team`
 - `GET /api/team/:slug`
-
-The public frontend routes are still pending:
-
-- `/team`
-- `/team/:slug`
 
 ## Existing Admin Areas
 
@@ -381,7 +428,7 @@ Or it may be completely disabled.
 
 Disabled pages should not remain accessible through direct routes or the sitemap.
 
-Team member records already support member-level:
+Team member records support member-level:
 
 - `isVisible`
 - `isFeatured`
@@ -389,7 +436,23 @@ Team member records already support member-level:
 - `status`
 - `availabilityStatus`
 
-Team module-level publication settings remain pending.
+The Team module also supports independent:
+
+- Homepage section visibility
+- Navbar visibility
+- Dedicated public-page visibility
+- Homepage display order
+- Navbar display order
+- Dynamic public navigation label
+
+Validated Team visibility behavior:
+
+- Hidden Team members are excluded from public APIs and sitemap URLs.
+- Disabling the Team public page blocks `/team` and `/team/:slug`.
+- Disabling the Team public page removes all Team URLs from the sitemap.
+- Homepage visibility remains independent from dedicated-page visibility.
+- Navbar and Footer links respect Team publication settings.
+- Restoring the Team public page restores the Team routes and sitemap URLs.
 
 ## Design Direction
 
@@ -447,11 +510,11 @@ Vite currently reports a JavaScript bundle larger than 500 kB after minification
 
 Latest verified main JavaScript bundle:
 
-`757.00 kB`
+`802.82 kB`
 
 Latest verified gzip size:
 
-`171.07 kB`
+`178.23 kB`
 
 This warning is not blocking current development.
 
@@ -473,21 +536,47 @@ Current phase:
 
 Status:
 
-`READY TO START`
+`IMPLEMENTATION COMPLETE — FINAL DOCUMENTATION, VALIDATION, COMMIT AND PUSH PENDING`
 
-Latest pushed Team Admin frontend commit:
+Latest pushed documentation checkpoint:
 
-`95578b5 Add dynamic team admin management`
+`504705d Synchronize team phase documentation`
 
-Previous Team backend commit:
+Previous Team implementation commits:
 
-`90cb41b Add dynamic team backend APIs`
+- `95578b5 Add dynamic team admin management`
+- `90cb41b Add dynamic team backend APIs`
+
+The completed public Team website, Team Site Settings, navigation, sitemap, SEO and structured-data changes currently exist as uncommitted local work.
 
 ## Current Major Feature Phase
 
 `Step 6.9D — Public Team Website Integration`
 
-This phase includes public Team pages, homepage integration, module publication controls, navigation, sitemap, SEO, responsive testing and accessibility testing.
+Completed scope:
+
+- Public Team listing and details pages
+- Homepage Team integration
+- Module-level publication controls
+- Navbar, public-header and Footer integration
+- Visibility-aware public routing
+- XML sitemap integration
+- Member-specific SEO
+- `CollectionPage`, `ItemList`, `ProfilePage` and `Person` JSON-LD
+- Invalid-member indexing protection
+- API and browser runtime testing
+- Temporary test-record cleanup
+
+Remaining phase-close work:
+
+- Synchronize remaining documentation
+- Run complete server and project validation
+- Review the complete implementation diff
+- Commit the verified Public Team integration
+- Push `main` to `origin`
+- Confirm a clean working tree
+
+Final comprehensive responsive and accessibility regression testing remains part of the phase-close validation.
 
 ## Source of Truth
 
