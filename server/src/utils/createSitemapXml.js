@@ -6,6 +6,10 @@ const publicPageDefinitions = [
     pathname: "/statistics",
   },
   {
+    key: "skills",
+    pathname: "/skills",
+  },
+  {
     key: "services",
     pathname: "/services",
   },

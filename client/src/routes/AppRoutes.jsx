@@ -9,6 +9,7 @@ import NotFoundPage from "../pages/NotFoundPage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ServicesPage from "../pages/ServicesPage";
+import SkillsPage from "../pages/SkillsPage";
 import StatisticsPage from "../pages/StatisticsPage";
 import TeamPage from "../pages/TeamPage";
 import TeamMemberDetailsPage from "../pages/TeamMemberDetailsPage";
@@ -237,6 +238,10 @@ function AppRoutes() {
             element={<PublicPageVisibilityRoute sectionKey="statistics" />}
           >
             <Route path="/statistics" element={<StatisticsPage />} />
+          </Route>
+
+          <Route element={<PublicPageVisibilityRoute sectionKey="skills" />}>
+            <Route path="/skills" element={<SkillsPage />} />
           </Route>
 
           <Route element={<PublicPageVisibilityRoute sectionKey="services" />}>

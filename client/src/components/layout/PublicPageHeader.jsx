@@ -41,6 +41,17 @@ const defaultNavigationItems = [
     navigationOrder: 3,
   },
   {
+    key: "skills",
+    label: "Skills",
+    href: "/skills",
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 4,
+    navigationOrder: 4,
+  },
+  {
     key: "services",
     label: "Services",
     href: "/services",
@@ -48,8 +59,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 4,
-    navigationOrder: 4,
+    order: 5,
+    navigationOrder: 5,
   },
   {
     key: "projects",
@@ -59,8 +70,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 5,
-    navigationOrder: 5,
+    order: 6,
+    navigationOrder: 6,
   },
   {
     key: "team",
@@ -70,8 +81,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 6,
-    navigationOrder: 6,
+    order: 7,
+    navigationOrder: 7,
   },
   {
     key: "companies",
@@ -81,8 +92,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 7,
-    navigationOrder: 7,
+    order: 8,
+    navigationOrder: 8,
   },
   {
     key: "contact",
@@ -92,8 +103,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 8,
-    navigationOrder: 8,
+    order: 9,
+    navigationOrder: 9,
   },
 ];
 

@@ -33,6 +33,7 @@ const platformGroupFields = [
  */
 const dedicatedPageSectionKeys = new Set([
   "statistics",
+  "skills",
   "services",
   "projects",
   "team",
@@ -196,6 +197,10 @@ function validateDynamicContentUrls(formValues, errors) {
       value: formValues?.statisticsSection?.ctaButton?.url,
     },
     {
+      fieldName: "skillsSection.ctaButton.url",
+      value: formValues?.skillsSection?.ctaButton?.url,
+    },
+    {
       fieldName: "servicesSection.ctaButton.url",
       value: formValues?.servicesSection?.ctaButton?.url,
     },
@@ -255,6 +260,14 @@ function prepareInitialValues(initialValues = {}) {
         typeof initialValues.seo?.keywordsText === "string"
           ? initialValues.seo.keywordsText
           : normalizedValues.seo.keywordsText,
+    },
+
+    skillsSection: {
+      ...normalizedValues.skillsSection,
+
+      ctaButton: {
+        ...normalizedValues.skillsSection.ctaButton,
+      },
     },
 
     servicesSection: {
@@ -1241,6 +1254,17 @@ function SiteSettingsForm({
         description="Manage the heading, description and call-to-action displayed with your public portfolio statistics."
         fieldName="statisticsSection"
         values={formValues.statisticsSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Skills Section Content"
+        description="Manage the heading, description and call-to-action displayed above your public Skills."
+        fieldName="skillsSection"
+        values={formValues.skillsSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}

@@ -453,6 +453,8 @@ function createSiteSettingsFormValues(settings = {}) {
 
     statisticsSection: normalizeListingSection(settings?.statisticsSection),
 
+    skillsSection: normalizeListingSection(settings?.skillsSection),
+
     servicesSection: normalizeListingSection(settings?.servicesSection),
 
     projectsSection: normalizeListingSection(settings?.projectsSection),
@@ -607,6 +609,8 @@ function createSiteSettingsPayload(formValues = {}) {
     },
 
     statisticsSection: createListingSectionPayload(values.statisticsSection),
+
+    skillsSection: createListingSectionPayload(values.skillsSection),
 
     servicesSection: createListingSectionPayload(values.servicesSection),
 

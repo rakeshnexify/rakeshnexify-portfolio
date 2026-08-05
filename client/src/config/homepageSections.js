@@ -27,8 +27,8 @@ const homepageSectionDefinitions = [
     navigationOrder: 3,
   },
   {
-    key: "services",
-    label: "Services",
+    key: "skills",
+    label: "Skills",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -36,8 +36,8 @@ const homepageSectionDefinitions = [
     navigationOrder: 4,
   },
   {
-    key: "projects",
-    label: "Projects",
+    key: "services",
+    label: "Services",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -45,8 +45,8 @@ const homepageSectionDefinitions = [
     navigationOrder: 5,
   },
   {
-    key: "team",
-    label: "Team",
+    key: "projects",
+    label: "Projects",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -54,8 +54,8 @@ const homepageSectionDefinitions = [
     navigationOrder: 6,
   },
   {
-    key: "companies",
-    label: "Companies",
+    key: "team",
+    label: "Team",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -63,13 +63,22 @@ const homepageSectionDefinitions = [
     navigationOrder: 7,
   },
   {
-    key: "contact",
-    label: "Contact",
+    key: "companies",
+    label: "Companies",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
     order: 8,
     navigationOrder: 8,
+  },
+  {
+    key: "contact",
+    label: "Contact",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 9,
+    navigationOrder: 9,
   },
 ];
 

@@ -14,6 +14,7 @@ const platformGroupFields = [
 
 const listingSectionFields = [
   "statisticsSection",
+  "skillsSection",
   "servicesSection",
   "projectsSection",
   "teamSection",

@@ -23,39 +23,46 @@ const defaultNavigationSections = [
     order: 2,
   },
   {
+    key: "skills",
+    label: "Skills",
+    href: "/skills",
+    isVisible: true,
+    order: 3,
+  },
+  {
     key: "services",
     label: "Services",
     href: "/services",
     isVisible: true,
-    order: 3,
+    order: 4,
   },
   {
     key: "projects",
     label: "Projects",
     href: "/projects",
     isVisible: true,
-    order: 4,
+    order: 5,
   },
   {
     key: "team",
     label: "Team",
     href: "/team",
     isVisible: true,
-    order: 5,
+    order: 6,
   },
   {
     key: "companies",
     label: "Companies",
     href: "/companies",
     isVisible: true,
-    order: 6,
+    order: 7,
   },
   {
     key: "contact",
     label: "Contact",
     href: "/#contact",
     isVisible: true,
-    order: 7,
+    order: 8,
   },
 ];
 
@@ -64,6 +71,7 @@ const defaultSectionByKey = Object.fromEntries(
 );
 
 const dedicatedPageSectionKeys = new Set([
+  "skills",
   "services",
   "projects",
   "team",

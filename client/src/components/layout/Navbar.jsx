@@ -37,8 +37,8 @@ const defaultNavigationSections = [
     navigationOrder: 3,
   },
   {
-    key: "services",
-    label: "Services",
+    key: "skills",
+    label: "Skills",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -46,8 +46,8 @@ const defaultNavigationSections = [
     navigationOrder: 4,
   },
   {
-    key: "projects",
-    label: "Projects",
+    key: "services",
+    label: "Services",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -55,8 +55,8 @@ const defaultNavigationSections = [
     navigationOrder: 5,
   },
   {
-    key: "team",
-    label: "Team",
+    key: "projects",
+    label: "Projects",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -64,8 +64,8 @@ const defaultNavigationSections = [
     navigationOrder: 6,
   },
   {
-    key: "companies",
-    label: "Companies",
+    key: "team",
+    label: "Team",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -73,13 +73,22 @@ const defaultNavigationSections = [
     navigationOrder: 7,
   },
   {
-    key: "contact",
-    label: "Contact",
+    key: "companies",
+    label: "Companies",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
     order: 8,
     navigationOrder: 8,
+  },
+  {
+    key: "contact",
+    label: "Contact",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 9,
+    navigationOrder: 9,
   },
 ];
 
@@ -95,6 +104,10 @@ const sectionDestinations = {
   statistics: {
     type: "page",
     target: "/statistics",
+  },
+  skills: {
+    type: "page",
+    target: "/skills",
   },
   services: {
     type: "page",
