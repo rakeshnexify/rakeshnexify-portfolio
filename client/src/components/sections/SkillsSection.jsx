@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 
+import { mergeHomepageSections } from "../../config/homepageSections";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import useSkills from "../../hooks/useSkills";
 import Container from "../layout/Container";
@@ -159,6 +160,18 @@ function SkillsSection() {
     defaultSectionContent.ctaButton.url,
   );
 
+  const skillsPublicationSection = useMemo(() => {
+    return mergeHomepageSections(settings?.sections).find(
+      (section) => section.key === "skills",
+    );
+  }, [settings?.sections]);
+
+  const shouldShowCta =
+    !(
+      skillsPublicationSection?.isPageVisible === false &&
+      ["/skills", "/skills/"].includes(ctaUrl)
+    );
+
   const skills = useMemo(() => {
     const sourceSkills = Array.isArray(loadedSkills) ? loadedSkills : [];
 
@@ -258,7 +271,7 @@ function SkillsSection() {
           </ResponsiveCardRow>
         )}
 
-        {previewSkills.length > 0 && (
+        {previewSkills.length > 0 && shouldShowCta && (
           <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <p className="font-bold text-slate-950">
