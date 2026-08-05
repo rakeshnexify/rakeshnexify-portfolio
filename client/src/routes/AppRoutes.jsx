@@ -22,12 +22,14 @@ import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
 import AdminProjectsPage from "../pages/admin/AdminProjectsPage";
 import AdminServiceEditorPage from "../pages/admin/AdminServiceEditorPage";
 import AdminServicesPage from "../pages/admin/AdminServicesPage";
+import AdminSkillEditorPage from "../pages/admin/AdminSkillEditorPage";
+import AdminSkillsPage from "../pages/admin/AdminSkillsPage";
+import AdminSiteSettingsEditorPage from "../pages/admin/AdminSiteSettingsEditorPage";
+import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
 import AdminStatisticEditorPage from "../pages/admin/AdminStatisticEditorPage";
 import AdminStatisticsPage from "../pages/admin/AdminStatisticsPage";
 import AdminTeamMemberEditorPage from "../pages/admin/AdminTeamMemberEditorPage";
 import AdminTeamMembersPage from "../pages/admin/AdminTeamMembersPage";
-import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
-import AdminSiteSettingsEditorPage from "../pages/admin/AdminSiteSettingsEditorPage";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
 import PublicPageVisibilityRoute from "./PublicPageVisibilityRoute";
@@ -303,6 +305,16 @@ function AppRoutes() {
           <Route
             path="/admin/statistics/:id/edit"
             element={<AdminStatisticEditorPage mode="edit" />}
+          />
+
+          <Route path="/admin/skills" element={<AdminSkillsPage />} />
+          <Route
+            path="/admin/skills/new"
+            element={<AdminSkillEditorPage mode="create" />}
+          />
+          <Route
+            path="/admin/skills/:id/edit"
+            element={<AdminSkillEditorPage mode="edit" />}
           />
 
           <Route path="/admin/team" element={<AdminTeamMembersPage />} />

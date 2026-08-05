@@ -16,13 +16,19 @@ const dashboardModules = [
     status: "Management ready",
     path: "/admin/services",
   },
-
   {
     title: "Statistics",
     description:
       "Create, edit, reorder, feature and control the visibility of portfolio statistics.",
     status: "Management ready",
     path: "/admin/statistics",
+  },
+  {
+    title: "Skills",
+    description:
+      "Create and manage professional Skills, categories, proficiency levels, experience, display order, featured status and public visibility.",
+    status: "Management ready",
+    path: "/admin/skills",
   },
   {
     title: "Projects",
@@ -63,7 +69,6 @@ function formatRole(role = "") {
 
 function AdminDashboardPage() {
   const navigate = useNavigate();
-
   const { admin, logout } = useAdminAuth();
 
   function handleLogout() {
@@ -125,9 +130,9 @@ function AdminDashboardPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl break-words leading-7 text-slate-400">
-              Manage your portfolio content, services, projects, Team members,
-              companies, enquiries and website settings from this secure
-              dashboard.
+              Manage your portfolio content, services, Skills, projects, Team
+              members, companies, enquiries and website settings from this
+              secure dashboard.
             </p>
           </div>
 
