@@ -198,8 +198,7 @@ function PageSeo({
     updateMeta({
       attribute: "property",
       value: "og:title",
-      content:
-      structuredDataJson,
+      content: safeTitle,
     });
 
     updateMeta({
@@ -223,8 +222,7 @@ function PageSeo({
     updateMeta({
       attribute: "name",
       value: "twitter:title",
-      content:
-      structuredDataJson,
+      content: safeTitle,
     });
 
     updateMeta({

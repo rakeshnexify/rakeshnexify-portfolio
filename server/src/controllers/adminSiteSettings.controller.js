@@ -17,6 +17,7 @@ const listingSectionFields = [
   "skillsSection",
   "servicesSection",
   "projectsSection",
+  "educationSection",
   "teamSection",
   "companiesSection",
 ];

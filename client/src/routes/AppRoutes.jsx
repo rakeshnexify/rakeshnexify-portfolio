@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 import PageSeo from "../components/seo/PageSeo";
 import CompaniesPage from "../pages/CompaniesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
+import EducationPage from "../pages/EducationPage";
 import HomePage from "../pages/HomePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
@@ -248,6 +249,12 @@ function AppRoutes() {
 
           <Route element={<PublicPageVisibilityRoute sectionKey="services" />}>
             <Route path="/services" element={<ServicesPage />} />
+          </Route>
+
+          <Route
+            element={<PublicPageVisibilityRoute sectionKey="education" />}
+          >
+            <Route path="/education" element={<EducationPage />} />
           </Route>
 
           <Route element={<PublicPageVisibilityRoute sectionKey="projects" />}>

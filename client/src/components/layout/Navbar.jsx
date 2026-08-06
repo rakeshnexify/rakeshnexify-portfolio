@@ -64,8 +64,8 @@ const defaultNavigationSections = [
     navigationOrder: 6,
   },
   {
-    key: "team",
-    label: "Team",
+    key: "education",
+    label: "Education",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -73,8 +73,8 @@ const defaultNavigationSections = [
     navigationOrder: 7,
   },
   {
-    key: "companies",
-    label: "Companies",
+    key: "team",
+    label: "Team",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -82,13 +82,22 @@ const defaultNavigationSections = [
     navigationOrder: 8,
   },
   {
-    key: "contact",
-    label: "Contact",
+    key: "companies",
+    label: "Companies",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
     order: 9,
     navigationOrder: 9,
+  },
+  {
+    key: "contact",
+    label: "Contact",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 10,
+    navigationOrder: 10,
   },
 ];
 
@@ -116,6 +125,10 @@ const sectionDestinations = {
   projects: {
     type: "page",
     target: "/projects",
+  },
+  education: {
+    type: "page",
+    target: "/education",
   },
   team: {
     type: "page",

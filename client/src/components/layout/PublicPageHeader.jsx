@@ -74,6 +74,17 @@ const defaultNavigationItems = [
     navigationOrder: 6,
   },
   {
+    key: "education",
+    label: "Education",
+    href: "/education",
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 7,
+    navigationOrder: 7,
+  },
+  {
     key: "team",
     label: "Team",
     href: "/team",
@@ -81,8 +92,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 7,
-    navigationOrder: 7,
+    order: 8,
+    navigationOrder: 8,
   },
   {
     key: "companies",
@@ -92,8 +103,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 8,
-    navigationOrder: 8,
+    order: 9,
+    navigationOrder: 9,
   },
   {
     key: "contact",
@@ -103,8 +114,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 9,
-    navigationOrder: 9,
+    order: 10,
+    navigationOrder: 10,
   },
 ];
 

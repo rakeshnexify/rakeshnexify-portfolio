@@ -17,6 +17,10 @@ const publicPageDefinitions = [
     key: "projects",
     pathname: "/projects",
   },
+  {
+    key: "education",
+    pathname: "/education",
+  },
 
   {
     key: "team",

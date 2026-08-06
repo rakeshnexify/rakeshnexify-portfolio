@@ -36,6 +36,7 @@ const dedicatedPageSectionKeys = new Set([
   "skills",
   "services",
   "projects",
+  "education",
   "team",
   "companies",
 ]);
@@ -209,6 +210,10 @@ function validateDynamicContentUrls(formValues, errors) {
       value: formValues?.projectsSection?.ctaButton?.url,
     },
     {
+      fieldName: "educationSection.ctaButton.url",
+      value: formValues?.educationSection?.ctaButton?.url,
+    },
+    {
       fieldName: "teamSection.ctaButton.url",
       value: formValues?.teamSection?.ctaButton?.url,
     },
@@ -283,6 +288,14 @@ function prepareInitialValues(initialValues = {}) {
 
       ctaButton: {
         ...normalizedValues.projectsSection.ctaButton,
+      },
+    },
+
+    educationSection: {
+      ...normalizedValues.educationSection,
+
+      ctaButton: {
+        ...normalizedValues.educationSection.ctaButton,
       },
     },
 
@@ -1287,6 +1300,17 @@ function SiteSettingsForm({
         description="Manage the heading, description and call-to-action displayed above your public projects."
         fieldName="projectsSection"
         values={formValues.projectsSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Education Section Content"
+        description="Manage the heading, description and call-to-action displayed above your public Education timeline."
+        fieldName="educationSection"
+        values={formValues.educationSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}

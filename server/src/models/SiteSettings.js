@@ -702,6 +702,11 @@ const siteSettingsSchema = new mongoose.Schema(
       default: () => ({}),
     },
 
+    educationSection: {
+      type: listingSectionContentSchema,
+      default: () => ({}),
+    },
+
     teamSection: {
       type: listingSectionContentSchema,
       default: () => ({}),
