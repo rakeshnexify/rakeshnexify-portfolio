@@ -51,25 +51,32 @@ const defaultNavigationSections = [
     order: 6,
   },
   {
+    key: "experience",
+    label: "Experience",
+    href: "/experience",
+    isVisible: true,
+    order: 7,
+  },
+  {
     key: "team",
     label: "Team",
     href: "/team",
     isVisible: true,
-    order: 7,
+    order: 8,
   },
   {
     key: "companies",
     label: "Companies",
     href: "/companies",
     isVisible: true,
-    order: 8,
+    order: 9,
   },
   {
     key: "contact",
     label: "Contact",
     href: "/#contact",
     isVisible: true,
-    order: 9,
+    order: 10,
   },
 ];
 
@@ -82,6 +89,7 @@ const dedicatedPageSectionKeys = new Set([
   "services",
   "projects",
   "education",
+  "experience",
   "team",
   "companies",
 ]);

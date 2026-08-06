@@ -5,6 +5,7 @@ import PageSeo from "../components/seo/PageSeo";
 import CompaniesPage from "../pages/CompaniesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import EducationPage from "../pages/EducationPage";
+import ExperiencePage from "../pages/ExperiencePage";
 import HomePage from "../pages/HomePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
@@ -257,6 +258,12 @@ function AppRoutes() {
             element={<PublicPageVisibilityRoute sectionKey="education" />}
           >
             <Route path="/education" element={<EducationPage />} />
+          </Route>
+
+          <Route
+            element={<PublicPageVisibilityRoute sectionKey="experience" />}
+          >
+            <Route path="/experience" element={<ExperiencePage />} />
           </Route>
 
           <Route element={<PublicPageVisibilityRoute sectionKey="projects" />}>

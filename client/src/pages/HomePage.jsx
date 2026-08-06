@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import CompaniesSection from "../components/sections/CompaniesSection";
 import ContactSection from "../components/sections/ContactSection";
 import EducationSection from "../components/sections/EducationSection";
+import ExperienceSection from "../components/sections/ExperienceSection";
 import HeroSection from "../components/sections/HeroSection";
 import ProjectsSection from "../components/sections/ProjectsSection";
 import ServicesSection from "../components/sections/ServicesSection";
@@ -24,6 +25,7 @@ const sectionComponents = {
   services: ServicesSection,
   projects: ProjectsSection,
   education: EducationSection,
+  experience: ExperienceSection,
   team: TeamSection,
   companies: CompaniesSection,
   contact: ContactSection,
