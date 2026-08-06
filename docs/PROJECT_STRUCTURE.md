@@ -1,6 +1,6 @@
 # Project Structure
 
-Last updated: 2026-08-04
+Last updated: 2026-08-06
 
 ## Project
 
@@ -71,9 +71,9 @@ Frontend source path:
 
 `client/src/`
 
-Current frontend source file count:
+Current frontend source file count after Skills and Education:
 
-`105`
+`125`
 
 ## Client Source Tree
 
@@ -83,18 +83,22 @@ client/src/
 ├── components/
 │   ├── admin/
 │   │   ├── companies/
+│   │   ├── education/
 │   │   ├── projects/
 │   │   ├── services/
 │   │   ├── site-settings/
+│   │   ├── skills/
 │   │   ├── statistics/
 │   │   └── team/
 │   ├── companies/
+│   ├── education/
 │   ├── layout/
 │   ├── projects/
 │   ├── sections/
 │   │   └── contact/
 │   ├── seo/
 │   ├── services/
+│   ├── skills/
 │   ├── statistics/
 │   ├── team/
 │   └── ui/
@@ -149,17 +153,21 @@ Contains reusable Admin forms and editors.
 Current feature folders:
 
 - `companies`
+- `education`
 - `projects`
 - `services`
 - `site-settings`
+- `skills`
 - `statistics`
 - `team`
 
 Important files include:
 
 - `CompanyForm.jsx`
+- `EducationForm.jsx`
 - `ProjectForm.jsx`
 - `ServiceForm.jsx`
+- `SkillForm.jsx`
 - `StatisticForm.jsx`
 - `TeamMemberForm.jsx`
 - `SiteSettingsForm.jsx`
@@ -168,6 +176,50 @@ Important files include:
 - `PlatformSettingsEditor.jsx`
 
 ## Public Feature Components
+
+### Education
+
+Path:
+
+`client/src/components/education/`
+
+Current component:
+
+- `EducationTimelineCard.jsx`
+
+Purpose:
+
+Renders a public Education timeline record with:
+
+- Institution logo or initials fallback
+- Degree and field of study
+- Education type
+- Study dates
+- Current-study and featured badges
+- Grade and location
+- Institution and certificate links
+- Safe HTTP/HTTPS URL handling
+
+### Skills
+
+Path:
+
+`client/src/components/skills/`
+
+Current component:
+
+- `SkillCard.jsx`
+
+Purpose:
+
+Renders a reusable public Skill card with:
+
+- Skill name and short name
+- Category
+- Proficiency level
+- Optional years of experience
+- Icon or image
+- Featured state
 
 ### Companies
 
@@ -268,8 +320,10 @@ Current sections:
 - `HeroSection.jsx`
 - `AboutSection.jsx`
 - `StatisticsSection.jsx`
+- `SkillsSection.jsx`
 - `ServicesSection.jsx`
 - `ProjectsSection.jsx`
+- `EducationSection.jsx`
 - `TeamSection.jsx`
 - `CompaniesSection.jsx`
 - `ContactSection.jsx`
@@ -330,7 +384,7 @@ Stores frontend API configuration behavior.
 
 Defines and merges supported homepage-section settings.
 
-The Team section is registered after Projects and before Companies.
+Skills and Education are registered in the shared homepage and navigation system. Education is currently registered before Team.
 
 ### `siteSettingsPages.js`
 
@@ -390,7 +444,9 @@ Current hooks:
 - `useProjects.js`
 - `useServices.js`
 - `useSiteSettings.js`
+- `useSkills.js`
 - `useStatistics.js`
+- `useEducation.js`
 - `useTeamMembers.js`
 - `useTeamMember.js`
 
@@ -422,8 +478,10 @@ Current public pages:
 
 - `HomePage.jsx`
 - `StatisticsPage.jsx`
+- `SkillsPage.jsx`
 - `ServicesPage.jsx`
 - `ProjectsPage.jsx`
+- `EducationPage.jsx`
 - `ProjectDetailsPage.jsx`
 - `TeamPage.jsx`
 - `TeamMemberDetailsPage.jsx`
@@ -473,7 +531,11 @@ Current Admin pages:
 - `AdminServiceEditorPage.jsx`
 - `AdminStatisticsPage.jsx`
 - `AdminStatisticEditorPage.jsx`
+- `AdminSkillsPage.jsx`
+- `AdminSkillEditorPage.jsx`
 - `AdminProjectsPage.jsx`
+- `AdminEducationPage.jsx`
+- `AdminEducationEditorPage.jsx`
 - `AdminProjectEditorPage.jsx`
 - `AdminTeamMembersPage.jsx`
 - `AdminTeamMemberEditorPage.jsx`
@@ -496,6 +558,23 @@ Current files:
 ### `AppRoutes.jsx`
 
 Contains the main public and Admin route definitions.
+
+Current public Skills and Education routes:
+
+- `/skills`
+- `/education`
+
+Current Admin Skills routes:
+
+- `/admin/skills`
+- `/admin/skills/new`
+- `/admin/skills/:id/edit`
+
+Current Admin Education routes:
+
+- `/admin/education`
+- `/admin/education/new`
+- `/admin/education/:id/edit`
 
 Current public Team routes:
 
@@ -535,7 +614,9 @@ Current public API services:
 - `siteSettingsApi.js`
 - `servicesApi.js`
 - `statisticsApi.js`
+- `skillsApi.js`
 - `projectsApi.js`
+- `educationApi.js`
 - `teamApi.js`
 - `companiesApi.js`
 - `contactMessageApi.js`
@@ -546,7 +627,9 @@ Current Admin API services:
 - `adminSiteSettingsApi.js`
 - `adminServicesApi.js`
 - `adminStatisticsApi.js`
+- `adminSkillsApi.js`
 - `adminProjectsApi.js`
+- `adminEducationApi.js`
 - `adminTeamMembersApi.js`
 - `adminCompaniesApi.js`
 - `adminContactMessagesApi.js`
@@ -580,7 +663,9 @@ Current files:
 - `siteSettingsForm.js`
 - `serviceForm.js`
 - `statisticForm.js`
+- `skillForm.js`
 - `projectForm.js`
+- `educationForm.js`
 - `teamMemberForm.js`
 - `companyForm.js`
 
@@ -632,9 +717,9 @@ Backend source path:
 
 `server/src/`
 
-Current backend source file count:
+Current backend source file count after Skills and Education:
 
-`57`
+`67`
 
 ## Server Source Tree
 
@@ -718,7 +803,9 @@ Path:
 - `siteSettings.controller.js`
 - `service.controller.js`
 - `statistic.controller.js`
+- `skill.controller.js`
 - `project.controller.js`
+- `education.controller.js`
 - `teamMember.controller.js`
 - `company.controller.js`
 - `contactMessage.controller.js`
@@ -730,7 +817,9 @@ Path:
 - `adminSiteSettings.controller.js`
 - `adminService.controller.js`
 - `adminStatistic.controller.js`
+- `adminSkill.controller.js`
 - `adminProject.controller.js`
+- `adminEducation.controller.js`
 - `adminTeamMember.controller.js`
 - `adminCompany.controller.js`
 - `adminContactMessage.controller.js`
@@ -814,6 +903,8 @@ Current models:
 - `SiteSettings.js`
 - `Service.js`
 - `Statistic.js`
+- `Skill.js`
+- `Education.js`
 - `Project.js`
 - `Company.js`
 - `TeamMember.js`
@@ -848,6 +939,8 @@ Path:
 - `siteSettings.routes.js`
 - `service.routes.js`
 - `statistic.routes.js`
+- `skill.routes.js`
+- `education.routes.js`
 - `project.routes.js`
 - `teamMember.routes.js`
 - `company.routes.js`
@@ -859,6 +952,8 @@ Path:
 - `adminSiteSettings.routes.js`
 - `adminService.routes.js`
 - `adminStatistic.routes.js`
+- `adminSkill.routes.js`
+- `adminEducation.routes.js`
 - `adminProject.routes.js`
 - `adminTeamMember.routes.js`
 - `adminCompany.routes.js`
@@ -964,6 +1059,117 @@ Current files:
 All required repository-memory documentation files now exist.
 
 The documentation folder is the permanent continuation memory for future ChatGPT and Codex sessions.
+
+---
+
+# Current Skills Module Structure
+
+Status:
+
+`COMPLETE, VALIDATED AND PUSHED`
+
+Git checkpoints:
+
+- `6aa985c Add dynamic skills backend APIs`
+- `5311e2d Add dynamic skills admin interface`
+- `1bb7e5f Add public Skills section and page`
+- `92966df Fix Skills CTA visibility`
+
+## Backend
+
+```text
+server/src/models/Skill.js
+server/src/controllers/skill.controller.js
+server/src/controllers/adminSkill.controller.js
+server/src/routes/skill.routes.js
+server/src/routes/adminSkill.routes.js
+```
+
+## Admin Frontend
+
+```text
+client/src/components/admin/skills/SkillForm.jsx
+client/src/pages/admin/AdminSkillsPage.jsx
+client/src/pages/admin/AdminSkillEditorPage.jsx
+client/src/services/adminSkillsApi.js
+client/src/utils/skillForm.js
+```
+
+## Public Frontend
+
+```text
+client/src/components/skills/SkillCard.jsx
+client/src/components/sections/SkillsSection.jsx
+client/src/hooks/useSkills.js
+client/src/services/skillsApi.js
+client/src/pages/SkillsPage.jsx
+```
+
+## Routes
+
+```text
+/skills
+/admin/skills
+/admin/skills/new
+/admin/skills/:id/edit
+```
+
+No fake or automatically seeded Skill records should be added.
+
+---
+
+# Current Education Module Structure
+
+Status:
+
+`COMPLETE, VALIDATED AND PUSHED`
+
+Git checkpoints:
+
+- `8fd4cd6 Add dynamic education backend APIs`
+- `2604555 Add dynamic Education admin interface`
+- `6c0e2a1 Add public Education section and page`
+
+## Backend
+
+```text
+server/src/models/Education.js
+server/src/controllers/education.controller.js
+server/src/controllers/adminEducation.controller.js
+server/src/routes/education.routes.js
+server/src/routes/adminEducation.routes.js
+```
+
+## Admin Frontend
+
+```text
+client/src/components/admin/education/EducationForm.jsx
+client/src/pages/admin/AdminEducationPage.jsx
+client/src/pages/admin/AdminEducationEditorPage.jsx
+client/src/services/adminEducationApi.js
+client/src/utils/educationForm.js
+```
+
+## Public Frontend
+
+```text
+client/src/components/education/EducationTimelineCard.jsx
+client/src/components/sections/EducationSection.jsx
+client/src/hooks/useEducation.js
+client/src/services/educationApi.js
+client/src/pages/EducationPage.jsx
+```
+
+## Routes
+
+```text
+/education
+/admin/education
+/admin/education/new
+/admin/education/:id/edit
+```
+
+No fake or automatically seeded Education records should be added.
 
 ---
 

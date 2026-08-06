@@ -1,6 +1,6 @@
 ﻿# Project Roadmap
 
-Last updated: 2026-08-04
+Last updated: 2026-08-06
 
 ## Project
 
@@ -93,6 +93,8 @@ Completed:
 - Services management
 - Statistics management
 - Projects management
+- Skills management
+- Education management
 - Team Members management
 - Companies management
 - Contact messages management
@@ -295,6 +297,8 @@ Completed:
 - Dynamic descriptions
 - Dynamic keywords
 - Canonical URLs
+- Skills listing metadata and JSON-LD
+- Education listing metadata and safe JSON-LD
 - Open Graph image support
 - Dynamic sitemap
 - Visibility-aware sitemap filtering
@@ -657,47 +661,164 @@ Final phase-close validation completed:
 - Team records must be created dynamically through the protected Admin interface.
 - Temporary validation records must be deleted after testing.
 
-## Phase 14 — Skills Management
+## Phase 14 — Dynamic Skills Management
 
-Status: PLANNED
+Status: COMPLETE — IMPLEMENTED, VALIDATED, COMMITTED AND PUSHED
 
-Planned:
+Verified checkpoints:
 
-- Skills database model
-- Skill categories
-- Skill level
-- Icon or image
+- `6aa985c Add dynamic skills backend APIs`
+- `5311e2d Add dynamic skills admin interface`
+- `1bb7e5f Add public Skills section and page`
+- `92966df Fix Skills CTA visibility`
+
+Completed:
+
+- `Skill` model and `skills` collection
+- Private normalized Skill-name key
+- Unique slug
+- Category and proficiency level
+- Optional years of experience
+- Icon and image URL support
+- Public Skills API
+- Protected Admin Skills CRUD API
+- Search and practical filters
+- RBAC
+- Admin listing, create and edit pages
+- Visibility and featured quick actions
+- Role-restricted permanent delete
+- Homepage Skills section
+- Public `/skills` page
+- Category grouping
+- Dynamic Site Settings content
+- Independent homepage, Navbar and public-page visibility
+- Navbar, public-header and Footer integration
+- Dynamic SEO and JSON-LD
+- Visibility-aware sitemap
+- Loading, error and empty states
+- Runtime, browser and Codex validation
+- Skills CTA visibility correction
+- Temporary validation data cleanup
+
+Deferred:
+
+- `/skills/:slug`
+- Record-specific Skill SEO
+- Dynamic Skill Category model
+- Complex Team and Project relations
+- Endorsements
+- Drag-and-drop
+- Bulk import or export
+
+## Phase 15 — Dynamic Education Management
+
+Status: COMPLETE — IMPLEMENTED, VALIDATED, COMMITTED AND PUSHED
+
+Verified checkpoints:
+
+- `8fd4cd6 Add dynamic education backend APIs`
+- `2604555 Add dynamic Education admin interface`
+- `6c0e2a1 Add public Education section and page`
+
+Completed:
+
+- `Education` model and `education` collection
+- Education-type enum
+- Strict calendar dates
+- End-date range validation
+- Current-study end-date clearing
+- Private normalized duplicate identity
+- Institution, certificate and logo URL validation
+- Public Education API
+- Protected Admin Education CRUD API
+- Search and practical filters
+- RBAC
+- Admin listing, create and edit pages
+- Visibility and featured quick actions
+- Role-restricted permanent delete
+- Homepage Education timeline
+- Public `/education` page
+- Four-record preview
+- Institution logo or initials fallback
+- Current and featured badges
+- Dynamic Site Settings content
+- Independent homepage, Navbar and public-page visibility
+- Navbar, public-header and Footer integration
+- Dynamic SEO and safe JSON-LD
+- Visibility-aware sitemap
+- Loading, error and empty states
+- Mongoose 9 middleware correction
+- Runtime, browser and Codex validation
+- Temporary validation data cleanup
+
+Deferred:
+
+- `/education/:slug`
+- Record-specific Education SEO
+- Institution model
+- Cross-module relations
+- Transcript or certificate file upload
+- Drag-and-drop
+- Bulk import or export
+
+## Phase 17 — Dynamic Experience Management
+
+Status: PLANNED — PLANNING APPROVED
+
+Approved MVP:
+
+- `Experience` model
+- `experiences` collection
+- Professional work and freelance records
+- Employment type
+- Start and end dates
+- Current-position flag
+- Location and location type
+- Short and full descriptions
+- Responsibilities
+- Achievements
+- Skills and tools string arrays
+- Optional organization logo
+- Optional organization website
 - Visibility
 - Featured status
 - Display order
-- Admin CRUD
-- Homepage section
-- Dedicated Skills page
-- Team relation
-- Project relation
+- Protected Admin CRUD
+- Search and practical filters
+- Homepage Experience timeline
+- Dedicated `/experience` page
+- Dynamic Site Settings content
+- Independent publication controls
+- Dynamic listing-page SEO
+- Sitemap support
+- Loading, error and empty states
+- Responsive and accessible UI
+- Runtime validation
+- Documentation synchronization
 
-## Phase 15 — Experience and Timeline
+MVP exclusions:
 
-Status: PLANNED
+- Education duplication
+- Separate status enum
+- `/experience/:slug`
+- Individual Experience SEO pages
+- Cross-module relations
+- Pagination
+- Fake or automatically seeded records
 
-Planned:
+Recommended major steps:
 
-- Experience database model
-- Work experience
-- Freelance experience
-- Education timeline
-- Certification timeline
-- Start and end dates
-- Current-position flag
-- Organization relation
-- Visibility
-- Display order
-- Admin CRUD
-- Homepage timeline
-- Dedicated Experience page
-- SEO support
+1. Repository audit and final contract
+2. Model and validation
+3. Public and Admin backend APIs
+4. Frontend services, hook and form utility
+5. Admin interface
+6. Public page and homepage timeline
+7. Shared publication, SEO and sitemap
+8. Final testing, Codex review and documentation
 
-## Phase 16 — Testimonials
+
+## Phase 17 — Testimonials
 
 Status: PLANNED
 
@@ -719,7 +840,7 @@ Planned:
 - Dedicated Testimonials page
 - Structured data review
 
-## Phase 17 — Blog or News
+## Phase 18 — Blog or News
 
 Status: PLANNED
 
@@ -741,7 +862,7 @@ Planned:
 - Sitemap integration
 - Search and filters
 
-## Phase 18 — Media Management
+## Phase 19 — Media Management
 
 Status: PLANNED
 
@@ -758,7 +879,7 @@ Planned:
 - Cloud storage integration
 - Reuse across Projects, Companies, Team and Blog
 
-## Phase 19 — Email and Notifications
+## Phase 20 — Email and Notifications
 
 Status: PLANNED
 
@@ -772,7 +893,7 @@ Planned:
 - Delivery failure handling
 - Safe environment variables
 
-## Phase 20 — Testing and Quality Assurance
+## Phase 21 — Testing and Quality Assurance
 
 Status: PLANNED
 
@@ -792,7 +913,7 @@ Planned:
 - Error-state testing
 - Cross-browser testing
 
-## Phase 21 — Performance Optimization
+## Phase 22 — Performance Optimization
 
 Status: REVIEW
 
@@ -814,7 +935,7 @@ Planned review:
 - Compression
 - Production caching headers
 
-## Phase 22 — Dependency Security Review
+## Phase 23 — Dependency Security Review
 
 Status: REVIEW
 
@@ -831,7 +952,7 @@ Required process:
 5. Test updates on a separate branch when appropriate.
 6. Never apply `npm audit fix --force` without reviewing breaking changes.
 
-## Phase 23 — Final Production Deployment
+## Phase 24 — Final Production Deployment
 
 Status: PLANNED
 
@@ -854,7 +975,7 @@ Planned:
 - Create backup strategy
 - Add monitoring and logs
 
-## Phase 24 — Post-Launch Maintenance
+## Phase 25 — Post-Launch Maintenance
 
 Status: PLANNED
 
@@ -873,37 +994,24 @@ Planned:
 
 ## Current Immediate Next Step
 
-Complete the final post-commit documentation checkpoint for Phase 13.
-
-Current documentation-only scope:
-
-- `docs/CURRENT_STATUS.md`
-- `docs/SESSION_HANDOFF.md`
-- `docs/ROADMAP.md`
-- `docs/PROJECT_OVERVIEW.md`
-- `docs/PROJECT_STRUCTURE.md`
-- `docs/DECISIONS.md`
+Complete the Skills and Education documentation-only checkpoint.
 
 Required order:
 
-1. Replace all six files with their final synchronized versions.
-2. Search documentation for stale pending or uncommitted Team references.
+1. Review the complete documentation diff.
+2. Confirm only the intended nine documentation files are modified.
 3. Run `git diff --check -- docs`.
-4. Review `git diff -- docs`.
-5. Confirm only the intended documentation files are modified.
-6. Stage the verified documentation files.
-7. Run `git diff --cached --check`.
-8. Review the staged file names and summary.
-9. Commit the documentation-only checkpoint.
-10. Push `main` to `origin`.
-11. Confirm `HEAD`, `origin/main` and `origin/HEAD` are synchronized.
-12. Confirm the working tree is clean.
-13. Select the next major roadmap feature.
+4. Stage only the verified documentation files.
+5. Run `git diff --cached --check`.
+6. Review staged file names and summary.
+7. Commit the documentation checkpoint.
+8. Push `main` to `origin`.
+9. Confirm `HEAD`, `origin/main` and `origin/HEAD` are synchronized.
+10. Confirm the working tree is clean.
+11. Start Experience Step 1 repository audit.
 
 Recommended documentation commit message:
 
 ```text
-Finalize team phase documentation
+Synchronize Skills and Education documentation
 ```
-
-After this documentation checkpoint, Phase 13 is fully closed. The next major implementation phase should be selected from the planned roadmap rather than started implicitly.

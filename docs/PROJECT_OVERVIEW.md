@@ -1,6 +1,6 @@
 # Project Overview
 
-Last updated: 2026-08-04
+Last updated: 2026-08-06
 
 ## Project Name
 
@@ -22,15 +22,21 @@ Remote repository:
 
 Latest pushed development commit:
 
-`7ca4f6c Add public team website integration`
+`6c0e2a1 Add public Education section and page`
 
-Previous Team checkpoints:
+Recent Education checkpoints:
 
-- `504705d Synchronize team phase documentation`
-- `95578b5 Add dynamic team admin management`
-- `90cb41b Add dynamic team backend APIs`
+- `2604555 Add dynamic Education admin interface`
+- `8fd4cd6 Add dynamic education backend APIs`
 
-The complete Dynamic Team implementation is committed and pushed to `origin/main`.
+Recent Skills checkpoints:
+
+- `92966df Fix Skills CTA visibility`
+- `1bb7e5f Add public Skills section and page`
+- `5311e2d Add dynamic skills admin interface`
+- `6aa985c Add dynamic skills backend APIs`
+
+Skills, Education and the previously completed Team implementation are committed and pushed to `origin/main`.
 
 ## Project Purpose
 
@@ -44,8 +50,9 @@ It is designed to present:
 - Completed projects
 - Companies owned or managed
 - Team members
-- Development experience
 - Skills and tools
+- Education
+- Development experience
 - Client testimonials
 - Contact information
 - Social and professional platforms
@@ -73,6 +80,8 @@ This includes:
 - Dedicated public-page visibility
 - Services
 - Statistics
+- Skills
+- Education
 - Projects
 - Companies
 - Team members
@@ -204,6 +213,8 @@ MongoDB stores dynamic data for:
 - Site Settings
 - Services
 - Statistics
+- Skills
+- Education
 - Projects
 - Companies
 - Team members
@@ -223,6 +234,8 @@ The project currently includes:
 - Modular Site Settings pages
 - Services management
 - Statistics management
+- Skills management
+- Education management
 - Projects management
 - Companies management
 - Team backend APIs
@@ -239,6 +252,66 @@ The project currently includes:
 - Public Not Found page
 - Production server configuration
 - Repository-memory documentation system
+
+## Dynamic Skills Management Status
+
+Overall status:
+
+`COMPLETE, VALIDATED AND PUSHED`
+
+Verified checkpoints:
+
+- `6aa985c Add dynamic skills backend APIs`
+- `5311e2d Add dynamic skills admin interface`
+- `1bb7e5f Add public Skills section and page`
+- `92966df Fix Skills CTA visibility`
+
+Completed scope:
+
+- `Skill` model and `skills` collection
+- Public and protected Admin APIs
+- Admin listing, create and edit workflows
+- Search and practical filters
+- Visibility, featured and display-order controls
+- Homepage Skills section
+- Public `/skills` page
+- Dynamic Site Settings content
+- Independent publication controls
+- Navbar, public-header and Footer integration
+- SEO, JSON-LD and sitemap
+- Loading, error and empty states
+- No fake or automatically seeded Skill records
+
+## Dynamic Education Management Status
+
+Overall status:
+
+`COMPLETE, VALIDATED AND PUSHED`
+
+Verified checkpoints:
+
+- `8fd4cd6 Add dynamic education backend APIs`
+- `2604555 Add dynamic Education admin interface`
+- `6c0e2a1 Add public Education section and page`
+
+Completed scope:
+
+- `Education` model and `education` collection
+- Public and protected Admin APIs
+- Strict date validation and current-study behavior
+- Private duplicate identity
+- Admin listing, create and edit workflows
+- Search and practical filters
+- Visibility, featured and display-order controls
+- Homepage Education timeline
+- Public `/education` page
+- Dynamic Site Settings content
+- Independent publication controls
+- Navbar, public-header and Footer integration
+- SEO, safe JSON-LD and sitemap
+- Loading, error and empty states
+- Verified Mongoose 9 middleware correction
+- No fake or automatically seeded Education records
 
 ## Dynamic Team Management Status
 
@@ -335,11 +408,13 @@ Currently implemented homepage sections include:
 1. Hero
 2. About
 3. Statistics
-4. Services
-5. Projects
-6. Team
-7. Companies
-8. Contact
+4. Skills
+5. Services
+6. Projects
+7. Education
+8. Team
+9. Companies
+10. Contact
 
 The approved long-term homepage order is:
 
@@ -365,9 +440,11 @@ The project currently supports public frontend routes for:
 
 - Homepage: `/`
 - Statistics: `/statistics`
+- Skills: `/skills`
 - Services: `/services`
 - Projects: `/projects`
 - Project details: `/projects/:slug`
+- Education: `/education`
 - Team: `/team`
 - Team member details: `/team/:slug`
 - Companies: `/companies`
@@ -386,6 +463,8 @@ The Admin Panel currently includes management areas for:
 - Site Settings
 - Services
 - Statistics
+- Skills
+- Education
 - Projects
 - Team Members
 - Companies
@@ -399,7 +478,6 @@ Current Team Admin routes:
 
 Future Admin areas should include:
 
-- Skills
 - Experience
 - Testimonials
 - Blog or News
@@ -511,11 +589,11 @@ Vite currently reports a JavaScript bundle larger than 500 kB after minification
 
 Latest verified main JavaScript bundle:
 
-`802.82 kB`
+`926.41 kB`
 
 Latest verified gzip size:
 
-`178.23 kB`
+`201.15 kB`
 
 This warning is not blocking current development.
 
@@ -531,57 +609,40 @@ Do not run `npm audit fix --force` without reviewing the affected package and br
 
 ## Current Development Position
 
-Completed phase:
+Active checkpoint:
 
-`Step 6.9D — Public Team Website Integration`
+`Skills and Education documentation synchronization`
 
 Implementation status:
 
-`COMPLETE, VALIDATED AND PUSHED`
+- Skills: complete, validated and pushed
+- Education: complete, validated and pushed
+- Team and earlier modules: complete
 
 Latest pushed development commit:
 
-`7ca4f6c Add public team website integration`
-
-Previous Team checkpoints:
-
-- `504705d Synchronize team phase documentation`
-- `95578b5 Add dynamic team admin management`
-- `90cb41b Add dynamic team backend APIs`
-
-Git state verified after the implementation push:
-
-- `HEAD`, `origin/main` and `origin/HEAD` point to `7ca4f6c`
-- Working tree was clean
-- Root `npm run check` passed
-- `git diff --check` reported no whitespace errors
-- Existing CRLF-to-LF messages remain non-blocking
-
-## Completed Major Feature Phase
-
-`Step 6.9D — Public Team Website Integration`
-
-Completed scope:
-
-- Public Team listing and details pages
-- Homepage Team integration
-- Module-level publication controls
-- Navbar, public-header and Footer integration
-- Visibility-aware public routing
-- XML sitemap integration
-- Member-specific SEO
-- `CollectionPage`, `ItemList`, `ProfilePage` and `Person` JSON-LD
-- Invalid-member indexing protection
-- API and browser runtime testing
-- Temporary test-record cleanup
-- Production build and full root validation
-- Git commit and push to `origin/main`
+`6c0e2a1 Add public Education section and page`
 
 ## Current Immediate Step
 
-Synchronize post-commit status documentation so repository-memory files reference commit `7ca4f6c`.
+1. Validate the nine updated repository-memory documents.
+2. Commit and push the documentation-only checkpoint.
+3. Confirm the working tree is clean.
+4. Start Experience Step 1 repository audit and final contract verification.
 
-After this documentation-only checkpoint is committed and pushed, select the next major roadmap feature.
+Approved next module:
+
+`Fully Dynamic Experience Management Module`
+
+The Experience MVP will use:
+
+- Mongoose model `Experience`
+- MongoDB collection `experiences`
+- Public `/experience`
+- Protected Admin CRUD
+- Homepage Experience timeline
+- No public detail page in the MVP
+- No fake or automatically seeded records
 
 ## Source of Truth
 

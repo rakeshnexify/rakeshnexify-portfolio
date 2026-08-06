@@ -1,6 +1,6 @@
 ﻿# Session Handoff
 
-Last updated: 2026-08-04
+Last updated: 2026-08-06
 
 ## Project
 
@@ -14,89 +14,138 @@ Remote branch: `origin/main`
 
 ## Latest Pushed Development Commit
 
-`7ca4f6c Add public team website integration`
+`6c0e2a1 Add public Education section and page`
 
-This commit completed and published the public Team website, Team Site Settings, navigation, sitemap, SEO and structured-data integration.
+Recent Education checkpoints:
 
-Previous Team checkpoints:
+- `2604555 Add dynamic Education admin interface`
+- `8fd4cd6 Add dynamic education backend APIs`
 
-- `504705d Synchronize team phase documentation`
-- `95578b5 Add dynamic team admin management`
-- `90cb41b Add dynamic team backend APIs`
+Recent Skills checkpoints:
 
-Immediately after the push:
+- `92966df Fix Skills CTA visibility`
+- `1bb7e5f Add public Skills section and page`
+- `5311e2d Add dynamic skills admin interface`
+- `6aa985c Add dynamic skills backend APIs`
 
-- `HEAD`, `origin/main` and `origin/HEAD` pointed to `7ca4f6c`.
-- The working tree was clean.
+Verified before documentation synchronization:
+
+- Working tree was clean.
+- Branch was `main`.
+- `HEAD`, `origin/main` and `origin/HEAD` pointed to `6c0e2a1`.
 
 ## Current Development Phase
 
-Completed phase:
+Active checkpoint:
 
-`Step 6.9D — Public Team Website Integration`
+`Skills and Education documentation synchronization`
 
 Status:
 
-`COMPLETE, VALIDATED, COMMITTED AND PUSHED`
+`IN PROGRESS — DOCUMENTATION ONLY`
 
-The completed Team scope includes:
+The completed Skills and Education implementation must remain unchanged during this checkpoint.
 
-- Dynamic Team backend
-- Protected Admin Team management frontend
-- Public `/team` listing page
-- Public `/team/:slug` member-details page
-- Homepage Team section
-- Navbar, public-header and Footer integration
-- Team Site Settings content and publication controls
-- Visibility-aware Team routes
-- Team sitemap integration
-- Team member SEO metadata
-- `CollectionPage`, `ItemList`, `ProfilePage` and `Person` JSON-LD
-- Runtime, browser and API validation
-- Final production build and root project validation
-- Git commit and push to `origin/main`
+## Completed Skills Module
 
-The temporary `Public Team Test` record was permanently deleted.
+Backend:
 
-The current public Team API contains one valid visible member:
+- `Skill` model and `skills` collection
+- Public `/api/skills`
+- Protected `/api/admin/skills`
+- Unique slug and normalized-name protection
+- Search and practical filters
+- Role-based CRUD
+- Public visibility filtering
+- Root validation integration
 
-- `Rakesh Pandit`
-- Slug: `rakesh-pandit`
+Admin:
 
-The only current phase-close work is the final documentation-only checkpoint.
+- `/admin/skills`
+- `/admin/skills/new`
+- `/admin/skills/:id/edit`
+- Reusable Skill form
+- Search and filters
+- Visibility and featured quick actions
+- Role-restricted delete
+- Browser workflow validation
 
-## Current Git Checkpoints
+Public:
 
-Latest pushed development commit:
+- Homepage Skills section
+- `/skills`
+- Category grouping
+- Dynamic Site Settings content
+- Independent publication controls
+- Navbar, public-header and Footer
+- SEO, JSON-LD and sitemap
+- Loading, error and empty states
 
-`7ca4f6c Add public team website integration`
+## Completed Education Module
 
-Previous Team checkpoints:
+Backend:
 
-- `504705d Synchronize team phase documentation`
-- `95578b5 Add dynamic team admin management`
-- `90cb41b Add dynamic team backend APIs`
+- `Education` model and `education` collection
+- Public `/api/education`
+- Protected `/api/admin/education`
+- Strict dates
+- Current-study behavior
+- Duplicate identity protection
+- URL validation
+- Search and practical filters
+- Role-based CRUD
+- Root validation integration
 
-Verified state immediately after pushing `7ca4f6c`:
+Admin:
 
-- Local `main` matched `origin/main`.
-- `HEAD`, `origin/main` and `origin/HEAD` pointed to `7ca4f6c`.
-- The working tree was clean.
-- Temporary audit files had been removed.
-- Temporary Team test data had been removed.
+- `/admin/education`
+- `/admin/education/new`
+- `/admin/education/:id/edit`
+- Reusable Education form
+- Timeline, grade, location and content fields
+- Institution, certificate and logo URL fields
+- Search and filters
+- Visibility and featured quick actions
+- Role-restricted delete
+- Browser workflow validation
 
-Current intended local state:
+Public:
 
-- Only the six final repository-memory documentation files should be modified.
-- The completed Team implementation should remain unchanged.
-- A documentation-only commit and push remain before Phase 13 is fully closed.
+- Homepage Education timeline
+- `/education`
+- Reusable timeline card
+- Institution logo or initials fallback
+- Current and featured badges
+- Dynamic Site Settings content
+- Independent publication controls
+- Navbar, public-header and Footer
+- SEO, safe JSON-LD and sitemap
+- Loading, error and empty states
 
-Always verify the actual repository state using:
+## Verified Education Runtime Fix
 
-```powershell
-git status --short
-git log --oneline -10 --decorate
-```
+The project used:
+
+`mongoose@9.8.0`
+
+Initial create error:
+
+`next is not a function`
+
+The final `Education` model uses synchronous `pre("validate")` middleware without a callback-style `next` parameter or `next()` call.
+
+Education creation passed after the correction.
+
+## Verified Global SEO Fix
+
+During Education public integration:
+
+- `og:title` was corrected to use `safeTitle`
+- `twitter:title` was corrected to use `safeTitle`
+- Serialized JSON-LD remains only in the structured-data script
+
+Focused Codex re-review reported no blocking or important non-blocking findings.
+
 
 ## Completed Project Foundation
 
@@ -121,14 +170,18 @@ git log --oneline -10 --decorate
 - Hero section
 - About section
 - Statistics section
+- Skills section
 - Services section
 - Projects section
+- Education section
 - Homepage Team section
 - Companies section
 - Contact section
 - Dedicated Statistics listing page
+- Dedicated Skills listing page
 - Dedicated Services listing page
 - Dedicated Projects listing page
+- Dedicated Education listing page
 - Dedicated Team listing page
 - Dedicated Companies listing page
 - Project details page
@@ -151,6 +204,8 @@ git log --oneline -10 --decorate
 - Site Settings management
 - Services management
 - Statistics management
+- Skills management
+- Education management
 - Projects management
 - Team Members management
 - Companies management
@@ -408,7 +463,7 @@ No fake or default Team members should be added.
 
 ## Latest Validation
 
-The following command passed successfully:
+The following command passed after Education public integration:
 
 ```powershell
 npm run check
@@ -417,23 +472,20 @@ npm run check
 Latest verified client production build:
 
 - Vite: `8.1.5`
-- Modules transformed: `124`
-- Main JavaScript bundle: `802.82 kB`
-- Gzip size: `178.23 kB`
+- Modules transformed: `144`
+- Main JavaScript bundle: `926.41 kB`
+- Gzip size: `201.15 kB`
 - Build result: successful
 
-The configured root validation also passed Team backend and shared integration syntax checks.
+The configured root validation passed Skills, Education and shared integration syntax checks.
 
-The implementation was staged as `28` verified files before commit.
-
-The following commands reported no whitespace errors:
+The following command reported no whitespace errors:
 
 ```powershell
 git diff --check
-git diff --cached --check
 ```
 
-Git may show CRLF-to-LF conversion warnings for some frontend files. Those warnings are currently non-blocking.
+Git may show non-blocking CRLF-to-LF conversion warnings.
 
 Development runtime was tested with:
 
@@ -449,7 +501,7 @@ Vite reports that the main JavaScript chunk is larger than 500 kB after minifica
 
 Current verified bundle:
 
-`802.82 kB`
+`926.41 kB`
 
 Status:
 
@@ -487,62 +539,55 @@ No known blocking functional problem exists in the completed Team backend, Admin
 
 ## Documentation Synchronization
 
-The implementation commit `7ca4f6c` is already pushed.
+The completed Skills and Education implementation is already pushed.
 
-The following six repository-memory files are synchronized locally with the completed checkpoint:
+Current documentation-only scope:
 
+- `docs/API_ROUTES.md`
+- `docs/BUGS.md`
 - `docs/CURRENT_STATUS.md`
-- `docs/SESSION_HANDOFF.md`
-- `docs/ROADMAP.md`
+- `docs/DATABASE_SCHEMA.md`
+- `docs/DECISIONS.md`
 - `docs/PROJECT_OVERVIEW.md`
 - `docs/PROJECT_STRUCTURE.md`
-- `docs/DECISIONS.md`
+- `docs/ROADMAP.md`
+- `docs/SESSION_HANDOFF.md`
 
-The remaining work is a documentation-only validation, commit and push.
-
-`docs/API_ROUTES.md` and `docs/DATABASE_SCHEMA.md` were audited and already contain the required Team API and schema documentation.
-
-`docs/BUGS.md` should only be changed when a verified issue or resolved bug needs to be recorded.
+Do not modify implementation files during this checkpoint.
 
 ## Immediate Next Step
 
-Complete the documentation-only Phase 13 checkpoint.
-
-Required order:
-
-1. Confirm the six synchronized documentation files are the only intended changes.
-2. Search all Markdown files for stale Team pending, uncommitted or pre-`7ca4f6c` status statements.
-3. Run `git diff --check -- docs`.
-4. Review the complete documentation diff.
-5. Stage only the six verified documentation files.
-6. Run `git diff --cached --check`.
-7. Review staged file names and the staged summary.
-8. Commit with:
+1. Review the full nine-file documentation diff.
+2. Run `git diff --check -- docs`.
+3. Confirm only the intended documentation files are modified.
+4. Stage the nine verified documentation files.
+5. Run `git diff --cached --check`.
+6. Review staged names and summary.
+7. Commit with:
 
 ```text
-Finalize team phase documentation
+Synchronize Skills and Education documentation
 ```
 
-9. Push `main` to `origin`.
-10. Confirm `HEAD`, `origin/main` and `origin/HEAD` are synchronized.
-11. Confirm the working tree is clean.
-12. Select the next major roadmap feature.
+8. Push `main` to `origin`.
+9. Confirm Git synchronization and a clean working tree.
+10. Start Experience Step 1.
 
-## Team Naming Decisions
+## Approved Experience Direction
 
-Use these names consistently:
-
-- Mongoose model: `TeamMember`
-- MongoDB collection: `teamMembers`
-- Public API: `/api/team`
-- Admin API: `/api/admin/team`
-- Public listing route: `/team`
-- Public details route: `/team/:slug`
-- Admin listing route: `/admin/team`
-- Admin create route: `/admin/team/new`
-- Admin edit route: `/admin/team/:id/edit`
-
-Do not create alternate Team naming conventions without reviewing the existing implementation.
+- Model: `Experience`
+- Collection: `experiences`
+- Public API: `/api/experience`
+- Admin API: `/api/admin/experience`
+- Public route: `/experience`
+- Admin routes:
+  - `/admin/experience`
+  - `/admin/experience/new`
+  - `/admin/experience/:id/edit`
+- No public detail page in the MVP
+- No cross-module relations in the MVP
+- No pagination in the MVP
+- No fake or seeded Experience records
 
 ## Required New-Session Startup
 

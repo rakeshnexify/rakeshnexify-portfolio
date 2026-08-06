@@ -1,6 +1,6 @@
 ﻿# Database Schema
 
-Last updated: 2026-08-04
+Last updated: 2026-08-06
 
 ## Database
 
@@ -42,10 +42,12 @@ The project currently contains these Mongoose models:
 2. `SiteSettings`
 3. `Service`
 4. `Statistic`
-5. `Project`
-6. `Company`
-7. `TeamMember`
-8. `ContactMessage`
+5. `Skill`
+6. `Education`
+7. `Project`
+8. `Company`
+9. `TeamMember`
+10. `ContactMessage`
 
 ---
 
@@ -225,11 +227,23 @@ Uses the reusable listing-section schema:
 - `description`
 - `ctaButton`
 
+### skillsSection
+
+Uses the reusable listing-section schema.
+
 ### servicesSection
 
 Uses the reusable listing-section schema.
 
 ### projectsSection
+
+Uses the reusable listing-section schema.
+
+### educationSection
+
+Uses the reusable listing-section schema.
+
+### teamSection
 
 Uses the reusable listing-section schema.
 
@@ -467,6 +481,290 @@ Text-search fields:
 
 - `label`
 - `description`
+
+---
+
+# Skill
+
+Model file:
+
+`server/src/models/Skill.js`
+
+Mongoose model:
+
+`Skill`
+
+MongoDB collection:
+
+`skills`
+
+This collection stores fully dynamic professional Skills.
+
+## Main Fields
+
+- `name`
+- `nameKey`
+- `slug`
+- `shortName`
+- `description`
+- `category`
+- `proficiencyLevel`
+- `yearsOfExperience`
+- `icon`
+- `iconUrl`
+- `order`
+- `isFeatured`
+- `isVisible`
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
+
+## Proficiency-Level Values
+
+- `familiar`
+- `proficient`
+- `advanced`
+- `expert`
+
+## Duplicate Protection
+
+### nameKey
+
+- Private normalized Skill-name identity
+- Required internally
+- Unique database index
+- Excluded from normal queries using `select: false`
+- Removed by JSON and object transforms
+- Duplicate database errors map to the public `name` field
+
+### slug
+
+- Required
+- Lowercase
+- Unique
+- Uses the project slug format
+
+## Years of Experience
+
+- Optional number
+- Minimum: `0`
+- Maximum: `60`
+- Empty input becomes `null`
+- Decimal values are allowed
+
+## URL Validation
+
+`iconUrl` is optional.
+
+When present:
+
+- Must be a valid URL
+- Must use HTTP or HTTPS
+- Non-web protocols are rejected
+
+## Publication Fields
+
+### order
+
+- Type: Number
+- Minimum: `0`
+- Default: `0`
+
+### isFeatured
+
+- Type: Boolean
+- Default: `false`
+
+### isVisible
+
+- Type: Boolean
+- Default: `true`
+
+## Relations
+
+- `createdBy` references `AdminUser`
+- `updatedBy` references `AdminUser`
+
+## Schema Configuration
+
+- Automatic `createdAt`
+- Automatic `updatedAt`
+- `versionKey: false`
+- Explicit collection name: `skills`
+- Private-field output transforms
+
+## Important Indexes
+
+- Unique slug index
+- Unique normalized `nameKey` index
+- Publication and display-order index
+- Admin filter index
+- Text-search index for current searchable Skill content
+
+---
+
+# Education
+
+Model file:
+
+`server/src/models/Education.js`
+
+Mongoose model:
+
+`Education`
+
+MongoDB collection:
+
+`education`
+
+This collection stores fully dynamic academic qualifications, courses, training and certifications.
+
+## Main Fields
+
+- `institutionName`
+- `identityKey`
+- `slug`
+- `degree`
+- `fieldOfStudy`
+- `educationType`
+- `startDate`
+- `endDate`
+- `isCurrentlyStudying`
+- `grade`
+- `location`
+- `shortDescription`
+- `description`
+- `institutionUrl`
+- `certificateUrl`
+- `logoUrl`
+- `order`
+- `isFeatured`
+- `isVisible`
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
+
+## Education-Type Values
+
+- `school`
+- `college`
+- `university`
+- `course`
+- `training`
+- `certification`
+- `other`
+
+## Timeline Rules
+
+- `startDate` is required.
+- Admin input uses strict `YYYY-MM-DD` calendar validation.
+- `endDate` cannot be earlier than `startDate`.
+- `isCurrentlyStudying: true` forces `endDate` to `null`.
+- Public date formatting is timezone-safe.
+
+## Duplicate Protection
+
+### identityKey
+
+Private normalized identity based on:
+
+- Institution name
+- Degree
+- Field of study
+- Education type
+- Start date
+
+Behavior:
+
+- Required internally
+- Unique database index
+- Excluded from normal queries using `select: false`
+- Removed by JSON and object transforms
+- Duplicate database errors map to `institutionName`
+
+### slug
+
+- Required
+- Lowercase
+- Unique
+- Uses the project slug format
+
+## URL Fields
+
+Optional credential-free HTTP or HTTPS URLs:
+
+- `institutionUrl`
+- `certificateUrl`
+- `logoUrl`
+
+## Publication Fields
+
+### order
+
+- Type: Number
+- Minimum: `0`
+- Default: `0`
+
+### isFeatured
+
+- Type: Boolean
+- Default: `false`
+
+### isVisible
+
+- Type: Boolean
+- Default: `true`
+
+## Relations
+
+- `createdBy` references `AdminUser`
+- `updatedBy` references `AdminUser`
+
+## Schema Configuration
+
+- Automatic `createdAt`
+- Automatic `updatedAt`
+- `versionKey: false`
+- Explicit collection name: `education`
+- Private-field output transforms
+
+## Indexes
+
+Unique slug:
+
+- `slug`
+
+Unique identity:
+
+- `identityKey`
+
+Public listing:
+
+- `isVisible`
+- `isFeatured`
+- `order`
+- `startDate`
+- `_id`
+
+Admin filters:
+
+- `educationType`
+- `isVisible`
+- `isFeatured`
+- `order`
+- `startDate`
+- `_id`
+
+## Mongoose 9 Middleware
+
+The verified final implementation uses synchronous `pre("validate")` middleware without a callback-style `next` argument.
+
+The middleware:
+
+- Clears `endDate` for current-study records
+- Regenerates `identityKey` when identity fields change
 
 ---
 
@@ -1116,6 +1414,10 @@ The following fields reference `AdminUser`:
 - Service `updatedBy`
 - Statistic `createdBy`
 - Statistic `updatedBy`
+- Skill `createdBy`
+- Skill `updatedBy`
+- Education `createdBy`
+- Education `updatedBy`
 - Project `createdBy`
 - Project `updatedBy`
 - Company `createdBy`

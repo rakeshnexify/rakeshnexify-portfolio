@@ -1,6 +1,6 @@
 ﻿# Bugs and Known Issues
 
-Last updated: 2026-08-04
+Last updated: 2026-08-06
 
 ## Purpose
 
@@ -58,16 +58,16 @@ Vite reports:
 
 Latest verified main JavaScript bundle:
 
-`757.00 kB`
+`926.41 kB`
 
 Latest verified gzip size:
 
-`171.07 kB`
+`201.15 kB`
 
 Latest verified build details:
 
 - Vite: `8.1.5`
-- Modules transformed: `117`
+- Modules transformed: `144`
 - Build result: successful
 
 ## Current Impact
@@ -230,7 +230,9 @@ Automated tests are still needed for:
 - Team backend APIs
 - Team Admin form utilities
 - Team Admin authorization
-- Team public frontend after implementation
+- Skills backend, Admin and public workflows
+- Education backend, Admin and public workflows
+- Experience module after implementation
 
 ## Current Impact
 
@@ -524,6 +526,112 @@ The temporary Team test member was deleted after verification.
 No blocking Team Admin frontend problem is currently known.
 
 ---
+
+
+
+# RESOLVED-008 — Education Create Failed Under Mongoose 9
+
+Status: Resolved and Verified
+
+## Previous Error
+
+`next is not a function`
+
+## Location
+
+`server/src/models/Education.js`
+
+## Cause
+
+The synchronous Education `pre("validate")` middleware used the callback-style `next` argument.
+
+The project was running Mongoose `9.8.0`, where this callback pattern is not supported for the middleware implementation used.
+
+## Fix
+
+Changed the middleware to a synchronous function without:
+
+- A `next` parameter
+- A `next()` call
+
+The existing behavior was preserved:
+
+- Current-study records clear `endDate`
+- Education duplicate identity is regenerated when identity fields change
+
+## Verification
+
+- Education creation succeeded.
+- The record appeared in the Admin listing.
+- `npm run check` passed.
+- Codex verified the Mongoose 9 middleware fix.
+
+---
+
+# RESOLVED-009 — Social Titles Received Serialized JSON-LD
+
+Status: Resolved and Verified
+
+## Previous Problem
+
+`og:title` and `twitter:title` were assigned serialized structured-data JSON instead of the page title.
+
+## Location
+
+`client/src/components/seo/PageSeo.jsx`
+
+## Impact
+
+Pages supplying JSON-LD could produce broken social-sharing titles.
+
+## Fix
+
+Both metadata values now use:
+
+`safeTitle`
+
+Structured data remains only in the `application/ld+json` script.
+
+## Verification
+
+- Production build passed.
+- `git diff --check` passed.
+- Focused Codex re-review reported no blocking or important non-blocking findings.
+
+---
+
+# RESOLVED-010 — Education Disabled-Page CTA Variants
+
+Status: Resolved and Verified
+
+## Previous Risk
+
+The homepage CTA was hidden only for exact `/education` and `/education/` values.
+
+Query, fragment and same-site absolute variants could remain visible after the public page was disabled.
+
+## Location
+
+`client/src/components/sections/EducationSection.jsx`
+
+## Fix
+
+The CTA destination is parsed against the canonical site origin.
+
+Same-site destinations whose normalized pathname is `/education` are suppressed when the public Education page is disabled.
+
+Unrelated internal and external CTA destinations remain available.
+
+## Verification
+
+Focused Codex review verified:
+
+- Trailing slash
+- Query
+- Fragment
+- Same-site absolute URL
+- Unrelated destinations
+
 
 # Issue Reporting Template
 

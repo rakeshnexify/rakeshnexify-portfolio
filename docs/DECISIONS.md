@@ -1,6 +1,6 @@
 ﻿# Project Decisions
 
-Last updated: 2026-08-04
+Last updated: 2026-08-06
 
 ## Purpose
 
@@ -640,11 +640,11 @@ Status: Accepted
 
 The latest verified client build reports a main JavaScript chunk of:
 
-`802.82 kB`
+`926.41 kB`
 
 The latest verified gzip size is:
 
-`178.23 kB`
+`201.15 kB`
 
 ## Decision
 
@@ -984,3 +984,194 @@ When replacing an existing decision:
 4. Explain why the decision changed.
 5. Update affected documentation.
 6. Verify implementation before committing.
+
+
+# Decision 026 — Implement the Dynamic Skills Management Module
+
+Status: Accepted and Implemented
+
+## Decision
+
+Use these Skills conventions:
+
+- Mongoose model: `Skill`
+- MongoDB collection: `skills`
+- Public API: `/api/skills`
+- Admin API: `/api/admin/skills`
+- Public page: `/skills`
+- Admin routes:
+  - `/admin/skills`
+  - `/admin/skills/new`
+  - `/admin/skills/:id/edit`
+
+## Approved Scope
+
+- Database-backed Skills
+- Protected Admin CRUD
+- Search and practical filters
+- Category and proficiency
+- Optional years of experience
+- Visibility, featured and order
+- Homepage section
+- Dedicated public page
+- Site Settings
+- Independent publication controls
+- SEO, JSON-LD and sitemap
+
+## Important Decisions
+
+- No public Skill details page
+- No record-specific Skill SEO fields
+- No fake or seeded Skills
+- Private normalized `nameKey` prevents duplicate names
+- Public API excludes Admin audit fields
+- Homepage does not depend on featured records only
+
+## Reason
+
+The portfolio needs maintainable professional Skill content without unnecessary detail-page or relation complexity.
+
+---
+
+# Decision 027 — Implement the Dynamic Education Management Module
+
+Status: Accepted and Implemented
+
+## Decision
+
+Use these Education conventions:
+
+- Mongoose model: `Education`
+- MongoDB collection: `education`
+- Public API: `/api/education`
+- Admin API: `/api/admin/education`
+- Public page: `/education`
+- Admin routes:
+  - `/admin/education`
+  - `/admin/education/new`
+  - `/admin/education/:id/edit`
+
+## Approved Scope
+
+- Institution and qualification fields
+- Education type
+- Start and end dates
+- Current-study behavior
+- Grade and location
+- Short and full descriptions
+- Institution, certificate and logo URLs
+- Visibility, featured and order
+- Homepage timeline
+- Dedicated public page
+- Site Settings
+- Independent publication controls
+- SEO, JSON-LD and sitemap
+
+## Important Decisions
+
+- No `/education/:slug` details page
+- No record-specific SEO fields
+- No cross-module relations
+- No fake or seeded Education records
+- Duplicate identity uses institution, qualification, field, type and start date
+- Current study forces `endDate` to `null`
+- URL values must be credential-free HTTP/HTTPS URLs
+- Public ordering combines featured priority, Admin order and chronological fallback
+
+## Reason
+
+The listing page can present complete Education information without additional detail-route complexity.
+
+---
+
+# Decision 028 — Use Mongoose 9-Compatible Middleware
+
+Status: Accepted
+
+## Decision
+
+Synchronous Mongoose middleware must not accept or call the old callback-style `next` argument.
+
+Use:
+
+```js
+schema.pre("validate", function prepareForValidation() {
+  // synchronous preparation
+});
+```
+
+Do not use:
+
+```js
+schema.pre("validate", function prepareForValidation(next) {
+  next();
+});
+```
+
+## Evidence
+
+The Education create workflow produced:
+
+`next is not a function`
+
+under Mongoose `9.8.0`.
+
+Removing the callback signature fixed the runtime failure.
+
+## Consequence
+
+Future models, including Experience, must use:
+
+- Synchronous middleware without `next`
+- Promise-returning middleware
+- Or `async` middleware
+
+according to actual needs.
+
+---
+
+# Decision 029 — Keep Listing Modules Simple Without Unnecessary Detail Pages
+
+Status: Accepted
+
+## Decision
+
+Skills and Education use dedicated listing pages without record-detail routes.
+
+Experience will initially follow the same rule unless repository evidence proves a detail page has real user or SEO value.
+
+## Reason
+
+A detail route adds:
+
+- Additional public API contract
+- Record-level SEO
+- Sitemap detail URLs
+- Not-found states
+- More publication behavior
+- More maintenance
+
+This complexity is not justified when the listing page can display the complete record.
+
+---
+
+# Decision 030 — Keep Social Metadata Separate From JSON-LD
+
+Status: Accepted and Verified
+
+## Decision
+
+`PageSeo` must use the page title for:
+
+- `og:title`
+- `twitter:title`
+
+Serialized structured data must only be written to the `application/ld+json` script.
+
+## Reason
+
+Using JSON-LD as a social title produces broken sharing previews.
+
+## Verification
+
+The correction was implemented during Education public integration and passed focused Codex re-review.

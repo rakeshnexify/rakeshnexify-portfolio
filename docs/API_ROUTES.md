@@ -1,6 +1,6 @@
 ﻿# API Routes
 
-Last updated: 2026-08-04
+Last updated: 2026-08-06
 
 ## Project
 
@@ -279,6 +279,72 @@ Public behavior should respect:
 
 ---
 
+# Public Skills API
+
+Route file:
+
+`server/src/routes/skill.routes.js`
+
+Mount path:
+
+`/api/skills`
+
+## Get Public Skills
+
+Endpoint:
+
+`GET /api/skills`
+
+Authentication:
+
+Not required.
+
+Controller:
+
+`getPublicSkills`
+
+Purpose:
+
+Returns publicly visible Skill records.
+
+The public listing always applies:
+
+- `isVisible: true`
+- Admin-defined display order
+- Stable created-date fallback sorting
+
+Supported query parameters:
+
+- `search` — Searches Skill name, short name, description and category
+- `category` — Case-insensitive exact category filter
+- `proficiencyLevel` — Proficiency-level filter
+- `featured` — Boolean featured filter using `true` or `false`
+
+Supported `proficiencyLevel` values:
+
+- `familiar`
+- `proficient`
+- `advanced`
+- `expert`
+
+Successful response status:
+
+`200 OK`
+
+Response shape:
+
+```json
+{
+  "success": true,
+  "count": 0,
+  "data": []
+}
+```
+
+No public Skill details endpoint currently exists.
+
+---
+
 # Public Projects API
 
 Route file:
@@ -328,6 +394,77 @@ Path parameter:
 Purpose:
 
 Returns one visible Project for its public details page.
+
+---
+
+# Public Education API
+
+Route file:
+
+`server/src/routes/education.routes.js`
+
+Mount path:
+
+`/api/education`
+
+## Get Public Education Records
+
+Endpoint:
+
+`GET /api/education`
+
+Authentication:
+
+Not required.
+
+Controller:
+
+`getPublicEducation`
+
+Purpose:
+
+Returns publicly visible Education records.
+
+The public listing always applies:
+
+- `isVisible: true`
+- Featured priority
+- Admin-defined display order
+- Newest start-date fallback
+- Stable `_id` fallback
+
+Supported query parameters:
+
+- `search` — Searches institution, degree, field of study, location and descriptions
+- `educationType` — Education-type filter
+- `featured` — Boolean featured filter using `true` or `false`
+- `currentlyStudying` — Boolean current-study filter using `true` or `false`
+
+Supported `educationType` values:
+
+- `school`
+- `college`
+- `university`
+- `course`
+- `training`
+- `certification`
+- `other`
+
+Successful response status:
+
+`200 OK`
+
+Response shape:
+
+```json
+{
+  "success": true,
+  "count": 0,
+  "data": []
+}
+```
+
+No public Education details endpoint currently exists.
 
 ---
 
@@ -451,6 +588,37 @@ Response shape:
   "count": 0,
   "data": []
 }
+```
+
+## Get Public Team Member by Slug
+
+Endpoint:
+
+`GET /api/team/:slug`
+
+Authentication:
+
+Not required.
+
+Controller:
+
+`getPublicTeamMemberBySlug`
+
+Path parameter:
+
+- `slug` — Unique Team member slug
+
+Purpose:
+
+Returns one publicly visible Team member for the public details page.
+
+Public behavior:
+
+- Hidden Team members return `404`.
+- Hidden related Projects, Companies and Services are excluded.
+- Admin audit fields are not exposed.
+
+---
 
 # Public Contact Message API
 
@@ -785,6 +953,112 @@ Controller:
 
 ---
 
+# Admin Skills API
+
+Route file:
+
+`server/src/routes/adminSkill.routes.js`
+
+Mount path:
+
+`/api/admin/skills`
+
+All routes require:
+
+`requireAdminAuth`
+
+## List Skills
+
+Endpoint:
+
+`GET /api/admin/skills`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminSkills`
+
+Supported query parameters:
+
+- `search`
+- `category`
+- `proficiencyLevel`
+- `isVisible`
+- `isFeatured`
+
+## Create Skill
+
+Endpoint:
+
+`POST /api/admin/skills`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`createAdminSkill`
+
+Important behavior:
+
+- Generates a normalized slug when required
+- Enforces unique slug and normalized Skill-name identity
+- Rejects non-object request bodies with a structured `400`
+- Maps duplicate normalized names to `fieldErrors.name`
+
+## Get Skill by ID
+
+Endpoint:
+
+`GET /api/admin/skills/:id`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminSkillById`
+
+## Update Skill
+
+Endpoint:
+
+`PATCH /api/admin/skills/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`updateAdminSkill`
+
+## Delete Skill
+
+Endpoint:
+
+`DELETE /api/admin/skills/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+
+Controller:
+
+`deleteAdminSkill`
+
+---
+
 # Admin Projects API
 
 Route file:
@@ -873,6 +1147,113 @@ Allowed roles:
 Controller:
 
 `deleteAdminProject`
+
+---
+
+# Admin Education API
+
+Route file:
+
+`server/src/routes/adminEducation.routes.js`
+
+Mount path:
+
+`/api/admin/education`
+
+All routes require:
+
+`requireAdminAuth`
+
+## List Education Records
+
+Endpoint:
+
+`GET /api/admin/education`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminEducation`
+
+Supported query parameters:
+
+- `search`
+- `educationType`
+- `isCurrentlyStudying`
+- `isVisible`
+- `isFeatured`
+
+## Create Education Record
+
+Endpoint:
+
+`POST /api/admin/education`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`createAdminEducation`
+
+Important behavior:
+
+- Uses strict `YYYY-MM-DD` calendar validation
+- Generates and validates the slug
+- Enforces unique slug and normalized Education identity
+- Clears `endDate` when `isCurrentlyStudying` is true
+- Returns structured field-level validation errors
+
+## Get Education Record by ID
+
+Endpoint:
+
+`GET /api/admin/education/:id`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminEducationById`
+
+## Update Education Record
+
+Endpoint:
+
+`PATCH /api/admin/education/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`updateAdminEducation`
+
+## Delete Education Record
+
+Endpoint:
+
+`DELETE /api/admin/education/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+
+Controller:
+
+`deleteAdminEducation`
 
 ---
 
@@ -1056,10 +1437,14 @@ Controller:
 - `GET /api/site-settings`
 - `GET /api/services`
 - `GET /api/statistics`
+- `GET /api/skills`
 - `GET /api/projects`
 - `GET /api/projects/:slug`
+- `GET /api/education`
 - `GET /api/companies`
 - `GET /api/companies/:slug`
+- `GET /api/team`
+- `GET /api/team/:slug`
 - `POST /api/contact-messages`
 
 ## Admin Authentication
@@ -1088,6 +1473,14 @@ Controller:
 - `PATCH /api/admin/statistics/:id`
 - `DELETE /api/admin/statistics/:id`
 
+## Admin Skills
+
+- `GET /api/admin/skills`
+- `POST /api/admin/skills`
+- `GET /api/admin/skills/:id`
+- `PATCH /api/admin/skills/:id`
+- `DELETE /api/admin/skills/:id`
+
 ## Admin Projects
 
 - `GET /api/admin/projects`
@@ -1095,6 +1488,14 @@ Controller:
 - `GET /api/admin/projects/:id`
 - `PATCH /api/admin/projects/:id`
 - `DELETE /api/admin/projects/:id`
+
+## Admin Education
+
+- `GET /api/admin/education`
+- `POST /api/admin/education`
+- `GET /api/admin/education/:id`
+- `PATCH /api/admin/education/:id`
+- `DELETE /api/admin/education/:id`
 
 ## Admin Companies
 
@@ -1142,4 +1543,3 @@ Whenever an API route is created, removed or changed:
 6. Document path parameters.
 7. Document important middleware.
 8. Update `docs/SESSION_HANDOFF.md`.
-```
