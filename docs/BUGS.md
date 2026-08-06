@@ -58,16 +58,16 @@ Vite reports:
 
 Latest verified main JavaScript bundle:
 
-`926.41 kB`
+`997.38 kB`
 
 Latest verified gzip size:
 
-`201.15 kB`
+`212.96 kB`
 
 Latest verified build details:
 
 - Vite: `8.1.5`
-- Modules transformed: `144`
+- Modules transformed: `154`
 - Build result: successful
 
 ## Current Impact
@@ -232,7 +232,7 @@ Automated tests are still needed for:
 - Team Admin authorization
 - Skills backend, Admin and public workflows
 - Education backend, Admin and public workflows
-- Experience module after implementation
+- Experience backend, Admin, public page, publication and sitemap workflows
 
 ## Current Impact
 
@@ -296,10 +296,16 @@ Git may report:
 
 `CRLF will be replaced by LF the next time Git touches it`
 
-The warning has been observed for:
+The warning has been observed for several edited Experience integration files, including:
 
-- `client/src/pages/admin/AdminDashboardPage.jsx`
+- `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
+- `client/src/components/layout/Footer.jsx`
+- `client/src/components/layout/Navbar.jsx`
+- `client/src/components/layout/PublicPageHeader.jsx`
+- `client/src/config/homepageSections.js`
 - `client/src/routes/AppRoutes.jsx`
+- `server/src/config/homepageSections.js`
+- `server/src/utils/createSitemapXml.js`
 
 ## Current Impact
 
@@ -632,6 +638,41 @@ Focused Codex review verified:
 - Same-site absolute URL
 - Unrelated destinations
 
+
+
+# RESOLVED-011 — Experience Public-Page and Sitemap Visibility
+
+Status: Resolved and Verified
+
+## Previous Risk
+
+The new public `/experience` route, navigation links, homepage CTA and sitemap entry needed to respect the independent `isPageVisible` publication setting.
+
+## Files Involved
+
+- `client/src/components/sections/ExperienceSection.jsx`
+- `client/src/components/layout/Navbar.jsx`
+- `client/src/components/layout/PublicPageHeader.jsx`
+- `client/src/components/layout/Footer.jsx`
+- `client/src/routes/AppRoutes.jsx`
+- `client/src/config/homepageSections.js`
+- `server/src/config/homepageSections.js`
+- `server/src/utils/createSitemapXml.js`
+
+## Verification
+
+The following states were verified through the Admin Site Settings interface and runtime requests:
+
+- Enabled Experience page appears in navigation and the sitemap.
+- Disabled Experience page is blocked by the public visibility route.
+- Disabled Experience page is removed from Navbar, public header and Footer.
+- Homepage Experience CTA is suppressed when it targets the disabled `/experience` page.
+- Disabled Experience page is removed from `sitemap.xml`.
+- Re-enabling the page restores navigation, direct access and the sitemap entry.
+
+The backend development process required a restart once so the newly edited sitemap utility was loaded. No remaining application defect was found.
+
+---
 
 # Issue Reporting Template
 

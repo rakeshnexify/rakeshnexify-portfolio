@@ -1,6 +1,6 @@
 ﻿# API Routes
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 
 ## Project
 
@@ -197,7 +197,7 @@ Returns public-safe global website settings used by:
 - Owner information
 - Hero
 - About
-- Listing-section content
+- Listing-section content, including Experience section content
 - Contact content
 - Footer
 - Platforms
@@ -465,6 +465,85 @@ Response shape:
 ```
 
 No public Education details endpoint currently exists.
+
+---
+
+
+# Public Experience API
+
+Route file:
+
+`server/src/routes/experience.routes.js`
+
+Mount path:
+
+`/api/experience`
+
+## Get Public Experience Records
+
+Endpoint:
+
+`GET /api/experience`
+
+Authentication:
+
+Not required.
+
+Controller:
+
+`getPublicExperience`
+
+Purpose:
+
+Returns publicly visible Experience records.
+
+The public listing always applies:
+
+- `isVisible: true`
+- Featured priority
+- Admin-defined display order
+- Newest start-date fallback
+- Stable created-date and `_id` fallback sorting
+
+Supported query parameters:
+
+- `search` — Searches organization name, slug, job title, location, descriptions, responsibilities, achievements, skills and tools
+- `employmentType` — Employment-type filter
+- `current` — Boolean current-position filter using `true` or `false`
+- `featured` — Boolean featured filter using `true` or `false`
+
+Supported `employmentType` values:
+
+- `full-time`
+- `part-time`
+- `freelance`
+- `contract`
+- `internship`
+- `self-employed`
+- `founder`
+- `volunteer`
+- `other`
+
+Successful response status:
+
+`200 OK`
+
+Response shape:
+
+```json
+{
+  "success": true,
+  "count": 0,
+  "data": []
+}
+```
+
+Public response behavior:
+
+- Admin audit fields are excluded.
+- Private `identityKey` is excluded.
+- Hidden Experience records are excluded.
+- There is no public Experience details endpoint.
 
 ---
 
@@ -1257,6 +1336,137 @@ Controller:
 
 ---
 
+
+# Admin Experience API
+
+Route file:
+
+`server/src/routes/adminExperience.routes.js`
+
+Mount path:
+
+`/api/admin/experience`
+
+All routes require:
+
+`requireAdminAuth`
+
+## List Experience Records
+
+Endpoint:
+
+`GET /api/admin/experience`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminExperience`
+
+Supported query parameters:
+
+- `search`
+- `employmentType`
+- `isCurrent`
+- `isVisible`
+- `isFeatured`
+
+Admin sorting:
+
+1. `order` ascending
+2. `startDate` descending
+3. `createdAt` ascending
+4. `_id` ascending
+
+## Create Experience Record
+
+Endpoint:
+
+`POST /api/admin/experience`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`createAdminExperience`
+
+Important behavior:
+
+- Rejects non-object request bodies with a structured `400`
+- Uses strict `YYYY-MM-DD` calendar validation
+- Requires an end date when the position is not current
+- Clears `endDate` when `isCurrent` is true
+- Generates a slug from organization, role and start date when needed
+- Enforces unique slug and normalized Experience identity
+- Rejects non-text values inside text arrays
+- Normalizes responsibilities, achievements, skills and tools
+- Returns structured field-level errors
+
+## Get Experience Record by ID
+
+Endpoint:
+
+`GET /api/admin/experience/:id`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminExperienceById`
+
+## Update Experience Record
+
+Endpoint:
+
+`PATCH /api/admin/experience/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`updateAdminExperience`
+
+Important behavior:
+
+- Rejects an empty update payload
+- Revalidates timeline and required fields
+- Regenerates the private duplicate identity when identity fields change
+- Preserves immutable Admin audit ownership
+- Updates `updatedBy` from the authenticated Admin
+
+## Delete Experience Record
+
+Endpoint:
+
+`DELETE /api/admin/experience/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+
+Controller:
+
+`deleteAdminExperience`
+
+Purpose:
+
+Permanently deletes one Experience record.
+
+---
+
 # Admin Companies API
 
 Route file:
@@ -1441,6 +1651,7 @@ Controller:
 - `GET /api/projects`
 - `GET /api/projects/:slug`
 - `GET /api/education`
+- `GET /api/experience`
 - `GET /api/companies`
 - `GET /api/companies/:slug`
 - `GET /api/team`
@@ -1496,6 +1707,14 @@ Controller:
 - `GET /api/admin/education/:id`
 - `PATCH /api/admin/education/:id`
 - `DELETE /api/admin/education/:id`
+
+## Admin Experience
+
+- `GET /api/admin/experience`
+- `POST /api/admin/experience`
+- `GET /api/admin/experience/:id`
+- `PATCH /api/admin/experience/:id`
+- `DELETE /api/admin/experience/:id`
 
 ## Admin Companies
 

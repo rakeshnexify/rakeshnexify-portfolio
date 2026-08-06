@@ -1,382 +1,244 @@
 # Current Project Status
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 
 ## Project
 
 RakeshNexify MERN Portfolio and Admin CMS.
 
-Repository path: `D:\rakeshnexify-portfolio`
+Repository path:
 
-Branch: `main`
+`D:\rakeshnexify-portfolio`
+
+Branch:
+
+`main`
 
 ## Current Overall State
 
-The MERN portfolio foundation and multiple fully dynamic modules are complete and working.
+The MERN portfolio foundation and the following fully dynamic modules are complete:
 
-The latest completed modules are:
+- Services
+- Statistics
+- Skills
+- Education
+- Experience
+- Projects
+- Team
+- Companies
+- Contact messages
+- Site Settings
 
-- Dynamic Skills Management
-- Dynamic Education Management
+Latest pushed development commit:
 
-The latest pushed development commit is:
+`91263aa Add public Experience section and page`
 
-`6c0e2a1 Add public Education section and page`
+Verified Git state after the push:
 
-Verified latest Git state before documentation work:
-
-- Branch: `main`
-- Working tree: clean
-- `HEAD`, `origin/main` and `origin/HEAD` synchronized at `6c0e2a1`
-
-The current local work is documentation-only synchronization for Skills and Education.
+- `main` matched `origin/main`
+- Working tree was clean
+- `git status -sb` displayed `## main...origin/main`
 
 ## Current Development Phase
 
 Phase:
 
-`Skills and Education documentation synchronization`
+`Experience documentation synchronization`
 
 Status:
 
 `IN PROGRESS — DOCUMENTATION ONLY`
 
-Do not modify the completed Skills or Education implementation during this checkpoint.
+Do not modify verified Experience implementation files during this checkpoint unless documentation review discovers a real implementation defect.
 
-After this documentation checkpoint is committed and pushed, the next approved module is:
+## Verified Experience Checkpoints
 
-`Fully Dynamic Experience Management Module`
+- `b117e22 Add dynamic Experience backend APIs`
+- `5dbcb7a Add Experience frontend services and form utilities`
+- `8e235fb Add dynamic Experience admin interface`
+- `91263aa Add public Experience section and page`
 
-## Verified Skills Checkpoints
+## Completed Experience Backend
 
-- `92966df Fix Skills CTA visibility`
-- `1bb7e5f Add public Skills section and page`
-- `5311e2d Add dynamic skills admin interface`
-- `6aa985c Add dynamic skills backend APIs`
-
-## Completed Skills Module
-
-### Backend
-
-- Created the `Skill` model and `skills` collection
-- Added private normalized `nameKey` duplicate protection
-- Added unique slug validation
-- Added category and proficiency fields
-- Added optional years-of-experience support
-- Added icon and image URL support
-- Added visibility, featured and display-order controls
-- Added public Skills API
-- Added protected Admin Skills CRUD API
+- Created `Experience` model and `experiences` collection
+- Added required organization, job title, employment type, start date and short description
+- Added optional location, location type and full description
+- Added responsibilities, achievements, skills and tools arrays
+- Added optional organization logo and website URLs
+- Added strict `YYYY-MM-DD` calendar validation
+- Added current-position behavior that clears `endDate`
+- Required `endDate` for non-current records
+- Added private normalized `identityKey`
+- Added unique slug and duplicate identity indexes
+- Added public listing and Admin filter indexes
+- Added public `GET /api/experience`
+- Added protected Admin CRUD at `/api/admin/experience`
 - Added search and practical filters
-- Preserved Admin authentication and RBAC
-- Added Skills files to the permanent root validation script
+- Preserved JWT authentication and RBAC
+- Excluded private and Admin audit fields from public responses
+- Rejected non-object bodies and non-text array items with structured errors
+- Added Experience backend files to root `npm run check`
 - Completed runtime and Codex validation
 
-### Admin Frontend
+## Completed Experience Frontend Services and Utilities
 
-- Added Skills dashboard navigation
-- Added Skills listing, create and edit pages
-- Added reusable `SkillForm`
-- Added form defaults, validation and payload utilities
-- Added search and filters
-- Added visibility and featured quick actions
-- Added role-restricted permanent deletion
-- Completed browser workflow validation
+- `client/src/services/experienceApi.js`
+- `client/src/services/adminExperienceApi.js`
+- `client/src/hooks/useExperience.js`
+- `client/src/utils/experienceForm.js`
 
-### Public Website
+Completed behavior:
 
-- Added homepage `SkillsSection`
-- Added reusable `SkillCard`
-- Added public `/skills` page
-- Added category grouping
-- Added loading, error and empty states
-- Added Navbar, public-header and Footer integration
-- Added Skills Site Settings content
-- Added independent homepage, Navbar and public-page visibility
-- Added dynamic SEO and JSON-LD
-- Added visibility-aware sitemap behavior
-- Fixed Skills CTA visibility behavior
+- Public and Admin response validation
+- Bearer authorization for Admin requests
+- AbortSignal support
+- Stable public sorting
+- Form defaults and API conversion
+- Slug, date and URL validation
+- Current-position date rules
+- Array normalization and limits
+- Publication-field payload handling
 
-## Verified Education Checkpoints
+## Completed Experience Admin Interface
 
-- `6c0e2a1 Add public Education section and page`
-- `2604555 Add dynamic Education admin interface`
-- `8fd4cd6 Add dynamic education backend APIs`
+- Dashboard Experience card
+- `/admin/experience`
+- `/admin/experience/new`
+- `/admin/experience/:id/edit`
+- Reusable `ExperienceForm`
+- Search and employment-type filters
+- Current/completed filter
+- Visibility and featured filters
+- Create and edit workflows
+- Visibility and featured quick actions
+- Role-restricted permanent deletion
+- Loading, error and empty states
+- 401 redirect and 403 messaging
+- Browser-tested temporary record creation and cleanup
 
-## Completed Education Module
+## Completed Experience Public Website
 
-### Backend
+- Reusable `ExperienceTimelineCard`
+- Homepage `ExperienceSection`
+- Public `/experience` page
+- Up to four homepage preview records
+- Featured, order and chronological sorting
+- Organization logo or initials fallback
+- Current and featured badges
+- Employment and location labels
+- Responsibilities and achievements
+- Skills and tools
+- Organization website link
+- Loading, error and empty states
+- Responsive and accessible layouts
 
-- Created the `Education` model and `education` collection
-- Added Education-type enum
-- Added strict `YYYY-MM-DD` date validation
-- Added end-date range validation
-- Added current-study end-date clearing
-- Added private normalized `identityKey` duplicate protection
-- Added institution, certificate and logo URL validation
-- Added public Education API
-- Added protected Admin Education CRUD API
-- Added search and practical filters
-- Preserved Admin authentication and RBAC
-- Added Education files to the permanent root validation script
-- Completed runtime and Codex validation
+## Completed Experience Site Settings and Publication
 
-### Admin Frontend
+- Added `experienceSection` to the Site Settings schema
+- Added Experience content to the Admin listing-sections editor
+- Added Experience CTA validation and payload conversion
+- Added Experience to client and server homepage registries
+- Added independent homepage visibility
+- Added independent Navbar visibility
+- Added independent public-page visibility
+- Added homepage and Navbar ordering
+- Added Navbar, public-header and Footer links
+- Added visibility-protected `/experience` route
+- Added CTA suppression when `/experience` is disabled
 
-- Added Education dashboard navigation
-- Added Education listing, create and edit pages
-- Added reusable `EducationForm`
-- Added timeline, grade, location, content and URL fields
-- Added logo preview
-- Added search and filters
-- Added visibility and featured quick actions
-- Added role-restricted permanent deletion
-- Completed browser workflow validation
+## Completed Experience SEO and Sitemap
 
-### Public Website
+- Dynamic title, description and keywords
+- Canonical `/experience` URL
+- Open Graph and Twitter metadata through `PageSeo`
+- `CollectionPage` and `ItemList` JSON-LD
+- Visibility-aware `/experience` sitemap entry
+- No `/experience/:slug` routes or sitemap URLs
 
-- Added homepage `EducationSection`
-- Added reusable `EducationTimelineCard`
-- Added public `/education` page
-- Added a four-record timeline preview
-- Added institution logo or initials fallback
-- Added current-study and featured badges
-- Added safe institution and certificate links
-- Added Navbar, public-header and Footer integration
-- Added Education Site Settings content
-- Added independent homepage, Navbar and public-page visibility
-- Added dynamic SEO and safe JSON-LD
-- Added visibility-aware sitemap behavior
-- Added loading, error and empty states
+Verified publication behavior:
 
-## Verified Mongoose 9 Fix
-
-The Education create workflow initially failed with:
-
-`next is not a function`
-
-The project was running:
-
-`mongoose@9.8.0`
-
-The final `Education` model uses synchronous `pre("validate")` middleware without a callback-style `next` parameter or `next()` call.
-
-Education creation succeeded after this correction.
-
-## Verified Global SEO Fix
-
-During Education public review, `PageSeo.jsx` was corrected so:
-
-- `og:title` uses the safe page title
-- `twitter:title` uses the safe page title
-- Serialized JSON-LD remains only in the structured-data script
-
-Focused Codex re-review found no blocking or important non-blocking issue.
-
-## Completed Team Backend
-
-- Created the `TeamMember` MongoDB model
-- Added Team member slug generation and validation
-- Added professional role and Team position fields
-- Added short introduction and full biography fields
-- Added profile image and cover image fields
-- Added skills and tools arrays
-- Added member status and availability status
-- Added contact and portfolio fields
-- Added social profile fields
-- Added related Project, Company and Service references
-- Added visibility, featured and display-order controls
-- Added member-specific SEO fields
-- Added protected Admin Team CRUD APIs
-- Added public Team listing API
-- Added public Team slug-detail API
-- Added Admin search and filtering
-- Added role-based create, update and delete permissions
-- Added hidden-member protection on public APIs
-- Added hidden-related-record protection on member details
-- Added Team files to the permanent root validation script
-- Completed authenticated Team API runtime testing
-
-## Completed Team Admin Frontend
-
-- Created `adminTeamMembersApi.js`
-- Created the Admin Team listing page
-- Added search, role, status and availability filters
-- Added visibility and featured filters
-- Added visibility quick action
-- Added featured quick action
-- Added role-restricted permanent deletion
-- Added Team management dashboard card
-- Created reusable `TeamMemberForm.jsx`
-- Created Team form defaults and payload utilities
-- Added automatic slug generation
-- Added local and server field-error handling
-- Added identity and biography fields
-- Added profile and cover image fields
-- Added skills and tools fields
-- Added contact and portfolio fields
-- Added social profile fields
-- Added Project, Company and Service relationship selectors
-- Added Team member SEO fields
-- Added publication and ordering controls
-- Created Team member create and edit pages
-- Registered Admin Team listing, create and edit routes
-- Tested create, edit, update and delete workflows
-- Tested relationship option loading and selection
-- Tested search and filter workflows
-- Tested visibility and featured quick actions
-
-## Completed Public Team Website Integration
-
-- Created the public Team API service
-- Created the public Team listing hook
-- Created the public Team member-detail hook
-- Created reusable public `TeamMemberCard`
-- Created the public `/team` listing page
-- Created the public `/team/:slug` member-detail page
-- Added loading, error, empty and not-found states
-- Added featured-first and display-order sorting
-- Added member initials fallback when no profile image exists
-- Added profile, portfolio, website and social links
-- Added related Projects, Companies and Services
-- Added full-width responsive related-record grids
-- Added homepage `TeamSection`
-- Added Team between Projects and Companies in homepage ordering
-- Added Team to Navbar navigation
-- Added Team to dedicated public page headers
-- Added Team to Footer navigation
-- Added `/team` and `/team/:slug` public routes
-- Added Team routes to production deep-route documentation
-
-## Completed Team Site Settings Integration
-
-- Added `teamSection` to the Site Settings database schema
-- Added Team section content to Admin Site Settings
-- Added Team content form values and request payload handling
-- Added Team section content to the Admin controller whitelist
-- Added independent homepage visibility control
-- Added independent Navbar visibility control
-- Added independent public-page visibility control
-- Tested Team section content persistence
-- Tested homepage visibility behavior
-- Tested Navbar visibility behavior
-- Tested public-page enable and disable behavior
-- Tested Footer visibility behavior
-- Confirmed homepage Team visibility remains independent from public-page visibility
-
-## Completed Team Sitemap Integration
-
-- Added `/team` to the XML sitemap
-- Added visible Team member detail URLs to the XML sitemap
-- Added hidden-member filtering
-- Added Team public-page visibility filtering
-- Confirmed disabling the Team public page removes all Team sitemap URLs
-- Confirmed Team API records remain unchanged when the public page is disabled
-- Confirmed restoring the Team public page restores Team sitemap URLs
-- Confirmed deleting the temporary test member removes its sitemap URL
-- Current valid Team sitemap URLs are:
-  - `https://rakeshnexify.com/team`
-  - `https://rakeshnexify.com/team/rakesh-pandit`
-
-## Completed Team SEO Integration
-
-- Added Team listing title, description and keywords
-- Added member-specific SEO title, description and keywords
-- Added canonical URLs
-- Added Open Graph metadata
-- Added Twitter metadata
-- Added Team member social-sharing image fallback priority
-- Added `profile` Open Graph type for Team member details
-- Added `noindex, nofollow` protection for unavailable member profiles
-- Added reusable JSON-LD support to `PageSeo`
-- Added `CollectionPage` and `ItemList` structured data to `/team`
-- Added `ProfilePage` and `Person` structured data to `/team/:slug`
-- Added member affiliation, skills, tools and professional-link structured data
-- Confirmed stale structured data is removed when navigating to an invalid member page
-- Browser-tested listing SEO metadata and JSON-LD
-- Browser-tested member profile SEO metadata and JSON-LD
-- Browser-tested invalid member SEO protection
-
-## Team Runtime Validation Completed
-
-- Public Team listing API returns visible members only
-- Public Team member API returns visible members only
-- Hidden Team members return `404`
-- Quick Hide action works
-- Quick Show action works
-- Temporary Team member creation worked
-- Temporary Team member editing worked
-- Temporary Team member deletion worked
-- Related hidden records are excluded from member details
-- `/team` public listing renders correctly
-- Valid member details render correctly
-- Invalid member details show the correct not-found state
-- Homepage Team section renders API data
-- Navbar, public header and Footer Team links work
-- Sitemap Team URLs match visible database records
-- Temporary `Public Team Test` member has been permanently deleted
-- Current public Team member count is `1`
+- Enabled public page: `/experience` appears in navigation and sitemap
+- Disabled public page: route is blocked and sitemap entry is removed
+- Re-enabled public page: route, navigation and sitemap entry return
 
 ## Latest Project Validation
 
-The complete Skills and Education implementation passed the configured root validation:
+The following passed after public Experience integration:
 
 ```powershell
 npm run check
 ```
 
-Latest verified production build after Education public integration:
+Latest client build:
 
 - Vite: `8.1.5`
-- Modules transformed: `144`
-- Main JavaScript bundle: `926.41 kB`
-- Gzip size: `201.15 kB`
-- Build result: successful
+- Modules transformed: `154`
+- Main JavaScript bundle: `997.38 kB`
+- Gzip size: `212.96 kB`
+- Result: successful
 
-Additional verification:
+Additional checks:
 
-- Configured Skills and Education server files passed `node --check`
-- `git diff --check` reported no whitespace errors
-- Codex backend and integration reviews passed
-- CRLF-to-LF warnings remained non-blocking
-- The Vite chunk-size warning remained non-blocking
-- Temporary validation data was removed
+- Experience server files passed `node --check`
+- `git diff --check` passed
+- `git diff --cached --check` passed
+- Expected 15 public-integration files were staged
+- Runtime visibility and sitemap tests passed
+- Temporary Experience record was deleted
+- Commit and push succeeded
+
+## Known Warnings
+
+### Bundle Size
+
+The Vite chunk-size warning remains open and non-blocking.
+
+### Dependency Audit
+
+One previously reported high-severity client dependency warning remains under review.
+
+Do not use `npm audit fix --force` without investigation.
+
+### Line Endings
+
+CRLF-to-LF warnings remain non-blocking. No actual whitespace error is known.
+
+## Known Blocking Problems
+
+None currently known in the completed Experience backend, Admin interface or public website.
 
 ## Current Git State
 
 Latest pushed development commit:
 
-`6c0e2a1 Add public Education section and page`
-
-Recent Education checkpoints:
-
-- `2604555 Add dynamic Education admin interface`
-- `8fd4cd6 Add dynamic education backend APIs`
-
-Recent Skills checkpoints:
-
-- `92966df Fix Skills CTA visibility`
-- `1bb7e5f Add public Skills section and page`
-- `5311e2d Add dynamic skills admin interface`
-- `6aa985c Add dynamic skills backend APIs`
-
-Verified state before documentation synchronization:
-
-- Local `main` matched `origin/main`.
-- `HEAD`, `origin/main` and `origin/HEAD` pointed to `6c0e2a1`.
-- The working tree was clean.
+`91263aa Add public Experience section and page`
 
 Current intended local work:
 
-- Modify only the nine Skills/Education documentation files.
-- Validate the complete documentation diff.
-- Commit and push the documentation-only checkpoint.
-- Start Experience Step 1 only after the working tree is clean.
+- Modify only the nine repository-memory documentation files
+- Validate documentation scope and whitespace
+- Commit and push the documentation-only checkpoint
 
-Always verify the actual repository state using:
+Always verify repository state with:
 
 ```powershell
 git status --short
-git diff --check
 git log --oneline -10 --decorate
+git diff --check
 ```
+
+## Immediate Next Step
+
+1. Apply the nine Experience documentation replacements.
+2. Run `git diff --check -- docs`.
+3. Confirm only the intended documentation files changed.
+4. Stage the nine documentation files.
+5. Run `git diff --cached --check`.
+6. Commit with a documentation-only message.
+7. Push `main` to `origin`.
+8. Confirm a clean synchronized working tree.
+9. Begin the next approved roadmap module.
+
+Recommended documentation commit message:
+
+`Synchronize Experience module documentation`

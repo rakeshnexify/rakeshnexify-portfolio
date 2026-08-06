@@ -640,11 +640,11 @@ Status: Accepted
 
 The latest verified client build reports a main JavaScript chunk of:
 
-`926.41 kB`
+`997.38 kB`
 
 The latest verified gzip size is:
 
-`201.15 kB`
+`212.96 kB`
 
 ## Decision
 
@@ -1138,7 +1138,7 @@ Status: Accepted
 
 Skills and Education use dedicated listing pages without record-detail routes.
 
-Experience will initially follow the same rule unless repository evidence proves a detail page has real user or SEO value.
+Experience follows the same rule in the completed MVP. It has a dedicated `/experience` listing page and no `/experience/:slug` detail route.
 
 ## Reason
 
@@ -1175,3 +1175,100 @@ Using JSON-LD as a social title produces broken sharing previews.
 ## Verification
 
 The correction was implemented during Education public integration and passed focused Codex re-review.
+
+
+# Decision 031 — Implement the Dynamic Experience Management Module
+
+Status: Accepted and Implemented
+
+## Decision
+
+Use these Experience conventions:
+
+- Mongoose model: `Experience`
+- MongoDB collection: `experiences`
+- Public API: `/api/experience`
+- Admin API: `/api/admin/experience`
+- Public page: `/experience`
+- Admin routes:
+  - `/admin/experience`
+  - `/admin/experience/new`
+  - `/admin/experience/:id/edit`
+
+## Completed Scope
+
+- Database-backed professional Experience records
+- Organization and job-title identity
+- Employment type
+- Start and end dates
+- Current-position behavior
+- Location and location type
+- Short and full descriptions
+- Separate responsibilities and achievements
+- Skills and tools arrays
+- Optional organization logo and website
+- Visibility, featured and display order
+- Protected Admin CRUD
+- Search and practical filters
+- Homepage timeline preview
+- Dedicated `/experience` listing page
+- Dynamic Site Settings content
+- Independent homepage, Navbar and public-page visibility
+- Dynamic listing-page SEO and JSON-LD
+- Visibility-aware sitemap entry
+- Responsive loading, error and empty states
+
+## Important Decisions
+
+- No `/experience/:slug` public details page
+- No record-specific Experience SEO fields
+- No cross-module relations in the MVP
+- No pagination in the MVP
+- No separate status enum
+- No fake or automatically seeded Experience records
+- Backend field name remains `jobTitle`; the Admin UI label is `Job title / professional role`
+- `isCurrent: true` forces `endDate` to `null`
+- Non-current records require an end date
+- Private duplicate identity combines organization, job title, employment type and start date
+- Responsibilities, achievements, skills and tools remain separate normalized string arrays
+
+## Publication and Ordering
+
+Public ordering:
+
+1. Featured records first
+2. Admin `order` ascending
+3. Newest `startDate` first
+4. Oldest `createdAt` first
+5. Stable `_id` fallback
+
+Admin ordering:
+
+1. `order` ascending
+2. Newest `startDate` first
+3. Oldest `createdAt` first
+4. Stable `_id` fallback
+
+The homepage preview uses the public ordering and displays up to four visible records. It does not require records to be featured.
+
+## Security and Validation
+
+- Public API exposes visible records only.
+- Private `identityKey` and Admin audit fields are excluded from public responses.
+- Admin APIs preserve Bearer JWT authentication and project RBAC.
+- Create and update allow `super-admin`, `admin` and `editor`.
+- Permanent deletion allows only `super-admin` and `admin`.
+- URL fields allow credential-free HTTP or HTTPS URLs only.
+- Text-array payloads reject non-text items.
+- Synchronous Mongoose middleware follows the Mongoose 9-compatible pattern.
+
+## Verified Checkpoints
+
+- `b117e22 Add dynamic Experience backend APIs`
+- `5dbcb7a Add Experience frontend services and form utilities`
+- `8e235fb Add dynamic Experience admin interface`
+- `91263aa Add public Experience section and page`
+
+## Reason
+
+The portfolio needs a complete professional work-history module that is fully manageable through the Admin Panel while avoiding unnecessary detail-route, relation and record-specific SEO complexity.

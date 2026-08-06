@@ -95,6 +95,7 @@ Completed:
 - Projects management
 - Skills management
 - Education management
+- Experience management
 - Team Members management
 - Companies management
 - Contact messages management
@@ -299,6 +300,7 @@ Completed:
 - Canonical URLs
 - Skills listing metadata and JSON-LD
 - Education listing metadata and safe JSON-LD
+- Experience listing metadata and JSON-LD
 - Open Graph image support
 - Dynamic sitemap
 - Visibility-aware sitemap filtering
@@ -761,62 +763,84 @@ Deferred:
 - Drag-and-drop
 - Bulk import or export
 
-## Phase 17 — Dynamic Experience Management
+## Phase 16 — Dynamic Experience Management
 
-Status: PLANNED — PLANNING APPROVED
+Status: COMPLETE — IMPLEMENTED, VALIDATED, COMMITTED AND PUSHED
 
-Approved MVP:
+Verified checkpoints:
 
-- `Experience` model
-- `experiences` collection
-- Professional work and freelance records
-- Employment type
+- `b117e22 Add dynamic Experience backend APIs`
+- `5dbcb7a Add Experience frontend services and form utilities`
+- `8e235fb Add dynamic Experience admin interface`
+- `91263aa Add public Experience section and page`
+
+Completed backend:
+
+- `Experience` model and `experiences` collection
+- Organization and job-title identity
+- Employment-type enum
 - Start and end dates
-- Current-position flag
+- Current-position end-date clearing
 - Location and location type
 - Short and full descriptions
-- Responsibilities
-- Achievements
-- Skills and tools string arrays
-- Optional organization logo
-- Optional organization website
-- Visibility
-- Featured status
-- Display order
-- Protected Admin CRUD
+- Responsibilities and achievements
+- Skills and tools arrays
+- Organization logo and website URLs
+- Private duplicate identity
+- Unique slug
+- Public Experience API
+- Protected Admin CRUD API
 - Search and practical filters
+- RBAC
+- Structured validation errors
+- Root validation-script integration
+
+Completed Admin frontend:
+
+- Dashboard Experience module
+- `/admin/experience`
+- `/admin/experience/new`
+- `/admin/experience/:id/edit`
+- Reusable Experience form
+- Search and filters
+- Visibility and featured quick actions
+- Current/completed state handling
+- Role-restricted permanent delete
+- Browser workflow validation
+
+Completed public website:
+
+- Reusable Experience timeline card
 - Homepage Experience timeline
-- Dedicated `/experience` page
+- Four-record preview
+- Public `/experience` page
+- Organization logo or initials fallback
+- Current and featured badges
+- Responsibilities, achievements, skills and tools
 - Dynamic Site Settings content
-- Independent publication controls
-- Dynamic listing-page SEO
-- Sitemap support
+- Independent homepage, Navbar and public-page visibility
+- Navbar, public-header and Footer integration
+- Dynamic SEO and JSON-LD
+- Visibility-aware sitemap
 - Loading, error and empty states
-- Responsive and accessible UI
-- Runtime validation
-- Documentation synchronization
+- Runtime visibility validation
+- Temporary test-data cleanup
 
-MVP exclusions:
+MVP exclusions preserved:
 
-- Education duplication
-- Separate status enum
-- `/experience/:slug`
-- Individual Experience SEO pages
-- Cross-module relations
-- Pagination
-- Fake or automatically seeded records
+- No `/experience/:slug`
+- No record-specific Experience SEO
+- No cross-module relations
+- No pagination
+- No separate status enum
+- No fake or automatically seeded records
 
-Recommended major steps:
+Deferred improvements:
 
-1. Repository audit and final contract
-2. Model and validation
-3. Public and Admin backend APIs
-4. Frontend services, hook and form utility
-5. Admin interface
-6. Public page and homepage timeline
-7. Shared publication, SEO and sitemap
-8. Final testing, Codex review and documentation
-
+- Optional relations after real use cases are defined
+- Pagination if record volume requires it
+- Drag-and-drop ordering
+- Bulk import or export
 
 ## Phase 17 — Testimonials
 
@@ -994,24 +1018,27 @@ Planned:
 
 ## Current Immediate Next Step
 
-Complete the Skills and Education documentation-only checkpoint.
+Complete the Experience documentation-only checkpoint.
 
 Required order:
 
-1. Review the complete documentation diff.
-2. Confirm only the intended nine documentation files are modified.
-3. Run `git diff --check -- docs`.
-4. Stage only the verified documentation files.
+1. Replace the nine repository-memory documents.
+2. Run `git diff --check -- docs`.
+3. Confirm only the intended documentation files changed.
+4. Stage the nine verified documentation files.
 5. Run `git diff --cached --check`.
 6. Review staged file names and summary.
 7. Commit the documentation checkpoint.
 8. Push `main` to `origin`.
-9. Confirm `HEAD`, `origin/main` and `origin/HEAD` are synchronized.
-10. Confirm the working tree is clean.
-11. Start Experience Step 1 repository audit.
+9. Confirm the working tree is clean and synchronized.
+10. Start the next approved major module.
 
 Recommended documentation commit message:
 
 ```text
-Synchronize Skills and Education documentation
+Synchronize Experience module documentation
 ```
+
+Recommended next major module:
+
+`Fully Dynamic Testimonials Management Module`

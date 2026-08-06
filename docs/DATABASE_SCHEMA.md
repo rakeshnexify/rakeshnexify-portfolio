@@ -1,6 +1,6 @@
 ﻿# Database Schema
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 
 ## Database
 
@@ -44,10 +44,11 @@ The project currently contains these Mongoose models:
 4. `Statistic`
 5. `Skill`
 6. `Education`
-7. `Project`
-8. `Company`
-9. `TeamMember`
-10. `ContactMessage`
+7. `Experience`
+8. `Project`
+9. `Company`
+10. `TeamMember`
+11. `ContactMessage`
 
 ---
 
@@ -242,6 +243,12 @@ Uses the reusable listing-section schema.
 ### educationSection
 
 Uses the reusable listing-section schema.
+
+### experienceSection
+
+Uses the reusable listing-section schema.
+
+It stores the dynamic heading, description and CTA content used by the homepage Experience section and public `/experience` page.
 
 ### teamSection
 
@@ -765,6 +772,304 @@ The middleware:
 
 - Clears `endDate` for current-study records
 - Regenerates `identityKey` when identity fields change
+
+---
+
+
+# Experience
+
+Model file:
+
+`server/src/models/Experience.js`
+
+Mongoose model:
+
+`Experience`
+
+MongoDB collection:
+
+`experiences`
+
+This collection stores fully dynamic professional work, freelance, contract, internship, self-employed, founder and other relevant Experience records.
+
+## Main Fields
+
+- `organizationName`
+- `identityKey`
+- `slug`
+- `jobTitle`
+- `employmentType`
+- `startDate`
+- `endDate`
+- `isCurrent`
+- `location`
+- `locationType`
+- `shortDescription`
+- `description`
+- `responsibilities`
+- `achievements`
+- `skills`
+- `tools`
+- `organizationLogoUrl`
+- `organizationWebsiteUrl`
+- `order`
+- `isFeatured`
+- `isVisible`
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
+
+## Required Identity and Content Fields
+
+### organizationName
+
+- Required
+- Trimmed
+- Minimum length: 2
+- Maximum length: 180
+
+### slug
+
+- Required
+- Lowercase
+- Unique
+- Minimum length: 2
+- Maximum length: 220
+- Accepts lowercase letters, numbers and single hyphen separators
+
+### jobTitle
+
+UI label:
+
+`Job title / professional role`
+
+Rules:
+
+- Required
+- Trimmed
+- Minimum length: 2
+- Maximum length: 180
+
+### employmentType
+
+- Required enum
+- Lowercase
+
+Supported values:
+
+- `full-time`
+- `part-time`
+- `freelance`
+- `contract`
+- `internship`
+- `self-employed`
+- `founder`
+- `volunteer`
+- `other`
+
+### startDate
+
+- Required Date
+- Admin input uses strict `YYYY-MM-DD` calendar validation
+
+### shortDescription
+
+- Required
+- Minimum length: 10
+- Maximum length: 600
+
+## Timeline Rules
+
+- `endDate` is required when `isCurrent` is false.
+- `endDate` cannot be earlier than `startDate`.
+- `isCurrent: true` forces `endDate` to `null`.
+- Public date formatting is timezone-safe.
+- The model uses Mongoose 9-compatible synchronous `pre("validate")` middleware without a callback-style `next` argument.
+
+## Location Fields
+
+### location
+
+- Optional String
+- Maximum length: 180
+
+### locationType
+
+Optional enum values:
+
+- `onsite`
+- `remote`
+- `hybrid`
+
+An empty value is allowed.
+
+## Descriptions and Text Arrays
+
+### description
+
+- Optional
+- Maximum length: 5000
+
+### responsibilities
+
+- String array
+- Maximum items: 30
+- Maximum length per item: 300
+
+### achievements
+
+- String array
+- Maximum items: 30
+- Maximum length per item: 300
+
+### skills
+
+- String array
+- Maximum items: 50
+- Maximum length per item: 100
+
+### tools
+
+- String array
+- Maximum items: 50
+- Maximum length per item: 100
+
+Array behavior:
+
+- Non-array values are rejected by the Admin API.
+- Non-string array items are rejected.
+- Values are trimmed.
+- Repeated internal whitespace is normalized.
+- Blank items are removed.
+- Case-insensitive duplicate values are removed while preserving the first display value.
+
+## Duplicate Protection
+
+### identityKey
+
+Private normalized identity based on:
+
+- Organization name
+- Job title
+- Employment type
+- Start date
+
+Behavior:
+
+- Required internally
+- Unique database index
+- Excluded from normal queries using `select: false`
+- Removed by JSON and object transforms
+- Duplicate database errors map to the public `organizationName` field
+- Regenerated when any identity field changes
+
+### slug
+
+- Uses a separate unique database index
+- Can be generated from organization name, job title and start date
+
+## Organization URL Fields
+
+Optional credential-free HTTP or HTTPS URLs:
+
+- `organizationLogoUrl`
+- `organizationWebsiteUrl`
+
+Rules:
+
+- Maximum length: 500
+- Must contain a valid hostname
+- Username or password credentials are rejected
+- Empty values are allowed
+
+## Publication Fields
+
+### order
+
+- Type: Number
+- Minimum: `0`
+- Default: `0`
+
+### isFeatured
+
+- Type: Boolean
+- Default: `false`
+
+### isVisible
+
+- Type: Boolean
+- Default: `true`
+
+## Audit Relations
+
+### createdBy
+
+- Required ObjectId
+- References `AdminUser`
+
+### updatedBy
+
+- Required ObjectId
+- References `AdminUser`
+
+The public Experience API does not expose these Admin audit fields.
+
+## Schema Configuration
+
+- Automatic `createdAt`
+- Automatic `updatedAt`
+- `versionKey: false`
+- Explicit collection name: `experiences`
+- Private-field output transforms
+- No separate status field
+- No record-specific SEO object
+- No cross-module relations in the MVP
+
+## Indexes
+
+Unique slug:
+
+- `slug`
+
+Unique normalized identity:
+
+- `identityKey`
+
+Public listing:
+
+- `isVisible`
+- `isFeatured`
+- `order`
+- `startDate`
+- `_id`
+
+Admin filters:
+
+- `employmentType`
+- `isCurrent`
+- `isVisible`
+- `isFeatured`
+- `order`
+- `startDate`
+- `_id`
+
+## Public Sorting
+
+Public Experience records use:
+
+1. Featured records first
+2. `order` ascending
+3. `startDate` descending
+4. `createdAt` ascending
+5. `_id` ascending
+
+Admin Experience records use:
+
+1. `order` ascending
+2. `startDate` descending
+3. `createdAt` ascending
+4. `_id` ascending
 
 ---
 
@@ -1418,6 +1723,8 @@ The following fields reference `AdminUser`:
 - Skill `updatedBy`
 - Education `createdBy`
 - Education `updatedBy`
+- Experience `createdBy`
+- Experience `updatedBy`
 - Project `createdBy`
 - Project `updatedBy`
 - Company `createdBy`

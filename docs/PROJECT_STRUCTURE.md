@@ -71,9 +71,9 @@ Frontend source path:
 
 `client/src/`
 
-Current frontend source file count after Skills and Education:
+Current frontend source file count after Experience public integration:
 
-`125`
+`135`
 
 ## Client Source Tree
 
@@ -84,6 +84,7 @@ client/src/
 │   ├── admin/
 │   │   ├── companies/
 │   │   ├── education/
+│   │   ├── experience/
 │   │   ├── projects/
 │   │   ├── services/
 │   │   ├── site-settings/
@@ -92,6 +93,7 @@ client/src/
 │   │   └── team/
 │   ├── companies/
 │   ├── education/
+│   ├── experience/
 │   ├── layout/
 │   ├── projects/
 │   ├── sections/
@@ -154,6 +156,7 @@ Current feature folders:
 
 - `companies`
 - `education`
+- `experience`
 - `projects`
 - `services`
 - `site-settings`
@@ -165,6 +168,7 @@ Important files include:
 
 - `CompanyForm.jsx`
 - `EducationForm.jsx`
+- `ExperienceForm.jsx`
 - `ProjectForm.jsx`
 - `ServiceForm.jsx`
 - `SkillForm.jsx`
@@ -199,6 +203,31 @@ Renders a public Education timeline record with:
 - Grade and location
 - Institution and certificate links
 - Safe HTTP/HTTPS URL handling
+
+
+### Experience
+
+Path:
+
+`client/src/components/experience/`
+
+Current component:
+
+- `ExperienceTimelineCard.jsx`
+
+Purpose:
+
+Renders a public Experience timeline record with:
+
+- Organization logo or initials fallback
+- Organization name and job title
+- Employment and location labels
+- Start and end dates
+- Current and featured badges
+- Descriptions
+- Responsibilities and achievements
+- Skills and tools
+- Safe organization website link
 
 ### Skills
 
@@ -324,6 +353,7 @@ Current sections:
 - `ServicesSection.jsx`
 - `ProjectsSection.jsx`
 - `EducationSection.jsx`
+- `ExperienceSection.jsx`
 - `TeamSection.jsx`
 - `CompaniesSection.jsx`
 - `ContactSection.jsx`
@@ -384,7 +414,7 @@ Stores frontend API configuration behavior.
 
 Defines and merges supported homepage-section settings.
 
-Skills and Education are registered in the shared homepage and navigation system. Education is currently registered before Team.
+Skills, Education and Experience are registered in the shared homepage and navigation system. Experience is registered after Education and before Team by default.
 
 ### `siteSettingsPages.js`
 
@@ -447,6 +477,7 @@ Current hooks:
 - `useSkills.js`
 - `useStatistics.js`
 - `useEducation.js`
+- `useExperience.js`
 - `useTeamMembers.js`
 - `useTeamMember.js`
 
@@ -482,6 +513,7 @@ Current public pages:
 - `ServicesPage.jsx`
 - `ProjectsPage.jsx`
 - `EducationPage.jsx`
+- `ExperiencePage.jsx`
 - `ProjectDetailsPage.jsx`
 - `TeamPage.jsx`
 - `TeamMemberDetailsPage.jsx`
@@ -536,6 +568,8 @@ Current Admin pages:
 - `AdminProjectsPage.jsx`
 - `AdminEducationPage.jsx`
 - `AdminEducationEditorPage.jsx`
+- `AdminExperiencePage.jsx`
+- `AdminExperienceEditorPage.jsx`
 - `AdminProjectEditorPage.jsx`
 - `AdminTeamMembersPage.jsx`
 - `AdminTeamMemberEditorPage.jsx`
@@ -559,10 +593,11 @@ Current files:
 
 Contains the main public and Admin route definitions.
 
-Current public Skills and Education routes:
+Current public Skills, Education and Experience routes:
 
 - `/skills`
 - `/education`
+- `/experience`
 
 Current Admin Skills routes:
 
@@ -575,6 +610,12 @@ Current Admin Education routes:
 - `/admin/education`
 - `/admin/education/new`
 - `/admin/education/:id/edit`
+
+Current Admin Experience routes:
+
+- `/admin/experience`
+- `/admin/experience/new`
+- `/admin/experience/:id/edit`
 
 Current public Team routes:
 
@@ -617,6 +658,7 @@ Current public API services:
 - `skillsApi.js`
 - `projectsApi.js`
 - `educationApi.js`
+- `experienceApi.js`
 - `teamApi.js`
 - `companiesApi.js`
 - `contactMessageApi.js`
@@ -630,6 +672,7 @@ Current Admin API services:
 - `adminSkillsApi.js`
 - `adminProjectsApi.js`
 - `adminEducationApi.js`
+- `adminExperienceApi.js`
 - `adminTeamMembersApi.js`
 - `adminCompaniesApi.js`
 - `adminContactMessagesApi.js`
@@ -666,6 +709,7 @@ Current files:
 - `skillForm.js`
 - `projectForm.js`
 - `educationForm.js`
+- `experienceForm.js`
 - `teamMemberForm.js`
 - `companyForm.js`
 
@@ -717,9 +761,9 @@ Backend source path:
 
 `server/src/`
 
-Current backend source file count after Skills and Education:
+Current backend source file count after Experience backend integration:
 
-`67`
+`72`
 
 ## Server Source Tree
 
@@ -806,6 +850,7 @@ Path:
 - `skill.controller.js`
 - `project.controller.js`
 - `education.controller.js`
+- `experience.controller.js`
 - `teamMember.controller.js`
 - `company.controller.js`
 - `contactMessage.controller.js`
@@ -820,6 +865,7 @@ Path:
 - `adminSkill.controller.js`
 - `adminProject.controller.js`
 - `adminEducation.controller.js`
+- `adminExperience.controller.js`
 - `adminTeamMember.controller.js`
 - `adminCompany.controller.js`
 - `adminContactMessage.controller.js`
@@ -905,6 +951,7 @@ Current models:
 - `Statistic.js`
 - `Skill.js`
 - `Education.js`
+- `Experience.js`
 - `Project.js`
 - `Company.js`
 - `TeamMember.js`
@@ -941,6 +988,7 @@ Path:
 - `statistic.routes.js`
 - `skill.routes.js`
 - `education.routes.js`
+- `experience.routes.js`
 - `project.routes.js`
 - `teamMember.routes.js`
 - `company.routes.js`
@@ -954,6 +1002,7 @@ Path:
 - `adminStatistic.routes.js`
 - `adminSkill.routes.js`
 - `adminEducation.routes.js`
+- `adminExperience.routes.js`
 - `adminProject.routes.js`
 - `adminTeamMember.routes.js`
 - `adminCompany.routes.js`
@@ -1170,6 +1219,103 @@ client/src/pages/EducationPage.jsx
 ```
 
 No fake or automatically seeded Education records should be added.
+
+---
+
+
+# Current Experience Module Structure
+
+Status:
+
+`COMPLETE, VALIDATED AND PUSHED`
+
+Git checkpoints:
+
+- `b117e22 Add dynamic Experience backend APIs`
+- `5dbcb7a Add Experience frontend services and form utilities`
+- `8e235fb Add dynamic Experience admin interface`
+- `91263aa Add public Experience section and page`
+
+## Backend
+
+```text
+server/src/models/Experience.js
+server/src/controllers/experience.controller.js
+server/src/controllers/adminExperience.controller.js
+server/src/routes/experience.routes.js
+server/src/routes/adminExperience.routes.js
+```
+
+## Frontend Services and Utility
+
+```text
+client/src/services/experienceApi.js
+client/src/services/adminExperienceApi.js
+client/src/hooks/useExperience.js
+client/src/utils/experienceForm.js
+```
+
+## Admin Frontend
+
+```text
+client/src/components/admin/experience/ExperienceForm.jsx
+client/src/pages/admin/AdminExperiencePage.jsx
+client/src/pages/admin/AdminExperienceEditorPage.jsx
+```
+
+## Public Frontend
+
+```text
+client/src/components/experience/ExperienceTimelineCard.jsx
+client/src/components/sections/ExperienceSection.jsx
+client/src/pages/ExperiencePage.jsx
+```
+
+## Shared Client Integration
+
+```text
+client/src/components/admin/site-settings/SiteSettingsForm.jsx
+client/src/components/layout/Footer.jsx
+client/src/components/layout/Navbar.jsx
+client/src/components/layout/PublicPageHeader.jsx
+client/src/config/homepageSections.js
+client/src/pages/HomePage.jsx
+client/src/pages/admin/AdminDashboardPage.jsx
+client/src/routes/AppRoutes.jsx
+client/src/utils/siteSettingsForm.js
+```
+
+## Shared Server Integration
+
+```text
+server/src/app.js
+server/src/config/homepageSections.js
+server/src/controllers/adminSiteSettings.controller.js
+server/src/models/SiteSettings.js
+server/src/utils/createSitemapXml.js
+```
+
+## Routes
+
+```text
+GET    /api/experience
+GET    /api/admin/experience
+POST   /api/admin/experience
+GET    /api/admin/experience/:id
+PATCH  /api/admin/experience/:id
+DELETE /api/admin/experience/:id
+
+/experience
+/admin/experience
+/admin/experience/new
+/admin/experience/:id/edit
+```
+
+No public Experience detail route exists in the MVP.
+
+No fake or automatically seeded Experience records should be added.
+
+Temporary validation records must be permanently deleted after testing.
 
 ---
 
