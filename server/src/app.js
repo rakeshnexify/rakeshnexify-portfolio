@@ -11,6 +11,7 @@ import helmetOptions from "./config/helmet.js";
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
 import adminCompanyRoutes from "./routes/adminCompany.routes.js";
 import adminContactMessageRoutes from "./routes/adminContactMessage.routes.js";
+import adminEducationRoutes from "./routes/adminEducation.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
 import adminSiteSettingsRoutes from "./routes/adminSiteSettings.routes.js";
@@ -20,6 +21,7 @@ import adminTeamMemberRoutes from "./routes/adminTeamMember.routes.js";
 
 import companyRoutes from "./routes/company.routes.js";
 import contactMessageRoutes from "./routes/contactMessage.routes.js";
+import educationRoutes from "./routes/education.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
@@ -76,6 +78,7 @@ app.use("/api/site-settings", siteSettingsRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/statistics", statisticRoutes);
 app.use("/api/skills", skillRoutes);
+app.use("/api/education", educationRoutes);
 app.use("/api/team", teamMemberRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/companies", companyRoutes);
@@ -84,6 +87,7 @@ app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/services", adminServiceRoutes);
 app.use("/api/admin/statistics", adminStatisticRoutes);
 app.use("/api/admin/skills", adminSkillRoutes);
+app.use("/api/admin/education", adminEducationRoutes);
 app.use("/api/admin/team", adminTeamMemberRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/admin/companies", adminCompanyRoutes);
@@ -116,6 +120,7 @@ if (isProduction) {
    * /services
    * /statistics
    * /skills
+   * /education
    * /projects
    * /projects/:slug
    * /team
@@ -152,13 +157,35 @@ app.use((req, res) => {
 });
 
 app.use((error, req, res, next) => {
+  const isMalformedJson =
+    error instanceof SyntaxError &&
+    error?.type === "entity.parse.failed" &&
+    error?.status === 400;
+
+  if (isMalformedJson) {
+    return res.status(400).json({
+      success: false,
+
+      message: "Request body contains invalid JSON.",
+    });
+  }
+
   console.error("Unhandled server error:", error.message);
 
-  res.status(error.statusCode || 500).json({
+  const receivedStatusCode = Number(error.statusCode || error.status);
+
+  const statusCode =
+    Number.isInteger(receivedStatusCode) &&
+    receivedStatusCode >= 400 &&
+    receivedStatusCode <= 599
+      ? receivedStatusCode
+      : 500;
+
+  return res.status(statusCode).json({
     success: false,
 
     message:
-      error.statusCode && error.statusCode < 500
+      statusCode < 500
         ? error.message
         : "An unexpected server error occurred.",
   });
