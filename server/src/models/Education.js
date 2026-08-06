@@ -265,7 +265,7 @@ const educationSchema = new mongoose.Schema(
   },
 );
 
-educationSchema.pre("validate", function prepareEducationForValidation(next) {
+educationSchema.pre("validate", function prepareEducationForValidation() {
   if (this.isCurrentlyStudying) {
     this.endDate = null;
   }
@@ -286,8 +286,6 @@ educationSchema.pre("validate", function prepareEducationForValidation(next) {
       startDate: this.startDate,
     });
   }
-
-  next();
 });
 
 educationSchema.index(

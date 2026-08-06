@@ -31,6 +31,13 @@ const dashboardModules = [
     path: "/admin/skills",
   },
   {
+    title: "Education",
+    description:
+      "Create and manage institutions, qualifications, study timelines, grades, supporting links, display order, featured status and public visibility.",
+    status: "Management ready",
+    path: "/admin/education",
+  },
+  {
     title: "Projects",
     description:
       "Manage portfolio projects, case studies, images and project links.",
@@ -130,9 +137,9 @@ function AdminDashboardPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl break-words leading-7 text-slate-400">
-              Manage your portfolio content, services, Skills, projects, Team
-              members, companies, enquiries and website settings from this
-              secure dashboard.
+              Manage your portfolio content, services, Skills, Education, projects,
+              Team members, companies, enquiries and website settings from
+              this secure dashboard.
             </p>
           </div>
 

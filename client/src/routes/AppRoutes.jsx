@@ -18,6 +18,8 @@ import AdminCompaniesPage from "../pages/admin/AdminCompaniesPage";
 import AdminCompanyEditorPage from "../pages/admin/AdminCompanyEditorPage";
 import AdminContactMessagesPage from "../pages/admin/AdminContactMessagesPage";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
+import AdminEducationEditorPage from "../pages/admin/AdminEducationEditorPage";
+import AdminEducationPage from "../pages/admin/AdminEducationPage";
 import AdminLoginPage from "../pages/admin/AdminLoginPage";
 import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
 import AdminProjectsPage from "../pages/admin/AdminProjectsPage";
@@ -320,6 +322,19 @@ function AppRoutes() {
           <Route
             path="/admin/skills/:id/edit"
             element={<AdminSkillEditorPage mode="edit" />}
+          />
+
+          <Route
+            path="/admin/education"
+            element={<AdminEducationPage />}
+          />
+          <Route
+            path="/admin/education/new"
+            element={<AdminEducationEditorPage mode="create" />}
+          />
+          <Route
+            path="/admin/education/:id/edit"
+            element={<AdminEducationEditorPage mode="edit" />}
           />
 
           <Route path="/admin/team" element={<AdminTeamMembersPage />} />
