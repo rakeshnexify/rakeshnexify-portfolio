@@ -103,13 +103,21 @@ function cleanOrder(value, fieldName = "order") {
 }
 
 function cleanRating(value, fieldName = "rating") {
-  const numericRating = Number(value);
+  if (typeof value === "number") {
+    if (!Number.isInteger(value) || value < 1 || value > 5) {
+      throw createHttpError(
+        `${fieldName} must be a whole number from 1 to 5.`,
+        400,
+        {
+          [fieldName]: "Select a whole-number rating from 1 to 5.",
+        },
+      );
+    }
 
-  if (
-    !Number.isInteger(numericRating) ||
-    numericRating < 1 ||
-    numericRating > 5
-  ) {
+    return value;
+  }
+
+  if (typeof value !== "string") {
     throw createHttpError(
       `${fieldName} must be a whole number from 1 to 5.`,
       400,
@@ -119,7 +127,19 @@ function cleanRating(value, fieldName = "rating") {
     );
   }
 
-  return numericRating;
+  const cleanValue = value.trim();
+
+  if (!/^[1-5]$/.test(cleanValue)) {
+    throw createHttpError(
+      `${fieldName} must be a whole number from 1 to 5.`,
+      400,
+      {
+        [fieldName]: "Select a whole-number rating from 1 to 5.",
+      },
+    );
+  }
+
+  return Number(cleanValue);
 }
 
 function cleanOptionalObjectId(value, fieldName) {

@@ -56,30 +56,42 @@ function parseBooleanQuery(value, fieldName) {
   });
 }
 
+function createInvalidRatingQueryError() {
+  return createHttpError(
+    "rating must be a whole number from 1 to 5.",
+    400,
+    {
+      rating: "Select one rating from 1 to 5.",
+    },
+  );
+}
+
 function parseRatingQuery(value) {
   if (value === undefined) {
     return undefined;
   }
 
-  const cleanValue = String(value).trim();
-  const rating = Number(cleanValue);
+  if (typeof value === "number") {
+    if (!Number.isInteger(value) || value < 1 || value > 5) {
+      throw createInvalidRatingQueryError();
+    }
 
-  if (
-    !cleanValue ||
-    !Number.isInteger(rating) ||
-    rating < 1 ||
-    rating > 5
-  ) {
-    throw createHttpError(
-      "rating must be a whole number from 1 to 5.",
-      400,
-      {
-        rating: "Select a whole-number rating from 1 to 5.",
-      },
-    );
+    return value;
   }
 
-  return rating;
+  if (typeof value !== "string") {
+    throw createInvalidRatingQueryError();
+  }
+
+  if (!/^[1-5]$/.test(value)) {
+    throw createInvalidRatingQueryError();
+  }
+
+  return Number(value);
+}
+
+function hasBracketStyleRatingQuery(query = {}) {
+  return Object.keys(query).some((key) => /^rating\[.*\]$/.test(key));
 }
 
 function sendPublicTestimonialError(error, res, next) {
@@ -101,6 +113,11 @@ async function getPublicTestimonials(req, res, next) {
     };
 
     const search = String(req.query.search || "").trim();
+
+    if (hasBracketStyleRatingQuery(req.query)) {
+      throw createInvalidRatingQueryError();
+    }
+
     const rating = parseRatingQuery(req.query.rating);
     const featured = parseBooleanQuery(req.query.featured, "featured");
 
