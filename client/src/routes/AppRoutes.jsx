@@ -2,12 +2,15 @@ import { useEffect, useLayoutEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import PageSeo from "../components/seo/PageSeo";
+import BlogPage from "../pages/BlogPage";
 import CompaniesPage from "../pages/CompaniesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import EducationPage from "../pages/EducationPage";
 import ExperiencePage from "../pages/ExperiencePage";
 import HomePage from "../pages/HomePage";
+import NewsPage from "../pages/NewsPage";
 import NotFoundPage from "../pages/NotFoundPage";
+import PostDetailsPage from "../pages/PostDetailsPage";
 import ProjectDetailsPage from "../pages/ProjectDetailsPage";
 import ProjectsPage from "../pages/ProjectsPage";
 import ServicesPage from "../pages/ServicesPage";
@@ -268,6 +271,18 @@ function AppRoutes() {
           >
             <Route path="/experience" element={<ExperiencePage />} />
           </Route>
+
+          <Route path="/blog" element={<BlogPage />} />
+          <Route
+            path="/blog/:slug"
+            element={<PostDetailsPage expectedType="blog" />}
+          />
+
+          <Route path="/news" element={<NewsPage />} />
+          <Route
+            path="/news/:slug"
+            element={<PostDetailsPage expectedType="news" />}
+          />
 
           <Route element={<PublicPageVisibilityRoute sectionKey="projects" />}>
             <Route path="/projects" element={<ProjectsPage />} />
