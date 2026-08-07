@@ -16,11 +16,29 @@ const publicTestimonialFields = [
   "updatedAt",
 ].join(" ");
 
+const relatedProjectPublicFields = [
+  "title",
+  "slug",
+  "shortDescription",
+  "coverImageUrl",
+  "category",
+  "status",
+].join(" ");
+
+function createHttpError(message, statusCode = 400, fieldErrors = {}) {
+  const error = new Error(message);
+
+  error.statusCode = statusCode;
+  error.fieldErrors = fieldErrors;
+
+  return error;
+}
+
 function escapeRegularExpression(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function parseBooleanQuery(value) {
+function parseBooleanQuery(value, fieldName) {
   if (value === undefined) {
     return undefined;
   }
@@ -33,21 +51,47 @@ function parseBooleanQuery(value) {
     return false;
   }
 
-  return undefined;
+  throw createHttpError(`${fieldName} must be true or false.`, 400, {
+    [fieldName]: `${fieldName} must be true or false.`,
+  });
 }
 
 function parseRatingQuery(value) {
-  if (value === undefined || value === "") {
+  if (value === undefined) {
     return undefined;
   }
 
-  const rating = Number(value);
+  const cleanValue = String(value).trim();
+  const rating = Number(cleanValue);
 
-  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-    return undefined;
+  if (
+    !cleanValue ||
+    !Number.isInteger(rating) ||
+    rating < 1 ||
+    rating > 5
+  ) {
+    throw createHttpError(
+      "rating must be a whole number from 1 to 5.",
+      400,
+      {
+        rating: "Select a whole-number rating from 1 to 5.",
+      },
+    );
   }
 
   return rating;
+}
+
+function sendPublicTestimonialError(error, res, next) {
+  if (error?.statusCode) {
+    return res.status(error.statusCode).json({
+      success: false,
+      message: error.message,
+      fieldErrors: error.fieldErrors || {},
+    });
+  }
+
+  return next(error);
 }
 
 async function getPublicTestimonials(req, res, next) {
@@ -58,7 +102,7 @@ async function getPublicTestimonials(req, res, next) {
 
     const search = String(req.query.search || "").trim();
     const rating = parseRatingQuery(req.query.rating);
-    const featured = parseBooleanQuery(req.query.featured);
+    const featured = parseBooleanQuery(req.query.featured, "featured");
 
     if (search) {
       const safeSearch = escapeRegularExpression(search);
@@ -106,14 +150,7 @@ async function getPublicTestimonials(req, res, next) {
         match: {
           isVisible: true,
         },
-        select: [
-          "title",
-          "slug",
-          "shortDescription",
-          "coverImageUrl",
-          "category",
-          "status",
-        ].join(" "),
+        select: relatedProjectPublicFields,
       })
       .sort({
         isFeatured: -1,
@@ -129,7 +166,7 @@ async function getPublicTestimonials(req, res, next) {
       data: testimonials,
     });
   } catch (error) {
-    return next(error);
+    return sendPublicTestimonialError(error, res, next);
   }
 }
 

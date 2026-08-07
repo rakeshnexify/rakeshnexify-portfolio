@@ -13,6 +13,16 @@ const editableStringFields = [
   "companyWebsiteUrl",
 ];
 
+const relatedProjectAdminFields = [
+  "title",
+  "slug",
+  "shortDescription",
+  "coverImageUrl",
+  "category",
+  "status",
+  "isVisible",
+].join(" ");
+
 function createHttpError(message, statusCode = 400, fieldErrors = {}) {
   const error = new Error(message);
 
@@ -38,6 +48,18 @@ function normalizeSingleLineText(value) {
   return cleanText(value).replace(/\s+/g, " ");
 }
 
+function requireJsonContentType(req) {
+  if (!req.is("application/json")) {
+    throw createHttpError(
+      "Testimonial write requests must use application/json.",
+      415,
+      {
+        body: "Send the Testimonial request body using application/json.",
+      },
+    );
+  }
+}
+
 function cleanBoolean(value, fieldName) {
   if (typeof value === "boolean") {
     return value;
@@ -57,6 +79,18 @@ function cleanBoolean(value, fieldName) {
 }
 
 function cleanOrder(value, fieldName = "order") {
+  const isSupportedScalar =
+    typeof value === "number" || typeof value === "string";
+
+  const hasNonEmptyStringValue =
+    typeof value !== "string" || value.trim().length > 0;
+
+  if (!isSupportedScalar || !hasNonEmptyStringValue) {
+    throw createHttpError(`${fieldName} must be a non-negative number.`, 400, {
+      [fieldName]: `${fieldName} must be a non-negative number.`,
+    });
+  }
+
   const numericOrder = Number(value);
 
   if (!Number.isFinite(numericOrder) || numericOrder < 0) {
@@ -200,6 +234,15 @@ async function validateRelatedProject(projectId) {
   }
 }
 
+async function populateRelatedProject(testimonial) {
+  await testimonial.populate({
+    path: "relatedProject",
+    select: relatedProjectAdminFields,
+  });
+
+  return testimonial;
+}
+
 function sendTestimonialError(error, res, next) {
   if (error?.name === "ValidationError") {
     const fieldErrors = {};
@@ -296,15 +339,7 @@ async function getAdminTestimonials(req, res, next) {
     const testimonials = await Testimonial.find(filter)
       .populate({
         path: "relatedProject",
-        select: [
-          "title",
-          "slug",
-          "shortDescription",
-          "coverImageUrl",
-          "category",
-          "status",
-          "isVisible",
-        ].join(" "),
+        select: relatedProjectAdminFields,
       })
       .sort({
         order: 1,
@@ -330,15 +365,7 @@ async function getAdminTestimonialById(req, res, next) {
     const testimonial = await Testimonial.findById(req.params.id)
       .populate({
         path: "relatedProject",
-        select: [
-          "title",
-          "slug",
-          "shortDescription",
-          "coverImageUrl",
-          "category",
-          "status",
-          "isVisible",
-        ].join(" "),
+        select: relatedProjectAdminFields,
       })
       .lean();
 
@@ -357,6 +384,8 @@ async function getAdminTestimonialById(req, res, next) {
 
 async function createAdminTestimonial(req, res, next) {
   try {
+    requireJsonContentType(req);
+
     const testimonialData = buildTestimonialPayload(req.body);
 
     await validateRelatedProject(testimonialData.relatedProject);
@@ -365,6 +394,8 @@ async function createAdminTestimonial(req, res, next) {
     testimonialData.updatedBy = req.admin._id;
 
     const testimonial = await Testimonial.create(testimonialData);
+
+    await populateRelatedProject(testimonial);
 
     return res.status(201).json({
       success: true,
@@ -378,6 +409,7 @@ async function createAdminTestimonial(req, res, next) {
 
 async function updateAdminTestimonial(req, res, next) {
   try {
+    requireJsonContentType(req);
     validateTestimonialId(req.params.id);
 
     const testimonialData = buildTestimonialPayload(req.body);
@@ -409,6 +441,8 @@ async function updateAdminTestimonial(req, res, next) {
     if (!testimonial) {
       throw createHttpError("Testimonial record not found.", 404);
     }
+
+    await populateRelatedProject(testimonial);
 
     return res.status(200).json({
       success: true,
