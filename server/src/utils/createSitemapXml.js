@@ -37,6 +37,14 @@ const publicPageDefinitions = [
     key: "testimonials",
     pathname: "/testimonials",
   },
+  {
+    key: "blog",
+    pathname: "/blog",
+  },
+  {
+    key: "news",
+    pathname: "/news",
+  },
 ];
 
 function removeTrailingSlash(value) {
@@ -139,6 +147,14 @@ function createUrlEntry({ pathname, updatedAt }) {
   </url>`;
 }
 
+function normalizePostType(value) {
+  const type = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  return type === "blog" || type === "news" ? type : "";
+}
+
 function createDynamicEntries({ items, basePath }) {
   if (!Array.isArray(items)) {
     return [];
@@ -197,6 +213,7 @@ export function createSitemapXml({
   projects = [],
   companies = [],
   teamMembers = [],
+  posts = [],
   sections = [],
 } = {}) {
   const staticPaths = createStaticPaths(sections);
@@ -226,11 +243,39 @@ export function createSitemapXml({
       })
     : [];
 
+  const blogPostEntries = isPublicPageVisible(sections, "blog")
+    ? createDynamicEntries({
+        items: Array.isArray(posts)
+          ? posts.filter(
+              (post) =>
+                post?.isVisible !== false &&
+                normalizePostType(post?.type) === "blog",
+            )
+          : [],
+        basePath: "/blog",
+      })
+    : [];
+
+  const newsPostEntries = isPublicPageVisible(sections, "news")
+    ? createDynamicEntries({
+        items: Array.isArray(posts)
+          ? posts.filter(
+              (post) =>
+                post?.isVisible !== false &&
+                normalizePostType(post?.type) === "news",
+            )
+          : [],
+        basePath: "/news",
+      })
+    : [];
+
   const sitemapEntries = removeDuplicateEntries([
     ...staticEntries,
     ...projectEntries,
     ...teamMemberEntries,
     ...companyEntries,
+    ...blogPostEntries,
+    ...newsPostEntries,
   ]);
 
   const urlEntries = sitemapEntries.map(createUrlEntry).join("\n\n");

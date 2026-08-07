@@ -10,6 +10,8 @@ import PageSeo from "../components/seo/PageSeo";
 import usePosts from "../hooks/usePosts";
 import useSiteSettings from "../hooks/useSiteSettings";
 
+const SITE_URL = "https://rakeshnexify.com";
+
 const pageContentByType = {
   blog: {
     eyebrow: "Blog",
@@ -62,6 +64,26 @@ const initialFilters = {
   tag: "",
   featured: "all",
 };
+
+function createAbsoluteSiteUrl(pathname) {
+  const safePath = String(pathname || "").trim();
+
+  if (!safePath || safePath === "/") {
+    return `${SITE_URL}/`;
+  }
+
+  return `${SITE_URL}${safePath.startsWith("/") ? safePath : `/${safePath}`}`;
+}
+
+function createStructuredDataImageUrl(value) {
+  const imageUrl = String(value || "").trim();
+
+  if (!imageUrl) {
+    return "";
+  }
+
+  return imageUrl.startsWith("/") ? `${SITE_URL}${imageUrl}` : imageUrl;
+}
 
 function createApiFilters(type, filters) {
   const apiFilters = {
@@ -243,6 +265,84 @@ function PostsListingPage({ type }) {
   const seoTitle = `${pageContent.typeLabel} | ${brandName}`;
   const socialSharingImage = String(globalSeo.ogImageUrl || "").trim();
 
+  const isCanonicalListingState =
+    !appliedFilters.search.trim() &&
+    !appliedFilters.category.trim() &&
+    !appliedFilters.tag.trim() &&
+    appliedFilters.featured === "all";
+
+  const listingStructuredData = useMemo(() => {
+    const sourcePosts = Array.isArray(posts) ? posts : [];
+
+    const eligiblePosts = sourcePosts
+      .map((post) => {
+        const postSlug = String(post?.slug || "").trim();
+
+        if (!postSlug || post?.type !== type) {
+          return null;
+        }
+
+        return {
+          slug: postSlug,
+          title:
+            String(post?.title || "").trim() ||
+            `${pageContent.typeLabel} Post`,
+        };
+      })
+      .filter(Boolean);
+
+    const itemListElements = eligiblePosts.map((post, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: createAbsoluteSiteUrl(
+        `/${type}/${encodeURIComponent(post.slug)}`,
+      ),
+      name: post.title,
+    }));
+
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: seoTitle,
+      headline: pageContent.heading,
+      description: pageContent.description,
+      url: createAbsoluteSiteUrl(pageContent.canonicalPath),
+      isPartOf: {
+        "@type": "WebSite",
+        name: brandName,
+        url: `${SITE_URL}/`,
+      },
+      mainEntity: {
+        "@type": "ItemList",
+        name: `${brandName} ${pageContent.typeLabel} Posts`,
+        numberOfItems: itemListElements.length,
+        itemListElement: itemListElements,
+      },
+    };
+
+    const structuredDataImage =
+      createStructuredDataImageUrl(socialSharingImage);
+
+    if (structuredDataImage) {
+      structuredData.image = structuredDataImage;
+    }
+
+    return structuredData;
+  }, [
+    brandName,
+    pageContent.canonicalPath,
+    pageContent.description,
+    pageContent.heading,
+    pageContent.typeLabel,
+    posts,
+    seoTitle,
+    socialSharingImage,
+    type,
+  ]);
+
+  const shouldEmitListingStructuredData =
+    isCanonicalListingState && !isLoading && !error;
+
   function handleFilterChange(event) {
     const { name, value } = event.target;
 
@@ -324,6 +424,9 @@ function PostsListingPage({ type }) {
         image={socialSharingImage}
         type="website"
         brandName={brandName}
+        structuredData={
+          shouldEmitListingStructuredData ? listingStructuredData : undefined
+        }
       />
 
       <PublicPageHeader />

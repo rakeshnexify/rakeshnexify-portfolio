@@ -10,6 +10,8 @@ import PageSeo from "../components/seo/PageSeo";
 import usePost from "../hooks/usePost";
 import useSiteSettings from "../hooks/useSiteSettings";
 
+const SITE_URL = "https://rakeshnexify.com";
+
 const defaultPostSeo = {
   blog: {
     description:
@@ -33,6 +35,36 @@ const defaultPostSeo = {
     ],
   },
 };
+
+function createAbsoluteSiteUrl(pathname) {
+  const safePath = String(pathname || "").trim();
+
+  if (!safePath || safePath === "/") {
+    return `${SITE_URL}/`;
+  }
+
+  return `${SITE_URL}${safePath.startsWith("/") ? safePath : `/${safePath}`}`;
+}
+
+function createStructuredDataImageUrl(value) {
+  const imageUrl = String(value || "").trim();
+
+  if (!imageUrl) {
+    return "";
+  }
+
+  return imageUrl.startsWith("/") ? `${SITE_URL}${imageUrl}` : imageUrl;
+}
+
+function createIsoDate(value) {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
+}
 
 function getErrorMessage(error) {
   if (error instanceof Error) {
@@ -243,6 +275,120 @@ function PostDetailsPage({ expectedType = "blog" }) {
     post && post.type !== safeExpectedType,
   );
 
+  const postStructuredData = useMemo(() => {
+    if (!post || post.type !== safeExpectedType || !safeSlug) {
+      return undefined;
+    }
+
+    const postTitle =
+      String(post.title || "").trim() || `${typeLabel} Post`;
+
+    const canonicalUrl = createAbsoluteSiteUrl(canonicalPath);
+    const listingUrl = createAbsoluteSiteUrl(`/${safeExpectedType}`);
+    const publishedAt = createIsoDate(post.publishedAt);
+    const updatedAt = createIsoDate(post.updatedAt);
+    const structuredDataImage =
+      createStructuredDataImageUrl(socialSharingImage);
+    const authorName = String(post.authorName || "").trim();
+    const category = String(post.category || "").trim();
+
+    const structuredKeywords = [
+      ...postKeywords,
+      ...tags,
+      category,
+    ]
+      .map((keyword) => String(keyword || "").trim())
+      .filter(Boolean);
+
+    const article = {
+      "@context": "https://schema.org",
+      "@type":
+        safeExpectedType === "news" ? "NewsArticle" : "BlogPosting",
+      headline: postTitle,
+      description: seoDescription,
+      url: canonicalUrl,
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": canonicalUrl,
+      },
+      isPartOf: {
+        "@type": "CollectionPage",
+        "@id": listingUrl,
+        name: `${typeLabel} | ${brandName}`,
+      },
+      publisher: {
+        "@type": "Organization",
+        name: brandName,
+        url: `${SITE_URL}/`,
+      },
+    };
+
+    if (authorName) {
+      article.author = {
+        "@type": "Person",
+        name: authorName,
+      };
+    }
+
+    if (publishedAt) {
+      article.datePublished = publishedAt;
+    }
+
+    if (updatedAt) {
+      article.dateModified = updatedAt;
+    }
+
+    if (structuredDataImage) {
+      article.image = structuredDataImage;
+    }
+
+    if (category) {
+      article.articleSection = category;
+    }
+
+    if (structuredKeywords.length > 0) {
+      article.keywords = [...new Set(structuredKeywords)].join(", ");
+    }
+
+    const breadcrumbs = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: `${SITE_URL}/`,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: typeLabel,
+          item: listingUrl,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: postTitle,
+          item: canonicalUrl,
+        },
+      ],
+    };
+
+    return [article, breadcrumbs];
+  }, [
+    brandName,
+    canonicalPath,
+    post,
+    postKeywords,
+    safeExpectedType,
+    safeSlug,
+    seoDescription,
+    socialSharingImage,
+    tags,
+    typeLabel,
+  ]);
+
   if (isLoading) {
     return (
       <>
@@ -325,6 +471,7 @@ function PostDetailsPage({ expectedType = "blog" }) {
         image={socialSharingImage}
         type="article"
         brandName={brandName}
+        structuredData={postStructuredData}
       />
 
       <PublicPageHeader />
