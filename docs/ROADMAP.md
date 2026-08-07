@@ -938,27 +938,186 @@ Future optional improvements:
 - Media-library integration for profile images
 - Optional moderation or approval workflow if multiple content editors require it
 
-## Phase 18 — Blog or News
+## Phase 18 — Blog / News
 
-Status: PLANNED
+Status: COMPLETE — IMPLEMENTED, VALIDATED, COMMITTED AND PUSHED
 
-Planned:
+The Blog and News system is implemented as one shared Post module.
 
-- Post model
-- Categories
-- Tags
-- Author
-- Slug
-- Featured image
-- Rich content
-- Draft and publication status
-- Scheduled publishing
-- SEO fields
-- Admin CRUD
-- Public listing
-- Post details page
-- Sitemap integration
+### Architecture
+
+- Mongoose model: `Post`
+- MongoDB collection: `posts`
+- Post types:
+  - `blog`
+  - `news`
+- Public API base: `/api/posts`
+- Admin API base: `/api/admin/posts`
+
+### Completed Backend
+
+- Shared Post model
+- Global unique slug
+- Required title, excerpt, content and author
+- Featured image and alt text
+- Category and normalized tags
+- Publication timestamp
+- Reading time
+- Optional related Projects
+- Visibility, featured and display order
+- Per-Post SEO
+- Admin audit fields and timestamps
+- Public visible-only listing API
+- Public visible-only detail API
+- Search, type, category, tag and featured filters
+- Strict scalar query validation
+- Hidden related-Project protection
+- Protected Admin CRUD
+- Admin search/type/category/tag/visibility/featured filters
+- Related Project validation
+- Partial nested SEO PATCH preservation
+- JWT authentication and RBAC
+
+### Completed Frontend Foundation
+
+- `postsApi.js`
+- `adminPostsApi.js`
+- `usePosts.js`
+- `usePost.js`
+- `postForm.js`
+- Strict response-shape handling
+- Structured errors
+- AbortSignal support
+- Race protection
+- Form normalization and validation
+
+### Completed Admin Panel
+
+- `/admin/posts`
+- `/admin/posts/new`
+- `/admin/posts/:id/edit`
+- Blog/News dashboard module
 - Search and filters
+- Create/edit form
+- Related Projects multi-select
+- Visibility and featured quick actions
+- Role-restricted delete
+- Mutation cancellation and stale-navigation guards
+
+### Completed Public Website
+
+- `/blog`
+- `/news`
+- `/blog/:slug`
+- `/news/:slug`
+- Blog listing
+- News listing
+- Type-protected detail page
+- Search, category, tag and featured filters
+- Reusable Post card
+- Plain-text content rendering
+- Featured-image fallback
+- Related visible Projects
+- Loading, retry, error, empty and not-found states
+- Cross-type route protection
+
+### Completed Homepage / Site Settings
+
+Shared registry keys:
+
+- `posts` — homepage-only combined `Latest Articles & News`
+- `blog` — Blog page/navigation publication
+- `news` — News page/navigation publication
+
+Completed:
+
+- `postsSection` Site Settings content
+- Combined homepage section visibility/order
+- Independent Blog page visibility
+- Independent News page visibility
+- Independent Blog navigation label/order/visibility
+- Independent News navigation label/order/visibility
+- Navbar, PublicPageHeader and Footer integration
+- Responsive desktop `More` overflow menu
+- Visibility-aware homepage Post detail links
+- Up to four homepage Posts
+- Chronological homepage ordering by `publishedAt`
+
+### Completed SEO / Sitemap
+
+- Blog collection canonical metadata
+- News collection canonical metadata
+- Canonical unfiltered `CollectionPage` + `ItemList`
+- Filter/loading/error states omit canonical listing JSON-LD
+- Blog detail `BlogPosting`
+- News detail `NewsArticle`
+- Detail `BreadcrumbList`
+- Valid publication/modified dates only
+- `/blog` and `/news` sitemap entries
+- Visible Blog/News detail sitemap URLs
+- Hidden Posts excluded
+- Disabled collection removes its detail URLs
+- No `/posts` sitemap route
+
+### Runtime Validation
+
+Verified:
+
+- Empty states
+- Admin creation and listing
+- Public Blog listing
+- Public News listing
+- Blog detail
+- News detail
+- Filters
+- Cross-type detail protection
+- Homepage publication chronology
+- Independent page visibility
+- Navbar visibility
+- Footer visibility
+- Homepage section visibility
+- Disabled collection homepage-card behavior
+- Collection JSON-LD
+- BlogPosting / NewsArticle JSON-LD
+- Breadcrumb JSON-LD
+- Sitemap behavior
+- Temporary test Post cleanup
+
+### Final Review
+
+Final comprehensive Codex review reported:
+
+- No blocking findings
+- No important non-blocking findings
+- No minor findings
+
+Final verdict:
+
+`BLOG / NEWS MODULE READY FOR DOCUMENTATION SYNC`
+
+### Verified Checkpoints
+
+- `57127e2 Add dynamic Blog and News backend APIs`
+- `9aeb0b6 Add Blog and News frontend foundation`
+- `10e662c Add dynamic Blog and News admin interface`
+- `4ae0312 Add public Blog and News pages`
+- `3b3ed37 Integrate Blog and News with site settings`
+- `e22eb2e Add Blog and News SEO and sitemap integration`
+
+### Current Checkpoint
+
+`Blog / News documentation synchronization`
+
+### Future Optional Improvements
+
+- Rich-text authoring/editor after a safe rendering strategy is approved
+- Scheduled publishing if a real workflow requires it
+- Dynamic Blog/News Category model if content volume justifies it
+- Pagination when Post volume requires it
+- Media-library integration
+- Author profile relations
+- Additional related-content recommendations
+- Automated API/UI/SEO tests
 
 ## Phase 19 — Media Management
 
@@ -1092,7 +1251,7 @@ Planned:
 
 ## Current Immediate Next Step
 
-Complete the Testimonials documentation-only checkpoint.
+Complete the Blog/News documentation-only checkpoint.
 
 Required closeout:
 
@@ -1107,7 +1266,7 @@ Required closeout:
 9. Commit with:
 
 ```text
-Synchronize Testimonials module documentation
+Synchronize Blog and News module documentation
 ```
 
 10. Push `main` to `origin`.
@@ -1116,6 +1275,6 @@ Synchronize Testimonials module documentation
 
 ## Next Major Feature
 
-`Fully Dynamic Blog or News Management Module`
+`Media Management`
 
-Start Blog or News planning only after the Testimonials documentation checkpoint is committed, pushed and the repository is synchronized.
+Start Media Management planning only after the Blog/News documentation checkpoint is committed, pushed and the repository is synchronized.

@@ -640,11 +640,11 @@ Status: Accepted
 
 The latest verified client build reports a main JavaScript chunk of:
 
-`1,057.06 kB`
+`1,157.35 kB`
 
 The latest verified gzip size is:
 
-`223.72 kB`
+`242.70 kB`
 
 ## Decision
 
@@ -973,6 +973,7 @@ Future dynamic public modules should follow the same separation between:
 - SEO indexing behavior
 
 ---
+
 
 # Superseding a Decision
 
@@ -1365,3 +1366,184 @@ The public `/testimonials` page may publish accurate general Schema.org `Review`
 ## Reason
 
 Strict ratings prevent inconsistent API, form, visual and structured-data behavior. Accurate Schema.org semantics are more important than forcing eligibility for a search-engine rich-result format that does not match the portfolio data model.
+
+# Decision 034 — Implement Blog and News as One Shared Post Module
+
+Status: Accepted and Implemented
+
+## Decision
+
+Blog and News use one shared dynamic Post architecture.
+
+Conventions:
+
+- Mongoose model: `Post`
+- MongoDB collection: `posts`
+- Public API: `/api/posts`
+- Admin API: `/api/admin/posts`
+- Post type values:
+  - `blog`
+  - `news`
+
+Public routes:
+
+- `/blog`
+- `/news`
+- `/blog/:slug`
+- `/news/:slug`
+
+Admin routes:
+
+- `/admin/posts`
+- `/admin/posts/new`
+- `/admin/posts/:id/edit`
+
+## Completed Scope
+
+- Shared Blog/News database model
+- Protected Admin CRUD
+- Strict public/Admin filters
+- Search
+- Category and tags
+- Author
+- Featured image
+- Plain-text long-form content
+- Global unique slug
+- Publication timestamp and reading time
+- Related Projects
+- Visibility, featured and display order
+- Per-Post SEO
+- Blog and News listing pages
+- Shared type-protected detail page
+- Homepage combined Articles & News preview
+- Site Settings
+- Independent Blog and News page/navigation visibility
+- JSON-LD and sitemap integration
+- Runtime validation
+
+## Important Decisions
+
+- No separate Blog and News collections.
+- Slugs are globally unique across both types.
+- No fake or automatically seeded Posts.
+- The backend `isVisible` flag controls record publication.
+- `publishedAt` is publication metadata and may be `null`; `createdAt` is not used as a fake publication date.
+- Public article content is rendered as plain text in the current MVP.
+- Related Projects may include hidden records in Admin responses but only visible records in public responses.
+
+## Verified Checkpoints
+
+- `57127e2 Add dynamic Blog and News backend APIs`
+- `9aeb0b6 Add Blog and News frontend foundation`
+- `10e662c Add dynamic Blog and News admin interface`
+- `4ae0312 Add public Blog and News pages`
+- `3b3ed37 Integrate Blog and News with site settings`
+- `e22eb2e Add Blog and News SEO and sitemap integration`
+
+## Reason
+
+Blog and News share the same publishing fields and workflows. A single Post model avoids duplicate models, controllers, forms and APIs while preserving distinct public experiences through the `type` field.
+
+---
+
+# Decision 035 — Separate Combined Homepage Posts From Blog and News Page Publication
+
+Status: Accepted and Implemented
+
+## Decision
+
+The shared Site Settings section registry uses three distinct keys:
+
+### `posts`
+
+Homepage-only combined `Latest Articles & News` section.
+
+Responsibilities:
+
+- Homepage visibility
+- Homepage order
+- Combined section content through `postsSection`
+
+It does not own:
+
+- A `/posts` public route
+- A Navbar destination
+- Dedicated-page visibility
+
+### `blog`
+
+Page-only publication/navigation registry item.
+
+Responsibilities:
+
+- `/blog`
+- `/blog/:slug`
+- Blog Navbar/PublicPageHeader entry
+- Blog Footer public-page link
+- Blog sitemap collection/detail visibility
+
+### `news`
+
+Page-only publication/navigation registry item.
+
+Responsibilities:
+
+- `/news`
+- `/news/:slug`
+- News Navbar/PublicPageHeader entry
+- News Footer public-page link
+- News sitemap collection/detail visibility
+
+## Homepage Card Rule
+
+The combined homepage may continue showing a visible Blog or News Post while that type's dedicated public page is disabled.
+
+In that state the card detail action must become unavailable/non-clickable so the homepage does not expose a broken disabled route.
+
+## Reason
+
+Homepage content visibility and public collection availability are separate publication decisions.
+
+---
+
+# Decision 036 — Make “Latest Articles & News” Chronological and Canonical SEO State-Aware
+
+Status: Accepted and Verified
+
+## Homepage Ordering Decision
+
+The combined homepage preview called `Latest Articles & News` must represent publication chronology rather than Admin featured/manual list ordering.
+
+The preview:
+
+1. Clones the public Post array
+2. Sorts by valid `publishedAt` descending
+3. Uses `createdAt` only as fallback/tie-break for equal or unavailable publication timestamps
+4. Uses a stable identifier fallback
+5. Displays up to four records
+
+The shared public `/api/posts` ordering remains unchanged for listing use cases.
+
+## SEO Decision
+
+Canonical Blog/News listing JSON-LD is emitted only for a settled successful unfiltered listing request.
+
+Filtered, loading and error states do not publish the canonical collection ItemList.
+
+Detail structured data uses:
+
+- `BlogPosting` for Blog
+- `NewsArticle` for News
+- `BreadcrumbList` for both
+
+## Sitemap Decision
+
+Blog and News sitemap collection/detail URLs are controlled by their independent `isPageVisible` settings.
+
+Hidden Posts never enter the sitemap.
+
+## Reason
+
+Page labels, structured data and sitemap discovery must describe the content actually being published rather than a transient or disabled state.
+
+---

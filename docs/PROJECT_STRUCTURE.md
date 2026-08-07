@@ -75,7 +75,7 @@ Last recorded frontend source file count after Experience public integration:
 
 `135`
 
-Testimonials public integration has since added new frontend files; use the repository itself for the current exact count.
+Testimonials and Blog/News integration have since added new frontend files; use the repository itself for the current exact count.
 
 ## Client Source Tree
 
@@ -87,6 +87,7 @@ client/src/
 │   │   ├── companies/
 │   │   ├── education/
 │   │   ├── experience/
+│   │   ├── posts/
 │   │   ├── projects/
 │   │   ├── services/
 │   │   ├── site-settings/
@@ -98,6 +99,7 @@ client/src/
 │   ├── education/
 │   ├── experience/
 │   ├── layout/
+│   ├── posts/
 │   ├── projects/
 │   ├── sections/
 │   │   └── contact/
@@ -161,6 +163,7 @@ Current feature folders:
 - `companies`
 - `education`
 - `experience`
+- `posts`
 - `projects`
 - `services`
 - `site-settings`
@@ -174,6 +177,7 @@ Important files include:
 - `CompanyForm.jsx`
 - `EducationForm.jsx`
 - `ExperienceForm.jsx`
+- `PostForm.jsx`
 - `ProjectForm.jsx`
 - `ServiceForm.jsx`
 - `SkillForm.jsx`
@@ -255,6 +259,35 @@ Renders a reusable public Skill card with:
 - Optional years of experience
 - Icon or image
 - Featured state
+
+
+### Blog / News Posts
+
+Path:
+
+`client/src/components/posts/`
+
+Current component:
+
+- `PostCard.jsx`
+
+Purpose:
+
+Renders a reusable Blog/News card with:
+
+- Blog or News badge
+- Featured state
+- Featured image or stable letter fallback
+- Category
+- Publication date
+- Reading time
+- Title and excerpt
+- Tags
+- Author
+- Type-correct detail route
+- Optional disabled/non-linked detail action when that collection page is unavailable
+
+The publication label uses `publishedAt` only. `createdAt` is not shown as a fake publication date.
 
 ### Companies
 
@@ -363,7 +396,7 @@ Current files:
 
 These components provide shared page structure, navigation and responsive behavior.
 
-Team and Testimonials integration exists in:
+Team, Testimonials and Blog/News integration exists in:
 
 - `Navbar.jsx`
 - `PublicPageHeader.jsx`
@@ -387,6 +420,7 @@ Current sections:
 - `ExperienceSection.jsx`
 - `TeamSection.jsx`
 - `CompaniesSection.jsx`
+- `LatestPostsSection.jsx`
 - `TestimonialsSection.jsx`
 - `ContactSection.jsx`
 
@@ -394,7 +428,9 @@ Current sections:
 
 `TestimonialsSection.jsx` loads public visible Testimonials, preserves the approved public ordering, renders up to three homepage preview cards and uses the dedicated Testimonials page CTA only when that page is enabled.
 
-Default shared section placement is Companies → Testimonials → Contact. Final homepage and Navbar order remain Admin-controlled through Site Settings.
+`LatestPostsSection.jsx` loads visible Blog and News records, clones and sorts them chronologically by `publishedAt` with stable fallback ordering, renders up to four cards, and suppresses detail links for a Post type whose dedicated public page is disabled.
+
+Default shared section placement is Companies → Articles & News → Testimonials → Contact. Final homepage and Navbar order remain Admin-controlled through Site Settings.
 
 Contact form component:
 
@@ -450,7 +486,7 @@ Stores frontend API configuration behavior.
 
 Defines and merges supported homepage-section settings.
 
-Skills, Education, Experience, Team, Companies and Testimonials are registered in the shared homepage, navigation and public-page visibility system. Testimonials is registered after Companies and before Contact by default.
+Skills, Education, Experience, Team, Companies, Articles & News and Testimonials are registered in the shared section system. The `posts` key is homepage-only; `blog` and `news` are page-only publication/navigation records. Articles & News is registered after Companies and before Testimonials by default.
 
 ### `siteSettingsPages.js`
 
@@ -516,6 +552,8 @@ Current hooks:
 - `useStatistics.js`
 - `useEducation.js`
 - `useExperience.js`
+- `usePosts.js`
+- `usePost.js`
 - `useTeamMembers.js`
 - `useTeamMember.js`
 - `useTestimonials.js`
@@ -533,6 +571,17 @@ Loads the public visible Team member collection and exposes loading, error and r
 ### `useTeamMember.js`
 
 Loads one public Team member by slug and exposes loading, error, HTTP status and refresh state.
+
+
+Blog/News hooks:
+
+### `usePosts.js`
+
+Loads public visible Post collections with filter support, AbortController cancellation, request IDs, error state and refresh behavior.
+
+### `usePost.js`
+
+Loads one visible Post by slug and exposes loading, error, HTTP status and refresh state while protecting against stale slug responses.
 
 Testimonials hook:
 
@@ -565,6 +614,9 @@ Current public pages:
 - `CompaniesPage.jsx`
 - `CompanyDetailsPage.jsx`
 - `TestimonialsPage.jsx`
+- `BlogPage.jsx`
+- `NewsPage.jsx`
+- `PostDetailsPage.jsx`
 - `NotFoundPage.jsx`
 
 Team pages:
@@ -592,6 +644,44 @@ Provides:
 - Member-specific metadata
 - `ProfilePage` and `Person` JSON-LD
 - `noindex, nofollow` for unavailable profiles
+
+
+Blog / News pages:
+
+### `BlogPage.jsx`
+
+Provides the shared listing implementation used by Blog and News.
+
+For Blog it provides:
+
+- `/blog`
+- Fixed API type `blog`
+- Search/category/tag/featured filters
+- Loading, retry, error and empty states
+- Canonical metadata
+- Settled unfiltered `CollectionPage` + `ItemList` JSON-LD
+
+### `NewsPage.jsx`
+
+Reuses the shared listing architecture with fixed Post type `news`.
+
+### `PostDetailsPage.jsx`
+
+Provides both:
+
+- `/blog/:slug`
+- `/news/:slug`
+
+Responsibilities:
+
+- Expected-route type enforcement
+- Loading, retry, error and not-found states
+- Plain-text article rendering
+- Featured-image fallback
+- Related visible Projects
+- Blog `BlogPosting` or News `NewsArticle`
+- `BreadcrumbList`
+- `noindex` for unavailable/error states
 
 Testimonials page:
 
@@ -634,6 +724,8 @@ Current Admin pages:
 - `AdminEducationEditorPage.jsx`
 - `AdminExperiencePage.jsx`
 - `AdminExperienceEditorPage.jsx`
+- `AdminPostsPage.jsx`
+- `AdminPostEditorPage.jsx`
 - `AdminProjectEditorPage.jsx`
 - `AdminTeamMembersPage.jsx`
 - `AdminTeamMemberEditorPage.jsx`
@@ -644,6 +736,8 @@ Current Admin pages:
 - `AdminContactMessagesPage.jsx`
 
 The Admin Team module follows the existing list-and-editor pattern.
+
+The Admin Blog/News module uses `AdminPostsPage.jsx` and `AdminPostEditorPage.jsx` for one shared Post management workflow.
 
 The Admin Testimonials module follows the same protected list-and-editor pattern and supports search, rating, visibility, featured and related-Project filters.
 
@@ -698,6 +792,23 @@ Current Admin Team routes:
 
 The public Team routes are wrapped by `PublicPageVisibilityRoute` with the `team` section key.
 
+Current public Blog / News routes:
+
+- `/blog`
+- `/blog/:slug`
+- `/news`
+- `/news/:slug`
+
+Current Admin Blog / News routes:
+
+- `/admin/posts`
+- `/admin/posts/new`
+- `/admin/posts/:id/edit`
+
+The Blog collection and detail routes are wrapped by `PublicPageVisibilityRoute` with section key `blog`.
+
+The News collection and detail routes are wrapped by `PublicPageVisibilityRoute` with section key `news`.
+
 Current public Testimonials route:
 
 - `/testimonials`
@@ -741,6 +852,7 @@ Current public API services:
 - `projectsApi.js`
 - `educationApi.js`
 - `experienceApi.js`
+- `postsApi.js`
 - `teamApi.js`
 - `testimonialsApi.js`
 - `companiesApi.js`
@@ -756,6 +868,7 @@ Current Admin API services:
 - `adminProjectsApi.js`
 - `adminEducationApi.js`
 - `adminExperienceApi.js`
+- `adminPostsApi.js`
 - `adminTeamMembersApi.js`
 - `adminTestimonialsApi.js`
 - `adminCompaniesApi.js`
@@ -775,6 +888,22 @@ Supports public list filters and public member-details loading.
 ### `adminTeamMembersApi.js`
 
 Consumes protected Admin Team CRUD endpoints.
+
+
+Blog/News API services:
+
+### `postsApi.js`
+
+Consumes:
+
+- `GET /api/posts`
+- `GET /api/posts/:slug`
+
+Supports public `search`, `type`, `category`, `tag` and `featured` filters, strict response validation and AbortSignal cancellation.
+
+### `adminPostsApi.js`
+
+Consumes protected Admin Post CRUD endpoints and supports Admin search, type, category, tag, visibility and featured filters plus abortable writes.
 
 Testimonials API services:
 
@@ -808,6 +937,7 @@ Current files:
 - `projectForm.js`
 - `educationForm.js`
 - `experienceForm.js`
+- `postForm.js`
 - `teamMemberForm.js`
 - `testimonialForm.js`
 - `companyForm.js`
@@ -820,7 +950,9 @@ Handles form conversion, validation helpers, normalization and reusable data tra
 
 `testimonialForm.js` contains Testimonial form defaults, API-data conversion, strict rating validation, URL validation, related-Project ObjectId validation, order validation, boolean handling and editable payload creation.
 
-`siteSettingsForm.js` includes Team and Testimonials section content conversion and request-payload handling.
+`postForm.js` contains Post form defaults, API-data conversion, slug generation, tag/SEO keyword conversion, date/time conversion, URL validation, related-Project normalization and editable payload creation.
+
+`siteSettingsForm.js` includes Team, Testimonials and Blog/News section-registry/content conversion and request-payload handling.
 
 ---
 
@@ -880,6 +1012,38 @@ Responsibilities:
 
 ---
 
+
+# Client Blog / News Integration Files
+
+The completed Blog/News module uses these shared client files:
+
+```text
+client/src/components/admin/site-settings/SiteSettingsForm.jsx
+client/src/components/layout/Footer.jsx
+client/src/components/layout/Navbar.jsx
+client/src/components/layout/PublicPageHeader.jsx
+client/src/components/seo/PageSeo.jsx
+client/src/config/homepageSections.js
+client/src/pages/HomePage.jsx
+client/src/pages/admin/AdminDashboardPage.jsx
+client/src/routes/AppRoutes.jsx
+client/src/utils/siteSettingsForm.js
+```
+
+Responsibilities:
+
+- Register `posts`, `blog` and `news`
+- Render the combined homepage Articles & News section
+- Add Blog/News navigation and Footer links
+- Store/submit `postsSection`
+- Control combined homepage visibility/order
+- Control Blog and News page/navigation visibility independently
+- Protect Blog/News listing and detail routes
+- Support Blog/News metadata and JSON-LD
+- Provide the desktop `More` overflow menu when navigation exceeds the four direct standard slots
+
+---
+
 # Server Structure
 
 Server application path:
@@ -894,7 +1058,7 @@ Last recorded backend source file count after Experience backend integration:
 
 `72`
 
-Testimonials backend integration has since added new server files; use the repository itself for the current exact count.
+Testimonials and Blog/News backend integration have since added new server files; use the repository itself for the current exact count.
 
 ## Server Source Tree
 
@@ -929,6 +1093,8 @@ Responsibilities include:
 - Protected Admin Team API mounting
 - Public Testimonials API mounting
 - Protected Admin Testimonials API mounting
+- Public Blog/News Posts API mounting
+- Protected Admin Blog/News Posts API mounting
 - Sitemap mounting
 - Production client delivery
 - Public Team deep-route fallback documentation
@@ -965,7 +1131,7 @@ Responsibilities:
 - Helmet policies
 - Shared homepage-section definitions
 
-`homepageSections.js` registers Team, Companies and Testimonials in the shared registry. Testimonials is placed after Companies and before Contact by default.
+`homepageSections.js` registers Team, Companies, Articles & News and Testimonials in the shared registry. `posts` is homepage-only, while `blog` and `news` are page-only publication/navigation records.
 
 ---
 
@@ -984,6 +1150,7 @@ Path:
 - `project.controller.js`
 - `education.controller.js`
 - `experience.controller.js`
+- `post.controller.js`
 - `teamMember.controller.js`
 - `testimonial.controller.js`
 - `company.controller.js`
@@ -1000,6 +1167,7 @@ Path:
 - `adminProject.controller.js`
 - `adminEducation.controller.js`
 - `adminExperience.controller.js`
+- `adminPost.controller.js`
 - `adminTeamMember.controller.js`
 - `adminTestimonial.controller.js`
 - `adminCompany.controller.js`
@@ -1022,6 +1190,27 @@ Responsibilities:
 - Save `teamSection` Site Settings content
 - Load visible Team member slugs for sitemap generation
 - Respect Team public-page publication settings
+
+
+Blog/News controller files:
+
+- `post.controller.js`
+- `adminPost.controller.js`
+
+Blog/News-related shared controller files:
+
+- `adminSiteSettings.controller.js`
+- `sitemap.controller.js`
+
+Responsibilities:
+
+- Return only visible public Posts
+- Enforce Blog/News public filters
+- Protect hidden related Projects
+- Provide protected Admin Post CRUD and filters
+- Save `postsSection` Site Settings content
+- Load visible Blog/News slugs for sitemap generation
+- Respect Blog and News public-page publication settings
 
 Testimonials controller files:
 
@@ -1064,6 +1253,8 @@ No Team default-data file exists.
 Team members must be created dynamically through the protected Admin management interface. Fake or hard-coded Team records should not be introduced.
 
 No Testimonials default-data file exists. Testimonials must be created dynamically through the protected Admin management interface. Fake or hard-coded Testimonial records should not be introduced.
+
+No Blog/News Post default-data file exists. Posts must be created dynamically through the protected Admin management interface. Temporary runtime Posts must be deleted after validation.
 
 ---
 
@@ -1110,13 +1301,16 @@ Current models:
 - `Company.js`
 - `TeamMember.js`
 - `Testimonial.js`
+- `Post.js`
 - `ContactMessage.js`
 
 `TeamMember.js` stores dynamic Team profiles, publication controls, SEO fields and cross-module relationships.
 
 `Testimonial.js` stores dynamic client feedback, strict rating data, optional profile media, optional related Project relation, display order, featured/visibility controls, Admin audit references and timestamps.
 
-`SiteSettings.js` stores Team and Testimonials section content plus the shared section publication settings.
+`Post.js` stores both Blog and News records, global unique slugs, article content, publication metadata, category/tags, related Projects, SEO, publication controls and Admin audit references.
+
+`SiteSettings.js` stores Team, Testimonials and `postsSection` content plus the shared `posts`/`blog`/`news` publication registry settings.
 
 All new models should document:
 
@@ -1146,6 +1340,7 @@ Path:
 - `skill.routes.js`
 - `education.routes.js`
 - `experience.routes.js`
+- `post.routes.js`
 - `project.routes.js`
 - `teamMember.routes.js`
 - `testimonial.routes.js`
@@ -1161,6 +1356,7 @@ Path:
 - `adminSkill.routes.js`
 - `adminEducation.routes.js`
 - `adminExperience.routes.js`
+- `adminPost.routes.js`
 - `adminProject.routes.js`
 - `adminTeamMember.routes.js`
 - `adminTestimonial.routes.js`
@@ -1174,6 +1370,8 @@ Team route files:
 
 Mounted API paths:
 
+- `/api/posts`
+- `/api/admin/posts`
 - `/api/team`
 - `/api/admin/team`
 - `/api/testimonials`
@@ -1221,6 +1419,18 @@ Team sitemap responsibilities:
 - Add visible `/team/:slug` member URLs
 - Exclude hidden Team members
 - Remove all Team URLs when the Team public page is disabled
+
+
+Blog/News sitemap responsibilities:
+
+- Add `/blog` when the Blog public page is enabled
+- Add visible `/blog/:slug` URLs
+- Remove Blog collection and detail URLs when Blog is disabled
+- Add `/news` when the News public page is enabled
+- Add visible `/news/:slug` URLs
+- Remove News collection and detail URLs when News is disabled
+- Exclude hidden Posts
+- Do not generate a `/posts` sitemap URL
 
 Testimonials sitemap responsibilities:
 
@@ -1275,6 +1485,37 @@ Responsibilities:
 - Add `/testimonials` to the sitemap only when the public page is enabled
 - Preserve independent homepage, Navbar and public-page visibility
 - Avoid creating Testimonial detail sitemap URLs
+
+---
+
+
+# Server Blog / News Integration Files
+
+The completed Blog/News module uses these server files:
+
+```text
+server/src/models/Post.js
+server/src/controllers/post.controller.js
+server/src/controllers/adminPost.controller.js
+server/src/routes/post.routes.js
+server/src/routes/adminPost.routes.js
+server/src/app.js
+server/src/config/homepageSections.js
+server/src/controllers/adminSiteSettings.controller.js
+server/src/controllers/sitemap.controller.js
+server/src/models/SiteSettings.js
+server/src/utils/createSitemapXml.js
+```
+
+Responsibilities:
+
+- Store shared Blog/News Post records
+- Mount public and protected Admin Post APIs
+- Register `posts`, `blog` and `news`
+- Store and save `postsSection`
+- Add Blog/News collection and visible detail URLs to the sitemap
+- Respect independent Blog and News public-page visibility
+- Keep hidden Posts out of public responses and sitemap output
 
 ---
 
@@ -1807,6 +2048,182 @@ No Testimonial detail URLs are generated.
 No fake or automatically seeded Testimonial records should be added.
 
 Temporary validation records must be permanently deleted after testing.
+
+---
+
+
+# Current Blog / News Module Structure
+
+Status:
+
+`COMPLETE, VALIDATED AND PUSHED`
+
+Git checkpoints:
+
+- `57127e2 Add dynamic Blog and News backend APIs`
+- `9aeb0b6 Add Blog and News frontend foundation`
+- `10e662c Add dynamic Blog and News admin interface`
+- `4ae0312 Add public Blog and News pages`
+- `3b3ed37 Integrate Blog and News with site settings`
+- `e22eb2e Add Blog and News SEO and sitemap integration`
+
+## Backend
+
+```text
+server/src/models/Post.js
+server/src/controllers/post.controller.js
+server/src/controllers/adminPost.controller.js
+server/src/routes/post.routes.js
+server/src/routes/adminPost.routes.js
+server/src/app.js
+```
+
+## Frontend Foundation
+
+```text
+client/src/services/postsApi.js
+client/src/services/adminPostsApi.js
+client/src/hooks/usePosts.js
+client/src/hooks/usePost.js
+client/src/utils/postForm.js
+```
+
+## Admin Frontend
+
+```text
+client/src/components/admin/posts/PostForm.jsx
+client/src/pages/admin/AdminPostsPage.jsx
+client/src/pages/admin/AdminPostEditorPage.jsx
+client/src/pages/admin/AdminDashboardPage.jsx
+client/src/routes/AppRoutes.jsx
+```
+
+## Public Frontend
+
+```text
+client/src/components/posts/PostCard.jsx
+client/src/components/sections/LatestPostsSection.jsx
+client/src/pages/BlogPage.jsx
+client/src/pages/NewsPage.jsx
+client/src/pages/PostDetailsPage.jsx
+```
+
+## Shared Client Integration
+
+```text
+client/src/components/admin/site-settings/SiteSettingsForm.jsx
+client/src/components/layout/Footer.jsx
+client/src/components/layout/Navbar.jsx
+client/src/components/layout/PublicPageHeader.jsx
+client/src/components/seo/PageSeo.jsx
+client/src/config/homepageSections.js
+client/src/pages/HomePage.jsx
+client/src/routes/AppRoutes.jsx
+client/src/utils/siteSettingsForm.js
+```
+
+## Shared Server Integration
+
+```text
+server/src/config/homepageSections.js
+server/src/controllers/adminSiteSettings.controller.js
+server/src/controllers/sitemap.controller.js
+server/src/models/SiteSettings.js
+server/src/utils/createSitemapXml.js
+```
+
+## Public API
+
+```text
+GET /api/posts
+GET /api/posts/:slug
+```
+
+Public filters:
+
+- `search`
+- `type`
+- `category`
+- `tag`
+- `featured`
+
+## Admin API
+
+```text
+GET    /api/admin/posts
+POST   /api/admin/posts
+GET    /api/admin/posts/:id
+PATCH  /api/admin/posts/:id
+DELETE /api/admin/posts/:id
+```
+
+Admin filters:
+
+- `search`
+- `type`
+- `category`
+- `tag`
+- `isVisible`
+- `isFeatured`
+
+RBAC:
+
+- Read: any active authenticated Admin
+- Create/update: `super-admin`, `admin`, `editor`
+- Delete: `super-admin`, `admin`
+
+## Public Routes
+
+```text
+/blog
+/blog/:slug
+/news
+/news/:slug
+```
+
+## Admin Routes
+
+```text
+/admin/posts
+/admin/posts/new
+/admin/posts/:id/edit
+```
+
+## Site Settings
+
+Shared registry:
+
+```text
+posts
+blog
+news
+```
+
+Content:
+
+```text
+postsSection.eyebrow
+postsSection.heading
+postsSection.description
+postsSection.ctaButton.label
+postsSection.ctaButton.url
+```
+
+## SEO and Sitemap
+
+- Blog/News listing `CollectionPage` + `ItemList`
+- Blog detail `BlogPosting` + `BreadcrumbList`
+- News detail `NewsArticle` + `BreadcrumbList`
+- `/blog` and visible Blog detail sitemap URLs
+- `/news` and visible News detail sitemap URLs
+- Independent page-visibility filtering
+- Hidden Posts excluded
+
+## Data Rules
+
+No fake or automatically seeded Blog/News Posts should be added.
+
+Temporary validation Posts must be permanently deleted after testing.
 
 ---
 

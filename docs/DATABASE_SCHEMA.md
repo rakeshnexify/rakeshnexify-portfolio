@@ -49,7 +49,8 @@ The project currently contains these Mongoose models:
 9. `Company`
 10. `TeamMember`
 11. `Testimonial`
-12. `ContactMessage`
+12. `Post`
+13. `ContactMessage`
 
 ---
 
@@ -260,6 +261,14 @@ Uses the reusable listing-section schema.
 Uses the reusable listing-section schema.
 
 It stores the dynamic eyebrow, heading, description and CTA content used by the homepage Testimonials section and public `/testimonials` page.
+
+### postsSection
+
+Uses the reusable listing-section schema.
+
+It stores the dynamic eyebrow, heading, description and CTA content for the combined homepage `Latest Articles & News` section.
+
+The dedicated Blog and News public pages use independent section-registry records instead of separate `blogSection` or `newsSection` content objects.
 
 ### companiesSection
 
@@ -1277,6 +1286,298 @@ There is no `/testimonials/:slug` route and no record-specific Testimonial SEO s
 
 ---
 
+
+# Post
+
+Model file:
+
+`server/src/models/Post.js`
+
+Mongoose model:
+
+`Post`
+
+MongoDB collection:
+
+`posts`
+
+This collection stores both Blog articles and News records through one shared dynamic model.
+
+## Main Fields
+
+- `title`
+- `slug`
+- `type`
+- `excerpt`
+- `content`
+- `featuredImageUrl`
+- `featuredImageAlt`
+- `category`
+- `tags`
+- `authorName`
+- `publishedAt`
+- `readingTime`
+- `relatedProjects`
+- `order`
+- `isFeatured`
+- `isVisible`
+- `seo`
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
+
+## Post Type
+
+### type
+
+Required enum values:
+
+- `blog`
+- `news`
+
+The same MongoDB collection and API resource is used for both types.
+
+## Required Content Fields
+
+### title
+
+- Type: String
+- Required
+- Trimmed
+- Minimum length: 2
+- Maximum length: 180
+
+### slug
+
+- Type: String
+- Required
+- Unique
+- Lowercase
+- Minimum length: 2
+- Maximum length: 200
+- Accepts lowercase letters, numbers and single hyphen separators
+
+The slug is globally unique across both Blog and News records.
+
+### excerpt
+
+- Type: String
+- Required
+- Minimum length: 10
+- Maximum length: 500
+
+### content
+
+- Type: String
+- Required
+- Minimum length: 20
+- Maximum length: 50000
+
+The current public client renders Post content as plain text. Stored HTML is not executed by the Blog/News detail page.
+
+### authorName
+
+- Type: String
+- Required
+- Minimum length: 2
+- Maximum length: 150
+
+## Media Fields
+
+### featuredImageUrl
+
+- Optional String
+- Maximum length: 500
+- Must be a credential-free HTTP or HTTPS URL when present
+
+### featuredImageAlt
+
+- Optional String
+- Maximum length: 220
+
+## Classification
+
+### category
+
+- Optional String
+- Maximum length: 120
+- Indexed
+
+### tags
+
+- String array
+- Trimmed
+- Blank values removed
+- Stored in lowercase
+- Duplicate values removed
+
+## Publication Metadata
+
+### publishedAt
+
+- Optional Date
+- Default: `null`
+- Indexed
+
+A visible Post may exist without a publication timestamp. Public UI does not substitute `createdAt` as a fake publication date.
+
+### readingTime
+
+- Type: Number
+- Whole number only
+- Minimum: `1`
+- Default: `1`
+
+## Project Relation
+
+### relatedProjects
+
+- Type: ObjectId array
+- References `Project`
+- Default: empty array
+
+Public Post responses populate only visible related Projects.
+
+Admin responses may populate hidden Projects because authorized Admin users manage publication state.
+
+## Publication and Display Controls
+
+### order
+
+- Type: Number
+- Minimum: `0`
+- Default: `0`
+
+### isFeatured
+
+- Type: Boolean
+- Default: `false`
+- Indexed
+
+### isVisible
+
+- Type: Boolean
+- Default: `true`
+- Indexed
+
+## SEO Fields
+
+The nested `seo` object contains:
+
+- `title`
+- `description`
+- `keywords`
+- `ogImageUrl`
+
+Rules:
+
+- SEO title maximum length: 70
+- SEO description maximum length: 180
+- SEO image URL maximum length: 500
+- SEO image must be credential-free HTTP/HTTPS when present
+- SEO keywords are normalized to lowercase and deduplicated
+- Nested SEO schema has no separate `_id`
+
+## Admin Audit Relations
+
+### createdBy
+
+- Required ObjectId
+- References `AdminUser`
+
+### updatedBy
+
+- Required ObjectId
+- References `AdminUser`
+
+These values are controlled by authenticated Admin writes and are not accepted as editable request-body fields.
+
+## Schema Configuration
+
+- Automatic `createdAt`
+- Automatic `updatedAt`
+- `versionKey: false`
+- Explicit collection name: `posts`
+
+## Indexes
+
+### Unique slug
+
+- Unique index on `slug`
+
+### Public listing index
+
+Index name:
+
+`post_public_listing`
+
+Fields:
+
+1. `isVisible` ascending
+2. `isFeatured` descending
+3. `order` ascending
+4. `publishedAt` descending
+5. `createdAt` descending
+6. `_id` ascending
+
+### Admin filter index
+
+Index name:
+
+`post_admin_filters`
+
+Fields:
+
+1. `type`
+2. `category`
+3. `isVisible`
+4. `isFeatured`
+5. `order`
+6. `publishedAt` descending
+7. `createdAt` descending
+8. `_id` ascending
+
+### Text index
+
+Index name:
+
+`post_text_search`
+
+Fields:
+
+- `title`
+- `slug`
+- `excerpt`
+- `content`
+- `category`
+- `tags`
+- `authorName`
+
+## Search Behavior
+
+The current public and Admin Post controllers perform case-insensitive regular-expression searches across the supported searchable fields.
+
+`Post.js` also declares the `post_text_search` MongoDB text index. The current API implementation uses regex queries rather than MongoDB `$text` queries.
+
+## Public Route Design
+
+Public API:
+
+- `GET /api/posts`
+- `GET /api/posts/:slug`
+
+Public frontend:
+
+- `/blog`
+- `/news`
+- `/blog/:slug`
+- `/news/:slug`
+
+The detail API is shared, while the client enforces the expected Blog-vs-News route type before rendering content.
+
+---
+
 # Project
 
 Model file:
@@ -1931,6 +2232,8 @@ The following fields reference `AdminUser`:
 - Experience `updatedBy`
 - Testimonial `createdBy`
 - Testimonial `updatedBy`
+- Post `createdBy`
+- Post `updatedBy`
 - Project `createdBy`
 - Project `updatedBy`
 - Company `createdBy`
@@ -1949,6 +2252,21 @@ The `Testimonial` model contains one optional ObjectId relation:
 - `Project` through `relatedProject`
 
 The public Testimonials API must populate only public-safe Project data. A hidden related Project must not be exposed.
+
+---
+
+
+## Current Blog / News Cross-Module Relation
+
+The `Post` model contains an ObjectId-array relation:
+
+- `Project` through `relatedProjects`
+
+Public Blog/News responses populate only visible Project records.
+
+Hidden related Projects must not leak through public listing or detail responses.
+
+Admin Blog/News responses may include hidden related Projects for authorized management.
 
 ---
 

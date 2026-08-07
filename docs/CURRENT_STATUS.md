@@ -24,6 +24,7 @@ The MERN portfolio foundation and the following fully dynamic modules are comple
 - Education
 - Experience
 - Testimonials
+- Blog / News
 - Projects
 - Team
 - Companies
@@ -32,7 +33,7 @@ The MERN portfolio foundation and the following fully dynamic modules are comple
 
 Latest pushed development commit:
 
-`12a2e67 Add public Testimonials section and page`
+`e22eb2e Add Blog and News SEO and sitemap integration`
 
 Verified Git state after the push:
 
@@ -44,13 +45,232 @@ Verified Git state after the push:
 
 Phase:
 
-`Testimonials documentation synchronization`
+`Blog / News documentation synchronization`
 
 Status:
 
 `IN PROGRESS — DOCUMENTATION ONLY`
 
-Do not modify verified Testimonials implementation files during this checkpoint unless documentation or Codex review discovers a real implementation defect.
+Do not modify verified Blog/News implementation files during this checkpoint unless documentation or Codex review discovers a real implementation defect.
+
+
+## Verified Blog / News Checkpoints
+
+- `57127e2 Add dynamic Blog and News backend APIs`
+- `9aeb0b6 Add Blog and News frontend foundation`
+- `10e662c Add dynamic Blog and News admin interface`
+- `4ae0312 Add public Blog and News pages`
+- `3b3ed37 Integrate Blog and News with site settings`
+- `e22eb2e Add Blog and News SEO and sitemap integration`
+
+## Completed Blog / News Backend
+
+- Created shared `Post` model and `posts` collection
+- Added strict `type` enum: `blog` or `news`
+- Added globally unique slug
+- Added title, excerpt and long-form content
+- Added featured image URL and alt text
+- Added category and normalized tags
+- Added author, publication timestamp and reading time
+- Added optional related Projects
+- Added order, featured and visibility controls
+- Added per-Post SEO fields
+- Added Admin audit references and timestamps
+- Added public `GET /api/posts`
+- Added public `GET /api/posts/:slug`
+- Added protected Admin CRUD at `/api/admin/posts`
+- Added public search, type, category, tag and featured filters
+- Added Admin search, type, category, tag, visibility and featured filters
+- Added strict scalar query handling
+- Added strict text/body validation
+- Added credential-free HTTP/HTTPS image validation
+- Added hidden related-Project protection in public responses
+- Preserved JWT authentication and RBAC
+- Added publication/Admin query indexes
+- Completed repeated Codex backend validation
+
+RBAC:
+
+- Read: any authenticated active Admin
+- Create/update: `super-admin`, `admin`, `editor`
+- Delete: `super-admin`, `admin`
+
+## Completed Blog / News Frontend Foundation
+
+Files:
+
+```text
+client/src/services/postsApi.js
+client/src/services/adminPostsApi.js
+client/src/hooks/usePosts.js
+client/src/hooks/usePost.js
+client/src/utils/postForm.js
+```
+
+Completed behavior:
+
+- Strict public/Admin API clients
+- Response-shape validation
+- Structured API errors
+- Bearer authorization
+- AbortSignal support
+- Stale-response protection
+- Stable public sorting
+- Form defaults and API conversion
+- Blog/News slug handling
+- Tags and SEO keyword conversion
+- Date/time conversion
+- Image URL validation
+- Related Project ObjectId validation
+- Editable payload whitelist
+
+## Completed Blog / News Admin Interface
+
+Files:
+
+```text
+client/src/components/admin/posts/PostForm.jsx
+client/src/pages/admin/AdminPostsPage.jsx
+client/src/pages/admin/AdminPostEditorPage.jsx
+client/src/pages/admin/AdminDashboardPage.jsx
+client/src/routes/AppRoutes.jsx
+```
+
+Completed behavior:
+
+- Dashboard Blog & News module
+- `/admin/posts`
+- `/admin/posts/new`
+- `/admin/posts/:id/edit`
+- Search and practical filters
+- Create and edit form
+- Related Project multi-select
+- Visibility and featured quick actions
+- Role-restricted permanent deletion
+- Loading, error and empty states
+- List-load and mutation race protection
+- Abortable submit behavior
+- Stale late-navigation protection
+
+## Completed Blog / News Public Website
+
+Public files:
+
+```text
+client/src/components/posts/PostCard.jsx
+client/src/components/sections/LatestPostsSection.jsx
+client/src/pages/BlogPage.jsx
+client/src/pages/NewsPage.jsx
+client/src/pages/PostDetailsPage.jsx
+```
+
+Completed behavior:
+
+- Public `/blog` listing
+- Public `/news` listing
+- Public `/blog/:slug` details
+- Public `/news/:slug` details
+- Blog/News type-protected detail rendering
+- Search, category, tag and featured filters
+- Loading, error, retry and empty states
+- Plain-text article rendering
+- Featured-image fallback
+- Publication date uses `publishedAt` only
+- Combined homepage `Latest Articles & News`
+- Up to four homepage preview records
+- Chronological homepage ordering by publication time
+- No fake public records
+
+## Completed Blog / News Site Settings and Publication
+
+Registry keys:
+
+- `posts` — homepage-only combined section
+- `blog` — Blog page/navigation publication
+- `news` — News page/navigation publication
+
+Completed:
+
+- Added `postsSection` Site Settings content
+- Added independent Blog public-page visibility
+- Added independent News public-page visibility
+- Added independent Blog navigation visibility/order/label
+- Added independent News navigation visibility/order/label
+- Added combined homepage visibility/order
+- Added Navbar and PublicPageHeader Blog/News support
+- Added Footer Blog/News links
+- Added visibility-protected collection and detail routes
+- Added homepage card link suppression when its collection is disabled
+- Added accessible desktop `More` overflow navigation
+
+Default registry placement:
+
+1. Hero
+2. About
+3. Statistics
+4. Skills
+5. Services
+6. Projects
+7. Education
+8. Experience
+9. Team
+10. Companies
+11. Articles & News
+12. Testimonials
+13. Contact
+
+`blog` and `news` are page-only registry records and do not render separate homepage sections.
+
+## Completed Blog / News SEO and Sitemap
+
+- Canonical `/blog` and `/news`
+- Canonical detail URLs
+- Canonical unfiltered listing `CollectionPage` + `ItemList`
+- Filtered/loading/error listing states omit canonical collection JSON-LD
+- Blog detail `BlogPosting` + `BreadcrumbList`
+- News detail `NewsArticle` + `BreadcrumbList`
+- Valid publication/modified dates only
+- No fake `datePublished`
+- Visibility-aware `/blog` and `/news` sitemap entries
+- Visible `/blog/:slug` and `/news/:slug` sitemap entries
+- Hidden Posts excluded
+- Disabling a collection removes its collection and detail sitemap URLs
+
+## Blog / News Runtime and Final Review
+
+Runtime verification completed for:
+
+- Empty Blog/News listing states
+- Empty homepage Posts state
+- Admin creation and listing
+- Blog listing
+- News listing
+- Blog detail
+- News detail
+- Public filters
+- Cross-type detail protection
+- Homepage publication chronology
+- Blog/News independent page visibility
+- Navbar visibility
+- Footer visibility
+- Homepage section visibility
+- Disabled-page homepage-card behavior
+- Collection JSON-LD
+- BlogPosting / NewsArticle JSON-LD
+- Breadcrumb JSON-LD
+- Sitemap inclusion/exclusion
+
+Temporary runtime Blog/News records were permanently deleted after testing.
+
+Final Codex review reported:
+
+- No blocking findings
+- No important non-blocking findings
+- No minor findings
+
+Final verdict:
+
+`BLOG / NEWS MODULE READY FOR DOCUMENTATION SYNC`
 
 ## Verified Testimonials Checkpoints
 
@@ -226,9 +446,9 @@ npm run check
 Latest client build:
 
 - Vite: `8.1.5`
-- Modules transformed: `164`
-- Main JavaScript bundle: `1,057.06 kB`
-- Gzip size: `223.72 kB`
+- Modules transformed: `177`
+- Main JavaScript bundle: `1,157.35 kB`
+- Gzip size: `242.70 kB`
 - Result: successful
 
 Additional checks:
@@ -270,12 +490,13 @@ None currently known in the completed Testimonials backend, Admin interface or p
 
 Latest pushed development commit:
 
-`12a2e67 Add public Testimonials section and page`
+`e22eb2e Add Blog and News SEO and sitemap integration`
 
 Current intended local work:
 
 - Modify only the nine repository-memory documentation files
 - Preserve existing documentation history and detail
+- Synchronize the completed Blog/News architecture, runtime validation and Git checkpoints
 - Validate documentation scope and whitespace
 - Run focused Codex documentation review before staging
 - Commit and push the documentation-only checkpoint after approval
@@ -290,10 +511,10 @@ git diff --check
 
 ## Immediate Next Step
 
-1. Apply the nine Testimonials documentation replacements.
+1. Apply the nine Blog/News documentation replacements.
 2. Run documentation scope and whitespace checks.
 3. Review the complete documentation diff with Codex.
-4. Fix only confirmed documentation issues.
+4. Fix only confirmed documentation findings.
 5. Stage only the nine documentation files after Codex approval.
 6. Run staged whitespace, name and stat checks.
 7. Commit with a documentation-only message.
@@ -303,8 +524,8 @@ git diff --check
 
 Recommended documentation commit message:
 
-`Synchronize Testimonials module documentation`
+`Synchronize Blog and News module documentation`
 
 Recommended next major module after documentation closes:
 
-`Fully Dynamic Blog or News Management Module`
+`Media Management`

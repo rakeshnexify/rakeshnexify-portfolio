@@ -58,16 +58,16 @@ Vite reports:
 
 Latest verified main JavaScript bundle:
 
-`1,057.06 kB`
+`1,157.35 kB`
 
 Latest verified gzip size:
 
-`223.72 kB`
+`242.70 kB`
 
 Latest verified build details:
 
 - Vite: `8.1.5`
-- Modules transformed: `164`
+- Modules transformed: `177`
 - Build result: successful
 
 ## Current Impact
@@ -236,6 +236,10 @@ Automated tests are still needed for:
 - Testimonials backend validation and authorization
 - Testimonials Admin CRUD and publication workflows
 - Testimonials public filters, visibility matrix, SEO and sitemap behavior
+- Blog/News backend validation and authorization
+- Blog/News Admin CRUD and mutation cancellation
+- Blog/News public filters, type protection and visibility matrix
+- Blog/News JSON-LD state transitions and sitemap filtering
 
 ## Current Impact
 
@@ -751,6 +755,153 @@ The final comprehensive Codex review confirmed that uppercase and lowercase HTTP
 - Accessible new-tab text
 
 No remaining finding was reported.
+
+---
+
+
+# RESOLVED-014 — Blog / News Strict Request and Response Contracts
+
+Status: Resolved and Verified
+
+## Previous Risk
+
+The shared Post module initially needed stricter handling around:
+
+- Scalar query values
+- String-field coercion
+- Nested SEO PATCH behavior
+- Frontend success-response shapes
+- Mutation cancellation
+
+## Files Involved
+
+- `server/src/models/Post.js`
+- `server/src/controllers/post.controller.js`
+- `server/src/controllers/adminPost.controller.js`
+- `client/src/services/postsApi.js`
+- `client/src/services/adminPostsApi.js`
+- `client/src/pages/admin/AdminPostEditorPage.jsx`
+
+## Fix
+
+The final module:
+
+- Rejects non-text values for writable text fields instead of silently coercing them.
+- Rejects bracket/repeated formats for strict scalar query filters.
+- Preserves omitted nested SEO fields through dotted PATCH updates.
+- Requires explicit valid success response shapes in frontend API services.
+- Supports AbortSignal for Admin mutations.
+- Protects editor navigation from stale late mutation completion.
+
+## Verification
+
+Multiple focused Codex reviews reported the backend and frontend foundation safe to stage after these fixes.
+
+---
+
+# RESOLVED-015 — Blog / News Public Publication Metadata and Error Indexing
+
+Status: Resolved and Verified
+
+## Previous Risk
+
+Public cards/details initially risked:
+
+- Treating `createdAt` as a fallback publication date
+- Allowing temporary detail-error pages to remain indexable
+- Retaining failed-image DOM state after image URLs changed
+
+## Files Involved
+
+- `client/src/components/posts/PostCard.jsx`
+- `client/src/pages/PostDetailsPage.jsx`
+
+## Fix
+
+- Published date uses only valid `publishedAt`.
+- Temporary detail errors are `noindex`.
+- PostCard image elements remount when the image URL changes.
+- Detail featured-image failure uses a stable accessible fallback.
+
+## Verification
+
+Focused Codex re-review reported every previous public-page finding resolved.
+
+---
+
+# RESOLVED-016 — Blog / News Navigation Width and Homepage Latest Ordering
+
+Status: Resolved and Verified
+
+## Previous Risk
+
+Adding Blog and News increased desktop navigation width pressure.
+
+The homepage section was named `Latest Articles & News` while the shared public API ordering prioritized featured/manual order before publication time.
+
+## Files Involved
+
+- `client/src/components/layout/Navbar.jsx`
+- `client/src/components/layout/PublicPageHeader.jsx`
+- `client/src/components/sections/LatestPostsSection.jsx`
+
+## Fix
+
+Desktop navigation now renders:
+
+- First four eligible Admin-ordered standard links
+- Remaining links inside an accessible `More` menu
+- Contact as a separate CTA
+
+The homepage preview clones public Posts and orders them by:
+
+1. Valid `publishedAt` descending
+2. `createdAt` fallback/tie-break
+3. Stable ID/slug fallback
+
+before taking the first four.
+
+## Runtime Verification
+
+A temporary News Post published on 07 Aug 2026 appeared before a Blog Post published on 01 Aug 2026 even though the Blog Post was featured with order `0` and the News Post used order `999`.
+
+Temporary test Posts were deleted afterward.
+
+---
+
+# RESOLVED-017 — Blog / News Canonical Listing JSON-LD State Transitions
+
+Status: Resolved and Verified
+
+## Previous Risk
+
+Clearing listing filters could temporarily make the page canonical while the hook still retained the previous filtered records during the unfiltered request.
+
+Defensive ListItem filtering could also create non-contiguous `position` values.
+
+## Location
+
+`client/src/pages/BlogPage.jsx`
+
+## Fix
+
+Canonical listing structured data now emits only when:
+
+- Applied filters are the unfiltered canonical state
+- Loading is complete
+- No API error exists
+
+Eligible records are filtered before assigning ItemList positions.
+
+## Verification
+
+Focused Codex re-review confirmed:
+
+- No stale filtered canonical JSON-LD
+- No loading/error listing JSON-LD
+- Contiguous ItemList positions
+- Correct zero-item successful CollectionPage behavior
+- Stale JSON-LD script removal through `PageSeo`
 
 ---
 

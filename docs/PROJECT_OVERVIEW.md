@@ -22,7 +22,7 @@ Remote branch:
 
 Latest pushed development commit:
 
-`12a2e67 Add public Testimonials section and page`
+`e22eb2e Add Blog and News SEO and sitemap integration`
 
 Recent Experience checkpoints:
 
@@ -31,6 +31,15 @@ Recent Experience checkpoints:
 - `5dbcb7a Add Experience frontend services and form utilities`
 - `b117e22 Add dynamic Experience backend APIs`
 
+
+Recent Blog / News checkpoints:
+
+- `e22eb2e Add Blog and News SEO and sitemap integration`
+- `3b3ed37 Integrate Blog and News with site settings`
+- `4ae0312 Add public Blog and News pages`
+- `10e662c Add dynamic Blog and News admin interface`
+- `9aeb0b6 Add Blog and News frontend foundation`
+- `57127e2 Add dynamic Blog and News backend APIs`
 
 Recent Testimonials checkpoints:
 
@@ -58,6 +67,7 @@ It presents:
 - Education
 - Professional Experience
 - Testimonials and client reviews
+- Blog articles and News updates
 - Projects
 - Team members
 - Companies and brands
@@ -78,9 +88,10 @@ Every reasonable content item should be Admin-controlled rather than unnecessari
 - Homepage visibility and order
 - Navbar visibility, label and order
 - Dedicated public-page visibility
-- Services, Statistics, Skills, Education, Experience and Testimonials
+- Services, Statistics, Skills, Education, Experience, Testimonials and Blog/News Posts
 - Projects, Team members and Companies
 - Testimonials and client-review publication
+- Blog and News publishing, visibility and SEO
 - Contact information and messages
 - Platform links and Footer content
 - SEO metadata, JSON-LD and sitemap behavior
@@ -161,12 +172,13 @@ MongoDB stores dynamic data for:
 - Education
 - Experience
 - Testimonials
+- Blog/News Posts
 - Projects
 - Companies
 - Team members
 - Contact messages
 
-Blog or News remains a future module.
+Blog and News are now implemented through one shared `Post` model and `posts` collection.
 
 ## Completed Core Modules
 
@@ -179,6 +191,7 @@ Blog or News remains a future module.
 - Education management
 - Experience management
 - Testimonials management
+- Blog and News management
 - Projects management
 - Team management
 - Companies management
@@ -255,6 +268,116 @@ Overall status:
 - `/experience` sitemap removal and restoration were verified
 - Final working tree was clean and synchronized with `origin/main`
 
+
+
+## Dynamic Blog / News Management Status
+
+Overall status:
+
+`COMPLETE, VALIDATED, COMMITTED AND PUSHED`
+
+### Shared Architecture
+
+- One `Post` model
+- One `posts` MongoDB collection
+- `type: blog | news`
+- Globally unique slug across both types
+- Shared public and Admin API resources
+- Distinct Blog and News public collection/detail routes
+
+### Backend
+
+- Public `GET /api/posts`
+- Public `GET /api/posts/:slug`
+- Protected Admin CRUD at `/api/admin/posts`
+- Strict search/type/category/tag/featured filters
+- Admin visibility and featured filters
+- Credential-free HTTP/HTTPS image validation
+- Related Project validation and public hidden-record protection
+- Partial nested SEO PATCH preservation
+- Server-controlled Admin audit fields
+- JWT authentication and RBAC
+
+### Admin Frontend
+
+- `/admin/posts`
+- `/admin/posts/new`
+- `/admin/posts/:id/edit`
+- Dashboard Blog & News card
+- Search and practical filters
+- Reusable Post form
+- Blog/News type selection
+- Tags and category
+- Publication timestamp and reading time
+- Related Projects multi-select
+- SEO fields
+- Visibility and featured quick actions
+- Role-restricted permanent deletion
+- Mutation AbortSignal and stale-navigation protection
+
+### Public Website
+
+- `/blog`
+- `/news`
+- `/blog/:slug`
+- `/news/:slug`
+- Search, category, tag and featured filters
+- Shared reusable `PostCard`
+- Type-protected detail rendering
+- Plain-text article content
+- Publication metadata
+- Related visible Projects
+- Homepage `Latest Articles & News`
+- Up to four chronologically latest preview records
+- No fake Posts
+
+### Site Settings and Publication
+
+- `posts` registry key for the homepage-only combined section
+- `blog` registry key for Blog navigation/public-page visibility
+- `news` registry key for News navigation/public-page visibility
+- `postsSection` dynamic heading, description and CTA
+- Independent Blog and News public-page controls
+- Independent Blog and News Navbar visibility/order/labels
+- Combined homepage visibility/order
+- Navbar `More` overflow menu for wide navigation sets
+- Footer and public-header integration
+- Visibility-protected listing and detail routes
+
+### SEO and Sitemap
+
+- `/blog` and `/news` canonical metadata
+- Unfiltered settled listing `CollectionPage` + `ItemList`
+- Blog detail `BlogPosting` + `BreadcrumbList`
+- News detail `NewsArticle` + `BreadcrumbList`
+- No stale collection JSON-LD during filters/loading/errors
+- Visibility-aware Blog and News collection/detail sitemap URLs
+- Hidden Posts excluded from sitemap
+
+### Runtime Validation
+
+- Backend and MongoDB startup
+- Admin create/list workflows
+- Public Blog/News listing and detail
+- Filters
+- Cross-type protection
+- Homepage publication chronology
+- Independent page/navigation/Footer visibility
+- Disabled-page homepage-card behavior
+- JSON-LD
+- Sitemap
+- Temporary Post cleanup
+
+Final comprehensive Codex review reported no blocking, important or minor findings.
+
+Verified checkpoints:
+
+- `57127e2 Add dynamic Blog and News backend APIs`
+- `9aeb0b6 Add Blog and News frontend foundation`
+- `10e662c Add dynamic Blog and News admin interface`
+- `4ae0312 Add public Blog and News pages`
+- `3b3ed37 Integrate Blog and News with site settings`
+- `e22eb2e Add Blog and News SEO and sitemap integration`
 
 ## Dynamic Testimonials Management Status
 
@@ -353,12 +476,13 @@ Default shared registry order:
 8. Experience
 9. Team
 10. Companies
-11. Testimonials
-12. Contact
+11. Articles & News
+12. Testimonials
+13. Contact
 
 The final visible order remains Admin-controlled through Site Settings.
 
-Testimonials is now part of the completed shared registry.
+Articles & News and Testimonials are part of the completed shared registry. Blog and News also have page-only publication/navigation registry entries.
 
 ## Current Public Frontend Routes
 
@@ -371,6 +495,10 @@ Testimonials is now part of the completed shared registry.
 - `/education`
 - `/experience`
 - `/testimonials`
+- `/blog`
+- `/blog/:slug`
+- `/news`
+- `/news/:slug`
 - `/team`
 - `/team/:slug`
 - `/companies`
@@ -389,6 +517,13 @@ Testimonials is now part of the completed shared registry.
 - Team Members
 - Companies
 - Contact messages
+- Blog & News Posts
+
+Blog/News Admin routes:
+
+- `/admin/posts`
+- `/admin/posts/new`
+- `/admin/posts/:id/edit`
 
 Experience Admin routes:
 
@@ -438,9 +573,9 @@ Every development session should:
 Latest verified Experience public build:
 
 - Vite: `8.1.5`
-- Modules transformed: `164`
-- Main JavaScript bundle: `1,057.06 kB`
-- Gzip size: `223.72 kB`
+- Modules transformed: `177`
+- Main JavaScript bundle: `1,157.35 kB`
+- Gzip size: `242.70 kB`
 - Build result: successful
 
 The warning is non-blocking and belongs to the later performance phase.
@@ -459,19 +594,23 @@ Git may report CRLF-to-LF conversion warnings. No Experience whitespace error wa
 
 Active checkpoint:
 
-`Testimonials documentation synchronization`
+`Blog / News documentation synchronization`
 
 Implementation status:
 
-- Testimonials backend: complete and pushed
-- Testimonials frontend foundation: complete and pushed
-- Testimonials Admin interface: complete and pushed
-- Testimonials public integration: complete and pushed
-- Testimonials documentation: current checkpoint
+- Blog/News backend: complete and pushed
+- Blog/News frontend foundation: complete and pushed
+- Blog/News Admin interface: complete and pushed
+- Blog/News public pages: complete and pushed
+- Blog/News Site Settings/homepage integration: complete and pushed
+- Blog/News SEO/sitemap integration: complete and pushed
+- Blog/News runtime verification: complete
+- Blog/News final Codex review: complete
+- Blog/News documentation: current checkpoint
 
 ## Current Immediate Step
 
-1. Synchronize the nine repository-memory documents with the completed Testimonials module.
+1. Synchronize the nine repository-memory documents with the completed Blog/News module.
 2. Run documentation whitespace and scope checks.
 3. Run a focused Codex documentation review before staging.
 4. Stage only the intended documentation files after approval.
@@ -481,7 +620,7 @@ Implementation status:
 
 Recommended next major module:
 
-`Fully Dynamic Blog or News Management Module`
+`Media Management`
 
 ## Source of Truth
 

@@ -197,7 +197,7 @@ Returns public-safe global website settings used by:
 - Owner information
 - Hero
 - About
-- Listing-section content, including Experience and Testimonials section content
+- Listing-section content, including Experience, Testimonials and combined Articles & News section content
 - Contact content
 - Footer
 - Platforms
@@ -620,6 +620,132 @@ Public response behavior:
 - There is no public Testimonial details endpoint.
 
 ---
+
+
+# Public Blog / News Posts API
+
+Route file:
+
+`server/src/routes/post.routes.js`
+
+Mount path:
+
+`/api/posts`
+
+The Blog and News public website uses one shared Post API. Record type is controlled by the Post `type` field:
+
+- `blog`
+- `news`
+
+## Get Public Posts
+
+Endpoint:
+
+`GET /api/posts`
+
+Authentication:
+
+Not required.
+
+Controller:
+
+`getPublicPosts`
+
+Purpose:
+
+Returns publicly visible Blog and News Post records for:
+
+- `/blog`
+- `/news`
+- Homepage `Latest Articles & News`
+
+The public listing always applies:
+
+- `isVisible: true`
+- Featured records first
+- Admin-defined `order` ascending
+- `publishedAt` descending
+- `createdAt` descending
+- Stable `_id` fallback
+
+Supported query parameters:
+
+- `search` — Searches title, slug, excerpt, content, category, tags and author name
+- `type` — Exact Post type: `blog` or `news`
+- `category` — Case-insensitive exact category filter
+- `tag` — Case-insensitive exact tag filter
+- `featured` — Boolean featured filter using exact `true` or `false`
+
+Validation behavior:
+
+- `type` accepts only `blog` or `news`.
+- `featured` accepts only exact `true` or `false`.
+- String filters must be single scalar text values.
+- Repeated/bracket-style values for strict scalar filters are rejected with structured `400` errors.
+
+Successful response status:
+
+`200 OK`
+
+Response shape:
+
+```json
+{
+  "success": true,
+  "count": 0,
+  "data": []
+}
+```
+
+Public response behavior:
+
+- Hidden Posts are excluded.
+- Admin audit fields are excluded.
+- `content` is omitted from the listing response.
+- `relatedProjects` is populated with public-safe Project fields only.
+- Hidden related Projects are excluded from the populated public relation.
+
+## Get Public Post by Slug
+
+Endpoint:
+
+`GET /api/posts/:slug`
+
+Authentication:
+
+Not required.
+
+Controller:
+
+`getPublicPostBySlug`
+
+Path parameter:
+
+- `slug` — Globally unique Blog/News Post slug
+
+Purpose:
+
+Returns one publicly visible Post for either:
+
+- `/blog/:slug`
+- `/news/:slug`
+
+Important behavior:
+
+- Hidden Posts return `404`.
+- The API returns the Post type so the client can enforce Blog-vs-News route correctness.
+- The detail response includes `content`.
+- Hidden related Projects are excluded.
+- Admin audit fields are not exposed.
+
+Successful response shape:
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
 
 # Public Companies API
 
@@ -1666,6 +1792,164 @@ Permanently deletes one Testimonial record.
 
 ---
 
+
+# Admin Blog / News Posts API
+
+Route file:
+
+`server/src/routes/adminPost.routes.js`
+
+Mount path:
+
+`/api/admin/posts`
+
+All routes require:
+
+`requireAdminAuth`
+
+The Admin API manages Blog and News through one shared `Post` resource.
+
+## List Posts
+
+Endpoint:
+
+`GET /api/admin/posts`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminPosts`
+
+Supported query parameters:
+
+- `search`
+- `type`
+- `category`
+- `tag`
+- `isVisible`
+- `isFeatured`
+
+Important behavior:
+
+- `type` accepts only `blog` or `news`.
+- Boolean filters use strict true/false handling.
+- String filters must be scalar text.
+- Bracket-style strict filters are rejected.
+- Admin responses may include hidden related Projects because the Admin interface is authorized to manage them.
+
+Admin sorting:
+
+1. `order` ascending
+2. `publishedAt` descending
+3. `createdAt` descending
+4. `_id` ascending
+
+## Create Post
+
+Endpoint:
+
+`POST /api/admin/posts`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`createAdminPost`
+
+Important behavior:
+
+- Authenticated writes require `application/json`.
+- The body must be a JSON object.
+- Editable fields are explicitly allowlisted.
+- `createdBy` and `updatedBy` are controlled by the server.
+- A missing/blank create slug can be generated from the title.
+- `type` must be `blog` or `news`.
+- Tags and SEO keywords are normalized and deduplicated.
+- `readingTime` must be a whole number of at least 1 minute.
+- `order` must be non-negative.
+- Related Project IDs must be valid, existing Project ObjectIds and are deduplicated.
+- Image and SEO image URLs must satisfy the Post model's credential-free HTTP/HTTPS rules.
+- Duplicate slugs return a structured conflict response.
+
+Success status:
+
+`201 Created`
+
+## Get Post by ID
+
+Endpoint:
+
+`GET /api/admin/posts/:id`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminPostById`
+
+## Update Post
+
+Endpoint:
+
+`PATCH /api/admin/posts/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`updateAdminPost`
+
+Important behavior:
+
+- Authenticated writes require `application/json`.
+- Empty updates are rejected.
+- Audit ownership cannot be mass-assigned.
+- `updatedBy` is set from the authenticated Admin.
+- Partial nested SEO updates use dotted field updates so omitted SEO fields are preserved.
+- Related Projects are revalidated when supplied.
+- A blank slug is regenerated only when the update also supplies a title; otherwise model validation remains authoritative.
+
+## Delete Post
+
+Endpoint:
+
+`DELETE /api/admin/posts/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+
+Controller:
+
+`deleteAdminPost`
+
+Purpose:
+
+Permanently deletes one Blog or News Post.
+
+Success data includes:
+
+- `id`
+- `title`
+- `slug`
+- `type`
+
+---
+
 # Admin Companies API
 
 Route file:
@@ -1852,6 +2136,8 @@ Controller:
 - `GET /api/education`
 - `GET /api/experience`
 - `GET /api/testimonials`
+- `GET /api/posts`
+- `GET /api/posts/:slug`
 - `GET /api/companies`
 - `GET /api/companies/:slug`
 - `GET /api/team`
@@ -1924,6 +2210,14 @@ Controller:
 - `PATCH /api/admin/testimonials/:id`
 - `DELETE /api/admin/testimonials/:id`
 
+## Admin Blog / News Posts
+
+- `GET /api/admin/posts`
+- `POST /api/admin/posts`
+- `GET /api/admin/posts/:id`
+- `PATCH /api/admin/posts/:id`
+- `DELETE /api/admin/posts/:id`
+
 ## Admin Companies
 
 - `GET /api/admin/companies`
@@ -1952,7 +2246,7 @@ Controller:
 
 ## Query Parameter Documentation
 
-Team and Testimonials listing query parameters have been audited and documented in their Public and Admin API sections.
+Team, Testimonials and Blog/News Post listing query parameters have been audited and documented in their Public and Admin API sections.
 
 Other module-specific listing parameters should be documented only after their controllers are audited.
 

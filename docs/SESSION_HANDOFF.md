@@ -20,9 +20,18 @@ Remote branch:
 
 ## Latest Pushed Development Commit
 
-`12a2e67 Add public Testimonials section and page`
+`e22eb2e Add Blog and News SEO and sitemap integration`
 
-Testimonials checkpoints:
+Blog / News checkpoints:
+
+- `57127e2 Add dynamic Blog and News backend APIs`
+- `9aeb0b6 Add Blog and News frontend foundation`
+- `10e662c Add dynamic Blog and News admin interface`
+- `4ae0312 Add public Blog and News pages`
+- `3b3ed37 Integrate Blog and News with site settings`
+- `e22eb2e Add Blog and News SEO and sitemap integration`
+
+Previous Testimonials checkpoints:
 
 - `d625157 Add dynamic Testimonials backend APIs`
 - `c9d0dfe Fix Testimonials backend validation`
@@ -31,17 +40,20 @@ Testimonials checkpoints:
 - `5c825e1 Add dynamic Testimonials admin interface`
 - `12a2e67 Add public Testimonials section and page`
 
-Verified immediately after the latest push:
+Verified after the latest Blog/News implementation push and runtime closeout:
 
 - `git status -sb` returned `## main...origin/main`
 - The working tree was clean before documentation synchronization
-- Final Testimonials public integration had passed production build and Codex review
+- Final Blog/News runtime/manual verification completed
+- Temporary Blog/News runtime Posts were deleted
+- Final comprehensive Codex review reported no blocking, important or minor findings
+- Final Codex verdict: `BLOG / NEWS MODULE READY FOR DOCUMENTATION SYNC`
 
 ## Current Development Phase
 
 Active checkpoint:
 
-`Testimonials documentation synchronization`
+`Blog / News documentation synchronization`
 
 Status:
 
@@ -59,9 +71,224 @@ Current scope:
 - `docs/ROADMAP.md`
 - `docs/SESSION_HANDOFF.md`
 
-Do not modify completed Testimonials implementation files during this checkpoint unless a verified defect is discovered.
+Do not modify completed Blog/News implementation files during this checkpoint unless a verified defect is discovered.
 
-## Completed Testimonials Contract
+
+## Completed Blog / News Contract
+
+Naming:
+
+- Model: `Post`
+- Collection: `posts`
+- Public API: `/api/posts`
+- Admin API: `/api/admin/posts`
+- Types:
+  - `blog`
+  - `news`
+
+Public routes:
+
+- `/blog`
+- `/news`
+- `/blog/:slug`
+- `/news/:slug`
+
+Admin pages:
+
+- `/admin/posts`
+- `/admin/posts/new`
+- `/admin/posts/:id/edit`
+
+MVP rules:
+
+- One shared Post model, not separate Blog/News collections
+- Global unique slug across both types
+- No fake or seeded Posts
+- Plain-text public content rendering
+- `publishedAt` may be null; `createdAt` is not publication metadata
+- Visible-only public API
+- Hidden related Projects excluded publicly
+- Admin audit fields remain server-controlled
+
+## Completed Blog / News Backend
+
+Files:
+
+```text
+server/src/models/Post.js
+server/src/controllers/post.controller.js
+server/src/controllers/adminPost.controller.js
+server/src/routes/post.routes.js
+server/src/routes/adminPost.routes.js
+server/src/app.js
+package.json
+```
+
+Key behavior:
+
+- Public `GET /api/posts`
+- Public `GET /api/posts/:slug`
+- Admin CRUD `/api/admin/posts`
+- Search/type/category/tag/featured public filters
+- Search/type/category/tag/visibility/featured Admin filters
+- Strict scalar query validation
+- Strict text and request-body validation
+- JSON-only authenticated writes
+- Related Project validation and deduplication
+- Public hidden-related-Project protection
+- Partial nested SEO PATCH preservation
+- Credential-free HTTP/HTTPS image URLs
+- Deterministic public/Admin sorting
+- Explicit audit-field control
+
+RBAC:
+
+- Read: any authenticated active Admin
+- Create/update: `super-admin`, `admin`, `editor`
+- Delete: `super-admin`, `admin`
+
+## Completed Blog / News Frontend Foundation
+
+Files:
+
+```text
+client/src/services/postsApi.js
+client/src/services/adminPostsApi.js
+client/src/hooks/usePosts.js
+client/src/hooks/usePost.js
+client/src/utils/postForm.js
+```
+
+Completed:
+
+- Strict public/Admin API clients
+- Response validation
+- Bearer authorization
+- AbortSignal support
+- Race-safe hooks
+- Form conversion/validation
+- Slug generation
+- Tags and SEO keyword normalization
+- Date/time conversion
+- Related Project ObjectId normalization
+- Safe image URLs
+- Editable payload whitelist
+
+## Completed Blog / News Admin Interface
+
+Files:
+
+```text
+client/src/components/admin/posts/PostForm.jsx
+client/src/pages/admin/AdminPostsPage.jsx
+client/src/pages/admin/AdminPostEditorPage.jsx
+client/src/pages/admin/AdminDashboardPage.jsx
+client/src/routes/AppRoutes.jsx
+```
+
+Completed:
+
+- Dashboard Blog & News module
+- Listing and filters
+- Create/edit
+- Related Project selector
+- Visibility and featured quick actions
+- Role-restricted deletion
+- Loading/error/empty states
+- Abortable mutations
+- Stale late-navigation protection
+
+## Completed Blog / News Public Integration
+
+Files:
+
+```text
+client/src/components/posts/PostCard.jsx
+client/src/components/sections/LatestPostsSection.jsx
+client/src/pages/BlogPage.jsx
+client/src/pages/NewsPage.jsx
+client/src/pages/PostDetailsPage.jsx
+```
+
+Shared client integration:
+
+```text
+client/src/components/admin/site-settings/SiteSettingsForm.jsx
+client/src/components/layout/Footer.jsx
+client/src/components/layout/Navbar.jsx
+client/src/components/layout/PublicPageHeader.jsx
+client/src/config/homepageSections.js
+client/src/pages/HomePage.jsx
+client/src/routes/AppRoutes.jsx
+client/src/utils/siteSettingsForm.js
+```
+
+Shared server integration:
+
+```text
+server/src/config/homepageSections.js
+server/src/controllers/adminSiteSettings.controller.js
+server/src/controllers/sitemap.controller.js
+server/src/models/SiteSettings.js
+server/src/utils/createSitemapXml.js
+```
+
+Completed behavior:
+
+- `/blog` and `/news` listings
+- `/blog/:slug` and `/news/:slug` details
+- Type mismatch protection
+- Search/category/tag/featured filters
+- Plain-text article rendering
+- Combined homepage `Latest Articles & News`
+- Chronological homepage publication ordering
+- `posts`, `blog`, `news` Site Settings registry keys
+- `postsSection` content
+- Independent Blog/News page visibility
+- Independent Blog/News navigation controls
+- Footer/PublicPageHeader integration
+- Accessible desktop `More` overflow menu
+- Visibility-aware homepage card actions
+- Listing `CollectionPage` + `ItemList`
+- Detail `BlogPosting` / `NewsArticle` + `BreadcrumbList`
+- Visibility-aware collection/detail sitemap URLs
+
+## Runtime and Final Review Validation Completed
+
+Runtime:
+
+- Backend startup
+- MongoDB connection
+- Vite startup
+- Empty Blog/News/homepage states
+- Admin create/list
+- Blog listing/detail
+- News listing/detail
+- Filters
+- Cross-type detail protection
+- Homepage publication chronology
+- Independent public-page visibility
+- Navbar and Footer visibility
+- Homepage section visibility
+- Disabled-page card behavior
+- JSON-LD
+- Sitemap
+- Temporary test-record deletion
+
+Final build during Step 8G:
+
+- Vite: `8.1.5`
+- Modules transformed: `177`
+- Main bundle: `1,157.35 kB`
+- Gzip: `242.70 kB`
+- `npm run check`: passed
+- `git diff --check`: passed
+
+Final comprehensive Codex verdict:
+
+`BLOG / NEWS MODULE READY FOR DOCUMENTATION SYNC`
+
+## Previous Completed Testimonials Contract
 
 Naming:
 
@@ -269,7 +496,7 @@ None currently known.
 
 ## Immediate Next Step
 
-1. Replace the nine documentation files with the Testimonials-synchronized versions.
+1. Replace the nine documentation files with the Blog/News-synchronized versions.
 2. Run:
 
 ```powershell
@@ -294,7 +521,7 @@ git diff --cached --stat
 8. Commit with:
 
 ```text
-Synchronize Testimonials module documentation
+Synchronize Blog and News module documentation
 ```
 
 9. Push `main` to `origin`.
@@ -303,7 +530,7 @@ Synchronize Testimonials module documentation
 
 Recommended next module:
 
-`Fully Dynamic Blog or News Management Module`
+`Media Management`
 
 ## Required New-Session Startup
 
