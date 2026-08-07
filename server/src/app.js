@@ -13,6 +13,7 @@ import adminCompanyRoutes from "./routes/adminCompany.routes.js";
 import adminContactMessageRoutes from "./routes/adminContactMessage.routes.js";
 import adminEducationRoutes from "./routes/adminEducation.routes.js";
 import adminExperienceRoutes from "./routes/adminExperience.routes.js";
+import adminPostRoutes from "./routes/adminPost.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
 import adminSiteSettingsRoutes from "./routes/adminSiteSettings.routes.js";
@@ -26,6 +27,7 @@ import contactMessageRoutes from "./routes/contactMessage.routes.js";
 import educationRoutes from "./routes/education.routes.js";
 import experienceRoutes from "./routes/experience.routes.js";
 import healthRoutes from "./routes/health.routes.js";
+import postRoutes from "./routes/post.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
 import siteSettingsRoutes from "./routes/siteSettings.routes.js";
@@ -85,6 +87,7 @@ app.use("/api/skills", skillRoutes);
 app.use("/api/education", educationRoutes);
 app.use("/api/experience", experienceRoutes);
 app.use("/api/testimonials", testimonialRoutes);
+app.use("/api/posts", postRoutes);
 app.use("/api/team", teamMemberRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/companies", companyRoutes);
@@ -96,6 +99,7 @@ app.use("/api/admin/skills", adminSkillRoutes);
 app.use("/api/admin/education", adminEducationRoutes);
 app.use("/api/admin/experience", adminExperienceRoutes);
 app.use("/api/admin/testimonials", adminTestimonialRoutes);
+app.use("/api/admin/posts", adminPostRoutes);
 app.use("/api/admin/team", adminTeamMemberRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/admin/companies", adminCompanyRoutes);
@@ -132,6 +136,10 @@ if (isProduction) {
    * /experience
    * /projects
    * /projects/:slug
+   * /blog
+   * /blog/:slug
+   * /news
+   * /news/:slug
    * /team
    * /team/:slug
    * /companies
