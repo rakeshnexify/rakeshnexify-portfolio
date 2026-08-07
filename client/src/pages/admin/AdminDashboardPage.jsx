@@ -66,6 +66,13 @@ const dashboardModules = [
     path: "/admin/companies",
   },
   {
+    title: "Testimonials",
+    description:
+      "Create and manage client reviews, ratings, profile media, related Projects, display order, featured status and public visibility.",
+    status: "Management ready",
+    path: "/admin/testimonials",
+  },
+  {
     title: "Contact Messages",
     description:
       "Review client enquiries, update response status, save private notes and archive completed conversations.",
@@ -144,9 +151,9 @@ function AdminDashboardPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl break-words leading-7 text-slate-400">
-              Manage your portfolio content, services, Skills, Education, Experience,
-              projects, Team members, companies, enquiries and website settings from
-              this secure dashboard.
+              Manage your portfolio content, services, Skills, Education,
+              Experience, projects, Team members, companies, Testimonials,
+              enquiries and website settings from this secure dashboard.
             </p>
           </div>
 

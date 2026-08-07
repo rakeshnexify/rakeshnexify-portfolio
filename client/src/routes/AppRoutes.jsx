@@ -35,6 +35,8 @@ import AdminSiteSettingsEditorPage from "../pages/admin/AdminSiteSettingsEditorP
 import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
 import AdminStatisticEditorPage from "../pages/admin/AdminStatisticEditorPage";
 import AdminStatisticsPage from "../pages/admin/AdminStatisticsPage";
+import AdminTestimonialEditorPage from "../pages/admin/AdminTestimonialEditorPage";
+import AdminTestimonialsPage from "../pages/admin/AdminTestimonialsPage";
 import AdminTeamMemberEditorPage from "../pages/admin/AdminTeamMemberEditorPage";
 import AdminTeamMembersPage from "../pages/admin/AdminTeamMembersPage";
 
@@ -175,10 +177,8 @@ function RouteScrollManager() {
       resizeObserver.observe(layoutRoot);
 
       /*
-       * Services, Projects and Companies data
-       * load hone ke baad layout height change
-       * ho sakti hai. Kuch seconds tak target
-       * section ko aligned rakhenge.
+       * Dynamic homepage sections can change layout height after data loads.
+       * Keep the requested hash section aligned for a few seconds.
        */
       stopObserverTimerId = window.setTimeout(() => {
         resizeObserver?.disconnect();
@@ -364,6 +364,19 @@ function AppRoutes() {
           <Route
             path="/admin/experience/:id/edit"
             element={<AdminExperienceEditorPage mode="edit" />}
+          />
+
+          <Route
+            path="/admin/testimonials"
+            element={<AdminTestimonialsPage />}
+          />
+          <Route
+            path="/admin/testimonials/new"
+            element={<AdminTestimonialEditorPage mode="create" />}
+          />
+          <Route
+            path="/admin/testimonials/:id/edit"
+            element={<AdminTestimonialEditorPage mode="edit" />}
           />
 
           <Route path="/admin/team" element={<AdminTeamMembersPage />} />
