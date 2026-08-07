@@ -40,6 +40,7 @@ const dedicatedPageSectionKeys = new Set([
   "experience",
   "team",
   "companies",
+  "testimonials",
 ]);
 
 function containsControlCharacters(value) {
@@ -227,6 +228,10 @@ function validateDynamicContentUrls(formValues, errors) {
       value: formValues?.companiesSection?.ctaButton?.url,
     },
     {
+      fieldName: "testimonialsSection.ctaButton.url",
+      value: formValues?.testimonialsSection?.ctaButton?.url,
+    },
+    {
       fieldName: "footer.projectButton.url",
       value: formValues?.footer?.projectButton?.url,
     },
@@ -325,6 +330,14 @@ function prepareInitialValues(initialValues = {}) {
 
       ctaButton: {
         ...normalizedValues.companiesSection.ctaButton,
+      },
+    },
+
+    testimonialsSection: {
+      ...normalizedValues.testimonialsSection,
+
+      ctaButton: {
+        ...normalizedValues.testimonialsSection.ctaButton,
       },
     },
 
@@ -1357,6 +1370,17 @@ function SiteSettingsForm({
         description="Manage the heading, description and call-to-action displayed above your companies and brands."
         fieldName="companiesSection"
         values={formValues.companiesSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Testimonials Section Content"
+        description="Manage the heading, description and call-to-action displayed above your public client Testimonials."
+        fieldName="testimonialsSection"
+        values={formValues.testimonialsSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}

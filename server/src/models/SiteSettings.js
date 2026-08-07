@@ -722,6 +722,11 @@ const siteSettingsSchema = new mongoose.Schema(
       default: () => ({}),
     },
 
+    testimonialsSection: {
+      type: listingSectionContentSchema,
+      default: () => ({}),
+    },
+
     contactSection: {
       type: contactSectionContentSchema,
       default: () => ({}),

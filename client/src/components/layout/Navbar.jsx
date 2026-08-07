@@ -100,13 +100,22 @@ const defaultNavigationSections = [
     navigationOrder: 10,
   },
   {
-    key: "contact",
-    label: "Contact",
+    key: "testimonials",
+    label: "Testimonials",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
     order: 11,
     navigationOrder: 11,
+  },
+  {
+    key: "contact",
+    label: "Contact",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 12,
+    navigationOrder: 12,
   },
 ];
 
@@ -150,6 +159,10 @@ const sectionDestinations = {
   companies: {
     type: "page",
     target: "/companies",
+  },
+  testimonials: {
+    type: "page",
+    target: "/testimonials",
   },
   contact: {
     type: "section",

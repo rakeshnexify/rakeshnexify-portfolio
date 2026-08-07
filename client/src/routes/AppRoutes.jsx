@@ -13,6 +13,7 @@ import ProjectsPage from "../pages/ProjectsPage";
 import ServicesPage from "../pages/ServicesPage";
 import SkillsPage from "../pages/SkillsPage";
 import StatisticsPage from "../pages/StatisticsPage";
+import TestimonialsPage from "../pages/TestimonialsPage";
 import TeamPage from "../pages/TeamPage";
 import TeamMemberDetailsPage from "../pages/TeamMemberDetailsPage";
 
@@ -280,6 +281,12 @@ function AppRoutes() {
           <Route element={<PublicPageVisibilityRoute sectionKey="companies" />}>
             <Route path="/companies" element={<CompaniesPage />} />
             <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
+          </Route>
+
+          <Route
+            element={<PublicPageVisibilityRoute sectionKey="testimonials" />}
+          >
+            <Route path="/testimonials" element={<TestimonialsPage />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />

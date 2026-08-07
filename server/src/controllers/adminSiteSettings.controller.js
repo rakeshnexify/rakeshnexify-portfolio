@@ -21,6 +21,7 @@ const listingSectionFields = [
   "experienceSection",
   "teamSection",
   "companiesSection",
+  "testimonialsSection",
 ];
 
 const brandStringFields = [

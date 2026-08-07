@@ -118,6 +118,17 @@ const defaultNavigationItems = [
     navigationOrder: 10,
   },
   {
+    key: "testimonials",
+    label: "Testimonials",
+    href: "/testimonials",
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 11,
+    navigationOrder: 11,
+  },
+  {
     key: "contact",
     label: "Contact",
     href: "/#contact",
@@ -125,8 +136,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 11,
-    navigationOrder: 11,
+    order: 12,
+    navigationOrder: 12,
   },
 ];
 

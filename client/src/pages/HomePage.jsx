@@ -9,6 +9,7 @@ import ProjectsSection from "../components/sections/ProjectsSection";
 import ServicesSection from "../components/sections/ServicesSection";
 import SkillsSection from "../components/sections/SkillsSection";
 import StatisticsSection from "../components/sections/StatisticsSection";
+import TestimonialsSection from "../components/sections/TestimonialsSection";
 import TeamSection from "../components/sections/TeamSection";
 import AboutSection from "../components/sections/AboutSection";
 import Footer from "../components/layout/Footer";
@@ -28,6 +29,7 @@ const sectionComponents = {
   experience: ExperienceSection,
   team: TeamSection,
   companies: CompaniesSection,
+  testimonials: TestimonialsSection,
   contact: ContactSection,
 };
 

@@ -33,6 +33,10 @@ const publicPageDefinitions = [
     key: "companies",
     pathname: "/companies",
   },
+  {
+    key: "testimonials",
+    pathname: "/testimonials",
+  },
 ];
 
 function removeTrailingSlash(value) {

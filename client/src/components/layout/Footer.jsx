@@ -72,11 +72,18 @@ const defaultNavigationSections = [
     order: 9,
   },
   {
+    key: "testimonials",
+    label: "Testimonials",
+    href: "/testimonials",
+    isVisible: true,
+    order: 10,
+  },
+  {
     key: "contact",
     label: "Contact",
     href: "/#contact",
     isVisible: true,
-    order: 10,
+    order: 11,
   },
 ];
 
@@ -92,6 +99,7 @@ const dedicatedPageSectionKeys = new Set([
   "experience",
   "team",
   "companies",
+  "testimonials",
 ]);
 
 const supportedFooterSections = new Set(

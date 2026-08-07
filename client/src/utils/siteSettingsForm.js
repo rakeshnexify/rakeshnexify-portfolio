@@ -467,6 +467,10 @@ function createSiteSettingsFormValues(settings = {}) {
 
     companiesSection: normalizeListingSection(settings?.companiesSection),
 
+    testimonialsSection: normalizeListingSection(
+      settings?.testimonialsSection,
+    ),
+
     contactSection: normalizeContactSection(settings?.contactSection),
 
     contact: {
@@ -627,6 +631,10 @@ function createSiteSettingsPayload(formValues = {}) {
     teamSection: createListingSectionPayload(values.teamSection),
 
     companiesSection: createListingSectionPayload(values.companiesSection),
+
+    testimonialsSection: createListingSectionPayload(
+      values.testimonialsSection,
+    ),
 
     contactSection: {
       eyebrow: values.contactSection.eyebrow,
