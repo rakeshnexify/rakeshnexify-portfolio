@@ -274,7 +274,11 @@ async function fetchAdminPostById(accessToken, postId, { signal } = {}) {
   return responseData.data;
 }
 
-async function createAdminPost(accessToken, postData) {
+async function createAdminPost(
+  accessToken,
+  postData,
+  { signal } = {},
+) {
   const response = await fetch(createApiUrl(ADMIN_POSTS_PATH), {
     method: "POST",
 
@@ -285,6 +289,8 @@ async function createAdminPost(accessToken, postData) {
     },
 
     body: JSON.stringify(postData),
+
+    signal,
   });
 
   const responseData = assertAdminPostMutationResponse(
@@ -298,7 +304,12 @@ async function createAdminPost(accessToken, postData) {
   };
 }
 
-async function updateAdminPost(accessToken, postId, postData) {
+async function updateAdminPost(
+  accessToken,
+  postId,
+  postData,
+  { signal } = {},
+) {
   const cleanPostId = normalizePostId(postId);
 
   const response = await fetch(
@@ -313,6 +324,8 @@ async function updateAdminPost(accessToken, postId, postData) {
       },
 
       body: JSON.stringify(postData),
+
+      signal,
     },
   );
 

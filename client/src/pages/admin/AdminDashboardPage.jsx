@@ -52,6 +52,13 @@ const dashboardModules = [
     path: "/admin/projects",
   },
   {
+    title: "Blog & News",
+    description:
+      "Create and manage Blog and News articles, publishing metadata, related Projects, SEO, display order, featured status and public visibility.",
+    status: "Management ready",
+    path: "/admin/posts",
+  },
+  {
     title: "Team Members",
     description:
       "Create and manage Team member profiles, professional roles, availability, display order, featured status and public visibility.",
@@ -152,8 +159,9 @@ function AdminDashboardPage() {
 
             <p className="mt-4 max-w-2xl break-words leading-7 text-slate-400">
               Manage your portfolio content, services, Skills, Education,
-              Experience, projects, Team members, companies, Testimonials,
-              enquiries and website settings from this secure dashboard.
+              Experience, projects, Blog and News, Team members, companies,
+              Testimonials, enquiries and website settings from this secure
+              dashboard.
             </p>
           </div>
 

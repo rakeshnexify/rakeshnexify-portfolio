@@ -26,6 +26,8 @@ import AdminEducationPage from "../pages/admin/AdminEducationPage";
 import AdminExperienceEditorPage from "../pages/admin/AdminExperienceEditorPage";
 import AdminExperiencePage from "../pages/admin/AdminExperiencePage";
 import AdminLoginPage from "../pages/admin/AdminLoginPage";
+import AdminPostEditorPage from "../pages/admin/AdminPostEditorPage";
+import AdminPostsPage from "../pages/admin/AdminPostsPage";
 import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
 import AdminProjectsPage from "../pages/admin/AdminProjectsPage";
 import AdminServiceEditorPage from "../pages/admin/AdminServiceEditorPage";
@@ -394,6 +396,16 @@ function AppRoutes() {
           <Route
             path="/admin/team/:id/edit"
             element={<AdminTeamMemberEditorPage mode="edit" />}
+          />
+
+          <Route path="/admin/posts" element={<AdminPostsPage />} />
+          <Route
+            path="/admin/posts/new"
+            element={<AdminPostEditorPage mode="create" />}
+          />
+          <Route
+            path="/admin/posts/:id/edit"
+            element={<AdminPostEditorPage mode="edit" />}
           />
 
           <Route path="/admin/projects" element={<AdminProjectsPage />} />
