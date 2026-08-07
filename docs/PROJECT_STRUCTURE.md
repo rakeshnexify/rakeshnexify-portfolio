@@ -1,6 +1,6 @@
 # Project Structure
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 
 ## Project
 
@@ -71,9 +71,11 @@ Frontend source path:
 
 `client/src/`
 
-Current frontend source file count after Experience public integration:
+Last recorded frontend source file count after Experience public integration:
 
 `135`
+
+Testimonials public integration has since added new frontend files; use the repository itself for the current exact count.
 
 ## Client Source Tree
 
@@ -90,7 +92,8 @@ client/src/
 │   │   ├── site-settings/
 │   │   ├── skills/
 │   │   ├── statistics/
-│   │   └── team/
+│   │   ├── team/
+│   │   └── testimonials/
 │   ├── companies/
 │   ├── education/
 │   ├── experience/
@@ -103,6 +106,7 @@ client/src/
 │   ├── skills/
 │   ├── statistics/
 │   ├── team/
+│   ├── testimonials/
 │   └── ui/
 ├── config/
 ├── context/
@@ -163,6 +167,7 @@ Current feature folders:
 - `skills`
 - `statistics`
 - `team`
+- `testimonials`
 
 Important files include:
 
@@ -174,6 +179,7 @@ Important files include:
 - `SkillForm.jsx`
 - `StatisticForm.jsx`
 - `TeamMemberForm.jsx`
+- `TestimonialForm.jsx`
 - `SiteSettingsForm.jsx`
 - `SiteSettingsOverview.jsx`
 - `LegalLinksEditor.jsx`
@@ -314,6 +320,31 @@ Renders a reusable public Team member card with:
 - Social, website and portfolio links
 - Public member-details route
 
+### Testimonials
+
+Path:
+
+`client/src/components/testimonials/`
+
+Current component:
+
+- `TestimonialCard.jsx`
+
+Purpose:
+
+Renders a reusable public Testimonial card with:
+
+- Client name
+- Client role
+- Company name
+- Review text
+- Strict 1–5 rating display
+- Profile image or initials fallback
+- Featured state
+- Safe company website link
+- Optional populated related Project link
+- Hidden or unavailable related Projects omitted safely
+
 ## Layout Components
 
 Path:
@@ -332,7 +363,7 @@ Current files:
 
 These components provide shared page structure, navigation and responsive behavior.
 
-Team integration exists in:
+Team and Testimonials integration exists in:
 
 - `Navbar.jsx`
 - `PublicPageHeader.jsx`
@@ -356,9 +387,14 @@ Current sections:
 - `ExperienceSection.jsx`
 - `TeamSection.jsx`
 - `CompaniesSection.jsx`
+- `TestimonialsSection.jsx`
 - `ContactSection.jsx`
 
 `TeamSection.jsx` loads visible Team records, sorts featured members first, renders a homepage preview and links to the dedicated Team page.
+
+`TestimonialsSection.jsx` loads public visible Testimonials, preserves the approved public ordering, renders up to three homepage preview cards and uses the dedicated Testimonials page CTA only when that page is enabled.
+
+Default shared section placement is Companies → Testimonials → Contact. Final homepage and Navbar order remain Admin-controlled through Site Settings.
 
 Contact form component:
 
@@ -414,7 +450,7 @@ Stores frontend API configuration behavior.
 
 Defines and merges supported homepage-section settings.
 
-Skills, Education and Experience are registered in the shared homepage and navigation system. Experience is registered after Education and before Team by default.
+Skills, Education, Experience, Team, Companies and Testimonials are registered in the shared homepage, navigation and public-page visibility system. Testimonials is registered after Companies and before Contact by default.
 
 ### `siteSettingsPages.js`
 
@@ -457,6 +493,8 @@ Database-managed content should not be duplicated here unnecessarily.
 
 No fake or default Team member data should be added.
 
+No fake or default Testimonial data should be added.
+
 ---
 
 # Client Hooks
@@ -480,6 +518,7 @@ Current hooks:
 - `useExperience.js`
 - `useTeamMembers.js`
 - `useTeamMember.js`
+- `useTestimonials.js`
 
 Purpose:
 
@@ -494,6 +533,12 @@ Loads the public visible Team member collection and exposes loading, error and r
 ### `useTeamMember.js`
 
 Loads one public Team member by slug and exposes loading, error, HTTP status and refresh state.
+
+Testimonials hook:
+
+### `useTestimonials.js`
+
+Loads the public visible Testimonial collection and exposes loading, error and refresh state. It supports the approved public filters and protects state from stale or aborted requests.
 
 ---
 
@@ -519,6 +564,7 @@ Current public pages:
 - `TeamMemberDetailsPage.jsx`
 - `CompaniesPage.jsx`
 - `CompanyDetailsPage.jsx`
+- `TestimonialsPage.jsx`
 - `NotFoundPage.jsx`
 
 Team pages:
@@ -547,6 +593,24 @@ Provides:
 - `ProfilePage` and `Person` JSON-LD
 - `noindex, nofollow` for unavailable profiles
 
+Testimonials page:
+
+### `TestimonialsPage.jsx`
+
+Provides:
+
+- Dedicated `/testimonials` listing
+- Search filter
+- Strict rating filter
+- Loading, error, retry and empty states
+- Reusable Testimonial cards
+- Matching-result count for filtered states
+- Average rating derived only from valid ratings
+- Canonical `/testimonials` metadata
+- `CollectionPage` structured data
+- `ItemList` and `Review` JSON-LD only when appropriate
+- No public Testimonial detail route
+
 ## Admin Pages
 
 Path:
@@ -573,11 +637,15 @@ Current Admin pages:
 - `AdminProjectEditorPage.jsx`
 - `AdminTeamMembersPage.jsx`
 - `AdminTeamMemberEditorPage.jsx`
+- `AdminTestimonialsPage.jsx`
+- `AdminTestimonialEditorPage.jsx`
 - `AdminCompaniesPage.jsx`
 - `AdminCompanyEditorPage.jsx`
 - `AdminContactMessagesPage.jsx`
 
 The Admin Team module follows the existing list-and-editor pattern.
+
+The Admin Testimonials module follows the same protected list-and-editor pattern and supports search, rating, visibility, featured and related-Project filters.
 
 ---
 
@@ -630,6 +698,20 @@ Current Admin Team routes:
 
 The public Team routes are wrapped by `PublicPageVisibilityRoute` with the `team` section key.
 
+Current public Testimonials route:
+
+- `/testimonials`
+
+Current Admin Testimonials routes:
+
+- `/admin/testimonials`
+- `/admin/testimonials/new`
+- `/admin/testimonials/:id/edit`
+
+The public Testimonials route is wrapped by `PublicPageVisibilityRoute` with the `testimonials` section key.
+
+No `/testimonials/:slug` route exists in the MVP.
+
 ### `ProtectedAdminRoute.jsx`
 
 Protects authenticated Admin pages.
@@ -660,6 +742,7 @@ Current public API services:
 - `educationApi.js`
 - `experienceApi.js`
 - `teamApi.js`
+- `testimonialsApi.js`
 - `companiesApi.js`
 - `contactMessageApi.js`
 
@@ -674,6 +757,7 @@ Current Admin API services:
 - `adminEducationApi.js`
 - `adminExperienceApi.js`
 - `adminTeamMembersApi.js`
+- `adminTestimonialsApi.js`
 - `adminCompaniesApi.js`
 - `adminContactMessagesApi.js`
 
@@ -691,6 +775,20 @@ Supports public list filters and public member-details loading.
 ### `adminTeamMembersApi.js`
 
 Consumes protected Admin Team CRUD endpoints.
+
+Testimonials API services:
+
+### `testimonialsApi.js`
+
+Consumes:
+
+- `GET /api/testimonials`
+
+Supports public `search`, strict `rating` and `featured` filters plus AbortSignal cancellation and structured errors.
+
+### `adminTestimonialsApi.js`
+
+Consumes protected Admin Testimonials CRUD endpoints and supports Admin search, rating, visibility, featured and related-Project filters.
 
 ---
 
@@ -711,6 +809,7 @@ Current files:
 - `educationForm.js`
 - `experienceForm.js`
 - `teamMemberForm.js`
+- `testimonialForm.js`
 - `companyForm.js`
 
 Purpose:
@@ -719,7 +818,9 @@ Handles form conversion, validation helpers, normalization and reusable data tra
 
 `teamMemberForm.js` contains Team form defaults, API-data conversion, slug generation and payload normalization.
 
-`siteSettingsForm.js` includes Team section content conversion and request-payload handling.
+`testimonialForm.js` contains Testimonial form defaults, API-data conversion, strict rating validation, URL validation, related-Project ObjectId validation, order validation, boolean handling and editable payload creation.
+
+`siteSettingsForm.js` includes Team and Testimonials section content conversion and request-payload handling.
 
 ---
 
@@ -751,6 +852,34 @@ Responsibilities:
 
 ---
 
+# Client Testimonials Integration Files
+
+The completed public Testimonials module modifies these shared files:
+
+```text
+client/src/components/admin/site-settings/SiteSettingsForm.jsx
+client/src/components/layout/Footer.jsx
+client/src/components/layout/Navbar.jsx
+client/src/components/layout/PublicPageHeader.jsx
+client/src/config/homepageSections.js
+client/src/pages/HomePage.jsx
+client/src/routes/AppRoutes.jsx
+client/src/utils/siteSettingsForm.js
+```
+
+Responsibilities:
+
+- Register Testimonials as a homepage, navigation and dedicated-page module
+- Render the homepage Testimonials section
+- Add `/testimonials` links to public navigation surfaces
+- Add `testimonialsSection` Site Settings fields
+- Control Testimonials homepage, Navbar and public-page visibility independently
+- Add and protect the public `/testimonials` route
+- Hide the homepage CTA when it targets a disabled Testimonials page
+- Support listing-page SEO and structured data
+
+---
+
 # Server Structure
 
 Server application path:
@@ -761,9 +890,11 @@ Backend source path:
 
 `server/src/`
 
-Current backend source file count after Experience backend integration:
+Last recorded backend source file count after Experience backend integration:
 
 `72`
+
+Testimonials backend integration has since added new server files; use the repository itself for the current exact count.
 
 ## Server Source Tree
 
@@ -796,6 +927,8 @@ Responsibilities include:
 - Route mounting
 - Public Team API mounting
 - Protected Admin Team API mounting
+- Public Testimonials API mounting
+- Protected Admin Testimonials API mounting
 - Sitemap mounting
 - Production client delivery
 - Public Team deep-route fallback documentation
@@ -832,7 +965,7 @@ Responsibilities:
 - Helmet policies
 - Shared homepage-section definitions
 
-`homepageSections.js` registers Team after Projects and before Companies.
+`homepageSections.js` registers Team, Companies and Testimonials in the shared registry. Testimonials is placed after Companies and before Contact by default.
 
 ---
 
@@ -852,6 +985,7 @@ Path:
 - `education.controller.js`
 - `experience.controller.js`
 - `teamMember.controller.js`
+- `testimonial.controller.js`
 - `company.controller.js`
 - `contactMessage.controller.js`
 - `sitemap.controller.js`
@@ -867,6 +1001,7 @@ Path:
 - `adminEducation.controller.js`
 - `adminExperience.controller.js`
 - `adminTeamMember.controller.js`
+- `adminTestimonial.controller.js`
 - `adminCompany.controller.js`
 - `adminContactMessage.controller.js`
 
@@ -887,6 +1022,23 @@ Responsibilities:
 - Save `teamSection` Site Settings content
 - Load visible Team member slugs for sitemap generation
 - Respect Team public-page publication settings
+
+Testimonials controller files:
+
+- `testimonial.controller.js`
+- `adminTestimonial.controller.js`
+
+Testimonials-related shared controller file:
+
+- `adminSiteSettings.controller.js`
+
+Responsibilities:
+
+- Return only public visible Testimonials
+- Support approved public search, rating and featured filters
+- Prevent hidden related Project data from leaking publicly
+- Provide protected Admin CRUD and filters
+- Save `testimonialsSection` Site Settings content
 
 ---
 
@@ -910,6 +1062,8 @@ Provides safe default database records or fallback initialization data.
 No Team default-data file exists.
 
 Team members must be created dynamically through the protected Admin management interface. Fake or hard-coded Team records should not be introduced.
+
+No Testimonials default-data file exists. Testimonials must be created dynamically through the protected Admin management interface. Fake or hard-coded Testimonial records should not be introduced.
 
 ---
 
@@ -955,11 +1109,14 @@ Current models:
 - `Project.js`
 - `Company.js`
 - `TeamMember.js`
+- `Testimonial.js`
 - `ContactMessage.js`
 
 `TeamMember.js` stores dynamic Team profiles, publication controls, SEO fields and cross-module relationships.
 
-`SiteSettings.js` stores Team section content and the shared section publication settings.
+`Testimonial.js` stores dynamic client feedback, strict rating data, optional profile media, optional related Project relation, display order, featured/visibility controls, Admin audit references and timestamps.
+
+`SiteSettings.js` stores Team and Testimonials section content plus the shared section publication settings.
 
 All new models should document:
 
@@ -991,6 +1148,7 @@ Path:
 - `experience.routes.js`
 - `project.routes.js`
 - `teamMember.routes.js`
+- `testimonial.routes.js`
 - `company.routes.js`
 - `contactMessage.routes.js`
 
@@ -1005,6 +1163,7 @@ Path:
 - `adminExperience.routes.js`
 - `adminProject.routes.js`
 - `adminTeamMember.routes.js`
+- `adminTestimonial.routes.js`
 - `adminCompany.routes.js`
 - `adminContactMessage.routes.js`
 
@@ -1017,6 +1176,8 @@ Mounted API paths:
 
 - `/api/team`
 - `/api/admin/team`
+- `/api/testimonials`
+- `/api/admin/testimonials`
 
 ---
 
@@ -1061,6 +1222,12 @@ Team sitemap responsibilities:
 - Exclude hidden Team members
 - Remove all Team URLs when the Team public page is disabled
 
+Testimonials sitemap responsibilities:
+
+- Add `/testimonials` when the Testimonials public page is enabled
+- Exclude `/testimonials` when its public page is disabled
+- Do not generate Testimonial detail URLs
+
 ---
 
 # Server Team Integration Files
@@ -1084,6 +1251,30 @@ Responsibilities:
 - Add Team listing and detail URLs to the sitemap
 - Respect Team visibility and public-page settings
 - Document production deep-route support
+
+---
+
+# Server Testimonials Integration Files
+
+The completed Testimonials module uses these shared server files:
+
+```text
+server/src/app.js
+server/src/config/homepageSections.js
+server/src/controllers/adminSiteSettings.controller.js
+server/src/models/SiteSettings.js
+server/src/utils/createSitemapXml.js
+```
+
+Responsibilities:
+
+- Mount public and protected Admin Testimonials APIs
+- Register Testimonials in shared homepage-section configuration
+- Store `testimonialsSection` content
+- Save Testimonials section content through Admin Site Settings
+- Add `/testimonials` to the sitemap only when the public page is enabled
+- Preserve independent homepage, Navbar and public-page visibility
+- Avoid creating Testimonial detail sitemap URLs
 
 ---
 
@@ -1437,6 +1628,185 @@ Public visibility: enabled
 No fake or default Team member records should be added.
 
 Temporary test records must be permanently deleted after validation.
+
+---
+
+# Current Testimonials Module Structure
+
+Status:
+
+`COMPLETE, VALIDATED AND PUSHED`
+
+Git checkpoints:
+
+- `d625157 Add dynamic Testimonials backend APIs`
+- `c9d0dfe Fix Testimonials backend validation`
+- `92f2dbd Complete strict Testimonials backend validation`
+- `b340cee Add Testimonials frontend foundation`
+- `5c825e1 Add dynamic Testimonials admin interface`
+- `12a2e67 Add public Testimonials section and page`
+
+## Backend
+
+```text
+server/src/models/Testimonial.js
+server/src/controllers/testimonial.controller.js
+server/src/controllers/adminTestimonial.controller.js
+server/src/routes/testimonial.routes.js
+server/src/routes/adminTestimonial.routes.js
+server/src/app.js
+```
+
+## Frontend Services, Hook and Utility
+
+```text
+client/src/services/testimonialsApi.js
+client/src/services/adminTestimonialsApi.js
+client/src/hooks/useTestimonials.js
+client/src/utils/testimonialForm.js
+```
+
+## Admin Frontend
+
+```text
+client/src/components/admin/testimonials/TestimonialForm.jsx
+client/src/pages/admin/AdminTestimonialsPage.jsx
+client/src/pages/admin/AdminTestimonialEditorPage.jsx
+client/src/pages/admin/AdminDashboardPage.jsx
+client/src/routes/AppRoutes.jsx
+```
+
+## Public Frontend
+
+```text
+client/src/components/testimonials/TestimonialCard.jsx
+client/src/components/sections/TestimonialsSection.jsx
+client/src/pages/TestimonialsPage.jsx
+```
+
+## Shared Client Integration
+
+```text
+client/src/components/admin/site-settings/SiteSettingsForm.jsx
+client/src/components/layout/Footer.jsx
+client/src/components/layout/Navbar.jsx
+client/src/components/layout/PublicPageHeader.jsx
+client/src/config/homepageSections.js
+client/src/pages/HomePage.jsx
+client/src/routes/AppRoutes.jsx
+client/src/utils/siteSettingsForm.js
+```
+
+## Shared Server Integration
+
+```text
+server/src/config/homepageSections.js
+server/src/controllers/adminSiteSettings.controller.js
+server/src/models/SiteSettings.js
+server/src/utils/createSitemapXml.js
+```
+
+## Public API
+
+```text
+GET /api/testimonials
+```
+
+Supported public filters:
+
+- `search`
+- `rating`
+- `featured`
+
+Public behavior:
+
+- Returns visible Testimonials only
+- Applies strict rating validation
+- Sorts featured Testimonials first, then display order with stable fallback ordering
+- Populates only public-safe related Project data
+- Returns hidden related Projects as `null`
+- Does not expose Admin audit fields
+
+## Admin API
+
+```text
+GET    /api/admin/testimonials
+POST   /api/admin/testimonials
+GET    /api/admin/testimonials/:id
+PATCH  /api/admin/testimonials/:id
+DELETE /api/admin/testimonials/:id
+```
+
+Admin filters include:
+
+- Search
+- Rating
+- Visibility
+- Featured state
+- Related Project
+
+RBAC:
+
+- Read: any active authenticated Admin
+- Create/update: `super-admin`, `admin`, `editor`
+- Delete: `super-admin`, `admin`
+
+## Public Route
+
+```text
+/testimonials
+```
+
+The route is protected by `PublicPageVisibilityRoute` using section key `testimonials`.
+
+No `/testimonials/:slug` route exists in the MVP.
+
+## Admin Routes
+
+```text
+/admin/testimonials
+/admin/testimonials/new
+/admin/testimonials/:id/edit
+```
+
+## Site Settings
+
+Testimonials uses:
+
+```text
+testimonialsSection.eyebrow
+testimonialsSection.heading
+testimonialsSection.description
+testimonialsSection.ctaButton.label
+testimonialsSection.ctaButton.url
+```
+
+Shared section controls remain independent:
+
+- `isVisible` — homepage section
+- `isNavigationVisible` — Navbar/PublicPageHeader
+- `isPageVisible` — dedicated `/testimonials` page, Footer dedicated-page link and sitemap entry
+
+When the Testimonials page is disabled, homepage content may remain visible, but a CTA targeting `/testimonials` is hidden.
+
+## SEO and Sitemap
+
+`TestimonialsPage.jsx` provides:
+
+- Canonical `/testimonials`
+- `CollectionPage` JSON-LD
+- `ItemList` and `Review` JSON-LD for valid unfiltered records
+- Strict rating handling so malformed ratings do not enter stars, averages or structured data
+
+`createSitemapXml.js` includes `/testimonials` only while the dedicated public page is enabled.
+
+No Testimonial detail URLs are generated.
+
+## Data Rules
+
+No fake or automatically seeded Testimonial records should be added.
+
+Temporary validation records must be permanently deleted after testing.
 
 ---
 

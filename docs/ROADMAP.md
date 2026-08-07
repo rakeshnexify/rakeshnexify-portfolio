@@ -1,6 +1,6 @@
 ﻿# Project Roadmap
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 
 ## Project
 
@@ -844,25 +844,99 @@ Deferred improvements:
 
 ## Phase 17 — Testimonials
 
-Status: PLANNED
+Status: COMPLETE
 
-Planned:
+Completed backend:
 
-- Testimonial database model
-- Client name
-- Client role
-- Company
-- Profile image
-- Review content
-- Rating
-- Project relation
-- Featured status
-- Visibility
-- Display order
-- Admin CRUD
-- Homepage section
-- Dedicated Testimonials page
-- Structured data review
+- `Testimonial` Mongoose model
+- `testimonials` MongoDB collection
+- Public `/api/testimonials` API
+- Protected `/api/admin/testimonials` CRUD API
+- Strict 1–5 integer rating validation
+- Public search, rating and featured filters
+- Admin search, rating, visibility, featured and related-Project filters
+- Optional Project relation
+- Hidden related-Project protection
+- Safe HTTP/HTTPS profile and company URLs
+- Visibility, featured and display order
+- Admin audit fields and timestamps
+- JWT authentication and RBAC
+
+Completed frontend foundation:
+
+- Public Testimonials API service
+- Admin Testimonials API service
+- `useTestimonials` hook
+- Request race and abort handling
+- Strict rating normalization
+- Testimonial form utility and validation
+
+Completed Admin Panel:
+
+- Testimonials dashboard module
+- `/admin/testimonials`
+- `/admin/testimonials/new`
+- `/admin/testimonials/:id/edit`
+- Search and practical filters
+- Create and edit workflows
+- Related Project selector
+- Visibility and featured quick actions
+- Role-restricted permanent deletion
+- Authoritative post-mutation reload behavior
+
+Completed public website:
+
+- Reusable `TestimonialCard`
+- Homepage `TestimonialsSection`
+- Dedicated `/testimonials` page
+- Search and rating filters
+- Rating stars and average rating
+- Related Project link when publicly available
+- Safe company website link
+- Loading, error and empty states
+- No public detail route
+
+Completed Site Settings and publication:
+
+- `testimonialsSection` content
+- Independent homepage visibility
+- Independent Navbar visibility
+- Independent public-page visibility
+- Homepage and Navbar order
+- Dynamic navigation label
+- Navbar, public header and Footer integration
+- Visibility-protected `/testimonials` route
+- CTA suppression when the Testimonials public page is disabled
+
+Completed SEO and sitemap:
+
+- Canonical `/testimonials`
+- CollectionPage structured data
+- Valid Review ItemList for the unfiltered listing
+- Strict rating protection for JSON-LD
+- Visibility-aware `/testimonials` sitemap entry
+- No Testimonial detail URLs
+
+Verified checkpoints:
+
+- `d625157 Add dynamic Testimonials backend APIs`
+- `c9d0dfe Fix Testimonials backend validation`
+- `92f2dbd Complete strict Testimonials backend validation`
+- `b340cee Add Testimonials frontend foundation`
+- `5c825e1 Add dynamic Testimonials admin interface`
+- `12a2e67 Add public Testimonials section and page`
+
+Current checkpoint:
+
+`Testimonials documentation synchronization`
+
+Future optional improvements:
+
+- Additional testimonial grouping or presentation modes when real content volume requires them
+- Richer Project/Testimonial cross-linking from Project pages
+- Automated API and UI tests
+- Media-library integration for profile images
+- Optional moderation or approval workflow if multiple content editors require it
 
 ## Phase 18 — Blog or News
 
@@ -1018,27 +1092,30 @@ Planned:
 
 ## Current Immediate Next Step
 
-Complete the Experience documentation-only checkpoint.
+Complete the Testimonials documentation-only checkpoint.
 
-Required order:
+Required closeout:
 
-1. Replace the nine repository-memory documents.
-2. Run `git diff --check -- docs`.
-3. Confirm only the intended documentation files changed.
-4. Stage the nine verified documentation files.
-5. Run `git diff --cached --check`.
-6. Review staged file names and summary.
-7. Commit the documentation checkpoint.
-8. Push `main` to `origin`.
-9. Confirm the working tree is clean and synchronized.
-10. Start the next approved major module.
-
-Recommended documentation commit message:
+1. Replace the nine synchronized repository-memory documents.
+2. Confirm documentation preserves existing historical detail.
+3. Run `git diff --check -- docs`.
+4. Confirm only the intended documentation files changed.
+5. Run a focused Codex documentation review.
+6. Fix only confirmed findings.
+7. Stage only the approved documentation files.
+8. Run staged whitespace, name and stat checks.
+9. Commit with:
 
 ```text
-Synchronize Experience module documentation
+Synchronize Testimonials module documentation
 ```
 
-Recommended next major module:
+10. Push `main` to `origin`.
+11. Confirm `git status -sb` shows `## main...origin/main`.
+12. Start the next approved major module in a clean repository state.
 
-`Fully Dynamic Testimonials Management Module`
+## Next Major Feature
+
+`Fully Dynamic Blog or News Management Module`
+
+Start Blog or News planning only after the Testimonials documentation checkpoint is committed, pushed and the repository is synchronized.

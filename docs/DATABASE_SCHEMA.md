@@ -48,7 +48,8 @@ The project currently contains these Mongoose models:
 8. `Project`
 9. `Company`
 10. `TeamMember`
-11. `ContactMessage`
+11. `Testimonial`
+12. `ContactMessage`
 
 ---
 
@@ -253,6 +254,12 @@ It stores the dynamic heading, description and CTA content used by the homepage 
 ### teamSection
 
 Uses the reusable listing-section schema.
+
+### testimonialsSection
+
+Uses the reusable listing-section schema.
+
+It stores the dynamic eyebrow, heading, description and CTA content used by the homepage Testimonials section and public `/testimonials` page.
 
 ### companiesSection
 
@@ -1073,6 +1080,203 @@ Admin Experience records use:
 
 ---
 
+
+# Testimonial
+
+Model file:
+
+`server/src/models/Testimonial.js`
+
+Mongoose model:
+
+`Testimonial`
+
+MongoDB collection:
+
+`testimonials`
+
+This collection stores fully dynamic client Testimonials and review content.
+
+## Main Fields
+
+- `clientName`
+- `clientRole`
+- `companyName`
+- `reviewText`
+- `rating`
+- `profileImageUrl`
+- `profileImageAlt`
+- `companyWebsiteUrl`
+- `relatedProject`
+- `order`
+- `isFeatured`
+- `isVisible`
+- `createdBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
+
+## Required Fields
+
+### clientName
+
+- Type: String
+- Required
+- Trimmed
+- Minimum length: 2
+- Maximum length: 150
+
+### reviewText
+
+- Type: String
+- Required
+- Trimmed
+- Minimum length: 10
+- Maximum length: 3000
+
+### rating
+
+- Type: Number
+- Required
+- Whole number only
+- Minimum: `1`
+- Maximum: `5`
+
+The Admin and public filter layers also use strict rating validation so malformed numeric-like values are not silently coerced into valid ratings.
+
+## Optional Client and Company Fields
+
+### clientRole
+
+- Type: String
+- Maximum length: 150
+- Default: empty string
+
+### companyName
+
+- Type: String
+- Maximum length: 180
+- Default: empty string
+
+### profileImageUrl
+
+- Type: String
+- Maximum length: 500
+- Default: empty string
+- Must be a credential-free HTTP or HTTPS URL when present
+
+### profileImageAlt
+
+- Type: String
+- Maximum length: 200
+- Default: empty string
+
+### companyWebsiteUrl
+
+- Type: String
+- Maximum length: 500
+- Default: empty string
+- Must be a credential-free HTTP or HTTPS URL when present
+
+## Project Relation
+
+### relatedProject
+
+- Type: ObjectId
+- References `Project`
+- Default: `null`
+- Optional
+
+Public API population must not expose a hidden related Project. Hidden related Projects are returned as `null`, not as a raw private identifier.
+
+## Publication and Display Fields
+
+### order
+
+- Type: Number
+- Minimum: `0`
+- Default: `0`
+
+### isFeatured
+
+- Type: Boolean
+- Default: `false`
+
+### isVisible
+
+- Type: Boolean
+- Default: `true`
+
+## Admin Audit Relations
+
+### createdBy
+
+- Type: ObjectId
+- References `AdminUser`
+- Required
+
+### updatedBy
+
+- Type: ObjectId
+- References `AdminUser`
+- Required
+
+These fields are controlled by authenticated Admin actions and are not accepted as editable body fields.
+
+## Schema Configuration
+
+- Automatic `createdAt`
+- Automatic `updatedAt`
+- `versionKey: false`
+- Explicit collection name: `testimonials`
+
+## Indexes
+
+Public listing index:
+
+- `isVisible`
+- `isFeatured` descending
+- `order`
+- `createdAt`
+- `_id`
+
+Admin filter index:
+
+- `rating`
+- `isVisible`
+- `isFeatured`
+- `order`
+- `createdAt`
+- `_id`
+
+Text-search index:
+
+- Name: `testimonial_text_search`
+- Fields:
+  - `clientName`
+  - `clientRole`
+  - `companyName`
+  - `reviewText`
+
+## Search Behavior
+
+The current Testimonials API performs search with case-insensitive regular-expression queries across:
+
+- `clientName`
+- `clientRole`
+- `companyName`
+- `reviewText`
+
+`Testimonial.js` also declares the MongoDB text index `testimonial_text_search` across these same four fields. The current API search implementation uses regex queries rather than MongoDB `$text` queries.
+
+## Public Route Design
+
+Testimonials use a dedicated listing page only.
+
+There is no `/testimonials/:slug` route and no record-specific Testimonial SEO schema in the MVP.
+
+---
+
 # Project
 
 Model file:
@@ -1725,6 +1929,8 @@ The following fields reference `AdminUser`:
 - Education `updatedBy`
 - Experience `createdBy`
 - Experience `updatedBy`
+- Testimonial `createdBy`
+- Testimonial `updatedBy`
 - Project `createdBy`
 - Project `updatedBy`
 - Company `createdBy`
@@ -1735,6 +1941,16 @@ The following fields reference `AdminUser`:
 - SiteSettings `updatedBy`
 - AdminUser `createdBy`
 - AdminUser `updatedBy`
+
+## Current Testimonials Cross-Module Relation
+
+The `Testimonial` model contains one optional ObjectId relation:
+
+- `Project` through `relatedProject`
+
+The public Testimonials API must populate only public-safe Project data. A hidden related Project must not be exposed.
+
+---
 
 ## Current Team Cross-Module Relations
 

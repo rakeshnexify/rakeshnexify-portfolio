@@ -1,6 +1,6 @@
 ﻿# Project Decisions
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 
 ## Purpose
 
@@ -640,11 +640,11 @@ Status: Accepted
 
 The latest verified client build reports a main JavaScript chunk of:
 
-`997.38 kB`
+`1,057.06 kB`
 
 The latest verified gzip size is:
 
-`212.96 kB`
+`223.72 kB`
 
 ## Decision
 
@@ -1272,3 +1272,96 @@ The homepage preview uses the public ordering and displays up to four visible re
 ## Reason
 
 The portfolio needs a complete professional work-history module that is fully manageable through the Admin Panel while avoiding unnecessary detail-route, relation and record-specific SEO complexity.
+
+---
+
+# Decision 032 — Implement the Dynamic Testimonials Management Module
+
+Status: Accepted and Implemented
+
+## Decision
+
+Use these Testimonials conventions:
+
+- Mongoose model: `Testimonial`
+- MongoDB collection: `testimonials`
+- Public API: `/api/testimonials`
+- Admin API: `/api/admin/testimonials`
+- Public page: `/testimonials`
+- Admin routes:
+  - `/admin/testimonials`
+  - `/admin/testimonials/new`
+  - `/admin/testimonials/:id/edit`
+
+## Completed Scope
+
+- Database-backed client Testimonials
+- Required client name, review text and rating
+- Optional client role and company name
+- Optional profile image and company website
+- Optional related Project
+- Rating from 1 through 5
+- Visibility, featured and display order
+- Protected Admin CRUD
+- Search and practical filters
+- Homepage Testimonials preview
+- Dedicated `/testimonials` listing page
+- Dynamic Site Settings content
+- Independent homepage, Navbar and public-page visibility
+- Visibility-aware navigation, Footer and sitemap integration
+- Listing-page SEO and general Schema.org structured data
+- Loading, error and empty states
+- No fake or automatically seeded Testimonial records
+
+## Important Decisions
+
+- No `/testimonials/:slug` public detail route
+- No record-specific Testimonial SEO fields in the MVP
+- No pagination in the MVP
+- Public API exposes visible Testimonials only
+- Hidden related Projects must not leak through public responses
+- Admin audit fields remain server-controlled
+- Public sorting is featured descending, order ascending, created date ascending and stable `_id` fallback
+- Rating validation is intentionally strict and rejects permissive numeric coercion
+- The homepage preview uses public ordering and displays up to three Testimonials
+
+## Verified Checkpoints
+
+- `d625157 Add dynamic Testimonials backend APIs`
+- `c9d0dfe Fix Testimonials backend validation`
+- `92f2dbd Complete strict Testimonials backend validation`
+- `b340cee Add Testimonials frontend foundation`
+- `5c825e1 Add dynamic Testimonials admin interface`
+- `12a2e67 Add public Testimonials section and page`
+
+## Reason
+
+The portfolio needs real client feedback that is fully manageable through the Admin Panel while remaining safe, easy to publish and simple enough to maintain without unnecessary record-detail routes.
+
+---
+
+# Decision 033 — Keep Testimonials Ratings and Review Structured Data Strict
+
+Status: Accepted and Verified
+
+## Decision
+
+Testimonials rating inputs and filters must accept only valid whole-number ratings from 1 through 5.
+
+Malformed numeric-like inputs must not be silently normalized into a valid rating.
+
+The public `/testimonials` page may publish accurate general Schema.org `Review` data, but the project must not change the reviewed entity type merely to imply unsupported Google Review Snippet eligibility.
+
+## Rules
+
+- Accept valid rating numbers `1` through `5`.
+- Accept exact public filter strings `"1"` through `"5"`.
+- Reject malformed variants such as `01`, `+1`, `1.0`, `1e0`, arrays and objects.
+- Exclude malformed ratings from stars, averages and Review JSON-LD.
+- Filtered listing states must not publish a misleading canonical Review `ItemList`.
+- `itemReviewed` must remain semantically accurate.
+- Company information may be represented as author affiliation where supported by the record.
+
+## Reason
+
+Strict ratings prevent inconsistent API, form, visual and structured-data behavior. Accurate Schema.org semantics are more important than forcing eligibility for a search-engine rich-result format that does not match the portfolio data model.

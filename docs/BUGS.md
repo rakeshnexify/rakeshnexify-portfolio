@@ -1,6 +1,6 @@
 ﻿# Bugs and Known Issues
 
-Last updated: 2026-08-06
+Last updated: 2026-08-07
 
 ## Purpose
 
@@ -58,16 +58,16 @@ Vite reports:
 
 Latest verified main JavaScript bundle:
 
-`997.38 kB`
+`1,057.06 kB`
 
 Latest verified gzip size:
 
-`212.96 kB`
+`223.72 kB`
 
 Latest verified build details:
 
 - Vite: `8.1.5`
-- Modules transformed: `154`
+- Modules transformed: `164`
 - Build result: successful
 
 ## Current Impact
@@ -233,6 +233,9 @@ Automated tests are still needed for:
 - Skills backend, Admin and public workflows
 - Education backend, Admin and public workflows
 - Experience backend, Admin, public page, publication and sitemap workflows
+- Testimonials backend validation and authorization
+- Testimonials Admin CRUD and publication workflows
+- Testimonials public filters, visibility matrix, SEO and sitemap behavior
 
 ## Current Impact
 
@@ -671,6 +674,83 @@ The following states were verified through the Admin Site Settings interface and
 - Re-enabling the page restores navigation, direct access and the sitemap entry.
 
 The backend development process required a restart once so the newly edited sitemap utility was loaded. No remaining application defect was found.
+
+---
+
+
+
+# RESOLVED-012 — Testimonials Strict Rating Validation
+
+Status: Resolved and Verified
+
+## Previous Risk
+
+JavaScript and query-string coercion could allow numeric-looking values that were not part of the approved rating contract to behave like valid ratings.
+
+Examples included:
+
+- `01`
+- `+1`
+- `1.0`
+- `1e0`
+- Bracket-style query arrays or objects
+
+## Files Involved
+
+- `server/src/controllers/testimonial.controller.js`
+- `server/src/controllers/adminTestimonial.controller.js`
+- `client/src/services/testimonialsApi.js`
+- `client/src/services/adminTestimonialsApi.js`
+- `client/src/utils/testimonialForm.js`
+- `client/src/components/testimonials/TestimonialCard.jsx`
+- `client/src/pages/TestimonialsPage.jsx`
+
+## Fix
+
+Testimonials rating validation was made strict across backend filters, frontend API helpers, form validation and public rendering.
+
+Only whole-number ratings from 1 through 5, or exact public filter strings `"1"` through `"5"`, are treated as valid.
+
+## Verification
+
+- Invalid public rating filters returned structured `400` responses during backend runtime checks.
+- Codex re-reviewed backend and frontend rating handling through multiple focused passes.
+- Final public integration review found no blocking, important or minor rating issue.
+
+---
+
+# RESOLVED-013 — Testimonials External CTA Scheme Classification
+
+Status: Resolved and Verified
+
+## Previous Risk
+
+`TestimonialsSection.jsx` safely parsed HTTP/HTTPS URLs case-insensitively, but the action-link rendering path originally detected external links using lowercase-only string prefixes.
+
+A valid value such as `HTTPS://example.com` could therefore lose external-link behavior.
+
+## Location
+
+`client/src/components/sections/TestimonialsSection.jsx`
+
+## Fix
+
+External HTTP/HTTPS classification now handles the URL scheme case-insensitively while preserving safe handling for:
+
+- Internal React Router paths
+- Hash anchors
+- Credential-free external URLs
+- Invalid or unsupported URL fallbacks
+
+## Verification
+
+The final comprehensive Codex review confirmed that uppercase and lowercase HTTP/HTTPS destinations receive:
+
+- `target="_blank"`
+- `rel="noopener noreferrer"`
+- Accessible new-tab text
+
+No remaining finding was reported.
 
 ---
 

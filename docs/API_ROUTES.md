@@ -197,7 +197,7 @@ Returns public-safe global website settings used by:
 - Owner information
 - Hero
 - About
-- Listing-section content, including Experience section content
+- Listing-section content, including Experience and Testimonials section content
 - Contact content
 - Footer
 - Platforms
@@ -544,6 +544,80 @@ Public response behavior:
 - Private `identityKey` is excluded.
 - Hidden Experience records are excluded.
 - There is no public Experience details endpoint.
+
+---
+
+
+# Public Testimonials API
+
+Route file:
+
+`server/src/routes/testimonial.routes.js`
+
+Mount path:
+
+`/api/testimonials`
+
+## Get Public Testimonials
+
+Endpoint:
+
+`GET /api/testimonials`
+
+Authentication:
+
+Not required.
+
+Controller:
+
+`getPublicTestimonials`
+
+Purpose:
+
+Returns publicly visible Testimonial records for the homepage preview and dedicated `/testimonials` listing page.
+
+The public listing always applies:
+
+- `isVisible: true`
+- Featured records first
+- Admin-defined `order` ascending
+- Oldest `createdAt` fallback
+- Stable `_id` fallback
+
+Supported query parameters:
+
+- `search` — Searches client name, client role, company name and review text
+- `rating` — Exact integer rating from `1` through `5`
+- `featured` — Boolean featured filter using `true` or `false`
+
+Validation behavior:
+
+- Invalid `rating` values return a structured `400` response.
+- Ratings are not permissively coerced from values such as `01`, `+1`, `1.0`, `1e0` or bracket-style query objects.
+- Invalid `featured` values return a structured `400` response.
+
+Successful response status:
+
+`200 OK`
+
+Response shape:
+
+```json
+{
+  "success": true,
+  "count": 0,
+  "data": []
+}
+```
+
+Public response behavior:
+
+- Admin audit fields are excluded.
+- Hidden Testimonials are excluded.
+- `relatedProject` is optional.
+- A hidden related Project is not exposed through the public Testimonial response.
+- No raw hidden Project identifier is exposed as a fallback.
+- There is no public Testimonial details endpoint.
 
 ---
 
@@ -1467,6 +1541,131 @@ Permanently deletes one Experience record.
 
 ---
 
+
+# Admin Testimonials API
+
+Route file:
+
+`server/src/routes/adminTestimonial.routes.js`
+
+Mount path:
+
+`/api/admin/testimonials`
+
+All routes require:
+
+`requireAdminAuth`
+
+## List Testimonials
+
+Endpoint:
+
+`GET /api/admin/testimonials`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminTestimonials`
+
+Supported query parameters:
+
+- `search`
+- `rating`
+- `isVisible`
+- `isFeatured`
+- `relatedProject`
+
+Important behavior:
+
+- `rating` accepts only exact integer values from `1` through `5`.
+- Boolean filters preserve strict true/false validation.
+- `relatedProject` must be a valid Project ObjectId when provided.
+
+## Create Testimonial
+
+Endpoint:
+
+`POST /api/admin/testimonials`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`createAdminTestimonial`
+
+Important behavior:
+
+- Authenticated write requests require JSON content type.
+- Required fields include `clientName`, `reviewText` and `rating`.
+- Rating must be a whole number from `1` through `5`.
+- Optional profile/company URLs must be credential-free HTTP/HTTPS URLs.
+- Optional `relatedProject` must reference an existing Project.
+- `createdBy` and `updatedBy` are controlled by the server and are not accepted from the request body.
+
+## Get Testimonial by ID
+
+Endpoint:
+
+`GET /api/admin/testimonials/:id`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminTestimonialById`
+
+## Update Testimonial
+
+Endpoint:
+
+`PATCH /api/admin/testimonials/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`updateAdminTestimonial`
+
+Important behavior:
+
+- Authenticated write requests require JSON content type.
+- Editable fields use the same validation rules as create.
+- Admin audit fields remain server-controlled.
+
+## Delete Testimonial
+
+Endpoint:
+
+`DELETE /api/admin/testimonials/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+
+Controller:
+
+`deleteAdminTestimonial`
+
+Purpose:
+
+Permanently deletes one Testimonial record.
+
+---
+
 # Admin Companies API
 
 Route file:
@@ -1652,6 +1851,7 @@ Controller:
 - `GET /api/projects/:slug`
 - `GET /api/education`
 - `GET /api/experience`
+- `GET /api/testimonials`
 - `GET /api/companies`
 - `GET /api/companies/:slug`
 - `GET /api/team`
@@ -1716,6 +1916,14 @@ Controller:
 - `PATCH /api/admin/experience/:id`
 - `DELETE /api/admin/experience/:id`
 
+## Admin Testimonials
+
+- `GET /api/admin/testimonials`
+- `POST /api/admin/testimonials`
+- `GET /api/admin/testimonials/:id`
+- `PATCH /api/admin/testimonials/:id`
+- `DELETE /api/admin/testimonials/:id`
+
 ## Admin Companies
 
 - `GET /api/admin/companies`
@@ -1744,7 +1952,7 @@ Controller:
 
 ## Query Parameter Documentation
 
-Team listing query parameters have been audited and documented in their Public and Admin Team API sections.
+Team and Testimonials listing query parameters have been audited and documented in their Public and Admin API sections.
 
 Other module-specific listing parameters should be documented only after their controllers are audited.
 

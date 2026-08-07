@@ -20,26 +20,28 @@ Remote branch:
 
 ## Latest Pushed Development Commit
 
-`91263aa Add public Experience section and page`
+`12a2e67 Add public Testimonials section and page`
 
-Experience checkpoints:
+Testimonials checkpoints:
 
-- `b117e22 Add dynamic Experience backend APIs`
-- `5dbcb7a Add Experience frontend services and form utilities`
-- `8e235fb Add dynamic Experience admin interface`
-- `91263aa Add public Experience section and page`
+- `d625157 Add dynamic Testimonials backend APIs`
+- `c9d0dfe Fix Testimonials backend validation`
+- `92f2dbd Complete strict Testimonials backend validation`
+- `b340cee Add Testimonials frontend foundation`
+- `5c825e1 Add dynamic Testimonials admin interface`
+- `12a2e67 Add public Testimonials section and page`
 
 Verified immediately after the latest push:
 
 - `git status -sb` returned `## main...origin/main`
-- The working tree was clean
-- Experience public visibility and sitemap behavior had passed
+- The working tree was clean before documentation synchronization
+- Final Testimonials public integration had passed production build and Codex review
 
 ## Current Development Phase
 
 Active checkpoint:
 
-`Experience documentation synchronization`
+`Testimonials documentation synchronization`
 
 Status:
 
@@ -57,64 +59,63 @@ Current scope:
 - `docs/ROADMAP.md`
 - `docs/SESSION_HANDOFF.md`
 
-Do not modify completed Experience implementation files during this checkpoint unless a verified defect is discovered.
+Do not modify completed Testimonials implementation files during this checkpoint unless a verified defect is discovered.
 
-## Completed Experience Contract
+## Completed Testimonials Contract
 
 Naming:
 
-- Model: `Experience`
-- Collection: `experiences`
-- Public API: `/api/experience`
-- Admin API: `/api/admin/experience`
-- Public page: `/experience`
+- Model: `Testimonial`
+- Collection: `testimonials`
+- Public API: `/api/testimonials`
+- Admin API: `/api/admin/testimonials`
+- Public page: `/testimonials`
 - Admin pages:
-  - `/admin/experience`
-  - `/admin/experience/new`
-  - `/admin/experience/:id/edit`
+  - `/admin/testimonials`
+  - `/admin/testimonials/new`
+  - `/admin/testimonials/:id/edit`
 
 MVP exclusions:
 
-- No `/experience/:slug`
-- No record-specific SEO fields
-- No cross-module relations
+- No `/testimonials/:slug`
+- No record-specific Testimonial SEO fields
 - No pagination
-- No separate status enum
 - No fake or seeded records
+- No Testimonial detail sitemap URLs
 
-## Completed Experience Backend
+## Completed Testimonials Backend
 
 Files:
 
 ```text
-server/src/models/Experience.js
-server/src/controllers/experience.controller.js
-server/src/controllers/adminExperience.controller.js
-server/src/routes/experience.routes.js
-server/src/routes/adminExperience.routes.js
+server/src/models/Testimonial.js
+server/src/controllers/testimonial.controller.js
+server/src/controllers/adminTestimonial.controller.js
+server/src/routes/testimonial.routes.js
+server/src/routes/adminTestimonial.routes.js
 server/src/app.js
 package.json
 ```
 
 Key behavior:
 
-- Required organization, job title, employment type, start date and short description
-- Optional location, location type and full description
-- Responsibilities and achievements stored separately
-- Skills and tools stored separately
-- Optional organization logo and website
-- Current-position flag clears `endDate`
-- Non-current records require `endDate`
-- Strict `YYYY-MM-DD` Admin validation
+- Required `clientName`, `reviewText` and `rating`
+- Integer rating from 1 through 5
+- Optional client role and company name
+- Optional profile image URL and alt text
+- Optional company website URL
+- Optional `relatedProject`
+- Order, featured and visibility fields
+- Public visible-only response
+- Public hidden-related-Project protection
+- Public sorting: featured descending, order ascending, created date ascending and `_id` fallback
+- Public search, rating and featured filters
+- Admin search, rating, visibility, featured and related-Project filters
+- Strict rating handling for numeric-looking edge cases
 - Credential-free HTTP/HTTPS URL validation
-- Private duplicate `identityKey`
-- Unique slug
-- Public visible-only whitelist
-- Public sorting: featured, order, start date, created date and `_id`
-- Admin sorting: order, start date, created date and `_id`
-- Structured `400`, `404` and `409` responses
-- Mongoose 9-compatible synchronous middleware
-- Text arrays reject non-text items and normalize duplicates
+- Structured `400`, `401`, `403`, `404` and relation errors
+- Authenticated JSON write-content enforcement
+- Admin audit fields protected from body input
 
 RBAC:
 
@@ -122,37 +123,38 @@ RBAC:
 - Create/update: `super-admin`, `admin`, `editor`
 - Delete: `super-admin`, `admin`
 
-## Completed Experience Frontend Foundation
+## Completed Testimonials Frontend Foundation
 
 Files:
 
 ```text
-client/src/services/experienceApi.js
-client/src/services/adminExperienceApi.js
-client/src/hooks/useExperience.js
-client/src/utils/experienceForm.js
+client/src/services/testimonialsApi.js
+client/src/services/adminTestimonialsApi.js
+client/src/hooks/useTestimonials.js
+client/src/utils/testimonialForm.js
 ```
 
 Completed:
 
 - Public and Admin API clients
-- Response-shape validation
-- Authorization handling
-- Stable Experience sorting
+- Response-shape and structured-error handling
+- Bearer authorization
+- AbortSignal support
+- Strict rating normalization
+- Stable public sorting
+- Initial-load/refresh race protection
 - Form defaults and conversion
-- Slug and timeline validation
-- URL validation
-- Text-list normalization
-- Publication payload conversion
+- URL, ObjectId, rating, order and boolean validation
+- Editable payload whitelist
 
-## Completed Experience Admin Interface
+## Completed Testimonials Admin Interface
 
 Files:
 
 ```text
-client/src/components/admin/experience/ExperienceForm.jsx
-client/src/pages/admin/AdminExperiencePage.jsx
-client/src/pages/admin/AdminExperienceEditorPage.jsx
+client/src/components/admin/testimonials/TestimonialForm.jsx
+client/src/pages/admin/AdminTestimonialsPage.jsx
+client/src/pages/admin/AdminTestimonialEditorPage.jsx
 client/src/pages/admin/AdminDashboardPage.jsx
 client/src/routes/AppRoutes.jsx
 ```
@@ -162,22 +164,21 @@ Completed:
 - Dashboard module
 - Listing, search and filters
 - Create and edit pages
-- Timeline and current-position controls
-- Responsibilities, achievements, skills and tools editors
-- Organization links and logo
-- Visibility, featured and order controls
-- Quick actions
+- Related Project selector
+- Visibility and featured quick actions
 - Role-restricted permanent deletion
-- Browser validation and temporary-record cleanup
+- Loading, error and empty states
+- Mutation and list-load concurrency guards
+- Authoritative backend reload after mutations
 
-## Completed Experience Public Integration
+## Completed Testimonials Public Integration
 
 New public files:
 
 ```text
-client/src/components/experience/ExperienceTimelineCard.jsx
-client/src/components/sections/ExperienceSection.jsx
-client/src/pages/ExperiencePage.jsx
+client/src/components/testimonials/TestimonialCard.jsx
+client/src/components/sections/TestimonialsSection.jsx
+client/src/pages/TestimonialsPage.jsx
 ```
 
 Shared client integration:
@@ -204,36 +205,45 @@ server/src/utils/createSitemapXml.js
 
 Completed behavior:
 
-- Homepage Experience timeline after Education and before Team in the default registry
-- Up to four visible records in homepage preview
-- Dedicated `/experience` page
-- Organization logo or initials fallback
-- Current and featured badges
-- Employment and location labels
-- Responsibilities, achievements, skills and tools
+- Homepage Testimonials preview after Companies and before Contact in the default registry
+- Up to three visible public Testimonials in the homepage preview
+- Dedicated `/testimonials` listing page
+- Search and rating filter UI
+- Strict rating stars and average calculation
+- Profile image or initials fallback
+- Featured badge
+- Safe company website link
+- Optional public Project link
 - Dynamic Site Settings heading, description and CTA
 - Navbar, public header and Footer links
 - Independent homepage, navigation and public-page controls
 - Visibility-protected route
-- Dynamic SEO and JSON-LD
+- CTA suppression when `/testimonials` is disabled
+- Case-insensitive external HTTP/HTTPS CTA handling
+- Canonical SEO and general Schema.org structured data
 - Visibility-aware sitemap
 
-## Runtime Validation Completed
+## Runtime and Review Validation Completed
+
+Backend milestone:
+
+- Public empty list returned success
+- Unauthorized Admin list returned `401`
+- Invalid rating and featured filters returned structured `400` responses
+- Multiple Codex backend re-reviews passed after strict validation fixes
+
+Frontend/public milestone:
 
 - `npm run check` passed
-- Vite transformed `154` modules
-- Main bundle: `997.38 kB`
-- Gzip: `212.96 kB`
+- Vite transformed `164` modules
+- Main bundle: `1,057.06 kB`
+- Gzip: `223.72 kB`
 - `git diff --check` passed
 - `git diff --cached --check` passed
-- Experience Admin create/edit/filter/delete workflows passed
-- Homepage Experience section passed
-- Public `/experience` page passed
-- Navbar, public header and Footer links passed
-- Experience Site Settings persistence passed
-- Disabled public page removed `/experience` from sitemap
-- Re-enabled public page restored `/experience` to sitemap
-- Temporary Experience test data was permanently deleted
+- Final public integration staged exactly 15 expected files
+- Final comprehensive Codex review reported no blocking, important or minor findings
+- Visibility matrix and sitemap behavior were verified during final review
+- No fake Testimonial records were added
 
 ## Known Warnings
 
@@ -245,6 +255,10 @@ Non-blocking Vite warning. Handle in the dedicated performance phase.
 
 One previous high-severity warning remains uninvestigated. Do not run `npm audit fix --force`.
 
+### Automated Tests
+
+Automated test coverage remains limited. Add dedicated tests in the later QA phase.
+
 ### Line Endings
 
 Git may report CRLF-to-LF warnings. No actual whitespace error is known.
@@ -255,18 +269,21 @@ None currently known.
 
 ## Immediate Next Step
 
-1. Replace the nine documentation files with the Experience-synchronized versions.
+1. Replace the nine documentation files with the Testimonials-synchronized versions.
 2. Run:
 
 ```powershell
 git diff --check -- docs
 git status --short
+git diff --name-only -- docs
 git diff --stat -- docs
 ```
 
 3. Confirm only the intended nine documentation files changed.
-4. Stage only those files.
-5. Run:
+4. Run a focused Codex review of the complete documentation diff.
+5. Fix only confirmed documentation findings.
+6. Stage only the nine documentation files after Codex approval.
+7. Run:
 
 ```powershell
 git diff --cached --check
@@ -274,31 +291,32 @@ git diff --cached --name-only
 git diff --cached --stat
 ```
 
-6. Commit with:
+8. Commit with:
 
 ```text
-Synchronize Experience module documentation
+Synchronize Testimonials module documentation
 ```
 
-7. Push `main` to `origin`.
-8. Confirm `git status -sb` shows `## main...origin/main`.
-9. Begin the next approved roadmap module.
+9. Push `main` to `origin`.
+10. Confirm `git status -sb` shows `## main...origin/main`.
+11. Begin the next approved roadmap module.
 
 Recommended next module:
 
-`Fully Dynamic Testimonials Management Module`
+`Fully Dynamic Blog or News Management Module`
 
 ## Required New-Session Startup
 
 1. Read `AGENTS.md`.
-2. Read `docs/SESSION_HANDOFF.md`.
-3. Read `docs/CURRENT_STATUS.md`.
-4. Read `docs/ROADMAP.md`.
-5. Run `git status --short`.
-6. Run `git log --oneline -10`.
-7. Inspect the existing implementation before editing.
-8. Continue only the next incomplete documented step.
-9. Never expose Admin credentials, tokens or private environment values.
+2. Read `docs/ai/PROJECT_RULEBOOK.md`.
+3. Read `docs/ai/CHATGPT_WORKFLOW.md`.
+4. Read `docs/SESSION_HANDOFF.md`.
+5. Read `docs/CURRENT_STATUS.md`.
+6. Read `docs/ROADMAP.md`.
+7. Run `git status --short`.
+8. Run `git branch --show-current`.
+9. Run `git log --oneline -10 --decorate`.
+10. Inspect the current repository before editing.
 
 ## Required Session Ending
 
