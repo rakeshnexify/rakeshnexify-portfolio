@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import Container from "../components/layout/Container";
+import { mergeHomepageSections } from "../config/homepageSections";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import PostCard from "../components/posts/PostCard";
@@ -128,7 +129,14 @@ function PostsLoadingState({ typeLabel }) {
   );
 }
 
-function PostsErrorState({ error, typeLabel, canonicalPath, onRetry, isRetrying }) {
+function PostsErrorState({
+  error,
+  typeLabel,
+  canonicalPath,
+  onRetry,
+  isRetrying,
+  showAlternatePageLink,
+}) {
   return (
     <>
       <PublicPageHeader />
@@ -172,12 +180,14 @@ function PostsErrorState({ error, typeLabel, canonicalPath, onRetry, isRetrying 
               Return Home
             </Link>
 
-            <Link
-              to={canonicalPath === "/blog" ? "/news" : "/blog"}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-5 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
-            >
-              View {canonicalPath === "/blog" ? "News" : "Blog"}
-            </Link>
+            {showAlternatePageLink && (
+              <Link
+                to={canonicalPath === "/blog" ? "/news" : "/blog"}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-5 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
+              >
+                View {canonicalPath === "/blog" ? "News" : "Blog"}
+              </Link>
+            )}
           </div>
         </div>
       </main>
@@ -200,6 +210,17 @@ function PostsListingPage({ type }) {
 
   const { posts, isLoading, error, refreshPosts } = usePosts(apiFilters);
   const { settings } = useSiteSettings();
+
+  const publicationSections = useMemo(
+    () => mergeHomepageSections(settings?.sections),
+    [settings?.sections],
+  );
+
+  const alternatePageKey = type === "blog" ? "news" : "blog";
+
+  const isAlternatePageVisible =
+    publicationSections.find((section) => section.key === alternatePageKey)
+      ?.isPageVisible !== false;
 
   const brandName =
     String(settings?.brand?.name || "").trim() || "RakeshNexify";
@@ -287,6 +308,7 @@ function PostsListingPage({ type }) {
           canonicalPath={pageContent.canonicalPath}
           onRetry={refreshPosts}
           isRetrying={isLoading}
+          showAlternatePageLink={isAlternatePageVisible}
         />
       </>
     );
@@ -337,12 +359,14 @@ function PostsListingPage({ type }) {
                     : `${pageContent.typeLabel} Posts`}
                 </span>
 
-                <Link
-                  to={type === "blog" ? "/news" : "/blog"}
-                  className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl border border-white/15 bg-white/10 px-5 text-sm font-semibold text-white transition hover:bg-white/15"
-                >
-                  View {type === "blog" ? "News" : "Blog"}
-                </Link>
+                {isAlternatePageVisible && (
+                  <Link
+                    to={type === "blog" ? "/news" : "/blog"}
+                    className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl border border-white/15 bg-white/10 px-5 text-sm font-semibold text-white transition hover:bg-white/15"
+                  >
+                    View {type === "blog" ? "News" : "Blog"}
+                  </Link>
+                )}
               </div>
             </div>
           </Container>

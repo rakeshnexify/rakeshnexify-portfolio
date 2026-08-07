@@ -139,6 +139,28 @@ const defaultNavigationItems = [
     order: 12,
     navigationOrder: 12,
   },
+  {
+    key: "blog",
+    label: "Blog",
+    href: "/blog",
+    type: "page",
+    isVisible: false,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 14,
+    navigationOrder: 13,
+  },
+  {
+    key: "news",
+    label: "News",
+    href: "/news",
+    type: "page",
+    isVisible: false,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 15,
+    navigationOrder: 14,
+  },
 ];
 
 const defaultItemByKey = Object.fromEntries(
@@ -275,7 +297,7 @@ function PublicNavigationLink({
 }) {
   const baseClasses = isMobile
     ? "min-w-0 break-words rounded-xl px-4 py-3 text-sm font-semibold transition"
-    : "max-w-32 truncate border-b-2 py-2 text-sm font-semibold transition xl:max-w-40";
+    : "max-w-24 truncate border-b-2 py-2 text-sm font-semibold transition xl:max-w-28";
 
   const stateClasses = isMobile
     ? isActive
@@ -305,9 +327,15 @@ function PublicPageHeader() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+
   const mobileMenuRef = useRef(null);
 
   const mobileMenuButtonRef = useRef(null);
+
+  const moreMenuRef = useRef(null);
+
+  const moreMenuButtonRef = useRef(null);
 
   const brandName =
     String(settings?.brand?.name || siteData.brand?.name || "").trim() ||
@@ -324,8 +352,20 @@ function PublicPageHeader() {
 
   const contactItem = navigationItems.find((item) => item.key === "contact");
 
+  const desktopNavigationItems = standardNavigationItems.slice(0, 4);
+
+  const overflowNavigationItems = standardNavigationItems.slice(4);
+
+  const isOverflowItemActive = overflowNavigationItems.some((item) =>
+    isNavigationItemActive(item, pathname, hash),
+  );
+
   function closeMobileMenu() {
     setIsMenuOpen(false);
+  }
+
+  function closeMoreMenu() {
+    setIsMoreMenuOpen(false);
   }
 
   function closeMenuAndRestoreFocus() {
@@ -338,14 +378,30 @@ function PublicPageHeader() {
 
   useEffect(() => {
     function handleEscapeKey(event) {
-      if (event.key === "Escape" && isMenuOpen) {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      if (isMoreMenuOpen) {
+        setIsMoreMenuOpen(false);
+
+        requestAnimationFrame(() => {
+          moreMenuButtonRef.current?.focus();
+        });
+
+        return;
+      }
+
+      if (isMenuOpen) {
         closeMenuAndRestoreFocus();
       }
     }
 
     function handleWindowResize() {
-      if (window.innerWidth >= 1024 && isMenuOpen) {
+      if (window.innerWidth >= 1024) {
         setIsMenuOpen(false);
+      } else {
+        setIsMoreMenuOpen(false);
       }
     }
 
@@ -358,7 +414,7 @@ function PublicPageHeader() {
 
       window.removeEventListener("resize", handleWindowResize);
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, isMoreMenuOpen]);
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -387,6 +443,24 @@ function PublicPageHeader() {
     };
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    if (!isMoreMenuOpen) {
+      return undefined;
+    }
+
+    function handleOutsideClick(event) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
+        setIsMoreMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick);
+    };
+  }, [isMoreMenuOpen]);
+
   return (
     <>
       <a
@@ -410,9 +484,9 @@ function PublicPageHeader() {
             {standardNavigationItems.length > 0 && (
               <nav
                 aria-label="Main navigation"
-                className="hidden min-w-0 items-center gap-5 lg:flex xl:gap-7"
+                className="hidden min-w-0 items-center gap-3 lg:flex xl:gap-4"
               >
-                {standardNavigationItems.map((item) => (
+                {desktopNavigationItems.map((item) => (
                   <PublicNavigationLink
                     key={item.key}
                     item={item}
@@ -420,6 +494,66 @@ function PublicPageHeader() {
                     onNavigate={closeMobileMenu}
                   />
                 ))}
+
+                {overflowNavigationItems.length > 0 && (
+                  <div ref={moreMenuRef} className="relative shrink-0">
+                    <button
+                      ref={moreMenuButtonRef}
+                      type="button"
+                      aria-haspopup="true"
+                      aria-expanded={isMoreMenuOpen}
+                      aria-controls="public-desktop-more-navigation"
+                      onClick={() => {
+                        setIsMoreMenuOpen((currentValue) => !currentValue);
+                      }}
+                      className={`inline-flex min-h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold transition ${
+                        isOverflowItemActive
+                          ? "bg-brand-50 text-brand-600"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-brand-600"
+                      }`}
+                    >
+                      More
+
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 20 20"
+                        className={`size-4 transition-transform ${
+                          isMoreMenuOpen ? "rotate-180" : ""
+                        }`}
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+
+                    {isMoreMenuOpen && (
+                      <div
+                        id="public-desktop-more-navigation"
+                        className="absolute right-0 top-full z-50 mt-3 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-950/10"
+                      >
+                        <div className="flex max-h-[70vh] min-w-0 flex-col gap-1 overflow-y-auto">
+                          {overflowNavigationItems.map((item) => (
+                            <PublicNavigationLink
+                              key={item.key}
+                              item={item}
+                              isActive={isNavigationItemActive(
+                                item,
+                                pathname,
+                                hash,
+                              )}
+                              isMobile
+                              onNavigate={closeMoreMenu}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </nav>
             )}
 

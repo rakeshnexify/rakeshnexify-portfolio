@@ -85,6 +85,20 @@ const defaultNavigationSections = [
     isVisible: true,
     order: 11,
   },
+  {
+    key: "blog",
+    label: "Blog",
+    href: "/blog",
+    isVisible: true,
+    order: 12,
+  },
+  {
+    key: "news",
+    label: "News",
+    href: "/news",
+    isVisible: true,
+    order: 13,
+  },
 ];
 
 const defaultSectionByKey = Object.fromEntries(
@@ -100,6 +114,8 @@ const dedicatedPageSectionKeys = new Set([
   "team",
   "companies",
   "testimonials",
+  "blog",
+  "news",
 ]);
 
 const supportedFooterSections = new Set(

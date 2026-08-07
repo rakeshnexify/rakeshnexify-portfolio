@@ -41,6 +41,41 @@ const dedicatedPageSectionKeys = new Set([
   "team",
   "companies",
   "testimonials",
+  "blog",
+  "news",
+]);
+
+const homepageSectionKeys = new Set([
+  "hero",
+  "about",
+  "statistics",
+  "skills",
+  "services",
+  "projects",
+  "education",
+  "experience",
+  "team",
+  "companies",
+  "posts",
+  "testimonials",
+  "contact",
+]);
+
+const navigationSectionKeys = new Set([
+  "hero",
+  "about",
+  "statistics",
+  "skills",
+  "services",
+  "projects",
+  "education",
+  "experience",
+  "team",
+  "companies",
+  "testimonials",
+  "contact",
+  "blog",
+  "news",
 ]);
 
 function containsControlCharacters(value) {
@@ -232,6 +267,10 @@ function validateDynamicContentUrls(formValues, errors) {
       value: formValues?.testimonialsSection?.ctaButton?.url,
     },
     {
+      fieldName: "postsSection.ctaButton.url",
+      value: formValues?.postsSection?.ctaButton?.url,
+    },
+    {
       fieldName: "footer.projectButton.url",
       value: formValues?.footer?.projectButton?.url,
     },
@@ -338,6 +377,14 @@ function prepareInitialValues(initialValues = {}) {
 
       ctaButton: {
         ...normalizedValues.testimonialsSection.ctaButton,
+      },
+    },
+
+    postsSection: {
+      ...normalizedValues.postsSection,
+
+      ctaButton: {
+        ...normalizedValues.postsSection.ctaButton,
       },
     },
 
@@ -884,13 +931,25 @@ function SiteSettingsForm({
   }
 
   function handleMoveSection(index, direction) {
-    const targetIndex = index + direction;
-
-    if (targetIndex < 0 || targetIndex >= formValues.sections.length) {
-      return;
-    }
-
     setFormValues((currentValues) => {
+      const homepageIndexes = currentValues.sections
+        .map((section, sectionIndex) =>
+          homepageSectionKeys.has(section.key) ? sectionIndex : -1,
+        )
+        .filter((sectionIndex) => sectionIndex >= 0);
+
+      const currentHomepagePosition = homepageIndexes.indexOf(index);
+      const targetHomepagePosition = currentHomepagePosition + direction;
+
+      if (
+        currentHomepagePosition < 0 ||
+        targetHomepagePosition < 0 ||
+        targetHomepagePosition >= homepageIndexes.length
+      ) {
+        return currentValues;
+      }
+
+      const targetIndex = homepageIndexes[targetHomepagePosition];
       const updatedSections = [...currentValues.sections];
 
       [updatedSections[index], updatedSections[targetIndex]] = [
@@ -968,6 +1027,10 @@ function SiteSettingsForm({
   function isPanelActive(panelKey) {
     return activePageKey === "all" || activePageKey === panelKey;
   }
+
+  const homepageSectionIndexes = formValues.sections
+    .map((section, index) => (homepageSectionKeys.has(section.key) ? index : -1))
+    .filter((index) => index >= 0);
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-8">
@@ -1386,6 +1449,17 @@ function SiteSettingsForm({
         getFieldError={getFieldError}
       />
 
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Latest Articles & News Section Content"
+        description="Manage the heading, description and primary call-to-action for the combined Blog and News homepage preview."
+        fieldName="postsSection"
+        values={formValues.postsSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
       <SettingsCard
         isVisible={isPanelActive("contact")}
         title="Contact Section Content"
@@ -1787,7 +1861,19 @@ function SiteSettingsForm({
 
         <div className="space-y-5">
           {formValues.sections.map((section, index) => {
+            const hasHomepageSection = homepageSectionKeys.has(section.key);
+            const hasNavigationItem = navigationSectionKeys.has(section.key);
             const hasDedicatedPage = dedicatedPageSectionKeys.has(section.key);
+            const homepagePosition = homepageSectionIndexes.indexOf(index);
+
+            const capabilityLabel =
+              hasHomepageSection && hasDedicatedPage
+                ? "Homepage + Page"
+                : hasDedicatedPage
+                  ? "Public Page"
+                  : hasHomepageSection
+                    ? "Homepage Section"
+                    : "Registry Item";
 
             return (
               <div
@@ -1815,7 +1901,7 @@ function SiteSettingsForm({
                         : "bg-slate-200 text-slate-600"
                     }`}
                   >
-                    {hasDedicatedPage ? "Section + Page" : "Homepage Section"}
+                    {capabilityLabel}
                   </span>
                 </div>
 
@@ -1836,7 +1922,7 @@ function SiteSettingsForm({
                       htmlFor={`settings-section-label-${index}`}
                       className="text-sm font-semibold text-slate-700"
                     >
-                      Navbar menu label
+                      {hasNavigationItem ? "Navbar menu label" : "Section label"}
                     </label>
 
                     <input
@@ -1858,116 +1944,176 @@ function SiteSettingsForm({
                   </div>
 
                   <div>
-                    <label
-                      htmlFor={`settings-section-order-${index}`}
-                      className="text-sm font-semibold text-slate-700"
-                    >
-                      Homepage order
-                    </label>
+                    {hasHomepageSection ? (
+                      <>
+                        <label
+                          htmlFor={`settings-section-order-${index}`}
+                          className="text-sm font-semibold text-slate-700"
+                        >
+                          Homepage order
+                        </label>
 
-                    <input
-                      id={`settings-section-order-${index}`}
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={section.order}
-                      onChange={(event) =>
-                        handleSectionChange(index, "order", event.target.value)
-                      }
-                      disabled={isSubmitting}
-                      className={inputClasses}
-                    />
+                        <input
+                          id={`settings-section-order-${index}`}
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={section.order}
+                          onChange={(event) =>
+                            handleSectionChange(
+                              index,
+                              "order",
+                              event.target.value,
+                            )
+                          }
+                          disabled={isSubmitting}
+                          className={inputClasses}
+                        />
 
-                    <FieldError
-                      message={getFieldError(`sections.${index}.order`)}
-                    />
+                        <FieldError
+                          message={getFieldError(`sections.${index}.order`)}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-slate-700">
+                          Homepage order
+                        </p>
+
+                        <div className={`${inputClasses} flex items-center text-slate-500`}>
+                          Not applicable
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   <div>
-                    <label
-                      htmlFor={`settings-navigation-order-${index}`}
-                      className="text-sm font-semibold text-slate-700"
-                    >
-                      Navbar order
-                    </label>
+                    {hasNavigationItem ? (
+                      <>
+                        <label
+                          htmlFor={`settings-navigation-order-${index}`}
+                          className="text-sm font-semibold text-slate-700"
+                        >
+                          Navbar order
+                        </label>
 
-                    <input
-                      id={`settings-navigation-order-${index}`}
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={section.navigationOrder}
-                      onChange={(event) =>
-                        handleSectionChange(
-                          index,
-                          "navigationOrder",
-                          event.target.value,
-                        )
-                      }
-                      disabled={isSubmitting}
-                      className={inputClasses}
-                    />
+                        <input
+                          id={`settings-navigation-order-${index}`}
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={section.navigationOrder}
+                          onChange={(event) =>
+                            handleSectionChange(
+                              index,
+                              "navigationOrder",
+                              event.target.value,
+                            )
+                          }
+                          disabled={isSubmitting}
+                          className={inputClasses}
+                        />
 
-                    <FieldError
-                      message={getFieldError(
-                        `sections.${index}.navigationOrder`,
-                      )}
-                    />
+                        <FieldError
+                          message={getFieldError(
+                            `sections.${index}.navigationOrder`,
+                          )}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-slate-700">
+                          Navbar order
+                        </p>
+
+                        <div className={`${inputClasses} flex items-center text-slate-500`}>
+                          Not applicable
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={section.isVisible !== false}
-                      onChange={(event) =>
-                        handleSectionChange(
-                          index,
-                          "isVisible",
-                          event.target.checked,
-                        )
-                      }
-                      disabled={isSubmitting}
-                      className="size-4 shrink-0 accent-brand-600"
-                    />
+                  {hasHomepageSection ? (
+                    <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={section.isVisible !== false}
+                        onChange={(event) =>
+                          handleSectionChange(
+                            index,
+                            "isVisible",
+                            event.target.checked,
+                          )
+                        }
+                        disabled={isSubmitting}
+                        className="size-4 shrink-0 accent-brand-600"
+                      />
 
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-slate-800">
-                        Show homepage section
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-slate-800">
+                          Show homepage section
+                        </span>
+
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          Display this section on the homepage.
+                        </span>
                       </span>
+                    </label>
+                  ) : (
+                    <div className="flex min-h-16 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-4 py-3">
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-slate-600">
+                          No homepage section
+                        </span>
 
-                      <span className="mt-1 block text-xs leading-5 text-slate-500">
-                        Display this section on the homepage.
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          This registry item does not render its own homepage section.
+                        </span>
                       </span>
-                    </span>
-                  </label>
+                    </div>
+                  )}
 
-                  <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={section.isNavigationVisible !== false}
-                      onChange={(event) =>
-                        handleSectionChange(
-                          index,
-                          "isNavigationVisible",
-                          event.target.checked,
-                        )
-                      }
-                      disabled={isSubmitting}
-                      className="size-4 shrink-0 accent-brand-600"
-                    />
+                  {hasNavigationItem ? (
+                    <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={section.isNavigationVisible !== false}
+                        onChange={(event) =>
+                          handleSectionChange(
+                            index,
+                            "isNavigationVisible",
+                            event.target.checked,
+                          )
+                        }
+                        disabled={isSubmitting}
+                        className="size-4 shrink-0 accent-brand-600"
+                      />
 
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-slate-800">
-                        Show in navbar
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-slate-800">
+                          Show in navbar
+                        </span>
+
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          Display this menu item in desktop and mobile navigation.
+                        </span>
                       </span>
+                    </label>
+                  ) : (
+                    <div className="flex min-h-16 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-4 py-3">
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-slate-600">
+                          No navbar item
+                        </span>
 
-                      <span className="mt-1 block text-xs leading-5 text-slate-500">
-                        Display this menu item in desktop and mobile navigation.
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          Navigation is provided through the Blog and News page items.
+                        </span>
                       </span>
-                    </span>
-                  </label>
+                    </div>
+                  )}
 
                   {hasDedicatedPage ? (
                     <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
@@ -1991,7 +2137,7 @@ function SiteSettingsForm({
                         </span>
 
                         <span className="mt-1 block text-xs leading-5 text-slate-500">
-                          Allow visitors to open the dedicated public page.
+                          Allow visitors to open this dedicated public page and its details.
                         </span>
                       </span>
                     </label>
@@ -2003,7 +2149,7 @@ function SiteSettingsForm({
                         </span>
 
                         <span className="mt-1 block text-xs leading-5 text-slate-500">
-                          This item is available as a homepage section only.
+                          This item does not own a dedicated public page.
                         </span>
                       </span>
                     </div>
@@ -2012,31 +2158,36 @@ function SiteSettingsForm({
 
                 <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs leading-5 text-slate-500">
-                    Move buttons change only the homepage section order. Navbar
-                    order is controlled separately above.
+                    {hasHomepageSection
+                      ? "Move buttons change only the order of real homepage sections. Navbar order remains independent."
+                      : "This page-only item does not participate in homepage ordering."}
                   </p>
 
-                  <div className="flex shrink-0 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => handleMoveSection(index, -1)}
-                      disabled={isSubmitting || index === 0}
-                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Move Up
-                    </button>
+                  {hasHomepageSection && (
+                    <div className="flex shrink-0 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveSection(index, -1)}
+                        disabled={isSubmitting || homepagePosition <= 0}
+                        className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Move Up
+                      </button>
 
-                    <button
-                      type="button"
-                      onClick={() => handleMoveSection(index, 1)}
-                      disabled={
-                        isSubmitting || index === formValues.sections.length - 1
-                      }
-                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Move Down
-                    </button>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveSection(index, 1)}
+                        disabled={
+                          isSubmitting ||
+                          homepagePosition < 0 ||
+                          homepagePosition === homepageSectionIndexes.length - 1
+                        }
+                        className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Move Down
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );

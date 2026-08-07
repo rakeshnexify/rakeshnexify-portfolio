@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 
 import Container from "../components/layout/Container";
+import { mergeHomepageSections } from "../config/homepageSections";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import { formatPostDate } from "../components/posts/PostCard";
@@ -77,6 +78,7 @@ function PostErrorState({
   isTypeMismatch,
   onRetry,
   isRetrying,
+  showAlternatePageLink,
 }) {
   const isNotFound = status === 404 || isTypeMismatch;
   const typeLabel = expectedType === "news" ? "News" : "Blog";
@@ -133,12 +135,14 @@ function PostErrorState({
               View All {typeLabel}
             </Link>
 
-            <Link
-              to={expectedType === "news" ? "/blog" : "/news"}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-5 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
-            >
-              View {expectedType === "news" ? "Blog" : "News"}
-            </Link>
+            {showAlternatePageLink && (
+              <Link
+                to={expectedType === "news" ? "/blog" : "/news"}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-5 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
+              >
+                View {expectedType === "news" ? "Blog" : "News"}
+              </Link>
+            )}
           </div>
         </div>
       </main>
@@ -162,6 +166,17 @@ function PostDetailsPage({ expectedType = "blog" }) {
 
   const safeExpectedType = expectedType === "news" ? "news" : "blog";
   const typeLabel = safeExpectedType === "news" ? "News" : "Blog";
+
+  const publicationSections = useMemo(
+    () => mergeHomepageSections(settings?.sections),
+    [settings?.sections],
+  );
+
+  const alternatePageKey = safeExpectedType === "news" ? "blog" : "news";
+
+  const isAlternatePageVisible =
+    publicationSections.find((section) => section.key === alternatePageKey)
+      ?.isPageVisible !== false;
 
   const brandName =
     String(settings?.brand?.name || "").trim() || "RakeshNexify";
@@ -277,6 +292,7 @@ function PostDetailsPage({ expectedType = "blog" }) {
           isTypeMismatch={isTypeMismatch}
           onRetry={refreshPost}
           isRetrying={isLoading}
+          showAlternatePageLink={isAlternatePageVisible}
         />
       </>
     );

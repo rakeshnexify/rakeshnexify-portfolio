@@ -46,12 +46,13 @@ function normalisePost(post = {}, index = 0) {
   };
 }
 
-function PostCard({ post, index = 0 }) {
+function PostCard({ post, index = 0, linkEnabled = true }) {
   const normalisedPost = normalisePost(post, index);
 
-  const detailsPath = normalisedPost.slug
-    ? `/${normalisedPost.type}/${normalisedPost.slug}`
-    : "";
+  const detailsPath =
+    linkEnabled && normalisedPost.slug
+      ? `/${normalisedPost.type}/${normalisedPost.slug}`
+      : "";
 
   const typeLabel = normalisedPost.type === "news" ? "News" : "Blog";
 

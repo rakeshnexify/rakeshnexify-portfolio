@@ -117,6 +117,24 @@ const defaultNavigationSections = [
     order: 12,
     navigationOrder: 12,
   },
+  {
+    key: "blog",
+    label: "Blog",
+    isVisible: false,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 14,
+    navigationOrder: 13,
+  },
+  {
+    key: "news",
+    label: "News",
+    isVisible: false,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 15,
+    navigationOrder: 14,
+  },
 ];
 
 const sectionDestinations = {
@@ -163,6 +181,14 @@ const sectionDestinations = {
   testimonials: {
     type: "page",
     target: "/testimonials",
+  },
+  blog: {
+    type: "page",
+    target: "/blog",
+  },
+  news: {
+    type: "page",
+    target: "/news",
   },
   contact: {
     type: "section",
@@ -305,7 +331,7 @@ function NavbarLink({ section, isActive, isMobile = false, onNavigate }) {
 
   const baseClasses = isMobile
     ? "min-w-0 break-words rounded-xl px-4 py-3 text-sm font-semibold transition"
-    : "max-w-32 truncate border-b-2 py-2 text-sm font-semibold transition-colors xl:max-w-40";
+    : "max-w-24 truncate border-b-2 py-2 text-sm font-semibold transition-colors xl:max-w-28";
 
   const stateClasses = isMobile
     ? isActive
@@ -350,11 +376,17 @@ function Navbar() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+
   const [activeSectionKey, setActiveSectionKey] = useState("hero");
 
   const mobileMenuRef = useRef(null);
 
   const mobileMenuButtonRef = useRef(null);
+
+  const moreMenuRef = useRef(null);
+
+  const moreMenuButtonRef = useRef(null);
 
   const brandName =
     String(settings?.brand?.name || siteData.brand?.name || "").trim() ||
@@ -374,8 +406,30 @@ function Navbar() {
     (section) => section.key === "contact",
   );
 
+  const desktopNavigationSections = navigationSections.slice(0, 4);
+
+  const overflowNavigationSections = navigationSections.slice(4);
+
+  const isOverflowSectionActive = overflowNavigationSections.some(
+    (section) => section.key === activeSectionKey,
+  );
+
   function closeMobileMenu() {
     setIsMenuOpen(false);
+  }
+
+  function closeMoreMenu() {
+    setIsMoreMenuOpen(false);
+  }
+
+  function navigateFromMoreMenu(section) {
+    const destination = sectionDestinations[section.key];
+
+    closeMoreMenu();
+
+    if (destination?.type === "section") {
+      goToHomepageSection(destination.target, section.key);
+    }
   }
 
   function goToHomepageSection(sectionId, sectionKey) {
@@ -405,20 +459,34 @@ function Navbar() {
 
   useEffect(() => {
     function handleEscapeKey(event) {
-      if (event.key !== "Escape" || !isMenuOpen) {
+      if (event.key !== "Escape") {
         return;
       }
 
-      setIsMenuOpen(false);
+      if (isMoreMenuOpen) {
+        setIsMoreMenuOpen(false);
 
-      requestAnimationFrame(() => {
-        mobileMenuButtonRef.current?.focus();
-      });
+        requestAnimationFrame(() => {
+          moreMenuButtonRef.current?.focus();
+        });
+
+        return;
+      }
+
+      if (isMenuOpen) {
+        setIsMenuOpen(false);
+
+        requestAnimationFrame(() => {
+          mobileMenuButtonRef.current?.focus();
+        });
+      }
     }
 
     function handleWindowResize() {
       if (window.innerWidth >= 1024) {
         setIsMenuOpen(false);
+      } else {
+        setIsMoreMenuOpen(false);
       }
     }
 
@@ -431,7 +499,7 @@ function Navbar() {
 
       window.removeEventListener("resize", handleWindowResize);
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, isMoreMenuOpen]);
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -459,6 +527,24 @@ function Navbar() {
       document.removeEventListener("pointerdown", handleOutsideClick);
     };
   }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (!isMoreMenuOpen) {
+      return undefined;
+    }
+
+    function handleOutsideClick(event) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
+        setIsMoreMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleOutsideClick);
+    };
+  }, [isMoreMenuOpen]);
 
   useEffect(() => {
     let animationFrameId = 0;
@@ -568,10 +654,10 @@ function Navbar() {
 
             {navigationSections.length > 0 && (
               <nav
-                className="hidden min-w-0 items-center gap-5 lg:flex xl:gap-7"
+                className="hidden min-w-0 items-center gap-3 lg:flex xl:gap-4"
                 aria-label="Main navigation"
               >
-                {navigationSections.map((section) => (
+                {desktopNavigationSections.map((section) => (
                   <NavbarLink
                     key={section.key}
                     section={section}
@@ -583,6 +669,66 @@ function Navbar() {
                     }
                   />
                 ))}
+
+                {overflowNavigationSections.length > 0 && (
+                  <div ref={moreMenuRef} className="relative shrink-0">
+                    <button
+                      ref={moreMenuButtonRef}
+                      type="button"
+                      aria-haspopup="true"
+                      aria-expanded={isMoreMenuOpen}
+                      aria-controls="desktop-more-navigation"
+                      onClick={() => {
+                        setIsMoreMenuOpen((currentValue) => !currentValue);
+                      }}
+                      className={`inline-flex min-h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold transition ${
+                        isOverflowSectionActive
+                          ? "bg-brand-50 text-brand-600"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-brand-600"
+                      }`}
+                    >
+                      More
+
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 20 20"
+                        className={`size-4 transition-transform ${
+                          isMoreMenuOpen ? "rotate-180" : ""
+                        }`}
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+
+                    {isMoreMenuOpen && (
+                      <div
+                        id="desktop-more-navigation"
+                        className="absolute right-0 top-full z-50 mt-3 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-950/10"
+                      >
+                        <div className="flex max-h-[70vh] min-w-0 flex-col gap-1 overflow-y-auto">
+                          {overflowNavigationSections.map((section) => (
+                            <NavbarLink
+                              key={section.key}
+                              section={section}
+                              isActive={activeSectionKey === section.key}
+                              isMobile
+                              onNavigate={
+                                sectionDestinations[section.key]?.type === "page"
+                                  ? closeMoreMenu
+                                  : () => navigateFromMoreMenu(section)
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </nav>
             )}
 

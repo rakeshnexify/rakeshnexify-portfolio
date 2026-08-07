@@ -272,17 +272,21 @@ function AppRoutes() {
             <Route path="/experience" element={<ExperiencePage />} />
           </Route>
 
-          <Route path="/blog" element={<BlogPage />} />
-          <Route
-            path="/blog/:slug"
-            element={<PostDetailsPage expectedType="blog" />}
-          />
+          <Route element={<PublicPageVisibilityRoute sectionKey="blog" />}>
+            <Route path="/blog" element={<BlogPage />} />
+            <Route
+              path="/blog/:slug"
+              element={<PostDetailsPage expectedType="blog" />}
+            />
+          </Route>
 
-          <Route path="/news" element={<NewsPage />} />
-          <Route
-            path="/news/:slug"
-            element={<PostDetailsPage expectedType="news" />}
-          />
+          <Route element={<PublicPageVisibilityRoute sectionKey="news" />}>
+            <Route path="/news" element={<NewsPage />} />
+            <Route
+              path="/news/:slug"
+              element={<PostDetailsPage expectedType="news" />}
+            />
+          </Route>
 
           <Route element={<PublicPageVisibilityRoute sectionKey="projects" />}>
             <Route path="/projects" element={<ProjectsPage />} />
