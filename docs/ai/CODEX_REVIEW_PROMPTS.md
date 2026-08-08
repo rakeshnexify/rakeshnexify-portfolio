@@ -1,6 +1,6 @@
 # Codex Focused Review Prompts
 
-Version: 1.0  
+Version: 1.1
 Recommended location: `docs/ai/CODEX_REVIEW_PROMPTS.md`
 
 Paste these prompts into the Codex panel, not the general Chat panel.
@@ -54,9 +54,11 @@ First read:
 
 - AGENTS.md
 - docs/ai/PROJECT_RULEBOOK.md
+- docs/PROJECT_MEMORY.md
 - docs/SESSION_HANDOFF.md
-- docs/CURRENT_STATUS.md
-- docs/ROADMAP.md
+
+Consult legacy technical or historical documentation only if its detailed
+information is specifically needed.
 
 Run only:
 
@@ -75,7 +77,7 @@ Report:
 2. Working-tree state
 3. Latest completed milestone
 4. Current documented next task
-5. Any conflict between Git state and documentation
+5. Any conflict between Git state, active memory and repository files
 6. Whether it is safe to start the next module
 ```
 
@@ -105,9 +107,13 @@ First read:
 
 - AGENTS.md
 - docs/ai/PROJECT_RULEBOOK.md
-- docs/DATABASE_SCHEMA.md
-- docs/API_ROUTES.md
-- Relevant existing reference-module files
+- docs/PROJECT_MEMORY.md
+- docs/SESSION_HANDOFF.md
+- Relevant current model, controller, route and reference-module files
+
+Consult `docs/DATABASE_SCHEMA.md` or `docs/API_ROUTES.md` only when their
+detailed legacy reference information is specifically useful. Verify all
+such information against current code.
 
 Then run:
 
@@ -151,7 +157,7 @@ Check:
 20. Secrets, credentials or unsafe logging
 21. Regression risk to existing modules
 22. Required root validation-script changes
-23. Required API and database documentation changes
+23. Required active-memory changes, distinguishing current handoff state from permanent architecture
 
 Output exactly:
 
@@ -299,13 +305,13 @@ First read:
 
 - AGENTS.md
 - docs/ai/PROJECT_RULEBOOK.md
+- docs/PROJECT_MEMORY.md
 - docs/SESSION_HANDOFF.md
-- docs/CURRENT_STATUS.md
-- docs/ROADMAP.md
-- docs/API_ROUTES.md
-- docs/DATABASE_SCHEMA.md
-- docs/PROJECT_STRUCTURE.md
-- Relevant reference-module integration files
+- Relevant current module and reference-module integration files
+
+Consult legacy technical or historical documentation only when its detailed
+information is specifically useful. Do not treat it as authoritative without
+verification against current code.
 
 Then run:
 
@@ -380,7 +386,9 @@ Project safety:
 41. Accidental deletion
 42. Unrelated file changes
 43. Secrets or temporary files
-44. Documentation synchronization
+44. Active-memory synchronization:
+    - `docs/SESSION_HANDOFF.md` for current state
+    - `docs/PROJECT_MEMORY.md` only for permanent changes
 
 Output exactly:
 

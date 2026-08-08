@@ -1,6 +1,6 @@
 # Reusable Dynamic Module Master Prompt
 
-Version: 1.0  
+Version: 1.1
 Recommended location: `docs/ai/MODULE_MASTER_PROMPT.md`
 
 Use this prompt at the beginning of a new ChatGPT chat for Skills, Experience, Education, Testimonials, Blog or another fully dynamic module.
@@ -44,23 +44,20 @@ plan do.
 1. PERMANENT RULES AND CURRENT SOURCES
 ==================================================
 
-Follow these files:
+Follow these normal instruction and active-memory files:
 
 - AGENTS.md
 - docs/ai/PROJECT_RULEBOOK.md
 - docs/ai/CHATGPT_WORKFLOW.md
+- docs/PROJECT_MEMORY.md
 - docs/SESSION_HANDOFF.md
-- docs/CURRENT_STATUS.md
-- docs/ROADMAP.md
 
-Read these when relevant:
+Read other docs/ai workflow or prompt files only when relevant.
 
-- docs/PROJECT_OVERVIEW.md
-- docs/PROJECT_STRUCTURE.md
-- docs/API_ROUTES.md
-- docs/DATABASE_SCHEMA.md
-- docs/DECISIONS.md
-- docs/BUGS.md
+Legacy technical and historical documents may remain available as read-only
+or archived references. Consult them only when their detailed information is
+specifically useful. They are not mandatory normal-session reads and must be
+verified against current code.
 
 Repository files, Git state and verified runtime behavior are the source
 of truth.
@@ -406,16 +403,29 @@ Final validation should cover the approved module scope, including:
 - Build and root checks
 - Secrets and temporary-file review
 
-Update relevant documentation:
+After module verification, update active memory in this order:
 
-- docs/DATABASE_SCHEMA.md
-- docs/API_ROUTES.md
-- docs/PROJECT_STRUCTURE.md
-- docs/CURRENT_STATUS.md
-- docs/SESSION_HANDOFF.md
-- docs/ROADMAP.md
-- docs/DECISIONS.md
-- docs/BUGS.md only for verified issues
+1. Update docs/SESSION_HANDOFF.md with:
+   - current branch/checkpoint
+   - current module and completion state
+   - current Git state
+   - recent verification
+   - temporary issues
+   - exact next action
+
+2. Update docs/PROJECT_MEMORY.md only if the module introduced or changed:
+   - permanent architecture
+   - a completed module contract
+   - a reusable system
+   - a durable decision
+   - a permanent limitation
+   - the remaining roadmap
+
+Do not recreate a many-document update matrix.
+
+Legacy technical and historical documents are not mandatory per-module
+update targets. Consult or update them only when explicitly required for a
+separate technical, historical or archival purpose.
 
 ==================================================
 10. CODEX ROLE

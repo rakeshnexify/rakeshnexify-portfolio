@@ -1,6 +1,6 @@
 # ChatGPT Development Workflow
 
-Version: 1.0  
+Version: 1.1
 Recommended location: `docs/ai/CHATGPT_WORKFLOW.md`
 
 This file defines how ChatGPT should plan, deliver and close work for the RakeshNexify MERN Portfolio.
@@ -339,7 +339,7 @@ After:
 - Controllers
 - Routes
 - Route mounting
-- Backend documentation draft
+- Relevant backend integration
 
 ### Checkpoint B — Complete integration
 
@@ -351,7 +351,7 @@ After:
 - Visibility
 - SEO
 - Sitemap
-- Documentation draft
+- Required active-memory draft updates
 
 ### Checkpoint C — Final staged diff
 
@@ -363,18 +363,19 @@ After:
 
 Add a separate Admin checkpoint only when necessary.
 
-At every checkpoint, ChatGPT must provide a ready-to-paste prompt from the pattern in:
+At every checkpoint, ChatGPT must provide a ready-to-paste focused prompt using the patterns in:
 
 `docs/ai/CODEX_REVIEW_PROMPTS.md`
 
-The prompt must include:
+The prompt should include:
 
-- Current module
 - Completed milestone
-- Exact changed files
-- Exact diff scope
-- Expected behavior
-- Findings-first rule
+- Exact changed-file list
+- Relevant Git diff scope
+- Expected architecture and behavior
+- Exact checks
+- Findings-first output
+- No-edit rule unless fixes are explicitly approved
 - No-commit/no-push rule
 
 ---
@@ -398,6 +399,7 @@ Codex is a reviewer, not the project owner.
 
 ---
 
+
 ## 12. Error Workflow
 
 When an error occurs, ask for:
@@ -416,7 +418,10 @@ Then:
 3. Give one focused fix.
 4. State why the fix is needed.
 5. Give a focused verification.
-6. Update `docs/BUGS.md` only for a confirmed issue worth tracking.
+6. Record a still-open temporary issue in `docs/SESSION_HANDOFF.md` when future sessions need to know about it.
+7. Record a durable architectural limitation in `docs/PROJECT_MEMORY.md` only when it remains relevant long-term.
+
+Do not make `docs/BUGS.md` a mandatory update target. It may be consulted or maintained separately as a historical issue reference.
 
 Do not repeatedly ask the user to rebuild the whole project when a focused check is enough.
 
@@ -426,29 +431,21 @@ Do not repeatedly ask the user to rebuild the whole project when a focused check
 
 Documentation is part of implementation, not optional cleanup.
 
-At the appropriate milestone, update:
+The active development-memory files are:
 
-- `docs/DATABASE_SCHEMA.md`
-- `docs/API_ROUTES.md`
-- `docs/PROJECT_STRUCTURE.md`
-- `docs/CURRENT_STATUS.md`
+- `docs/PROJECT_MEMORY.md`
 - `docs/SESSION_HANDOFF.md`
-- `docs/ROADMAP.md`
-- `docs/DECISIONS.md`
-- `docs/BUGS.md` only when required
 
-Do not duplicate the same status paragraph across every file without purpose.
+At normal module completion:
 
-Use each document for its intended role:
+1. First update `docs/SESSION_HANDOFF.md` with the current branch/checkpoint, current module, Git state, recent verification, temporary issues and exact next action.
+2. Then update `docs/PROJECT_MEMORY.md` only if the module introduced or changed permanent architecture, a completed module contract, a reusable system, a durable decision, a permanent limitation or the remaining roadmap.
 
-- `CURRENT_STATUS`: current verified state
-- `SESSION_HANDOFF`: continuation instructions
-- `ROADMAP`: completed and planned phases
-- `DATABASE_SCHEMA`: model contract
-- `API_ROUTES`: API contract
-- `PROJECT_STRUCTURE`: file structure
-- `DECISIONS`: stable decisions
-- `BUGS`: confirmed issues
+Keep `PROJECT_MEMORY.md` concise and permanent. Keep `SESSION_HANDOFF.md` compact and current.
+
+Do not recreate a many-document update matrix.
+
+Legacy technical and historical documents may remain available as read-only or archived references. They are not mandatory normal-session reads or mandatory per-module update targets. Consult them only when their detailed information is specifically useful, and verify their claims against current code.
 
 ---
 
@@ -500,17 +497,18 @@ Commit messages should be concise and describe one coherent milestone.
 
 Before ending a session:
 
-1. Confirm current completed step.
+1. Confirm the current completed step.
 2. Record remaining incomplete work.
-3. Record changed files.
-4. Record validation completed.
-5. Record unresolved issues.
-6. Update `docs/SESSION_HANDOFF.md`.
-7. Update `docs/CURRENT_STATUS.md`.
-8. Confirm Git state.
-9. Provide the next exact step title.
+3. Record the current branch/checkpoint and Git state.
+4. Record changed files when relevant.
+5. Record recent validation.
+6. Record temporary unresolved issues.
+7. Provide the exact next action.
+8. Update `docs/SESSION_HANDOFF.md`.
+9. Update `docs/PROJECT_MEMORY.md` only if permanent project memory changed.
+10. Confirm that documentation matches the current repository state.
 
-A new chat should continue from repository documentation, not from manually retelling hundreds of messages.
+A new session should continue from `docs/PROJECT_MEMORY.md`, `docs/SESSION_HANDOFF.md`, current Git state and actual repository files rather than from old chat history.
 
 ---
 
@@ -577,6 +575,7 @@ New Module Chat
 
 ---
 
+
 ## 18. Ready-to-Use Continuation Message
 
 Use this when reopening a module chat after an interruption:
@@ -589,14 +588,20 @@ Read:
 - AGENTS.md
 - docs/ai/PROJECT_RULEBOOK.md
 - docs/ai/CHATGPT_WORKFLOW.md
+- docs/PROJECT_MEMORY.md
 - docs/SESSION_HANDOFF.md
-- docs/CURRENT_STATUS.md
-- docs/ROADMAP.md
+
+Consult legacy technical or historical documentation only when its detailed
+information is specifically relevant.
 
 Verify:
 
 - git status --short
+- git branch --show-current
 - git log --oneline -10 --decorate
+
+Treat current repository files, Git state and verified runtime behavior as
+authoritative.
 
 Do not repeat completed work.
 Do not rewrite working files.

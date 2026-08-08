@@ -468,7 +468,6 @@ No public Education details endpoint currently exists.
 
 ---
 
-
 # Public Experience API
 
 Route file:
@@ -547,7 +546,6 @@ Public response behavior:
 
 ---
 
-
 # Public Testimonials API
 
 Route file:
@@ -620,7 +618,6 @@ Public response behavior:
 - There is no public Testimonial details endpoint.
 
 ---
-
 
 # Public Blog / News Posts API
 
@@ -1536,7 +1533,6 @@ Controller:
 
 ---
 
-
 # Admin Experience API
 
 Route file:
@@ -1667,7 +1663,6 @@ Permanently deletes one Experience record.
 
 ---
 
-
 # Admin Testimonials API
 
 Route file:
@@ -1791,7 +1786,6 @@ Purpose:
 Permanently deletes one Testimonial record.
 
 ---
-
 
 # Admin Blog / News Posts API
 
@@ -1949,6 +1943,233 @@ Success data includes:
 - `type`
 
 ---
+
+# Admin Media API
+
+Route file:
+
+`server/src/routes/adminMedia.routes.js`
+
+Mount path:
+
+`/api/admin/media`
+
+All Media routes require:
+
+`requireAdminAuth`
+
+There is intentionally no public Media API.
+
+## List Media
+
+Endpoint:
+
+`GET /api/admin/media`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminMedia`
+
+Supported query parameters:
+
+- `search`
+- `mediaType`
+- `folder`
+- `tag`
+- `sort`
+- `page`
+- `limit`
+
+Supported Media types:
+
+- `image`
+- `svg`
+- `document`
+- `audio`
+- `video`
+
+Purpose:
+
+Returns paginated Media metadata for the protected Admin Media Library and reusable Media Picker.
+
+## List Media Folders
+
+Endpoint:
+
+`GET /api/admin/media/folders`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminMediaFolders`
+
+Purpose:
+
+Returns logical Media Library folders and their asset counts.
+
+Important:
+
+`/folders` is registered before `/:id` so it is not interpreted as a Media ObjectId.
+
+## Upload Media
+
+Endpoint:
+
+`POST /api/admin/media`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`createAdminMedia`
+
+Upload middleware:
+
+`mediaUpload.middleware.js`
+
+Request:
+
+`multipart/form-data`
+
+File field:
+
+`file`
+
+Supported formats:
+
+Images:
+
+- JPG/JPEG
+- PNG
+- WebP
+- AVIF
+
+SVG:
+
+- SVG after strict validation and sanitization
+
+Documents:
+
+- PDF
+
+Audio:
+
+- MP3
+- WAV
+- OGG
+- M4A
+
+Video:
+
+- MP4
+- WebM
+
+Default maximum sizes:
+
+- image: `10 MB`
+- SVG: `5 MB`
+- document/PDF: `20 MB`
+- audio: `50 MB`
+- video: `100 MB`
+
+Important behavior:
+
+- Authentication and role authorization happen before multipart parsing.
+- Actual file signatures are inspected.
+- Browser MIME type and extension are cross-checked.
+- Dangerous intermediate extensions are rejected.
+- SVG active/external unsafe content is rejected and sanitized.
+- Temporary upload files are cleaned up.
+- Binary content is uploaded to Cloudinary.
+- MongoDB stores Media metadata only.
+- Failed MongoDB persistence triggers Cloudinary cleanup.
+
+## Get Media by ID
+
+Endpoint:
+
+`GET /api/admin/media/:id`
+
+Allowed roles:
+
+Any authenticated active Admin.
+
+Controller:
+
+`getAdminMediaById`
+
+Purpose:
+
+Returns one Media record plus reference/usage information.
+
+## Update Media Metadata
+
+Endpoint:
+
+`PATCH /api/admin/media/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Controller:
+
+`updateAdminMedia`
+
+Editable metadata includes approved fields such as:
+
+- title
+- alt text
+- decorative state
+- caption
+- description
+- logical folder
+- tags
+
+Provider identity and storage fields are not client-controlled.
+
+## Delete Media
+
+Endpoint:
+
+`DELETE /api/admin/media/:id`
+
+Allowed roles:
+
+- `super-admin`
+- `admin`
+
+Controller:
+
+`deleteAdminMedia`
+
+Purpose:
+
+Permanently deletes an unreferenced Media asset.
+
+Important behavior:
+
+- Exact known content references are checked before deletion.
+- Referenced Media returns `409 Conflict`.
+- Cloudinary deletion occurs before MongoDB metadata deletion.
+- A referenced asset must not be deleted through normal API behavior.
+
+Known limitation:
+
+A narrow TOCTOU window exists between the reference check and provider deletion. Broader coordinated deletion-state enforcement is deferred.
 
 # Admin Companies API
 
@@ -2241,8 +2462,16 @@ Controller:
 - `PATCH /api/admin/contact-messages/:id`
 - `DELETE /api/admin/contact-messages/:id`
 
----
+## Admin Media
 
+- `GET /api/admin/media`
+- `GET /api/admin/media/folders`
+- `POST /api/admin/media`
+- `GET /api/admin/media/:id`
+- `PATCH /api/admin/media/:id`
+- `DELETE /api/admin/media/:id`
+
+---
 
 ## Query Parameter Documentation
 

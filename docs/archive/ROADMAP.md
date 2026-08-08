@@ -1,6 +1,6 @@
 ﻿# Project Roadmap
 
-Last updated: 2026-08-07
+Last updated: 2026-08-09
 
 ## Project
 
@@ -1121,41 +1121,357 @@ Final verdict:
 
 ## Phase 19 — Media Management
 
+Status: COMPLETE — IMPLEMENTED, VALIDATED AND DOCUMENTED
+
+Completed architecture:
+
+- `Media` metadata model
+- Cloudinary-backed binary storage
+- Storage-provider abstraction
+- Protected Admin API at `/api/admin/media`
+- Admin Media Library at `/admin/media`
+- No public Media page or public Media API
+
+Supported Media:
+
+- JPG/JPEG
+- PNG
+- WebP
+- AVIF
+- Sanitized SVG
+- PDF
+- MP3
+- WAV
+- OGG
+- M4A
+- MP4
+- WebM
+
+Completed backend:
+
+- Cloudinary environment validation
+- Multer temporary upload handling
+- Actual file-signature validation
+- MIME and extension cross-checking
+- Dangerous intermediate-extension rejection
+- Per-type file-size limits
+- SVG active-content rejection and sanitization
+- Temporary-file cleanup
+- Provider cleanup on failed database persistence
+- Metadata-only MongoDB persistence
+- Search/filter/sort/pagination
+- Logical folder metadata and folder browser support
+- Usage/reference inspection
+- Reference-aware permanent deletion
+- Existing Admin authentication and RBAC preservation
+
+Completed Admin Media Library:
+
+- Upload
+- Drag/drop
+- Progress
+- Cancel
+- Preview
+- Search
+- Type filtering
+- Folder browsing
+- Tags
+- Metadata editing
+- Copy URL
+- Open Asset
+- Download
+- Usage display
+- Safe permanent deletion
+
+Completed reusable Media Picker:
+
+- `MediaField`
+- `MediaPicker`
+- `MediaPickerModal`
+- `useMediaPicker`
+- Authenticated browsing
+- Search/folder/type filtering
+- Manual URL compatibility
+- Keyboard focus trap and restoration
+- Safe HTTP/HTTPS current-link handling
+
+Initial module integration:
+
+- Project cover image
+- Project screenshots
+- Project video
+- Project SEO/social sharing image
+
+Reference mapping includes:
+
+- Site Settings
+- Services
+- Statistics
+- Skills
+- Education
+- Experience
+- Testimonials
+- Blog / News
+- Projects
+- Companies
+- Team
+
+Validation:
+
+- Real SVG Cloudinary upload verified
+- Malicious/unsupported uploads rejected
+- Folder browser verified
+- Copy/Open/Download verified
+- Metadata editing verified
+- Unreferenced deletion verified
+- Referenced Project Media deletion protection verified
+- Media Picker Project integration verified
+- Keyboard accessibility verified
+- `npm audit --prefix server`: 0 vulnerabilities
+- `npm run check`: passed
+- `git diff --cached --check`: passed
+- Final staged Codex review: `READY TO COMMIT`
+
+Known low-risk limitations:
+
+- Reference-detail display may be truncated when a resource type has many exact references.
+- A narrow deletion TOCTOU window remains between reference check and provider deletion.
+- Client bundle-size optimization remains deferred.
+
+Future Media improvements:
+
+- Integrate Media Picker into additional URL-based Admin modules as those forms are revisited
+- Optional hierarchical folder presentation
+- Optional bulk actions
+- Optional crop/transform workflow
+- Optional asset variants
+- Optional richer usage-count/truncation reporting
+
+## Phase 20 — Leads / CRM Management
+
 Status: PLANNED
 
 Planned:
 
-- Reusable media library
-- Image upload
-- Image selection
-- Image metadata
-- Alternative text
-- File validation
-- File-size validation
-- Image deletion protection
-- Cloud storage integration
-- Reuse across Projects, Companies, Team and Blog
+- Lead database model
+- Admin lead listing and detail workflow
+- Lead source
+- Lead status/stage
+- Priority
+- Contact information
+- Notes
+- Follow-up dates
+- Service interest
+- Project/inquiry relationships where useful
+- Search, filters and pagination
+- Role-aware management
+- Conversion/lost tracking
+- Safe audit fields
 
-## Phase 20 — Email and Notifications
+## Phase 21 — Certifications and Achievements
+
+Status: PLANNED
+
+Planned:
+
+- Certifications
+- Awards
+- Achievements
+- Issuer
+- Issue/expiry dates
+- Credential ID/URL
+- Media/certificate relation
+- Visibility, featured and order controls
+- Public presentation where approved
+- SEO/sitemap integration where appropriate
+
+## Phase 22 — Service Packages / Pricing
+
+Status: PLANNED
+
+Planned:
+
+- Dynamic service packages
+- Pricing
+- Billing/unit labels
+- Feature lists
+- Recommended package
+- CTA
+- Visibility/order
+- Service relationship
+- Admin management
+- Public responsive pricing presentation
+
+## Phase 23 — FAQ
+
+Status: PLANNED
+
+Planned:
+
+- FAQ categories
+- Questions and answers
+- Search
+- Visibility/order
+- Optional service relationships
+- Admin CRUD
+- Public FAQ presentation
+- FAQ structured data when valid
+
+## Phase 24 — Clients / Partners
+
+Status: PLANNED
+
+Planned:
+
+- Client/partner records
+- Logo/media
+- Website
+- Relationship type
+- Description
+- Featured/visibility/order
+- Related projects/services where useful
+- Public presentation
+
+## Phase 25 — Case Studies
+
+Status: PLANNED
+
+Planned:
+
+- Dynamic case-study records or approved extension of existing Project architecture
+- Problem
+- Approach
+- Solution
+- Results
+- Media
+- Related Project/client/service/team
+- SEO
+- Public detail presentation
+- Sitemap integration
+
+## Phase 26 — Appointment / Consultation Booking
+
+Status: PLANNED
+
+Planned:
+
+- Consultation requests
+- Availability rules
+- Requested date/time
+- Timezone handling
+- Contact information
+- Service/topic selection
+- Admin status workflow
+- Notes
+- Validation and abuse protection
+- Future notification integration
+
+## Phase 27 — Newsletter / Subscribers Management
+
+Status: PLANNED
+
+Scope:
+
+Subscriber management only during this phase.
+
+Planned:
+
+- Subscriber model
+- Subscribe/unsubscribe state
+- Source
+- Consent timestamp
+- Admin listing/search/filter
+- Duplicate protection
+- Export-ready architecture
+- No bulk email sending until Email/Notifications phase
+
+## Phase 28 — Admin Analytics
+
+Status: PLANNED
+
+Planned:
+
+- Admin dashboard summaries
+- Content counts
+- Lead/contact metrics
+- Publication metrics
+- Recent activity summaries
+- Safe aggregate endpoints
+- No invasive visitor tracking without an approved analytics strategy
+
+## Phase 29 — Admin Activity / Audit Log
+
+Status: PLANNED
+
+Planned:
+
+- Important Admin action logging
+- Actor
+- Action
+- Resource type
+- Resource ID
+- Timestamp
+- Safe metadata
+- Search/filter
+- Restricted read access
+- Retention strategy
+
+## Phase 30 — Dynamic Menu / Navigation
+
+Status: PLANNED
+
+Planned:
+
+- Database-backed menu items
+- Internal/external destinations
+- Labels
+- Ordering
+- Visibility
+- Parent/child structure where justified
+- Safe URL handling
+- Preserve existing publication controls
+- Responsive Navbar/Footer integration
+
+## Phase 31 — Professional UI / UX Redesign
+
+Status: PLANNED
+
+Planned after the remaining functional modules:
+
+- Public visual-system refinement
+- Admin usability refinement
+- Responsive consistency
+- Typography
+- Spacing
+- Color hierarchy
+- Card/form/table consistency
+- Loading/error/empty-state consistency
+- Accessibility refinement
+- Viewer-friendly information architecture
+
+## Phase 32 — Email and Notifications
 
 Status: PLANNED
 
 Planned:
 
 - Contact-form notification
+- Booking/lead notifications where approved
 - Auto-response email
 - Admin notification settings
-- SMTP or email-service configuration
+- SMTP or transactional-email configuration
 - Template management
 - Delivery failure handling
 - Safe environment variables
 
-## Phase 21 — Testing and Quality Assurance
+## Phase 33 — Final SEO, Testing and Quality Assurance
 
 Status: PLANNED
 
 Planned:
 
+- Final SEO audit
+- Social preview validation
 - API tests
 - Authentication tests
 - Authorization tests
@@ -1165,12 +1481,10 @@ Planned:
 - Responsive browser testing
 - Keyboard testing
 - Accessibility review
-- Empty-state testing
-- Loading-state testing
-- Error-state testing
+- Empty/loading/error-state testing
 - Cross-browser testing
 
-## Phase 22 — Performance Optimization
+## Phase 34 — Performance Optimization
 
 Status: REVIEW
 
@@ -1178,13 +1492,20 @@ Known current warning:
 
 - Main client JavaScript chunk is larger than 500 kB after minification.
 
+Latest Media build:
+
+- Vite: `8.1.5`
+- Modules transformed: `189`
+- Main JavaScript bundle: `1,225.99 kB`
+- Gzip size: `257.66 kB`
+
 Planned review:
 
 - Route-based lazy loading
 - Dynamic imports
 - Bundle analysis
-- Admin and public bundle separation
-- Image optimization
+- Admin/public bundle separation
+- Image/media optimization
 - Font optimization
 - API request caching
 - Database query indexes
@@ -1192,24 +1513,28 @@ Planned review:
 - Compression
 - Production caching headers
 
-## Phase 23 — Dependency Security Review
+## Phase 35 — Dependency Security Review
 
 Status: REVIEW
 
-Known current warning:
+Known client warning:
 
-- Client dependency audit reported one high-severity vulnerability.
+- A previous client dependency audit reported one high-severity vulnerability.
+
+Current server Media audit:
+
+- `npm audit --prefix server`: 0 vulnerabilities
 
 Required process:
 
-1. Run a non-destructive audit.
+1. Run a non-destructive client audit.
 2. Identify the affected package.
-3. Review whether it is a development or production dependency.
-4. Review available safe versions.
-5. Test updates on a separate branch when appropriate.
-6. Never apply `npm audit fix --force` without reviewing breaking changes.
+3. Determine development vs production exposure.
+4. Review safe versions and breaking changes.
+5. Test controlled updates.
+6. Never use `npm audit fix --force` without review.
 
-## Phase 24 — Final Production Deployment
+## Phase 36 — Final Production Deployment
 
 Status: PLANNED
 
@@ -1218,21 +1543,21 @@ Planned:
 - Select frontend and backend hosting
 - Configure final production domain
 - Configure production MongoDB access
+- Configure Cloudinary production credentials
 - Configure secure environment variables
 - Configure final CORS origin
 - Configure HTTPS
 - Configure redirects
 - Configure domain DNS
-- Validate sitemap URL
-- Validate robots behavior
-- Validate social preview
-- Validate contact delivery
+- Validate sitemap and robots behavior
+- Validate social previews
+- Validate contact/notification delivery
 - Validate Admin login
 - Create deployment documentation
 - Create backup strategy
 - Add monitoring and logs
 
-## Phase 25 — Post-Launch Maintenance
+## Phase 37 — Post-Launch Maintenance
 
 Status: PLANNED
 
@@ -1241,40 +1566,34 @@ Planned:
 - Error monitoring
 - Uptime monitoring
 - Database backups
+- Cloudinary usage monitoring
 - Dependency update schedule
-- Content update workflow
+- Content workflow
 - SEO performance review
 - Analytics review
 - Security review
 - Performance review
-- Regular documentation updates
+- Documentation updates
 
 ## Current Immediate Next Step
 
-Complete the Blog/News documentation-only checkpoint.
+Close the Media Management checkpoint:
 
-Required closeout:
+1. Synchronize Media completion in repository-memory documentation.
+2. Stage the approved documentation updates.
+3. Run `git diff --cached --check`.
+4. Confirm no real secrets are staged.
+5. Commit the completed Media Management module.
+6. Push `main` to `origin`.
+7. Confirm a clean synchronized working tree.
+8. Start `Leads / CRM Management`.
 
-1. Replace the nine synchronized repository-memory documents.
-2. Confirm documentation preserves existing historical detail.
-3. Run `git diff --check -- docs`.
-4. Confirm only the intended documentation files changed.
-5. Run a focused Codex documentation review.
-6. Fix only confirmed findings.
-7. Stage only the approved documentation files.
-8. Run staged whitespace, name and stat checks.
-9. Commit with:
+Recommended Media closeout commit:
 
 ```text
-Synchronize Blog and News module documentation
+Complete dynamic Media Management
 ```
-
-10. Push `main` to `origin`.
-11. Confirm `git status -sb` shows `## main...origin/main`.
-12. Start the next approved major module in a clean repository state.
 
 ## Next Major Feature
 
-`Media Management`
-
-Start Media Management planning only after the Blog/News documentation checkpoint is committed, pushed and the repository is synchronized.
+`Leads / CRM Management`

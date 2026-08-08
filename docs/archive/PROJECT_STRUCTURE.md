@@ -1044,6 +1044,8 @@ Responsibilities:
 
 ---
 
+
+
 # Server Structure
 
 Server application path:
@@ -2226,6 +2228,20 @@ No fake or automatically seeded Blog/News Posts should be added.
 Temporary validation Posts must be permanently deleted after testing.
 
 ---
+
+# Media Management Structure
+
+## Backend
+
+```text
+server/src/config/cloudinary.js
+server/src/models/Media.js
+server/src/controllers/adminMedia.controller.js
+server/src/routes/adminMedia.routes.js
+server/src/middleware/mediaUpload.middleware.js
+server/src/services/mediaStorage.service.js
+server/src/services/mediaReference.service.js
+server/src/utils/mediaFileValidation.js
 
 # Feature File Pattern
 

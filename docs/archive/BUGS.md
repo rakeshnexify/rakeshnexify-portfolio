@@ -1,6 +1,6 @@
 ﻿# Bugs and Known Issues
 
-Last updated: 2026-08-07
+Last updated: 2026-08-09
 
 ## Purpose
 
@@ -29,6 +29,8 @@ None currently known.
 3. Site Settings default tagline encoding issue
 4. Limited automated test coverage
 5. Git line-ending warnings
+6. Media reference-detail display truncation
+7. Media deletion reference-check TOCTOU window
 
 ## Resolved Recent Issues
 
@@ -58,16 +60,16 @@ Vite reports:
 
 Latest verified main JavaScript bundle:
 
-`1,157.35 kB`
+`1,225.99 kB`
 
 Latest verified gzip size:
 
-`242.70 kB`
+`257.66 kB`
 
 Latest verified build details:
 
 - Vite: `8.1.5`
-- Modules transformed: `177`
+- Modules transformed: `189`
 - Build result: successful
 
 ## Current Impact
@@ -330,6 +332,82 @@ The warning has been observed for several edited Experience integration files, i
 ## Temporary Decision
 
 Treat this warning as non-blocking unless Git shows a real whitespace error or an unexpected full-file rewrite.
+
+---
+
+# BUG-007 — Media Reference Detail Display Can Be Truncated
+
+Status: Deferred
+
+Priority: Low
+
+Type: Admin / Observability
+
+## Current Observation
+
+`server/src/services/mediaReference.service.js` caps returned reference-detail records per resource type.
+
+When one Media asset is referenced by more records than the detail cap, the Admin usage panel may not display every exact reference.
+
+## Current Impact
+
+- Safe deletion remains conservative.
+- Any exact returned match blocks deletion.
+- The limitation affects completeness of the displayed usage detail, not the normal protection decision.
+- Typical portfolio-scale usage is unlikely to reach the cap soon.
+
+## Planned Improvement
+
+When usage volume justifies it:
+
+- Return an explicit truncation indicator.
+- Return authoritative usage counts separately from the limited detail list.
+- Consider pagination for detailed Media references.
+
+## Temporary Decision
+
+Accept as a low-risk known limitation during the current Media release.
+
+---
+
+# BUG-008 — Media Delete Reference Check Has a Narrow TOCTOU Window
+
+Status: Deferred
+
+Priority: Low
+
+Type: Data integrity / Concurrency
+
+## Location
+
+- `server/src/controllers/adminMedia.controller.js`
+- `server/src/services/mediaReference.service.js`
+
+## Current Observation
+
+Permanent deletion checks for exact references before deleting the Cloudinary asset.
+
+A narrow time-of-check/time-of-use window exists if another Admin/content request creates a new Media reference after the final reference check but before provider deletion completes.
+
+## Current Impact
+
+- Normal referenced Media deletion is blocked with `409`.
+- The verified standard Admin workflow is protected.
+- Exploiting the race requires concurrent writes in a very narrow timing window.
+- Eliminating the race fully would require broader coordination across content write controllers or a deletion-state strategy.
+
+## Planned Improvement
+
+Future hardening may introduce:
+
+- Media deletion state/locking
+- Coordinated reference enforcement during content writes
+- Transaction-like orchestration where practical
+
+## Temporary Decision
+
+Document and defer until the broader Admin audit/concurrency architecture is implemented.
+
 
 ---
 
@@ -902,6 +980,46 @@ Focused Codex re-review confirmed:
 - Contiguous ItemList positions
 - Correct zero-item successful CollectionPage behavior
 - Stale JSON-LD script removal through `PageSeo`
+
+---
+
+
+# RESOLVED-018 — Media Picker Keyboard Focus Containment
+
+Status: Resolved and Verified
+
+## Previous Problem
+
+The reusable Media Picker dialog initially supported Escape and backdrop closing but did not:
+
+- Move focus into the dialog
+- Trap Tab/Shift+Tab focus
+- Restore focus to the triggering control
+
+Keyboard focus could therefore move into the Project form behind the modal.
+
+## Location
+
+`client/src/components/admin/media/MediaPickerModal.jsx`
+
+## Fix
+
+The final modal:
+
+- Focuses the close button after opening
+- Traps Tab and Shift+Tab inside the dialog
+- Recovers focus if it unexpectedly leaves the dialog
+- Supports Escape and backdrop closing
+- Restores focus to the originating control after close
+- Restores body overflow
+- Removes keyboard listeners during cleanup
+- Uses dialog label/description semantics
+
+## Verification
+
+A focused Codex re-review reported no remaining accessibility blocker.
+
+`npm run check` and `git diff --check` passed after the fix.
 
 ---
 

@@ -1,26 +1,28 @@
 # RakeshNexify AI Development Rulebook
 
-Version: 1.0  
-Project: RakeshNexify MERN Portfolio and Admin CMS  
-Repository: `D:\rakeshnexify-portfolio`  
+Version: 1.1
+Project: RakeshNexify MERN Portfolio and Admin CMS
+Repository: `D:\rakeshnexify-portfolio`
 Recommended location: `docs/ai/PROJECT_RULEBOOK.md`
 
 ---
 
 ## 1. Purpose
 
-This file contains the permanent development rules for ChatGPT, Codex and future developers.
+This file contains permanent development rules for ChatGPT, Codex and future developers.
 
-It should contain stable architecture and workflow rules only.
+It should contain stable architecture and workflow rules only. Do not use it for current status, commit hashes, temporary issues or session-specific tasks.
 
-Do not use this file as the current-status document. Current progress, latest commit and next task must come from:
+The active development-memory files are:
 
-- `docs/SESSION_HANDOFF.md`
-- `docs/CURRENT_STATUS.md`
-- `docs/ROADMAP.md`
-- Actual Git state
-- Actual repository files
+- `docs/PROJECT_MEMORY.md` — permanent architecture, completed module contracts, reusable systems, durable decisions, permanent limitations and remaining roadmap
+- `docs/SESSION_HANDOFF.md` — current branch/checkpoint, current module, Git state, recent verification, temporary issues and exact next action
+
+Current implementation and session state must still be verified against:
+
 - Verified runtime and database behavior
+- Actual repository files
+- Current Git state
 
 ---
 
@@ -46,28 +48,24 @@ Before planning or changing code:
 
 1. Open the correct repository:
    `D:\rakeshnexify-portfolio`
-2. Read:
+2. Read the normal permanent instructions and active memory:
    - `AGENTS.md`
    - `docs/ai/PROJECT_RULEBOOK.md`
+   - `docs/PROJECT_MEMORY.md`
    - `docs/SESSION_HANDOFF.md`
-   - `docs/CURRENT_STATUS.md`
-   - `docs/ROADMAP.md`
-3. Read when relevant:
-   - `docs/PROJECT_OVERVIEW.md`
-   - `docs/PROJECT_STRUCTURE.md`
-   - `docs/API_ROUTES.md`
-   - `docs/DATABASE_SCHEMA.md`
-   - `docs/DECISIONS.md`
-   - `docs/BUGS.md`
-4. Verify Git:
+3. Read other `docs/ai/` workflow or prompt files only when relevant to the requested workflow.
+4. Consult legacy technical or historical documents only when their detailed information is specifically useful. They are not mandatory normal-session reads and must be verified against current code.
+5. Verify Git:
+
    ```powershell
    git status --short
    git branch --show-current
    git log --oneline -10 --decorate
    ```
-5. Inspect the existing implementation before suggesting new architecture.
-6. Search for existing references to the requested module.
-7. Confirm whether the working tree is clean before beginning a new module.
+
+6. Inspect the existing implementation before suggesting new architecture.
+7. Search for existing references to the requested module.
+8. Confirm whether the working tree is clean before beginning a new module.
 
 If ChatGPT does not have repository access, it must say which current files are required and ask only for those files. It must not pretend that it inspected local files.
 
@@ -785,25 +783,32 @@ Codex must:
 
 ---
 
+
 ## 23. Documentation Rules
 
-Update documentation when implementation changes it.
+The two active development-memory files are:
 
-| Change | Required documentation |
-|---|---|
-| Model, fields, indexes or relations | `docs/DATABASE_SCHEMA.md` |
-| API routes, auth, roles or query parameters | `docs/API_ROUTES.md` |
-| Files or folders added, removed or moved | `docs/PROJECT_STRUCTURE.md` |
-| Current progress or next work | `docs/CURRENT_STATUS.md`, `docs/SESSION_HANDOFF.md`, `docs/ROADMAP.md` |
-| Important architecture decision | `docs/DECISIONS.md` |
-| Confirmed or resolved issue | `docs/BUGS.md` |
-| Project-wide purpose or capability change | `docs/PROJECT_OVERVIEW.md` |
+- `docs/PROJECT_MEMORY.md`
+- `docs/SESSION_HANDOFF.md`
 
-Do not update `BUGS.md` for speculation.
+At normal module completion:
 
-Do not claim a feature is complete before runtime verification.
+1. Update `docs/SESSION_HANDOFF.md` with the current checkpoint, Git state, recent verification, temporary issues and exact next action.
+2. Update `docs/PROJECT_MEMORY.md` only when the work introduces or changes:
+   - permanent architecture
+   - a completed module contract
+   - a reusable system
+   - a durable architectural decision
+   - a permanent limitation
+   - the remaining roadmap
 
-Keep documentation synchronized with actual code.
+Do not recreate a many-document update matrix.
+
+Legacy documents such as `API_ROUTES.md`, `BUGS.md`, `CURRENT_STATUS.md`, `DATABASE_SCHEMA.md`, `DECISIONS.md`, `PROJECT_OVERVIEW.md`, `PROJECT_STRUCTURE.md` and `ROADMAP.md` are not mandatory per-module update targets. Consult or update them only when explicitly required for a separate technical, historical or archival purpose.
+
+Do not claim a feature is complete before appropriate verification.
+
+Keep active memory concise and synchronized with actual code and Git state.
 
 ---
 
@@ -852,17 +857,13 @@ The user manually performs Git commit and push.
 
 ## 25. Known Non-Blocking Work
 
-Do not mix these items into unrelated feature development:
+Do not store a changing list of temporary issues in this rulebook.
 
-- Client bundle-size optimization
-- Route-based lazy loading
-- Admin/public bundle separation
-- Dependency vulnerability investigation
-- Site Settings tagline encoding investigation
-- Automated test expansion
-- Git line-ending cleanup
+Record current warnings, investigations and non-blocking session issues in `docs/SESSION_HANDOFF.md`.
 
-Handle each in a dedicated phase.
+Record only durable architectural limitations in `docs/PROJECT_MEMORY.md`.
+
+Before acting on an old issue, verify that it still exists in the current repository or runtime. Do not mix unrelated non-blocking work into an active feature module.
 
 ---
 
@@ -892,19 +893,18 @@ Do not:
 
 ## 27. Maintenance of This Rulebook
 
-Update this file only when a stable architecture or workflow decision changes.
+Update this file only when a stable workflow or development rule changes.
 
 Do not add temporary status, current commit hashes or short-lived task details here.
 
-Current work belongs in:
+Use:
 
-- `docs/SESSION_HANDOFF.md`
-- `docs/CURRENT_STATUS.md`
-- `docs/ROADMAP.md`
+- `docs/SESSION_HANDOFF.md` for current work and session state
+- `docs/PROJECT_MEMORY.md` for permanent architecture and durable decisions
 
 When a rule is replaced:
 
-1. Record the architectural decision in `docs/DECISIONS.md`.
+1. Record any durable architectural consequence in `docs/PROJECT_MEMORY.md`.
 2. Update this file.
-3. Update affected prompts.
+3. Update affected workflow and prompt files.
 4. Verify that ChatGPT and Codex workflows remain consistent.

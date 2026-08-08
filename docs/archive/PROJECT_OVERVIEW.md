@@ -176,6 +176,7 @@ MongoDB stores dynamic data for:
 - Projects
 - Companies
 - Team members
+- Media metadata
 - Contact messages
 
 Blog and News are now implemented through one shared `Post` model and `posts` collection.
@@ -194,6 +195,7 @@ Blog and News are now implemented through one shared `Post` model and `posts` co
 - Blog and News management
 - Projects management
 - Team management
+- Media Management and reusable Media Picker
 - Companies management
 - Contact messages management
 - Dynamic homepage registry

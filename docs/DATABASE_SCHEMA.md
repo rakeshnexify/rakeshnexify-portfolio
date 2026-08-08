@@ -50,7 +50,8 @@ The project currently contains these Mongoose models:
 10. `TeamMember`
 11. `Testimonial`
 12. `Post`
-13. `ContactMessage`
+13. `Media`
+14. `ContactMessage`
 
 ---
 
@@ -2141,6 +2142,142 @@ Text-search fields:
 
 ---
 
+# Media
+
+Model file:
+
+`server/src/models/Media.js`
+
+Mongoose model:
+
+`Media`
+
+MongoDB collection:
+
+`media`
+
+Purpose:
+
+Stores reusable Media Library metadata.
+
+Actual binary files are not stored in MongoDB. They are stored by the configured Media storage provider, currently Cloudinary.
+
+## Main Fields
+
+- `title`
+- `originalName`
+- `fileName`
+- `url`
+- `provider`
+- `providerPublicId`
+- `resourceType`
+- `mediaType`
+- `mimeType`
+- `extension`
+- `size`
+- `width`
+- `height`
+- `duration`
+- `altText`
+- `isDecorative`
+- `caption`
+- `description`
+- `folder`
+- `tags`
+- `uploadedBy`
+- `updatedBy`
+- `createdAt`
+- `updatedAt`
+
+## Media Types
+
+Allowed `mediaType` values:
+
+- `image`
+- `svg`
+- `document`
+- `audio`
+- `video`
+
+## Provider
+
+Current provider value:
+
+`cloudinary`
+
+Provider-specific identity is stored in:
+
+`providerPublicId`
+
+The public HTTPS delivery URL is stored in:
+
+`url`
+
+## Media Metadata
+
+Image/SVG metadata may include:
+
+- width
+- height
+
+Audio/video metadata may include:
+
+- duration
+
+Optional editorial metadata includes:
+
+- alternative text
+- decorative state
+- caption
+- description
+- logical folder
+- tags
+
+## Logical Folder Policy
+
+The Media `folder` field organizes assets inside the Admin Media Library.
+
+It is logical Media metadata and does not require moving the underlying Cloudinary resource when the value changes.
+
+## Relations
+
+- `uploadedBy` references `AdminUser`
+- `updatedBy` references `AdminUser`
+
+## Reference Policy
+
+Media reuse is currently tracked through exact stored Media URLs in supported content models.
+
+Known reference paths include:
+
+- Site Settings brand/logo/favicon/profile/resume/SEO media
+- Service icon
+- Statistic icon
+- Skill icon
+- Education logo/certificate
+- Experience organization logo
+- Testimonial profile image
+- Blog/News featured and SEO images
+- Project cover, gallery, video and SEO image
+- Company logo, cover and SEO image
+- Team profile, cover and SEO image
+
+Referenced assets are protected from normal permanent deletion.
+
+## Schema Configuration
+
+- Automatic `createdAt`
+- Automatic `updatedAt`
+- `versionKey: false`
+- Explicit Media collection
+- Provider metadata stored separately from binary content
+
+## Storage Rule
+
+Do not store uploaded binary file buffers inside MongoDB.
+
+MongoDB stores only Media metadata and provider references.
+
 # ContactMessage
 
 Model file:
@@ -2240,6 +2377,8 @@ The following fields reference `AdminUser`:
 - Company `updatedBy`
 - TeamMember `createdBy`
 - TeamMember `updatedBy`
+- Media `uploadedBy`
+- Media `updatedBy`
 - ContactMessage `statusUpdatedBy`
 - SiteSettings `updatedBy`
 - AdminUser `createdBy`

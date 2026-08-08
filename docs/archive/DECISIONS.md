@@ -974,6 +974,117 @@ Future dynamic public modules should follow the same separation between:
 
 ---
 
+# Decision 037 — Store Media Binaries Outside MongoDB
+
+Status: Accepted and Implemented
+
+## Decision
+
+Uploaded Media binaries are stored through a storage-provider abstraction, currently backed by Cloudinary.
+
+MongoDB stores only Media metadata and provider references.
+
+## Architecture
+
+Cloudinary stores:
+
+- image binaries
+- sanitized SVG files
+- PDF files
+- audio files
+- video files
+
+MongoDB stores:
+
+- Media metadata
+- provider public ID
+- HTTPS delivery URL
+- dimensions/duration where available
+- accessibility/editorial metadata
+- logical folder
+- tags
+- Admin audit references
+
+## Reason
+
+Large binary files should not consume the portfolio MongoDB database or complicate normal document queries and backups.
+
+A provider abstraction also leaves room for changing storage providers later without redesigning the entire Admin Media system.
+
+---
+
+# Decision 038 — Treat SVG as a High-Risk Media Type
+
+Status: Accepted and Implemented
+
+## Decision
+
+SVG upload is supported only after dedicated security validation and sanitization.
+
+SVG must never be inserted into the React DOM as trusted raw markup.
+
+## Required Behavior
+
+- Detect actual SVG content
+- Reject dangerous intermediate extensions
+- Reject active/external unsafe SVG content
+- Sanitize SVG before provider upload
+- Render SVG previews through normal image loading
+- Do not use `dangerouslySetInnerHTML`
+
+## Reason
+
+SVG can contain active or external content and must not be treated as equivalent to a simple raster image.
+
+---
+
+# Decision 039 — Use Reusable Media Picker Without Removing Manual URLs
+
+Status: Accepted and Implemented
+
+## Decision
+
+Existing content-model URL fields remain backward-compatible.
+
+The reusable Media Picker supplements manual URL input instead of replacing it.
+
+Current first integration:
+
+`Projects`
+
+Integrated fields:
+
+- `coverImageUrl`
+- `images[].url`
+- `links.videoUrl`
+- `seo.ogImageUrl`
+
+## Reason
+
+Existing records and external assets must continue working while Admin users gain reusable Media Library selection.
+
+This allows gradual integration into other modules without a database migration.
+
+---
+
+# Decision 040 — Protect Referenced Media From Normal Permanent Deletion
+
+Status: Accepted and Implemented
+
+## Decision
+
+Before permanent Media deletion, the backend checks supported content models for exact references to the Media URL.
+
+If a reference exists, normal deletion is blocked with `409 Conflict`.
+
+## Known Limitations
+
+- Reference detail display can be capped.
+- A narrow TOCTOU window exists between the final reference check and provider deletion.
+
+## Reason
+
+Deleting a reused asset without reference protection can silently break public content across multiple modules.
 
 # Superseding a Decision
 
