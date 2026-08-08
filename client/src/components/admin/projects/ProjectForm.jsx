@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import MediaField from "../media/MediaField";
 
 import {
   createEmptyProjectImage,
@@ -86,6 +87,8 @@ function ProjectForm({
   initialValues = defaultProjectFormValues,
   onSubmit,
   submitLabel = "Save Project",
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -780,25 +783,21 @@ function ProjectForm({
         <h2 className="text-xl font-bold text-slate-950">Project Media</h2>
 
         <div className="mt-6">
-          <label
-            htmlFor="project-cover-image"
-            className="text-sm font-semibold text-slate-700"
-          >
-            Cover image URL
-          </label>
-
-          <input
+          <MediaField
             id="project-cover-image"
             name="coverImageUrl"
-            type="url"
+            label="Cover image URL"
             value={formValues.coverImageUrl}
             onChange={handleInputChange}
-            disabled={isSubmitting}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Project Cover"
             placeholder="https://..."
-            className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+            helpText="Paste an external URL or choose an existing image/SVG from the Media Library."
+            error={getFieldError("coverImageUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
           />
-
-          <ProjectFieldError message={getFieldError("coverImageUrl")} />
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
@@ -849,23 +848,26 @@ function ProjectForm({
 
               <div className="mt-5 grid gap-5 lg:grid-cols-2">
                 <div className="lg:col-span-2">
-                  <label className="text-sm font-semibold text-slate-700">
-                    Screenshot URL *
-                  </label>
-
-                  <input
-                    type="url"
+                  <MediaField
+                    id={`project-image-${index}-url`}
+                    name={`images.${index}.url`}
+                    label="Screenshot URL *"
                     value={image.url}
-                    onChange={(event) =>
-                      handleImageChange(index, "url", event.target.value)
-                    }
-                    disabled={isSubmitting}
-                    placeholder="https://..."
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-                  />
+                    onChange={(event, selectedMedia) => {
+                      handleImageChange(index, "url", event.target.value);
 
-                  <ProjectFieldError
-                    message={getFieldError(`images.${index}.url`, "images")}
+                      if (selectedMedia?.altText && !image.alt.trim()) {
+                        handleImageChange(index, "alt", selectedMedia.altText);
+                      }
+                    }}
+                    accessToken={accessToken}
+                    allowedTypes={["image", "svg"]}
+                    pickerTitle={`Choose Screenshot ${index + 1}`}
+                    placeholder="https://..."
+                    helpText="Paste an external URL or select an image/SVG from Media."
+                    error={getFieldError(`images.${index}.url`, "images")}
+                    disabled={isSubmitting}
+                    onUnauthorized={onMediaUnauthorized}
                   />
                 </div>
 
@@ -1090,22 +1092,20 @@ function ProjectForm({
           </div>
 
           <div>
-            <label
-              htmlFor="project-video-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Project video URL
-            </label>
-
-            <input
+            <MediaField
               id="project-video-url"
               name="videoUrl"
-              type="url"
+              label="Project video URL"
               value={formValues.videoUrl}
               onChange={handleInputChange}
+              accessToken={accessToken}
+              allowedTypes={["video"]}
+              pickerTitle="Choose Project Video"
+              placeholder="https://youtube.com/... or Media URL"
+              helpText="YouTube/external URL can still be entered manually, or choose an uploaded MP4/WebM asset."
+              error={getFieldError("links.videoUrl", "videoUrl", "links")}
               disabled={isSubmitting}
-              placeholder="https://youtube.com/..."
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              onUnauthorized={onMediaUnauthorized}
             />
           </div>
         </div>
@@ -1194,26 +1194,20 @@ function ProjectForm({
           </div>
 
           <div>
-            <label
-              htmlFor="project-seo-image"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Social sharing image URL
-            </label>
-
-            <input
+            <MediaField
               id="project-seo-image"
               name="seoOgImageUrl"
-              type="url"
+              label="Social sharing image URL"
               value={formValues.seoOgImageUrl}
               onChange={handleInputChange}
-              disabled={isSubmitting}
+              accessToken={accessToken}
+              allowedTypes={["image", "svg"]}
+              pickerTitle="Choose Social Sharing Image"
               placeholder="https://..."
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <ProjectFieldError
-              message={getFieldError("seo.ogImageUrl", "seoOgImageUrl", "seo")}
+              helpText="Paste an external URL or reuse an image from the Media Library."
+              error={getFieldError("seo.ogImageUrl", "seoOgImageUrl", "seo")}
+              disabled={isSubmitting}
+              onUnauthorized={onMediaUnauthorized}
             />
           </div>
         </div>

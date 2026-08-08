@@ -29,6 +29,7 @@ import AdminEducationPage from "../pages/admin/AdminEducationPage";
 import AdminExperienceEditorPage from "../pages/admin/AdminExperienceEditorPage";
 import AdminExperiencePage from "../pages/admin/AdminExperiencePage";
 import AdminLoginPage from "../pages/admin/AdminLoginPage";
+import AdminMediaPage from "../pages/admin/AdminMediaPage";
 import AdminPostEditorPage from "../pages/admin/AdminPostEditorPage";
 import AdminPostsPage from "../pages/admin/AdminPostsPage";
 import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
@@ -260,9 +261,7 @@ function AppRoutes() {
             <Route path="/services" element={<ServicesPage />} />
           </Route>
 
-          <Route
-            element={<PublicPageVisibilityRoute sectionKey="education" />}
-          >
+          <Route element={<PublicPageVisibilityRoute sectionKey="education" />}>
             <Route path="/education" element={<EducationPage />} />
           </Route>
 
@@ -368,10 +367,7 @@ function AppRoutes() {
             element={<AdminSkillEditorPage mode="edit" />}
           />
 
-          <Route
-            path="/admin/education"
-            element={<AdminEducationPage />}
-          />
+          <Route path="/admin/education" element={<AdminEducationPage />} />
           <Route
             path="/admin/education/new"
             element={<AdminEducationEditorPage mode="create" />}
@@ -381,10 +377,7 @@ function AppRoutes() {
             element={<AdminEducationEditorPage mode="edit" />}
           />
 
-          <Route
-            path="/admin/experience"
-            element={<AdminExperiencePage />}
-          />
+          <Route path="/admin/experience" element={<AdminExperiencePage />} />
           <Route
             path="/admin/experience/new"
             element={<AdminExperienceEditorPage mode="create" />}
@@ -446,6 +439,8 @@ function AppRoutes() {
             path="/admin/companies/:id/edit"
             element={<AdminCompanyEditorPage mode="edit" />}
           />
+
+          <Route path="/admin/media" element={<AdminMediaPage />} />
         </Route>
 
         <Route

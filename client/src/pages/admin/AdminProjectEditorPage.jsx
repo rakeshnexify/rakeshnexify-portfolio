@@ -128,6 +128,12 @@ function AdminProjectEditorPage({ mode = "create" }) {
     return true;
   }
 
+  function handleMediaUnauthorized() {
+    handleAuthenticationError({
+      status: 401,
+    });
+  }
+
   async function handleSubmit(projectPayload) {
     try {
       if (isEditMode) {
@@ -289,6 +295,8 @@ function AdminProjectEditorPage({ mode = "create" }) {
             initialValues={initialValues}
             onSubmit={handleSubmit}
             submitLabel={isEditMode ? "Update Project" : "Create Project"}
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

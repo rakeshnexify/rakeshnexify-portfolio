@@ -13,6 +13,7 @@ import adminCompanyRoutes from "./routes/adminCompany.routes.js";
 import adminContactMessageRoutes from "./routes/adminContactMessage.routes.js";
 import adminEducationRoutes from "./routes/adminEducation.routes.js";
 import adminExperienceRoutes from "./routes/adminExperience.routes.js";
+import adminMediaRoutes from "./routes/adminMedia.routes.js";
 import adminPostRoutes from "./routes/adminPost.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
@@ -38,18 +39,26 @@ import testimonialRoutes from "./routes/testimonial.routes.js";
 import teamMemberRoutes from "./routes/teamMember.routes.js";
 
 const app = express();
+
 const isProduction = process.env.NODE_ENV === "production";
+
 const currentFilePath = fileURLToPath(import.meta.url);
 const currentDirectoryPath = path.dirname(currentFilePath);
-const clientDistPath = path.resolve(currentDirectoryPath, "../../client/dist");
+
+const clientDistPath = path.resolve(
+  currentDirectoryPath,
+  "../../client/dist",
+);
 
 app.use(helmet(helmetOptions));
 app.use(cors(corsOptions));
+
 app.use(
   express.json({
     limit: "20kb",
   }),
 );
+
 app.use(
   express.urlencoded({
     extended: true,
@@ -68,8 +77,8 @@ if (!isProduction) {
   app.get("/", (req, res) => {
     res.status(200).json({
       success: true,
-
-      message: "Welcome to the RakeshNexify Portfolio API.",
+      message:
+        "Welcome to the RakeshNexify Portfolio API.",
     });
   });
 }
@@ -79,6 +88,7 @@ if (!isProduction) {
  * files se pehle mount karna zaruri hai.
  */
 app.use("/", sitemapRoutes);
+
 app.use("/api/health", healthRoutes);
 app.use("/api/site-settings", siteSettingsRoutes);
 app.use("/api/services", serviceRoutes);
@@ -103,10 +113,20 @@ app.use("/api/admin/posts", adminPostRoutes);
 app.use("/api/admin/team", adminTeamMemberRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/admin/companies", adminCompanyRoutes);
-app.use("/api/admin/contact-messages", adminContactMessageRoutes);
-app.use("/api/admin/site-settings", adminSiteSettingsRoutes);
+app.use("/api/admin/media", adminMediaRoutes);
+app.use(
+  "/api/admin/contact-messages",
+  adminContactMessageRoutes,
+);
+app.use(
+  "/api/admin/site-settings",
+  adminSiteSettingsRoutes,
+);
 
-app.use("/api/contact-messages", contactMessageRoutes);
+app.use(
+  "/api/contact-messages",
+  contactMessageRoutes,
+);
 
 /*
  * Production me Vite ke generated
@@ -121,7 +141,10 @@ if (isProduction) {
 
       setHeaders(res, filePath) {
         if (filePath.endsWith("index.html")) {
-          res.setHeader("Cache-Control", "no-cache");
+          res.setHeader(
+            "Cache-Control",
+            "no-cache",
+          );
         }
       },
     }),
@@ -149,63 +172,92 @@ if (isProduction) {
    * Express 5 ke liye /{*splat}
    * wildcard syntax use kiya gaya hai.
    */
-  app.get("/{*splat}", (req, res, next) => {
-    const isApiRequest = req.path === "/api" || req.path.startsWith("/api/");
+  app.get(
+    "/{*splat}",
+    (req, res, next) => {
+      const isApiRequest =
+        req.path === "/api" ||
+        req.path.startsWith("/api/");
 
-    if (isApiRequest) {
-      next();
-      return;
-    }
-
-    res.sendFile(path.join(clientDistPath, "index.html"), (error) => {
-      if (error) {
-        next(error);
+      if (isApiRequest) {
+        next();
+        return;
       }
-    });
-  });
+
+      res.sendFile(
+        path.join(
+          clientDistPath,
+          "index.html",
+        ),
+        (error) => {
+          if (error) {
+            next(error);
+          }
+        },
+      );
+    },
+  );
 }
 
 app.use((req, res) => {
   res.status(404).json({
     success: false,
 
-    message: `API route not found: ${req.method} ${req.originalUrl}`,
-  });
-});
-
-app.use((error, req, res, next) => {
-  const isMalformedJson =
-    error instanceof SyntaxError &&
-    error?.type === "entity.parse.failed" &&
-    error?.status === 400;
-
-  if (isMalformedJson) {
-    return res.status(400).json({
-      success: false,
-
-      message: "Request body contains invalid JSON.",
-    });
-  }
-
-  console.error("Unhandled server error:", error.message);
-
-  const receivedStatusCode = Number(error.statusCode || error.status);
-
-  const statusCode =
-    Number.isInteger(receivedStatusCode) &&
-    receivedStatusCode >= 400 &&
-    receivedStatusCode <= 599
-      ? receivedStatusCode
-      : 500;
-
-  return res.status(statusCode).json({
-    success: false,
-
     message:
-      statusCode < 500
-        ? error.message
-        : "An unexpected server error occurred.",
+      `API route not found: ${req.method} ${req.originalUrl}`,
   });
 });
+
+app.use(
+  (error, req, res, next) => {
+    const isMalformedJson =
+      error instanceof SyntaxError &&
+      error?.type ===
+        "entity.parse.failed" &&
+      error?.status === 400;
+
+    if (isMalformedJson) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+
+          message:
+            "Request body contains invalid JSON.",
+        });
+    }
+
+    console.error(
+      "Unhandled server error:",
+      error.message,
+    );
+
+    const receivedStatusCode =
+      Number(
+        error.statusCode ||
+          error.status,
+      );
+
+    const statusCode =
+      Number.isInteger(
+        receivedStatusCode,
+      ) &&
+      receivedStatusCode >= 400 &&
+      receivedStatusCode <= 599
+        ? receivedStatusCode
+        : 500;
+
+    return res
+      .status(statusCode)
+      .json({
+        success: false,
+
+        message:
+          statusCode < 500
+            ? error.message
+            : "An unexpected server error occurred.",
+      });
+  },
+);
 
 export default app;
