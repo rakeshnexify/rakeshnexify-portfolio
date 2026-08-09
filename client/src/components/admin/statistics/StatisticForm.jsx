@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createStatisticKey,
   createStatisticPayload,
@@ -68,6 +70,8 @@ function StatisticForm({
   initialValues = defaultStatisticFormValues,
   onSubmit,
   submitLabel = "Save Statistic",
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
   const [localErrors, setLocalErrors] = useState({});
@@ -426,28 +430,21 @@ function StatisticForm({
             <StatisticFieldError message={getFieldError("icon")} />
           </div>
 
-          <div>
-            <label
-              htmlFor="statistic-icon-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Icon image URL
-            </label>
-
-            <input
-              id="statistic-icon-url"
-              name="iconUrl"
-              type="url"
-              value={formValues.iconUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://..."
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <StatisticFieldError message={getFieldError("iconUrl")} />
-          </div>
+          <MediaField
+            id="statistic-icon-url"
+            name="iconUrl"
+            label="Icon image URL"
+            value={formValues.iconUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Statistic Icon"
+            placeholder="https://..."
+            helpText="Paste an external icon URL or choose an image/SVG from the Media Library."
+            error={getFieldError("iconUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">

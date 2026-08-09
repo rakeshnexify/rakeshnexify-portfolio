@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createTestimonialPayload,
   defaultTestimonialFormValues,
@@ -38,6 +40,8 @@ function TestimonialForm({
   submitLabel = "Save Testimonial",
   projectOptions = [],
   areProjectsLoading = false,
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
   const [localErrors, setLocalErrors] = useState({});
@@ -90,16 +94,29 @@ function TestimonialForm({
     });
   }
 
-  function handleInputChange(event) {
+  function handleInputChange(event, selectedMedia = null) {
     const { name, value, type, checked } = event.target;
     const nextValue = type === "checkbox" ? checked : value;
+
+    const shouldPopulateProfileImageAlt =
+      name === "profileImageUrl" &&
+      Boolean(String(selectedMedia?.altText || "").trim()) &&
+      !String(formValues.profileImageAlt || "").trim();
 
     setFormValues((currentValues) => ({
       ...currentValues,
       [name]: nextValue,
+      ...(shouldPopulateProfileImageAlt
+        ? {
+            profileImageAlt: String(selectedMedia.altText).trim(),
+          }
+        : {}),
     }));
 
-    clearFieldErrors(name);
+    clearFieldErrors(
+      name,
+      ...(shouldPopulateProfileImageAlt ? ["profileImageAlt"] : []),
+    );
     setSubmitError("");
   }
 
@@ -400,31 +417,21 @@ function TestimonialForm({
         </h2>
 
         <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="testimonial-profile-image"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Profile Image URL
-            </label>
-
-            <input
-              id="testimonial-profile-image"
-              name="profileImageUrl"
-              type="url"
-              value={formValues.profileImageUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.com/client.jpg"
-              aria-invalid={Boolean(getFieldError("profileImageUrl"))}
-              className={inputClasses}
-            />
-
-            <TestimonialFieldError
-              message={getFieldError("profileImageUrl")}
-            />
-          </div>
+          <MediaField
+            id="testimonial-profile-image"
+            name="profileImageUrl"
+            label="Profile Image URL"
+            value={formValues.profileImageUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Client Profile Image"
+            placeholder="https://example.com/client.jpg"
+            helpText="Paste an external profile image URL or choose an image/SVG from the Media Library. Media alt text fills the profile alt field only when it is currently empty."
+            error={getFieldError("profileImageUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
 
           <div>
             <label

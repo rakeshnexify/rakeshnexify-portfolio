@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import ServiceForm from "../../components/admin/services/ServiceForm";
@@ -94,6 +94,21 @@ function AdminServiceEditorPage({ mode = "create" }) {
 
     return createServiceFormValues(service || {});
   }, [isEditMode, service]);
+
+  const handleMediaUnauthorized = useCallback(() => {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+      state: {
+        from: {
+          pathname: isEditMode
+            ? `/admin/services/${serviceId}/edit`
+            : "/admin/services/new",
+        },
+      },
+    });
+  }, [isEditMode, logout, navigate, serviceId]);
 
   async function handleAuthenticationError(error) {
     if (error?.status !== 401) {
@@ -271,6 +286,8 @@ function AdminServiceEditorPage({ mode = "create" }) {
             initialValues={initialValues}
             onSubmit={handleSubmit}
             submitLabel={isEditMode ? "Update Service" : "Create Service"}
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

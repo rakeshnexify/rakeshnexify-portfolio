@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createServicePayload,
   createServiceSlug,
@@ -47,6 +49,8 @@ function ServiceForm({
   initialValues = defaultServiceFormValues,
   onSubmit,
   submitLabel = "Save Service",
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -397,25 +401,21 @@ function ServiceForm({
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="service-icon-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Icon image URL
-            </label>
-
-            <input
-              id="service-icon-url"
-              name="iconUrl"
-              type="url"
-              value={formValues.iconUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="https://..."
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
+          <MediaField
+            id="service-icon-url"
+            name="iconUrl"
+            label="Icon image URL"
+            value={formValues.iconUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Service Icon"
+            placeholder="https://..."
+            helpText="Paste an external icon URL or choose an image/SVG from the Media Library."
+            error={getFieldError("iconUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">

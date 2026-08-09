@@ -93,6 +93,56 @@ function normalizeMediaTypeFilter(value) {
   return normalizedValue;
 }
 
+function normalizeMediaTypesFilter(value) {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const rawTypes = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : null;
+
+  if (!rawTypes) {
+    throw createFilterError(
+      "Media types filter is invalid.",
+      "mediaTypes",
+      "Media types must be an array or comma-separated text.",
+    );
+  }
+
+  const normalizedTypes = [
+    ...new Set(
+      rawTypes
+        .map((type) =>
+          String(type || "")
+            .trim()
+            .toLowerCase(),
+        )
+        .filter(Boolean),
+    ),
+  ];
+
+  if (normalizedTypes.length === 0) {
+    return undefined;
+  }
+
+  const invalidTypes = normalizedTypes.filter(
+    (type) => !MEDIA_TYPES.includes(type),
+  );
+
+  if (invalidTypes.length > 0) {
+    throw createFilterError(
+      "Media types filter is invalid.",
+      "mediaTypes",
+      "Select only image, SVG, document, audio or video.",
+    );
+  }
+
+  return normalizedTypes;
+}
+
 function normalizeMediaSortFilter(value) {
   const cleanValue = normalizeOptionalStringFilter(value, "sort", {
     maxLength: 30,
@@ -283,6 +333,16 @@ function buildAdminMediaQuery(filters = {}) {
 
   const mediaType = normalizeMediaTypeFilter(filters.mediaType);
 
+  const mediaTypes = normalizeMediaTypesFilter(filters.mediaTypes);
+
+  if (mediaType !== undefined && mediaTypes !== undefined) {
+    throw createFilterError(
+      "Use either mediaType or mediaTypes, not both.",
+      "mediaTypes",
+      "Choose either one Media type or a compatible Media type group.",
+    );
+  }
+
   const folder = normalizeOptionalStringFilter(filters.folder, "folder", {
     maxLength: 200,
   });
@@ -313,6 +373,10 @@ function buildAdminMediaQuery(filters = {}) {
 
   if (mediaType !== undefined) {
     query.set("mediaType", mediaType);
+  }
+
+  if (mediaTypes !== undefined) {
+    query.set("mediaTypes", mediaTypes.join(","));
   }
 
   if (folder !== undefined) {
@@ -748,6 +812,7 @@ export {
   normalizeMediaId,
   normalizeMediaSortFilter,
   normalizeMediaTypeFilter,
+  normalizeMediaTypesFilter,
   normalizeOptionalStringFilter,
   normalizePositiveIntegerFilter,
   normalizeUploadProgress,

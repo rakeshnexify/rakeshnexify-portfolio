@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import ExperienceForm from "../../components/admin/experience/ExperienceForm";
@@ -96,6 +96,21 @@ function AdminExperienceEditorPage({ mode = "create" }) {
 
     return createExperienceFormValues(experience || {});
   }, [experience, isEditMode]);
+
+  const handleMediaUnauthorized = useCallback(() => {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+      state: {
+        from: {
+          pathname: isEditMode
+            ? `/admin/experience/${experienceId}/edit`
+            : "/admin/experience/new",
+        },
+      },
+    });
+  }, [experienceId, isEditMode, logout, navigate]);
 
   function handleAuthenticationError(error) {
     if (error?.status !== 401) {
@@ -288,6 +303,8 @@ function AdminExperienceEditorPage({ mode = "create" }) {
             submitLabel={
               isEditMode ? "Update Experience" : "Create Experience"
             }
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

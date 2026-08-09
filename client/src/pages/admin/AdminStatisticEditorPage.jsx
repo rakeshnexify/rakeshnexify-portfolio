@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import StatisticForm from "../../components/admin/statistics/StatisticForm";
@@ -94,6 +94,21 @@ function AdminStatisticEditorPage({ mode = "create" }) {
 
     return createStatisticFormValues(statistic || {});
   }, [isEditMode, statistic]);
+
+  const handleMediaUnauthorized = useCallback(() => {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+      state: {
+        from: {
+          pathname: isEditMode
+            ? `/admin/statistics/${statisticId}/edit`
+            : "/admin/statistics/new",
+        },
+      },
+    });
+  }, [isEditMode, logout, navigate, statisticId]);
 
   async function handleAuthenticationError(error) {
     if (error?.status !== 401) {
@@ -275,6 +290,8 @@ function AdminStatisticEditorPage({ mode = "create" }) {
             initialValues={initialValues}
             onSubmit={handleSubmit}
             submitLabel={isEditMode ? "Update Statistic" : "Create Statistic"}
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

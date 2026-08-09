@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createExperienceDefaultSlug,
   createExperiencePayload,
@@ -47,6 +49,8 @@ function ExperienceForm({
   initialValues = defaultExperienceFormValues,
   onSubmit,
   submitLabel = "Save Experience",
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
   const [localErrors, setLocalErrors] = useState({});
@@ -718,31 +722,21 @@ Postman`}
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="experience-logo-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Organization Logo URL
-            </label>
-
-            <input
-              id="experience-logo-url"
-              name="organizationLogoUrl"
-              type="url"
-              value={formValues.organizationLogoUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.com/logo.png"
-              aria-invalid={Boolean(getFieldError("organizationLogoUrl"))}
-              className={inputClasses}
-            />
-
-            <ExperienceFieldError
-              message={getFieldError("organizationLogoUrl")}
-            />
-          </div>
+          <MediaField
+            id="experience-logo-url"
+            name="organizationLogoUrl"
+            label="Organization Logo URL"
+            value={formValues.organizationLogoUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Organization Logo"
+            placeholder="https://example.com/logo.png"
+            helpText="Paste an external logo URL or choose an image/SVG from the Media Library."
+            error={getFieldError("organizationLogoUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
 
           {formValues.organizationLogoUrl && (
             <div className="md:col-span-2">

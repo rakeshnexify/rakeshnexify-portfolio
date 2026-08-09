@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Link, useNavigate, useParams } from "react-router";
 
@@ -103,6 +103,22 @@ function AdminCompanyEditorPage({ mode = "create" }) {
 
     return createCompanyFormFromData(company || {});
   }, [company, isEditMode]);
+
+  const handleMediaUnauthorized = useCallback(() => {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+
+      state: {
+        from: {
+          pathname: isEditMode
+            ? `/admin/companies/${companyId}/edit`
+            : "/admin/companies/new",
+        },
+      },
+    });
+  }, [companyId, isEditMode, logout, navigate]);
 
   function handleAuthenticationError(error) {
     if (error?.status !== 401) {
@@ -289,6 +305,8 @@ function AdminCompanyEditorPage({ mode = "create" }) {
             initialValues={initialValues}
             onSubmit={handleSubmit}
             submitLabel={isEditMode ? "Update Company" : "Create Company"}
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

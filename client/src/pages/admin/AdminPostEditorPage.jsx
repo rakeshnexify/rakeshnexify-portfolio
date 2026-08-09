@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import PostForm from "../../components/admin/posts/PostForm";
@@ -131,14 +131,7 @@ function AdminPostEditorPage({ mode = "create" }) {
     return () => {
       controller.abort();
     };
-  }, [
-    accessToken,
-    hasMissingPostId,
-    isEditMode,
-    logout,
-    navigate,
-    postId,
-  ]);
+  }, [accessToken, hasMissingPostId, isEditMode, logout, navigate, postId]);
 
   const initialValues = useMemo(() => {
     if (!isEditMode) {
@@ -147,6 +140,30 @@ function AdminPostEditorPage({ mode = "create" }) {
 
     return createPostFormValues(post || {});
   }, [isEditMode, post]);
+
+  const handleMediaUnauthorized = useCallback(() => {
+    const currentSubmission = activeSubmissionRef.current;
+
+    currentSubmission.controller?.abort();
+
+    activeSubmissionRef.current = {
+      controller: null,
+      requestId: currentSubmission.requestId + 1,
+    };
+
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+      state: {
+        from: {
+          pathname: isEditMode
+            ? `/admin/posts/${postId}/edit`
+            : "/admin/posts/new",
+        },
+      },
+    });
+  }, [isEditMode, logout, navigate, postId]);
 
   function handleAuthenticationError(error) {
     if (error?.status !== 401) {
@@ -184,21 +201,12 @@ function AdminPostEditorPage({ mode = "create" }) {
 
     try {
       const response = isEditMode
-        ? await updateAdminPost(
-            accessToken,
-            postId,
-            postPayload,
-            {
-              signal: controller.signal,
-            },
-          )
-        : await createAdminPost(
-            accessToken,
-            postPayload,
-            {
-              signal: controller.signal,
-            },
-          );
+        ? await updateAdminPost(accessToken, postId, postPayload, {
+            signal: controller.signal,
+          })
+        : await createAdminPost(accessToken, postPayload, {
+            signal: controller.signal,
+          });
 
       if (
         controller.signal.aborted ||
@@ -400,6 +408,8 @@ function AdminPostEditorPage({ mode = "create" }) {
             projectOptions={projectOptions}
             areProjectsLoading={areProjectsLoading}
             onSubmittingChange={setIsSubmitting}
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

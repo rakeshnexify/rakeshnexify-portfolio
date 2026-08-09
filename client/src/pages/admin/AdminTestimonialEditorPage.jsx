@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import TestimonialForm from "../../components/admin/testimonials/TestimonialForm";
@@ -123,6 +123,21 @@ function AdminTestimonialEditorPage({ mode = "create" }) {
 
     return createTestimonialFormValues(testimonial || {});
   }, [isEditMode, testimonial]);
+
+  const handleMediaUnauthorized = useCallback(() => {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+      state: {
+        from: {
+          pathname: isEditMode
+            ? `/admin/testimonials/${testimonialId}/edit`
+            : "/admin/testimonials/new",
+        },
+      },
+    });
+  }, [isEditMode, logout, navigate, testimonialId]);
 
   function handleAuthenticationError(error) {
     if (error?.status !== 401) {
@@ -317,6 +332,8 @@ function AdminTestimonialEditorPage({ mode = "create" }) {
             }
             projectOptions={projectOptions}
             areProjectsLoading={areProjectsLoading}
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

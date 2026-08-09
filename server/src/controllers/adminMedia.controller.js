@@ -70,6 +70,7 @@ const EDITABLE_MEDIA_FIELDS = Object.freeze([
 const ALLOWED_MEDIA_QUERY_FIELDS = Object.freeze([
   "search",
   "mediaType",
+  "mediaTypes",
   "folder",
   "tag",
   "sort",
@@ -482,6 +483,51 @@ function parseMediaTypeQuery(query) {
   return cleanEnum(rawValue, "mediaType", MEDIA_TYPES);
 }
 
+function parseMediaTypesQuery(query) {
+  const hasMediaTypesQuery = hasOwnProperty(query, "mediaTypes");
+
+  if (!hasMediaTypesQuery) {
+    return [];
+  }
+
+  const rawValue = parseStringQuery(query, "mediaTypes", {
+    maxLength: 200,
+  });
+
+  if (!rawValue) {
+    throw createHttpError("Invalid Media type filter.", 400, {
+      mediaTypes: "Select at least one supported Media type.",
+    });
+  }
+
+  const requestedTypes = rawValue
+    .split(",")
+    .map((type) => type.trim().toLowerCase());
+
+  if (requestedTypes.some((type) => !type)) {
+    throw createHttpError("Invalid Media type filter.", 400, {
+      mediaTypes:
+        "Media types must be a comma-separated list without empty values.",
+    });
+  }
+
+  const normalizedTypes = [
+    ...new Set(
+      requestedTypes.map((type) =>
+        cleanEnum(type, "mediaTypes", MEDIA_TYPES),
+      ),
+    ),
+  ];
+
+  if (normalizedTypes.length === 0) {
+    throw createHttpError("Invalid Media type filter.", 400, {
+      mediaTypes: "Select at least one supported Media type.",
+    });
+  }
+
+  return normalizedTypes;
+}
+
 function parseSortQuery(query) {
   const rawValue = parseStringQuery(query, "sort", {
     maxLength: 30,
@@ -627,7 +673,24 @@ async function getAdminMedia(request, response, next) {
       maxLength: 60,
     }).toLowerCase();
 
+    const hasMediaTypeQuery = hasOwnProperty(request.query, "mediaType");
+
+    const hasMediaTypesQuery = hasOwnProperty(request.query, "mediaTypes");
+
+    if (hasMediaTypeQuery && hasMediaTypesQuery) {
+      throw createHttpError(
+        "Use either mediaType or mediaTypes, not both.",
+        400,
+        {
+          mediaType: "Choose one Media type filter format.",
+          mediaTypes: "Choose one Media type filter format.",
+        },
+      );
+    }
+
     const mediaType = parseMediaTypeQuery(request.query);
+
+    const mediaTypes = parseMediaTypesQuery(request.query);
 
     const sortOption = parseSortQuery(request.query);
 
@@ -690,6 +753,10 @@ async function getAdminMedia(request, response, next) {
 
     if (mediaType) {
       filter.mediaType = mediaType;
+    } else if (mediaTypes.length > 0) {
+      filter.mediaType = {
+        $in: mediaTypes,
+      };
     }
 
     if (folder) {

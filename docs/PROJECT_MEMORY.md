@@ -305,14 +305,38 @@ Reusable system:
 - `MediaPickerModal`
 - `useMediaPicker`
 
-Supports authenticated browsing, search, folders, media-type restrictions, pagination, cancellation/stale-response protection, manual URL compatibility, and keyboard-safe modal behavior.
+Supports authenticated browsing, search, folders, server-backed media-type restrictions, pagination, cancellation/stale-response protection, manual URL compatibility, accessible field errors/help text, and keyboard-safe modal behavior.
 
-Initial Project integration:
+Filtering contract:
 
-- `coverImageUrl`
-- `images[].url`
-- `links.videoUrl`
-- `seo.ogImageUrl`
+- `mediaType` is used for one requested Media type.
+- `mediaTypes` is used for multiple compatible types.
+- `mediaType` and `mediaTypes` are mutually exclusive by query-key presence.
+- blank or invalid `mediaTypes` values return structured `400` responses.
+- multi-type filtering uses the same MongoDB filter for result retrieval and counting so pagination totals remain accurate.
+- unrestricted Media Library browsing remains supported.
+
+Media Picker integration now covers compatible fields across:
+
+- Site Settings
+- Services
+- Statistics
+- Skills
+- Education
+- Experience
+- Testimonials
+- Posts / Blog / News
+- Projects
+- Companies
+- Team
+
+Manual external URLs remain supported alongside Media Library selection. Normal website, portfolio, institution, social, email, and phone fields remain normal URL/contact fields rather than Media Picker fields.
+
+Where an existing companion alt field exists, selected Media `altText` may populate it only when that alt field is currently blank; manually entered alt text must not be overwritten.
+
+Public Service cards render `iconUrl` when available and safely fall back to the existing numeric service marker when the icon is missing or fails to load.
+
+Project video URLs intentionally remain hybrid: uploaded Media video and external/manual video URLs are both supported.
 
 ### Reference Protection
 
@@ -320,7 +344,7 @@ Exact Media URL references are checked across Site Settings, Services, Statistic
 
 Referenced Media is blocked from normal permanent deletion with `409 Conflict`.
 
-See `Permanent Architectural Limitations` for the current reference-detail cap, deletion TOCTOU window, and partial Media Picker adoption.
+See `Permanent Architectural Limitations` for the current reference-detail cap and deletion TOCTOU window.
 
 ## Completed Module Inventory
 
@@ -330,14 +354,14 @@ See `Permanent Architectural Limitations` for the current reference-detail cap, 
 | Services | `Service` / `services` | `/api/services` | `/api/admin/services` | `/services` | `/admin/services`, `/admin/services/new`, `/admin/services/:id/edit` |
 | Statistics | `Statistic` / `statistics` | `/api/statistics` | `/api/admin/statistics` | `/statistics` | Admin list/create/edit routes |
 | Projects | `Project` / `projects` | `/api/projects` | `/api/admin/projects` | `/projects`, `/projects/:slug` | Admin list/create/edit; Media Picker integrated |
-| Companies | `Company` / `companies` | `/api/companies` | `/api/admin/companies` | `/companies`, `/companies/:slug` | Admin list/create/edit |
+| Companies | `Company` / `companies` | `/api/companies` | `/api/admin/companies` | `/companies`, `/companies/:slug` | Admin list/create/edit; Media Picker integrated |
 | Contact Messages | `ContactMessage` / `contact_messages` | `POST /api/contact-messages` | `/api/admin/contact-messages` | Homepage contact workflow | `/admin/contact-messages`; rate-limited public inquiry |
-| Team | `TeamMember` / `teamMembers` | `/api/team` | `/api/admin/team` | `/team`, `/team/:slug` | `/admin/team`, `/admin/team/new`, `/admin/team/:id/edit`; relations to Projects, Companies, Services |
+| Team | `TeamMember` / `teamMembers` | `/api/team` | `/api/admin/team` | `/team`, `/team/:slug` | `/admin/team`, `/admin/team/new`, `/admin/team/:id/edit`; relations to Projects, Companies, Services; Media Picker integrated |
 | Skills | `Skill` / `skills` | `/api/skills` | `/api/admin/skills` | `/skills` | `/admin/skills`, `/admin/skills/new`, `/admin/skills/:id/edit`; private `nameKey` |
 | Education | `Education` / `education` | `/api/education` | `/api/admin/education` | `/education` | `/admin/education`, `/admin/education/new`, `/admin/education/:id/edit`; private `identityKey` |
 | Experience | `Experience` / `experiences` | `/api/experience` | `/api/admin/experience` | `/experience` | `/admin/experience`, `/admin/experience/new`, `/admin/experience/:id/edit`; private `identityKey` |
 | Testimonials | `Testimonial` / `testimonials` | `/api/testimonials` | `/api/admin/testimonials` | `/testimonials` | `/admin/testimonials`, `/admin/testimonials/new`, `/admin/testimonials/:id/edit`; optional Project relation |
-| Blog / News | `Post` / `posts` | `/api/posts` | `/api/admin/posts` | `/blog`, `/news`, `/blog/:slug`, `/news/:slug` | `/admin/posts`, `/admin/posts/new`, `/admin/posts/:id/edit`; shared model and Project relations |
+| Blog / News | `Post` / `posts` | `/api/posts` | `/api/admin/posts` | `/blog`, `/news`, `/blog/:slug`, `/news/:slug` | `/admin/posts`, `/admin/posts/new`, `/admin/posts/:id/edit`; shared model and Project relations; Media Picker integrated |
 | Media | `Media` / `media` | None | `/api/admin/media` | None | `/admin/media`; Cloudinary-backed binary storage |
 | Admin Users | `AdminUser` / `admin_users` | None | `/api/admin/auth` | None | `/admin/login` plus protected Admin system; authentication support only, no AdminUser CRUD UI |
 
@@ -373,6 +397,9 @@ Prefer extending these instead of duplicating architecture:
 - Media binaries stay outside MongoDB through a provider abstraction.
 - SVG requires dedicated validation/sanitization.
 - Media Picker supplements manual URLs.
+- Compatible Admin media fields should reuse `MediaField` rather than duplicate picker logic.
+- Single-type and multi-type Media Picker filtering must remain server-backed so pagination/counts stay correct.
+- Companion alt text from selected Media may only auto-fill when the existing alt field is blank.
 - Referenced Media must be protected from normal deletion.
 - Avoid duplicate models where an existing module substantially owns the domain.
 - Commit only verified work.
@@ -389,7 +416,6 @@ Documentation policy:
 
 - Media reference details are capped at 25 displayed records even though deletion protection remains conservative.
 - Media deletion has a narrow reference-check/provider-delete TOCTOU window.
-- Media Picker is not integrated into every compatible Admin form.
 - Older controllers are not uniformly as strict as newer Post/Media controllers.
 - Navigation is registry-based, not arbitrary hierarchical navigation.
 

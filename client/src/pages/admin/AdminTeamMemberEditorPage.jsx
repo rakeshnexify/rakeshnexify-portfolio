@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Link, useNavigate, useParams } from "react-router";
 
@@ -168,6 +168,22 @@ function AdminTeamMemberEditorPage({ mode = "create" }) {
 
     return createTeamMemberFormFromData(teamMember || {});
   }, [isEditMode, teamMember]);
+
+  const handleMediaUnauthorized = useCallback(() => {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+
+      state: {
+        from: {
+          pathname: isEditMode
+            ? `/admin/team/${teamMemberId}/edit`
+            : "/admin/team/new",
+        },
+      },
+    });
+  }, [isEditMode, logout, navigate, teamMemberId]);
 
   function handleAuthenticationError(error) {
     if (error?.status !== 401) {
@@ -373,6 +389,8 @@ function AdminTeamMemberEditorPage({ mode = "create" }) {
                 ? "Update Team Member"
                 : "Create Team Member"
             }
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

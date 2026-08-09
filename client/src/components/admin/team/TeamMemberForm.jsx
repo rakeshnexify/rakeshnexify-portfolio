@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createTeamMemberPayload,
   createTeamMemberSlug,
@@ -67,6 +69,8 @@ function TeamMemberForm({
   companyOptions = [],
   serviceOptions = [],
   submitLabel = "Save Team Member",
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -122,10 +126,16 @@ function TeamMemberForm({
     });
   }
 
-  function handleInputChange(event) {
+  function handleInputChange(event, selectedMedia = null) {
     const { name, value, type, checked } = event.target;
 
     const nextValue = type === "checkbox" ? checked : value;
+    const selectedMediaAltText = String(selectedMedia?.altText || "").trim();
+
+    const shouldPopulateProfileImageAlt =
+      name === "profileImageUrl" &&
+      Boolean(selectedMediaAltText) &&
+      !String(formValues.profileImageAlt || "").trim();
 
     setFormValues((currentValues) => {
       const updatedValues = {
@@ -137,6 +147,10 @@ function TeamMemberForm({
         updatedValues.slug = createTeamMemberSlug(value);
       }
 
+      if (shouldPopulateProfileImageAlt) {
+        updatedValues.profileImageAlt = selectedMediaAltText;
+      }
+
       return updatedValues;
     });
 
@@ -144,7 +158,10 @@ function TeamMemberForm({
       setIsSlugManuallyEdited(Boolean(value.trim()));
     }
 
-    clearFieldErrors(name);
+    clearFieldErrors(
+      name,
+      ...(shouldPopulateProfileImageAlt ? ["profileImageAlt"] : []),
+    );
 
     const socialFieldMap = {
       githubUrl: "socialLinks.github",
@@ -439,29 +456,21 @@ function TeamMemberForm({
         </div>
 
         <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="team-member-profile-image-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Profile Image URL
-            </label>
-
-            <input
-              id="team-member-profile-image-url"
-              name="profileImageUrl"
-              type="url"
-              value={formValues.profileImageUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.com/profile.jpg"
-              aria-invalid={Boolean(getFieldError("profileImageUrl"))}
-              className={inputClasses}
-            />
-
-            <TeamMemberFieldError message={getFieldError("profileImageUrl")} />
-          </div>
+          <MediaField
+            id="team-member-profile-image-url"
+            name="profileImageUrl"
+            label="Profile Image URL"
+            value={formValues.profileImageUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Team Member Profile Image"
+            placeholder="https://example.com/profile.jpg"
+            helpText="Paste an external profile image URL or choose an image/SVG from the Media Library. Media alt text fills the profile alt field only when it is currently empty."
+            error={getFieldError("profileImageUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
 
           <div>
             <label
@@ -488,27 +497,21 @@ function TeamMemberForm({
           </div>
 
           <div className="md:col-span-2">
-            <label
-              htmlFor="team-member-cover-image-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Cover Image URL
-            </label>
-
-            <input
+            <MediaField
               id="team-member-cover-image-url"
               name="coverImageUrl"
-              type="url"
+              label="Cover Image URL"
               value={formValues.coverImageUrl}
               onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
+              accessToken={accessToken}
+              allowedTypes={["image", "svg"]}
+              pickerTitle="Choose Team Member Cover Image"
               placeholder="https://example.com/team-cover.jpg"
-              aria-invalid={Boolean(getFieldError("coverImageUrl"))}
-              className={inputClasses}
+              helpText="Paste an external cover image URL or choose an image/SVG from the Media Library."
+              error={getFieldError("coverImageUrl")}
+              disabled={isSubmitting}
+              onUnauthorized={onMediaUnauthorized}
             />
-
-            <TeamMemberFieldError message={getFieldError("coverImageUrl")} />
           </div>
 
           {formValues.profileImageUrl && (
@@ -1187,37 +1190,21 @@ node.js developer`}
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="team-member-seo-og-image"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Social Sharing Image URL
-            </label>
-
-            <input
-              id="team-member-seo-og-image"
-              name="seoOgImageUrl"
-              type="url"
-              value={formValues.seoOgImageUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.com/member-og-image.jpg"
-              aria-invalid={Boolean(
-                getFieldError("seoOgImageUrl", "seo.ogImageUrl"),
-              )}
-              className={inputClasses}
-            />
-
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Used when the member detail page is shared on social platforms.
-            </p>
-
-            <TeamMemberFieldError
-              message={getFieldError("seoOgImageUrl", "seo.ogImageUrl")}
-            />
-          </div>
+          <MediaField
+            id="team-member-seo-og-image"
+            name="seoOgImageUrl"
+            label="Social Sharing Image URL"
+            value={formValues.seoOgImageUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Team Member Social Image"
+            placeholder="https://example.com/member-og-image.jpg"
+            helpText="Paste an external social sharing image URL or choose an image/SVG from the Media Library."
+            error={getFieldError("seoOgImageUrl", "seo.ogImageUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
         </div>
       </section>
 

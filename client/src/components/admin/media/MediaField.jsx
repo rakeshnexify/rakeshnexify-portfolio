@@ -64,6 +64,12 @@ function MediaField({
 
   const canOpenCurrentUrl = isSafeHttpUrl(value);
 
+  const helpTextId = helpText ? `${id}-help` : undefined;
+  const errorId = error ? `${id}-error` : undefined;
+
+  const describedBy =
+    [helpTextId, errorId].filter(Boolean).join(" ") || undefined;
+
   return (
     <>
       <div>
@@ -82,6 +88,8 @@ function MediaField({
           disabled={disabled}
           required={required}
           placeholder={placeholder}
+          aria-invalid={Boolean(error)}
+          aria-describedby={describedBy}
           className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100"
         />
 
@@ -121,11 +129,22 @@ function MediaField({
         </div>
 
         {helpText && (
-          <p className="mt-2 text-xs leading-5 text-slate-500">{helpText}</p>
+          <p
+            id={helpTextId}
+            className="mt-2 text-xs leading-5 text-slate-500"
+          >
+            {helpText}
+          </p>
         )}
 
         {error && (
-          <p className="mt-2 text-sm font-semibold text-red-600">{error}</p>
+          <p
+            id={errorId}
+            role="alert"
+            className="mt-2 text-sm font-semibold text-red-600"
+          >
+            {error}
+          </p>
         )}
       </div>
 

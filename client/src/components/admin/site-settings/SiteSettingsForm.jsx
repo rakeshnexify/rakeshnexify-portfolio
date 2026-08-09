@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createSiteSettingsFormValues,
   createSiteSettingsPayload,
@@ -675,20 +677,28 @@ function ImageUrlField({
   placeholder = "https://...",
   previewAlt,
   previewClassName = "h-32 w-full object-contain",
+  accessToken = "",
+  allowedTypes = ["image", "svg"],
+  pickerTitle = "Choose Image",
+  helpText = "",
+  onUnauthorized,
 }) {
   return (
     <div>
-      <TextInput
+      <MediaField
         id={id}
         name={name}
         label={label}
         value={value}
         onChange={onChange}
+        accessToken={accessToken}
+        allowedTypes={allowedTypes}
+        pickerTitle={pickerTitle}
+        placeholder={placeholder}
+        helpText={helpText}
         error={error}
         disabled={disabled}
-        type="url"
-        placeholder={placeholder}
-        maxLength={500}
+        onUnauthorized={onUnauthorized}
       />
 
       {value && (
@@ -795,6 +805,8 @@ function SiteSettingsForm({
   cancelPath = "/admin/dashboard",
   cancelLabel = "Cancel",
   submitLabel = "Save Site Settings",
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(() =>
     prepareInitialValues(initialValues),
@@ -1029,7 +1041,9 @@ function SiteSettingsForm({
   }
 
   const homepageSectionIndexes = formValues.sections
-    .map((section, index) => (homepageSectionKeys.has(section.key) ? index : -1))
+    .map((section, index) =>
+      homepageSectionKeys.has(section.key) ? index : -1,
+    )
     .filter((index) => index >= 0);
 
   return (
@@ -1097,6 +1111,11 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("brand.logoUrl", "brand")}
             disabled={isSubmitting}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Brand Logo"
+            helpText="Paste an external URL or choose an image/SVG from the Media Library."
+            onUnauthorized={onMediaUnauthorized}
             previewAlt="Website brand logo preview"
           />
 
@@ -1108,6 +1127,11 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("brand.faviconUrl", "brand")}
             disabled={isSubmitting}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Favicon"
+            helpText="Choose an image/SVG from Media or keep using a manual external URL. Manual .ico URLs remain supported."
+            onUnauthorized={onMediaUnauthorized}
             previewAlt="Website favicon preview"
             previewClassName="mx-auto size-20 object-contain"
           />
@@ -1157,17 +1181,20 @@ function SiteSettingsForm({
             maxLength={150}
           />
 
-          <TextInput
+          <MediaField
             id="settings-owner-resume"
             name="owner.resumeUrl"
             label="Resume URL"
             value={formValues.owner.resumeUrl}
             onChange={handleFieldChange}
+            accessToken={accessToken}
+            allowedTypes={["document"]}
+            pickerTitle="Choose Resume PDF"
+            placeholder="https://..."
+            helpText="Paste an external resume URL or choose an uploaded PDF from the Media Library."
             error={getFieldError("owner.resumeUrl", "owner")}
             disabled={isSubmitting}
-            type="url"
-            placeholder="https://..."
-            maxLength={500}
+            onUnauthorized={onMediaUnauthorized}
           />
 
           <div className="lg:col-span-2">
@@ -1179,6 +1206,11 @@ function SiteSettingsForm({
               onChange={handleFieldChange}
               error={getFieldError("owner.profileImageUrl", "owner")}
               disabled={isSubmitting}
+              accessToken={accessToken}
+              allowedTypes={["image", "svg"]}
+              pickerTitle="Choose Owner Profile Image"
+              helpText="Paste an external URL or choose an image/SVG from the Media Library."
+              onUnauthorized={onMediaUnauthorized}
               previewAlt="Portfolio owner profile preview"
               previewClassName="mx-auto size-40 rounded-2xl object-cover"
             />
@@ -1846,6 +1878,11 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("seo.ogImageUrl", "seo")}
             disabled={isSubmitting}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Social Sharing Image"
+            helpText="Paste an external URL or choose an image/SVG from the Media Library. JPG or PNG is generally safest for social sharing."
+            onUnauthorized={onMediaUnauthorized}
             previewAlt="Social sharing preview"
             previewClassName="max-h-72 w-full object-contain"
           />
@@ -1922,7 +1959,9 @@ function SiteSettingsForm({
                       htmlFor={`settings-section-label-${index}`}
                       className="text-sm font-semibold text-slate-700"
                     >
-                      {hasNavigationItem ? "Navbar menu label" : "Section label"}
+                      {hasNavigationItem
+                        ? "Navbar menu label"
+                        : "Section label"}
                     </label>
 
                     <input
@@ -1980,7 +2019,9 @@ function SiteSettingsForm({
                           Homepage order
                         </p>
 
-                        <div className={`${inputClasses} flex items-center text-slate-500`}>
+                        <div
+                          className={`${inputClasses} flex items-center text-slate-500`}
+                        >
                           Not applicable
                         </div>
                       </>
@@ -2026,7 +2067,9 @@ function SiteSettingsForm({
                           Navbar order
                         </p>
 
-                        <div className={`${inputClasses} flex items-center text-slate-500`}>
+                        <div
+                          className={`${inputClasses} flex items-center text-slate-500`}
+                        >
                           Not applicable
                         </div>
                       </>
@@ -2069,7 +2112,8 @@ function SiteSettingsForm({
                         </span>
 
                         <span className="mt-1 block text-xs leading-5 text-slate-500">
-                          This registry item does not render its own homepage section.
+                          This registry item does not render its own homepage
+                          section.
                         </span>
                       </span>
                     </div>
@@ -2097,7 +2141,8 @@ function SiteSettingsForm({
                         </span>
 
                         <span className="mt-1 block text-xs leading-5 text-slate-500">
-                          Display this menu item in desktop and mobile navigation.
+                          Display this menu item in desktop and mobile
+                          navigation.
                         </span>
                       </span>
                     </label>
@@ -2109,7 +2154,8 @@ function SiteSettingsForm({
                         </span>
 
                         <span className="mt-1 block text-xs leading-5 text-slate-500">
-                          Navigation is provided through the Blog and News page items.
+                          Navigation is provided through the Blog and News page
+                          items.
                         </span>
                       </span>
                     </div>
@@ -2137,7 +2183,8 @@ function SiteSettingsForm({
                         </span>
 
                         <span className="mt-1 block text-xs leading-5 text-slate-500">
-                          Allow visitors to open this dedicated public page and its details.
+                          Allow visitors to open this dedicated public page and
+                          its details.
                         </span>
                       </span>
                     </label>

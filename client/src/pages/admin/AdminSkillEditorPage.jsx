@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import SkillForm from "../../components/admin/skills/SkillForm";
@@ -90,6 +90,21 @@ function AdminSkillEditorPage({ mode = "create" }) {
 
     return createSkillFormValues(skill || {});
   }, [isEditMode, skill]);
+
+  const handleMediaUnauthorized = useCallback(() => {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+      state: {
+        from: {
+          pathname: isEditMode
+            ? `/admin/skills/${skillId}/edit`
+            : "/admin/skills/new",
+        },
+      },
+    });
+  }, [isEditMode, logout, navigate, skillId]);
 
   function handleAuthenticationError(error) {
     if (error?.status !== 401) {
@@ -274,6 +289,8 @@ function AdminSkillEditorPage({ mode = "create" }) {
             initialValues={initialValues}
             onSubmit={handleSubmit}
             submitLabel={isEditMode ? "Update Skill" : "Create Skill"}
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import EducationForm from "../../components/admin/education/EducationForm";
@@ -96,6 +96,21 @@ function AdminEducationEditorPage({ mode = "create" }) {
 
     return createEducationFormValues(education || {});
   }, [education, isEditMode]);
+
+  const handleMediaUnauthorized = useCallback(() => {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+      state: {
+        from: {
+          pathname: isEditMode
+            ? `/admin/education/${educationId}/edit`
+            : "/admin/education/new",
+        },
+      },
+    });
+  }, [educationId, isEditMode, logout, navigate]);
 
   function handleAuthenticationError(error) {
     if (error?.status !== 401) {
@@ -288,6 +303,8 @@ function AdminEducationEditorPage({ mode = "create" }) {
             submitLabel={
               isEditMode ? "Update Education" : "Create Education"
             }
+            accessToken={accessToken}
+            onMediaUnauthorized={handleMediaUnauthorized}
           />
         </div>
       </section>

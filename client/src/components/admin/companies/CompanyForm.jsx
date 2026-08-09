@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createCompanyPayload,
   createCompanySlug,
@@ -90,6 +92,10 @@ function CompanyForm({
   onSubmit,
 
   submitLabel = "Save Company",
+
+  accessToken = "",
+
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
 
@@ -707,49 +713,37 @@ function CompanyForm({
             <CompanyFieldError message={getFieldError("websiteUrl")} />
           </div>
 
-          <div>
-            <label
-              htmlFor="company-logo"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Company logo URL
-            </label>
+          <MediaField
+            id="company-logo"
+            name="logoUrl"
+            label="Company logo URL"
+            value={formValues.logoUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Company Logo"
+            placeholder="https://..."
+            helpText="Paste an external logo URL or choose an image/SVG from the Media Library."
+            error={getFieldError("logoUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
 
-            <input
-              id="company-logo"
-              name="logoUrl"
-              type="url"
-              value={formValues.logoUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="https://..."
-              className={inputClasses}
-            />
-
-            <CompanyFieldError message={getFieldError("logoUrl")} />
-          </div>
-
-          <div>
-            <label
-              htmlFor="company-cover-image"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Cover image URL
-            </label>
-
-            <input
-              id="company-cover-image"
-              name="coverImageUrl"
-              type="url"
-              value={formValues.coverImageUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="https://..."
-              className={inputClasses}
-            />
-
-            <CompanyFieldError message={getFieldError("coverImageUrl")} />
-          </div>
+          <MediaField
+            id="company-cover-image"
+            name="coverImageUrl"
+            label="Cover image URL"
+            value={formValues.coverImageUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Company Cover Image"
+            placeholder="https://..."
+            helpText="Paste an external cover image URL or choose an image/SVG from the Media Library."
+            error={getFieldError("coverImageUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
         </div>
       </section>
 
@@ -1299,29 +1293,21 @@ function CompanyForm({
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="company-seo-image"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Social sharing image URL
-            </label>
-
-            <input
-              id="company-seo-image"
-              name="seoOgImageUrl"
-              type="url"
-              value={formValues.seoOgImageUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="https://..."
-              className={inputClasses}
-            />
-
-            <CompanyFieldError
-              message={getFieldError("seo.ogImageUrl", "seoOgImageUrl", "seo")}
-            />
-          </div>
+          <MediaField
+            id="company-seo-image"
+            name="seoOgImageUrl"
+            label="Social sharing image URL"
+            value={formValues.seoOgImageUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Company Social Image"
+            placeholder="https://..."
+            helpText="Paste an external social sharing image URL or choose an image/SVG from the Media Library."
+            error={getFieldError("seo.ogImageUrl", "seoOgImageUrl", "seo")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
         </div>
       </section>
 

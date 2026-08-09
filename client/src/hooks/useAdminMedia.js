@@ -20,6 +20,36 @@ function normalizeStringFilter(value) {
   return cleanValue || undefined;
 }
 
+function normalizeStringArrayFilter(value) {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const values = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : value;
+
+  if (!Array.isArray(values)) {
+    return values;
+  }
+
+  const normalizedValues = [
+    ...new Set(
+      values
+        .map((item) =>
+          String(item || "")
+            .trim()
+            .toLowerCase(),
+        )
+        .filter(Boolean),
+    ),
+  ];
+
+  return normalizedValues.length > 0 ? normalizedValues : undefined;
+}
+
 function normalizePositiveIntegerFilter(value, fallbackValue) {
   if (value === undefined || value === null || value === "") {
     return fallbackValue;
@@ -35,6 +65,8 @@ function normalizeFiltersForHook(filters) {
     search: normalizeStringFilter(filters.search),
 
     mediaType: normalizeStringFilter(filters.mediaType),
+
+    mediaTypes: normalizeStringArrayFilter(filters.mediaTypes),
 
     folder: normalizeStringFilter(filters.folder),
 
@@ -61,12 +93,17 @@ function getErrorMessage(error) {
 }
 
 export default function useAdminMedia(accessToken, filters = {}) {
+  const mediaTypesKey = Array.isArray(filters.mediaTypes)
+    ? filters.mediaTypes.join("|")
+    : String(filters.mediaTypes || "");
+
   const normalizedFilters = useMemo(
     () => normalizeFiltersForHook(filters),
     [
       filters.folder,
       filters.limit,
       filters.mediaType,
+      mediaTypesKey,
       filters.page,
       filters.search,
       filters.sort,
@@ -245,5 +282,6 @@ export {
   getErrorMessage,
   normalizeFiltersForHook,
   normalizePositiveIntegerFilter,
+  normalizeStringArrayFilter,
   normalizeStringFilter,
 };

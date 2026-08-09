@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createEducationDefaultSlug,
   createEducationPayload,
@@ -38,6 +40,8 @@ function EducationForm({
   initialValues = defaultEducationFormValues,
   onSubmit,
   submitLabel = "Save Education",
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
   const [localErrors, setLocalErrors] = useState({});
@@ -565,52 +569,38 @@ function EducationForm({
             <EducationFieldError message={getFieldError("institutionUrl")} />
           </div>
 
-          <div>
-            <label
-              htmlFor="education-certificate-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Certificate URL
-            </label>
-
-            <input
-              id="education-certificate-url"
-              name="certificateUrl"
-              type="url"
-              value={formValues.certificateUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.com/certificate"
-              aria-invalid={Boolean(getFieldError("certificateUrl"))}
-              className={inputClasses}
-            />
-
-            <EducationFieldError message={getFieldError("certificateUrl")} />
-          </div>
+          <MediaField
+            id="education-certificate-url"
+            name="certificateUrl"
+            label="Certificate URL"
+            value={formValues.certificateUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["document", "image", "svg"]}
+            pickerTitle="Choose Education Certificate"
+            placeholder="https://example.com/certificate"
+            helpText="Paste an external certificate URL or choose a PDF/image/SVG from the Media Library."
+            error={getFieldError("certificateUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
 
           <div className="md:col-span-2">
-            <label
-              htmlFor="education-logo-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Institution Logo URL
-            </label>
-
-            <input
+            <MediaField
               id="education-logo-url"
               name="logoUrl"
-              type="url"
+              label="Institution Logo URL"
               value={formValues.logoUrl}
               onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
+              accessToken={accessToken}
+              allowedTypes={["image", "svg"]}
+              pickerTitle="Choose Institution Logo"
               placeholder="https://example.edu/logo.png"
-              aria-invalid={Boolean(getFieldError("logoUrl"))}
-              className={inputClasses}
+              helpText="Paste an external logo URL or choose an image/SVG from the Media Library."
+              error={getFieldError("logoUrl")}
+              disabled={isSubmitting}
+              onUnauthorized={onMediaUnauthorized}
             />
-
-            <EducationFieldError message={getFieldError("logoUrl")} />
 
             {formValues.logoUrl && (
               <div className="mt-4 flex min-h-32 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">

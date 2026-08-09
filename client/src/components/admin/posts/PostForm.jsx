@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createPostPayload,
   createPostSlug,
@@ -48,6 +50,8 @@ function PostForm({
   projectOptions = [],
   areProjectsLoading = false,
   onSubmittingChange,
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
   const [localErrors, setLocalErrors] = useState({});
@@ -135,9 +139,14 @@ function PostForm({
     setServerErrors(clearErrors);
   }
 
-  function handleInputChange(event) {
+  function handleInputChange(event, selectedMedia = null) {
     const { name, value, type, checked } = event.target;
     const nextValue = type === "checkbox" ? checked : value;
+    const selectedMediaAltText = String(selectedMedia?.altText || "").trim();
+    const shouldPopulateFeaturedImageAlt =
+      name === "featuredImageUrl" &&
+      Boolean(selectedMediaAltText) &&
+      !String(formValues.featuredImageAlt || "").trim();
 
     setFormValues((currentValues) => {
       if (name.startsWith("seo.")) {
@@ -161,6 +170,10 @@ function PostForm({
         updatedValues.slug = createPostSlug(value);
       }
 
+      if (shouldPopulateFeaturedImageAlt) {
+        updatedValues.featuredImageAlt = selectedMediaAltText;
+      }
+
       return updatedValues;
     });
 
@@ -168,7 +181,10 @@ function PostForm({
       setIsSlugManuallyEdited(Boolean(value.trim()));
     }
 
-    clearFieldErrors(name);
+    clearFieldErrors(
+      name,
+      ...(shouldPopulateFeaturedImageAlt ? ["featuredImageAlt"] : []),
+    );
 
     if (name.startsWith("seo.")) {
       clearFieldErrors("seo", name);
@@ -464,29 +480,21 @@ function PostForm({
         </h2>
 
         <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="post-featured-image-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Featured Image URL
-            </label>
-
-            <input
-              id="post-featured-image-url"
-              name="featuredImageUrl"
-              type="url"
-              value={formValues.featuredImageUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.com/article.jpg"
-              aria-invalid={Boolean(getFieldError("featuredImageUrl"))}
-              className={inputClasses}
-            />
-
-            <PostFieldError message={getFieldError("featuredImageUrl")} />
-          </div>
+          <MediaField
+            id="post-featured-image-url"
+            name="featuredImageUrl"
+            label="Featured Image URL"
+            value={formValues.featuredImageUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Featured Image"
+            placeholder="https://example.com/article.jpg"
+            helpText="Paste an external image URL or choose an image/SVG from the Media Library. Media alt text fills the featured image alt field only when it is currently empty."
+            error={getFieldError("featuredImageUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
 
           <div>
             <label
@@ -774,33 +782,21 @@ web development`}
             <PostFieldError message={getFieldError("seo.keywords", "seo")} />
           </div>
 
-          <div>
-            <label
-              htmlFor="post-seo-og-image"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Open Graph Image URL
-            </label>
-
-            <input
-              id="post-seo-og-image"
-              name="seo.ogImageUrl"
-              type="url"
-              value={formValues.seo.ogImageUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.com/social-image.jpg"
-              aria-invalid={Boolean(
-                getFieldError("seo.ogImageUrl", "seo"),
-              )}
-              className={inputClasses}
-            />
-
-            <PostFieldError
-              message={getFieldError("seo.ogImageUrl", "seo")}
-            />
-          </div>
+          <MediaField
+            id="post-seo-og-image"
+            name="seo.ogImageUrl"
+            label="Open Graph Image URL"
+            value={formValues.seo.ogImageUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Open Graph Image"
+            placeholder="https://example.com/social-image.jpg"
+            helpText="Paste an external social image URL or choose an image/SVG from the Media Library."
+            error={getFieldError("seo.ogImageUrl", "seo")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
         </div>
       </section>
 

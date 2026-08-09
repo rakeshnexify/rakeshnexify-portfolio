@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 
+import MediaField from "../media/MediaField";
+
 import {
   createSkillPayload,
   createSkillSlug,
@@ -34,6 +36,8 @@ function SkillForm({
   initialValues = defaultSkillFormValues,
   onSubmit,
   submitLabel = "Save Skill",
+  accessToken = "",
+  onMediaUnauthorized,
 }) {
   const [formValues, setFormValues] = useState(initialValues);
   const [localErrors, setLocalErrors] = useState({});
@@ -416,29 +420,21 @@ function SkillForm({
             <SkillFieldError message={getFieldError("icon")} />
           </div>
 
-          <div>
-            <label
-              htmlFor="skill-icon-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Icon Image URL
-            </label>
-
-            <input
-              id="skill-icon-url"
-              name="iconUrl"
-              type="url"
-              value={formValues.iconUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.com/javascript.svg"
-              aria-invalid={Boolean(getFieldError("iconUrl"))}
-              className={inputClasses}
-            />
-
-            <SkillFieldError message={getFieldError("iconUrl")} />
-          </div>
+          <MediaField
+            id="skill-icon-url"
+            name="iconUrl"
+            label="Icon Image URL"
+            value={formValues.iconUrl}
+            onChange={handleInputChange}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Skill Icon"
+            placeholder="https://example.com/javascript.svg"
+            helpText="Paste an external icon URL or choose an image/SVG from the Media Library."
+            error={getFieldError("iconUrl")}
+            disabled={isSubmitting}
+            onUnauthorized={onMediaUnauthorized}
+          />
         </div>
       </section>
 

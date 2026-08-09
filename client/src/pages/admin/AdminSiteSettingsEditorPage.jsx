@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router";
 
 import SiteSettingsForm from "../../components/admin/site-settings/SiteSettingsForm";
@@ -53,6 +53,20 @@ function AdminSiteSettingsEditorPage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const currentPagePath = pageDefinition?.path || "/admin/site-settings";
+
+  const handleMediaUnauthorized = useCallback(() => {
+    logout();
+
+    navigate("/admin/login", {
+      replace: true,
+
+      state: {
+        from: {
+          pathname: currentPagePath,
+        },
+      },
+    });
+  }, [currentPagePath, logout, navigate]);
 
   useEffect(() => {
     if (!accessToken || !pageDefinition) {
@@ -332,6 +346,8 @@ function AdminSiteSettingsEditorPage() {
               cancelLabel="Back to Settings"
               onSubmit={handleSubmit}
               submitLabel={`Save ${pageDefinition.shortTitle} Settings`}
+              accessToken={accessToken}
+              onMediaUnauthorized={handleMediaUnauthorized}
             />
           </div>
         )}

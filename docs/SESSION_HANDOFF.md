@@ -10,160 +10,249 @@ Repository: `D:\rakeshnexify-portfolio`
 
 Branch: `main`
 
-Latest verified functional/documentation checkpoint before this handoff closeout:
+Latest verified pushed checkpoint before the current Media Picker rollout:
 
-`82943ad Consolidate project documentation memory`
+`ae38dac Close Media documentation handoff`
 
-Previous Media implementation checkpoint:
+The current Media Picker rollout is implemented and runtime-verified but is still UNCOMMITTED.
 
-`b6134e1 Complete dynamic Media Management`
+Do not start the next roadmap module until this rollout is staged, reviewed, committed, pushed, and the working tree is verified clean.
 
-Verified remote state before this handoff-only closeout:
+## Current Active Work
 
-- `main` and `origin/main` were synchronized.
-- `HEAD`, `origin/main`, and `origin/HEAD` resolved to `82943ad`.
-- Working tree was clean.
-- Media implementation and documentation consolidation were pushed successfully.
+### Media Picker Rollout Across Existing Admin Forms
 
-Important:
+The rollout extends the reusable Media Library picker to compatible media URL fields across existing Admin modules while preserving manual URL entry.
 
-This file is intended to be committed as a final handoff-only closeout after replacement. Its own future commit hash is intentionally not embedded here to avoid self-referential commit churn. Future sessions must verify the latest commit from current Git state.
+Integrated modules:
 
-## Recently Completed
+- Site Settings
+- Services
+- Statistics
+- Skills
+- Education
+- Experience
+- Testimonials
+- Posts / Blog / News
+- Team
+- Companies
 
-### Media Management
+Existing Project Media Picker integration remains in place.
 
-Completed, reviewed, committed, and pushed.
+### Shared Media Picker Improvements
 
-Implementation checkpoint:
+The rollout also adds/updates:
 
-`b6134e1 Complete dynamic Media Management`
+- server-backed `mediaTypes` filtering for multiple compatible Media types
+- `mediaType` for single-type filtering
+- `mediaType` / `mediaTypes` mutual exclusivity by query-key presence
+- structured `400` for blank/invalid `mediaTypes`
+- accurate multi-type pagination/count using the same MongoDB filter
+- `All Compatible` picker option for multi-type fields
+- stable Media unauthorized callbacks in Admin editors
+- `MediaField` accessibility via `aria-invalid` and `aria-describedby`
+- companion alt-text auto-fill only when the existing alt field is blank
+- public Service icon rendering with numeric fallback
 
-Verified scope includes:
+Manual external URLs remain supported.
 
-- Cloudinary-backed binary storage
-- MongoDB Media metadata
-- protected `/api/admin/media`
-- `/admin/media`
-- raster image, sanitized SVG, PDF, audio, and video support
-- secure upload validation and SVG sanitization
-- reusable Media Picker
-- Project Media Picker integration
-- reference-aware deletion protection
-- keyboard-accessible Media Picker modal
+Normal website, institution, portfolio, social, email, and phone fields remain normal URL/contact fields and were not converted into Media fields.
 
-Final Media staged-diff review:
+## Field Coverage
 
-`READY TO COMMIT`
+### Site Settings
 
-Server Media dependency audit:
+- `brand.logoUrl` -> image/SVG
+- `brand.faviconUrl` -> image/SVG
+- `owner.profileImageUrl` -> image/SVG
+- `owner.resumeUrl` -> document/PDF
+- `seo.ogImageUrl` -> image/SVG
 
-`0 vulnerabilities`
+Manual external `.ico` favicon URLs remain possible.
 
-### Documentation Consolidation
+### Services
 
-Completed, reviewed, committed, and pushed.
+- `iconUrl` -> image/SVG
+- existing text icon field remains unchanged
+- public `ServiceCard` renders `iconUrl` when valid
+- missing/broken icons fall back to the existing `01/02/03` marker
 
-Documentation checkpoint:
+### Statistics
 
-`82943ad Consolidate project documentation memory`
+- `iconUrl` -> image/SVG
+- text icon field remains unchanged
 
-The active development-memory system is now:
+### Skills
 
-- `docs/PROJECT_MEMORY.md` — permanent architecture and durable project memory
-- `docs/SESSION_HANDOFF.md` — compact current working state
+- `iconUrl` -> image/SVG
+- text icon field remains unchanged
 
-Workflow files migrated to the two-file policy:
+### Education
 
-- `docs/ai/PROJECT_RULEBOOK.md`
-- `docs/ai/CHATGPT_WORKFLOW.md`
-- `docs/ai/CODEX_REVIEW_PROMPTS.md`
-- `docs/ai/MODULE_MASTER_PROMPT.md`
+- `certificateUrl` -> document/image/SVG
+- `logoUrl` -> image/SVG
+- institution website URL remains unchanged
 
-Detailed references kept read-only in place:
+### Experience
 
-- `docs/API_ROUTES.md`
-- `docs/DATABASE_SCHEMA.md`
+- `organizationLogoUrl` -> image/SVG
+- organization website URL remains unchanged
 
-Legacy historical documents archived:
+### Testimonials
 
-- `docs/archive/BUGS.md`
-- `docs/archive/CURRENT_STATUS.md`
-- `docs/archive/DECISIONS.md`
-- `docs/archive/PROJECT_OVERVIEW.md`
-- `docs/archive/PROJECT_STRUCTURE.md`
-- `docs/archive/ROADMAP.md`
+- `profileImageUrl` -> image/SVG
+- selected Media `altText` fills `profileImageAlt` only when the current alt field is blank
 
-Final documentation consolidation review:
+### Posts
 
-`DOCUMENTATION CONSOLIDATION IS CLEAR TO STAGE`
+- `featuredImageUrl` -> image/SVG
+- selected Media `altText` fills `featuredImageAlt` only when blank
+- `seo.ogImageUrl` -> image/SVG
+- existing request abort, request-ID, mounted-state, and navigation protections remain intact
 
-Final documentation staged scope was documentation-only and passed `git diff --cached --check`.
+### Team
 
-## Current Module
+- `profileImageUrl` -> image/SVG
+- selected Media `altText` fills `profileImageAlt` only when blank
+- `coverImageUrl` -> image/SVG
+- flattened `seoOgImageUrl` -> image/SVG
+- website, portfolio, and social URLs remain unchanged
 
-No implementation module is currently active.
+### Companies
 
-The Media and documentation closeout is complete.
+- `logoUrl` -> image/SVG
+- `coverImageUrl` -> image/SVG
+- flattened `seoOgImageUrl` -> image/SVG
+- website and social URLs remain unchanged
 
-Next development module:
+## Review Findings and Resolution
 
-`Leads / CRM Management`
+Initial complete-integration Codex review found:
 
-Do not start implementation until the existing `ContactMessage` architecture is inspected and final CRM scope is approved.
+A. MUST FIX
 
-## Current Changes
+- `mediaType` / `mediaTypes` exclusivity could be bypassed with empty query values.
 
-Before replacing this handoff file:
+B. RECOMMENDED
 
-- working tree was clean
-- `main` matched `origin/main`
+- corrected Service icon URLs could remain hidden after an earlier image error
+- Team profile alt-error clearing depended on a deferred state updater
+- `MediaField` had lost invalid-state accessibility associations
 
-After replacing this file, the only intended working-tree change should be:
+All findings were fixed.
 
-- `docs/SESSION_HANDOFF.md`
+Re-review result:
 
-No client/server/package implementation change should be present.
+- A. MUST FIX BEFORE COMMIT: None
+- B. RECOMMENDED: None
+- C. OPTIONAL / FUTURE: No rollout-specific work identified
+- D. REJECT / NOT AN ISSUE: rollout behavior and safeguards verified
 
-## Current Test Status
+Codex verdict:
 
-Verified Media/module checks:
+`VERDICT: READY FOR FINAL STAGED REVIEW`
+
+## Current Validation Status
+
+Latest verified checks after all review fixes:
 
 - `npm run check` — passed
 - Vite production build — passed
-- `npm audit --prefix server` — `0 vulnerabilities`
-- Media runtime/security verification — complete
-- final Media staged-diff Codex review — clear
+- 189 modules transformed
+- `git diff --check` — no actual whitespace errors
+- Media Picker runtime verification — passed across rollout modules
+- Companies runtime verification — passed
+- Team profile/cover Media save and public rendering — passed
+- Service public icon rendering — passed
+- SVG multi-type picker behavior — passed
 
-Verified documentation checks:
+Known non-blocking output:
 
-- `git diff --check` — passed
-- documentation secret scans — passed
-- two-file memory review — passed
-- workflow Markdown/code-fence review — passed
-- final documentation consistency review — passed
-- final documentation staged-diff scope — clean
+- Vite client bundle remains above the recommended 500 kB chunk-size threshold.
+- CRLF-to-LF Git messages are line-ending conversion warnings, not whitespace errors.
 
-Verified Git push:
+## Current Staged Working Tree
 
-- `b6134e1` pushed to `origin/main`
-- `82943ad` pushed to `origin/main`
-- `main` and `origin/main` synchronized before this handoff-only update
+The final rollout scope is staged.
+
+Exactly 28 modified files are staged:
+
+- 26 implementation files
+- `docs/PROJECT_MEMORY.md`
+- `docs/SESSION_HANDOFF.md`
+
+The staged implementation files are:
+
+- `client/src/components/admin/companies/CompanyForm.jsx`
+- `client/src/components/admin/education/EducationForm.jsx`
+- `client/src/components/admin/experience/ExperienceForm.jsx`
+- `client/src/components/admin/media/MediaField.jsx`
+- `client/src/components/admin/media/MediaPicker.jsx`
+- `client/src/components/admin/posts/PostForm.jsx`
+- `client/src/components/admin/services/ServiceForm.jsx`
+- `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
+- `client/src/components/admin/skills/SkillForm.jsx`
+- `client/src/components/admin/statistics/StatisticForm.jsx`
+- `client/src/components/admin/team/TeamMemberForm.jsx`
+- `client/src/components/admin/testimonials/TestimonialForm.jsx`
+- `client/src/components/services/ServiceCard.jsx`
+- `client/src/hooks/useAdminMedia.js`
+- `client/src/pages/admin/AdminCompanyEditorPage.jsx`
+- `client/src/pages/admin/AdminEducationEditorPage.jsx`
+- `client/src/pages/admin/AdminExperienceEditorPage.jsx`
+- `client/src/pages/admin/AdminPostEditorPage.jsx`
+- `client/src/pages/admin/AdminServiceEditorPage.jsx`
+- `client/src/pages/admin/AdminSiteSettingsEditorPage.jsx`
+- `client/src/pages/admin/AdminSkillEditorPage.jsx`
+- `client/src/pages/admin/AdminStatisticEditorPage.jsx`
+- `client/src/pages/admin/AdminTeamMemberEditorPage.jsx`
+- `client/src/pages/admin/AdminTestimonialEditorPage.jsx`
+- `client/src/services/adminMediaApi.js`
+- `server/src/controllers/adminMedia.controller.js`
+
+Verified staged scope:
+
+- 28 modified files
+- 1,113 insertions
+- 517 deletions
+- no unstaged overlays
+- no added, removed, renamed, or unexpected staged paths
+- `git diff --cached --check` passed
+
+The final staged Codex review is the current checkpoint.
+
+## Documentation State
+
+Active development-memory files:
+
+- `docs/PROJECT_MEMORY.md`
+- `docs/SESSION_HANDOFF.md`
+
+`PROJECT_MEMORY.md` has been updated for the durable Media Picker rollout architecture, including:
+
+- full compatible Admin-field rollout
+- server-backed multi-type filtering contract
+- manual URL compatibility
+- alt-text auto-fill rule
+- `MediaField` accessibility
+- Service icon rendering/fallback
+- removal of the obsolete partial-adoption limitation
+
+This handoff records the current uncommitted rollout and final closeout sequence.
 
 ## Open Issues
 
-No confirmed Media or documentation blocker is open.
+No confirmed Media Picker rollout blocker is open.
 
 Known non-blocking project items:
 
 - Media reference-detail display is capped at 25 records.
 - Media deletion has a narrow reference-check/provider-delete TOCTOU window.
-- Media Picker is integrated into Project fields, not every compatible Admin form.
 - Client production bundle remains above Vite's recommended chunk-size threshold.
-- Current client dependency audit reports two high-severity dependency-chain findings and requires a separate controlled review.
+- Current client dependency audit has previously reported two high-severity dependency-chain findings and requires a separate controlled review.
 - Automated test coverage remains limited.
 - Source code contains the correct Site Settings tagline, but the deployed MongoDB value remains unverified.
-- `README.md` remains materially stale and should receive a separate focused public/setup documentation refresh later.
+- `README.md` remains materially stale and should receive a separate focused refresh later.
 
 Do not run:
 
@@ -171,24 +260,41 @@ Do not run:
 
 ## Next Action
 
-1. Commit and push this handoff-only update.
-2. Verify:
+The implementation rollout is staged and the final staged review is the current checkpoint.
+
+After this handoff correction is staged again:
+
+1. Run:
+   - `git diff --cached --check`
+   - `git diff --cached --stat`
+   - `git status -sb`
+2. Confirm the staged scope is still exactly the intended 28 files with no unstaged overlay.
+3. Run one final READ-ONLY Codex review of the STAGED diff only.
+4. If the staged review returns `VERDICT: READY TO COMMIT`, commit and push the rollout.
+5. Verify:
    - `git status -sb`
    - latest Git log
    - `main` and `origin/main` synchronized
    - working tree clean
-3. Start planning `Leads / CRM Management`.
-4. Before designing CRM, inspect the current `ContactMessage` model, controller, routes, Admin UI, and public contact submission flow.
-5. Preserve the existing public contact API contract unless repository evidence justifies a compatible migration.
-6. Avoid creating duplicate inquiry/lead data architecture.
+6. Only then move to `Leads / CRM Management`.
 
-## Upcoming Modules
+## Next Development Module
 
-Next:
+After Media Picker rollout closeout:
 
 `Leads / CRM Management`
 
-Then:
+Before implementation:
+
+- inspect the current `ContactMessage` model
+- inspect public contact submission
+- inspect Admin Contact Messages UI/API
+- extend the existing inquiry architecture rather than duplicating it
+- preserve the existing public contact API contract unless repository evidence justifies a compatible migration
+
+## Upcoming Modules
+
+After Leads / CRM Management:
 
 1. Certifications & Achievements
 2. Service Packages / Pricing

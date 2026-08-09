@@ -11,10 +11,23 @@ const DEFAULT_PICKER_FILTERS = {
   search: "",
   folder: "",
   mediaType: "",
+  mediaTypes: [],
   sort: "newest",
   page: 1,
   limit: 24,
 };
+
+function areSameMediaTypes(firstTypes, secondTypes) {
+  if (!Array.isArray(firstTypes) || !Array.isArray(secondTypes)) {
+    return false;
+  }
+
+  if (firstTypes.length !== secondTypes.length) {
+    return false;
+  }
+
+  return firstTypes.every((type, index) => type === secondTypes[index]);
+}
 
 function MediaPicker({
   accessToken,
@@ -60,22 +73,88 @@ function MediaPicker({
     : ALL_MEDIA_TYPES;
 
   useEffect(() => {
-    if (!hasTypeRestriction) {
-      return;
-    }
-
     setFilters((currentFilters) => {
-      if (normalizedAllowedTypes.includes(currentFilters.mediaType)) {
+      if (!hasTypeRestriction) {
+        if (
+          !currentFilters.mediaType &&
+          (!Array.isArray(currentFilters.mediaTypes) ||
+            currentFilters.mediaTypes.length === 0)
+        ) {
+          return currentFilters;
+        }
+
+        return {
+          ...currentFilters,
+          mediaType: "",
+          mediaTypes: [],
+          page: 1,
+        };
+      }
+
+      if (normalizedAllowedTypes.length === 1) {
+        const onlyAllowedType = normalizedAllowedTypes[0];
+
+        if (
+          currentFilters.mediaType === onlyAllowedType &&
+          (!Array.isArray(currentFilters.mediaTypes) ||
+            currentFilters.mediaTypes.length === 0)
+        ) {
+          return currentFilters;
+        }
+
+        return {
+          ...currentFilters,
+          mediaType: onlyAllowedType,
+          mediaTypes: [],
+          page: 1,
+        };
+      }
+
+      if (
+        currentFilters.mediaType &&
+        normalizedAllowedTypes.includes(currentFilters.mediaType)
+      ) {
+        if (
+          !Array.isArray(currentFilters.mediaTypes) ||
+          currentFilters.mediaTypes.length === 0
+        ) {
+          return currentFilters;
+        }
+
+        return {
+          ...currentFilters,
+          mediaTypes: [],
+          page: 1,
+        };
+      }
+
+      if (
+        !currentFilters.mediaType &&
+        areSameMediaTypes(
+          currentFilters.mediaTypes,
+          normalizedAllowedTypes,
+        )
+      ) {
         return currentFilters;
       }
 
       return {
         ...currentFilters,
-        mediaType: normalizedAllowedTypes[0],
+        mediaType: "",
+        mediaTypes: normalizedAllowedTypes,
         page: 1,
       };
     });
   }, [allowedTypesKey, hasTypeRestriction, normalizedAllowedTypes]);
+
+  const hasMultipleAllowedTypes =
+    hasTypeRestriction && normalizedAllowedTypes.length > 1;
+
+  const selectedTypeOption =
+    hasMultipleAllowedTypes && !filters.mediaType
+      ? "__compatible__"
+      : filters.mediaType;
+
 
   const {
     media,
@@ -164,11 +243,25 @@ function MediaPicker({
   }
 
   function handleTypeChange(event) {
-    setFilters((currentFilters) => ({
-      ...currentFilters,
-      mediaType: event.target.value,
-      page: 1,
-    }));
+    const selectedType = event.target.value;
+
+    setFilters((currentFilters) => {
+      if (selectedType === "__compatible__") {
+        return {
+          ...currentFilters,
+          mediaType: "",
+          mediaTypes: normalizedAllowedTypes,
+          page: 1,
+        };
+      }
+
+      return {
+        ...currentFilters,
+        mediaType: selectedType,
+        mediaTypes: [],
+        page: 1,
+      };
+    });
   }
 
   function handlePageChange(nextPage) {
@@ -197,11 +290,15 @@ function MediaPicker({
         />
 
         <select
-          value={filters.mediaType}
+          value={selectedTypeOption}
           onChange={handleTypeChange}
           className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
         >
           {!hasTypeRestriction && <option value="">All Media Types</option>}
+
+          {hasMultipleAllowedTypes && (
+            <option value="__compatible__">All Compatible</option>
+          )}
 
           {typeOptions.map((type) => (
             <option key={type} value={type}>

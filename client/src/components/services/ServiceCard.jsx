@@ -67,8 +67,22 @@ function ServiceCard({
   return (
     <article className="group flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-slate-200/70 sm:p-7">
       <div className="flex items-start justify-between gap-4">
-        <div className="grid size-12 place-items-center rounded-2xl bg-brand-50 text-sm font-extrabold text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
-          {String(index + 1).padStart(2, "0")}
+        <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-brand-50 text-sm font-extrabold text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
+          <span aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+
+          {service?.iconUrl && (
+            <img
+              key={service.iconUrl}
+              src={service.iconUrl}
+              alt=""
+              className="absolute inset-0 h-full w-full bg-white object-contain p-2"
+              onError={(event) => {
+                event.currentTarget.hidden = true;
+              }}
+            />
+          )}
         </div>
 
         <span
