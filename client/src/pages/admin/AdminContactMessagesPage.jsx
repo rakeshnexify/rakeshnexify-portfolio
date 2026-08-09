@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router";
 import useAdminAuth from "../../hooks/useAdminAuth";
 
 import {
+  convertAdminContactMessageToLead,
   deleteAdminContactMessage,
   fetchAdminContactMessages,
   updateAdminContactMessage,
@@ -435,6 +436,53 @@ function AdminContactMessagesPage() {
     }
   }
 
+  async function handleConvertToLead(message) {
+    if (!message?._id || actionKey) {
+      return;
+    }
+
+    const isConfirmed = window.confirm(
+      `Convert the enquiry from "${message.name}" into a CRM Lead?\n\nSubject: ${message.subject}\n\nThe original Contact Message will remain unchanged.`,
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    const currentActionKey = `convert-${message._id}`;
+
+    try {
+      setActionKey(currentActionKey);
+      setError("");
+      setSuccessMessage("");
+
+      const response = await convertAdminContactMessageToLead(
+        accessToken,
+        message._id,
+      );
+
+      const createdLead = response.lead;
+
+      if (!createdLead?._id) {
+        throw new Error(
+          "The Lead was created, but its ID was not returned by the server.",
+        );
+      }
+
+      navigate(`/admin/leads/${createdLead._id}/edit`, {
+        state: {
+          successMessage:
+            response.message ||
+            `The enquiry from "${message.name}" was converted to a Lead.`,
+        },
+      });
+    } catch (requestError) {
+      handleActionError(requestError);
+    } finally {
+      setActionKey("");
+    }
+  }
+
   async function handleDeleteMessage(message) {
     if (!message?._id || actionKey) {
       return;
@@ -483,6 +531,10 @@ function AdminContactMessagesPage() {
       replace: true,
     });
   }
+
+  const canConvertMessages = ["super-admin", "admin", "editor"].includes(
+    admin?.role,
+  );
 
   const canDeleteMessages = ["super-admin", "admin"].includes(admin?.role);
 
@@ -809,6 +861,8 @@ function AdminContactMessagesPage() {
 
               const isNoteAction = actionKey === `note-${message._id}`;
 
+              const isConvertAction = actionKey === `convert-${message._id}`;
+
               const isDeleteAction = actionKey === `delete-${message._id}`;
 
               return (
@@ -1014,6 +1068,35 @@ function AdminContactMessagesPage() {
                               {isNoteAction ? "Saving..." : "Save Admin Note"}
                             </button>
                           </div>
+                        </div>
+
+                        <div className="xl:col-span-2 flex flex-col gap-4 rounded-2xl border border-brand-200 bg-brand-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <p className="font-bold text-brand-800">
+                              CRM Lead conversion
+                            </p>
+
+                            <p className="mt-1 text-sm leading-6 text-brand-700">
+                              Convert this enquiry into a CRM Lead while keeping
+                              the original Contact Message unchanged.
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleConvertToLead(message)}
+                            disabled={Boolean(actionKey) || !canConvertMessages}
+                            title={
+                              canConvertMessages
+                                ? "Convert this Contact Message to a CRM Lead"
+                                : "Your role cannot convert Contact Messages to Leads"
+                            }
+                            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {isConvertAction
+                              ? "Converting..."
+                              : "Convert to Lead"}
+                          </button>
                         </div>
 
                         <div className="xl:col-span-2 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 sm:flex-row sm:items-center sm:justify-between">

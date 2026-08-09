@@ -228,6 +228,41 @@ async function updateAdminContactMessage(accessToken, messageId, messageData) {
   };
 }
 
+async function convertAdminContactMessageToLead(
+  accessToken,
+  messageId,
+  conversionData = {},
+) {
+  if (!messageId) {
+    throw new Error("Contact message ID is required.");
+  }
+
+  const response = await fetch(
+    createApiUrl(
+      `${ADMIN_CONTACT_MESSAGES_PATH}/${messageId}/convert-to-lead`,
+    ),
+    {
+      method: "POST",
+
+      headers: {
+        ...createAuthorizationHeaders(accessToken),
+
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify(conversionData),
+    },
+  );
+
+  const responseData = await readAdminContactMessagesResponse(response);
+
+  return {
+    message: responseData.message,
+
+    lead: responseData.data,
+  };
+}
+
 async function deleteAdminContactMessage(accessToken, messageId) {
   if (!messageId) {
     throw new Error("Contact message ID is required.");
@@ -253,6 +288,7 @@ async function deleteAdminContactMessage(accessToken, messageId) {
 
 export {
   contactMessageStatuses,
+  convertAdminContactMessageToLead,
   deleteAdminContactMessage,
   fetchAdminContactMessageById,
   fetchAdminContactMessages,

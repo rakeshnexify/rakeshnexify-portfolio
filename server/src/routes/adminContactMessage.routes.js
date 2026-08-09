@@ -7,6 +7,8 @@ import {
   updateAdminContactMessage,
 } from "../controllers/adminContactMessage.controller.js";
 
+import { convertContactMessageToLead } from "../controllers/adminLead.controller.js";
+
 import {
   requireAdminAuth,
   requireAdminRoles,
@@ -17,6 +19,12 @@ const router = Router();
 router.use(requireAdminAuth);
 
 router.get("/", getAdminContactMessages);
+
+router.post(
+  "/:id/convert-to-lead",
+  requireAdminRoles("super-admin", "admin", "editor"),
+  convertContactMessageToLead,
+);
 
 router.get("/:id", getAdminContactMessageById);
 

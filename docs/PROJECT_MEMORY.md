@@ -346,6 +346,109 @@ Referenced Media is blocked from normal permanent deletion with `409 Conflict`.
 
 See `Permanent Architectural Limitations` for the current reference-detail cap and deletion TOCTOU window.
 
+## Leads / CRM Management
+
+Leads / CRM is an Admin-only sales-opportunity system that extends the existing Contact Message inquiry workflow rather than replacing or duplicating public enquiry capture.
+
+Model: `Lead`
+
+Collection: `leads`
+
+Admin API: `/api/admin/leads`
+
+Admin routes:
+
+- `/admin/leads`
+- `/admin/leads/new`
+- `/admin/leads/:id/edit`
+
+No public Lead API or public Lead page exists.
+
+### Inquiry-to-Lead Contract
+
+`ContactMessage` remains the raw enquiry/inbox record.
+
+`Lead` is the CRM sales opportunity.
+
+Conversion is manual and Admin-driven through:
+
+`POST /api/admin/contact-messages/:id/convert-to-lead`
+
+The original Contact Message remains unchanged after conversion.
+
+`Lead.sourceContactMessage` is the source-of-truth relation.
+
+A partial unique index on `sourceContactMessage` prevents duplicate conversion while allowing manual Leads with no source Contact Message.
+
+Multiple Leads may use the same customer email; Lead email is intentionally not unique.
+
+### Pipeline and Ownership
+
+Lead statuses:
+
+- `new`
+- `qualified`
+- `contacted`
+- `proposal`
+- `negotiation`
+- `won`
+- `lost`
+- `archived`
+
+Lead priorities:
+
+- `low`
+- `medium`
+- `high`
+- `urgent`
+
+Leads support:
+
+- customer/contact details
+- company/source
+- optional Service relation
+- Service slug/title snapshots
+- requirement summary
+- estimated value and currency
+- active Admin assignment
+- follow-up and last-contact dates
+- status metadata
+- lost reason
+- display order
+- private CRM notes
+- created/updated Admin audit fields
+
+Private CRM notes are server-authored with acting Admin identity and timestamp, and are not writable through normal Lead create/update payloads.
+
+### Service Snapshot Contract
+
+Historical Service snapshots must survive normal Lead maintenance.
+
+If the Service relation is unchanged, the existing Lead snapshot remains authoritative even if the current Service record was renamed.
+
+If the Service relation changes to another valid Service, the Lead stores that Service's current authoritative slug/title snapshot.
+
+If the Service relation is cleared, the relation becomes `null` while the previous historical slug/title snapshot remains.
+
+This contract applies to manual Leads and Contact Message-converted Leads.
+
+### RBAC
+
+Read:
+
+- any authenticated active Admin
+
+Create/update/private note/conversion:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Permanent delete:
+
+- `super-admin`
+- `admin`
+
 ## Completed Module Inventory
 
 | Module | Model / Collection | Public API | Admin API | Public Routes | Admin Routes / Notes |
@@ -356,6 +459,7 @@ See `Permanent Architectural Limitations` for the current reference-detail cap a
 | Projects | `Project` / `projects` | `/api/projects` | `/api/admin/projects` | `/projects`, `/projects/:slug` | Admin list/create/edit; Media Picker integrated |
 | Companies | `Company` / `companies` | `/api/companies` | `/api/admin/companies` | `/companies`, `/companies/:slug` | Admin list/create/edit; Media Picker integrated |
 | Contact Messages | `ContactMessage` / `contact_messages` | `POST /api/contact-messages` | `/api/admin/contact-messages` | Homepage contact workflow | `/admin/contact-messages`; rate-limited public inquiry |
+| Leads / CRM | `Lead` / `leads` | None | `/api/admin/leads` | None | `/admin/leads`, `/admin/leads/new`, `/admin/leads/:id/edit`; manual Contact Message conversion, pipeline/follow-up, assignment, Service snapshots, private CRM notes |
 | Team | `TeamMember` / `teamMembers` | `/api/team` | `/api/admin/team` | `/team`, `/team/:slug` | `/admin/team`, `/admin/team/new`, `/admin/team/:id/edit`; relations to Projects, Companies, Services; Media Picker integrated |
 | Skills | `Skill` / `skills` | `/api/skills` | `/api/admin/skills` | `/skills` | `/admin/skills`, `/admin/skills/new`, `/admin/skills/:id/edit`; private `nameKey` |
 | Education | `Education` / `education` | `/api/education` | `/api/admin/education` | `/education` | `/admin/education`, `/admin/education/new`, `/admin/education/:id/edit`; private `identityKey` |
@@ -380,6 +484,8 @@ Prefer extending these instead of duplicating architecture:
 - AbortSignal/stale-safe hooks
 - Admin list/editor/form patterns
 - loading/error/empty states
+- Contact Message -> Lead conversion pattern
+- CRM pipeline/follow-up/private-note patterns
 - Media Picker
 
 ## Long-Term Decisions
@@ -401,6 +507,10 @@ Prefer extending these instead of duplicating architecture:
 - Single-type and multi-type Media Picker filtering must remain server-backed so pagination/counts stay correct.
 - Companion alt text from selected Media may only auto-fill when the existing alt field is blank.
 - Referenced Media must be protected from normal deletion.
+- Contact Messages remain raw enquiries; Leads remain CRM sales opportunities.
+- Contact Message -> Lead conversion stays explicit and Admin-driven rather than automatic.
+- `Lead.sourceContactMessage` remains the source-of-truth conversion relation; do not require a reverse Lead ID on ContactMessage unless a future feature justifies it.
+- Historical Lead Service snapshots must be preserved when the relation is unchanged or cleared, and refreshed only when a genuinely different Service is linked.
 - Avoid duplicate models where an existing module substantially owns the domain.
 - Commit only verified work.
 - Never run `npm audit fix --force` without review.
@@ -425,21 +535,19 @@ Temporary build/audit/test warnings belong in `SESSION_HANDOFF.md`.
 
 Approved order:
 
-1. Leads / CRM Management
-2. Certifications & Achievements
-3. Service Packages / Pricing
-4. FAQ
-5. Clients / Partners
-6. Case Studies
-7. Appointment / Consultation Booking
-8. Newsletter / Subscribers Management
-9. Admin Analytics Dashboard
-10. Admin Activity / Audit Log
-11. Menu / Navigation Management
+1. Certifications & Achievements
+2. Service Packages / Pricing
+3. FAQ
+4. Clients / Partners
+5. Case Studies
+6. Appointment / Consultation Booking
+7. Newsletter / Subscribers Management
+8. Admin Analytics Dashboard
+9. Admin Activity / Audit Log
+10. Menu / Navigation Management
 
 Overlap rules:
 
-- Leads/CRM must extend Contact Messages rather than duplicate inquiry capture.
 - Certifications/Achievements overlaps Education certificates and Experience achievements.
 - Service Packages/Pricing must extend or relate to the existing Services domain rather than duplicate service definitions.
 - Clients/Partners overlaps Companies, Projects, and Testimonials.

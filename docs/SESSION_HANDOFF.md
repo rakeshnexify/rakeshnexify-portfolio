@@ -10,216 +10,336 @@ Repository: `D:\rakeshnexify-portfolio`
 
 Branch: `main`
 
-Latest verified pushed checkpoint before the current Media Picker rollout:
+Latest verified pushed checkpoint before the current CRM work:
 
-`ae38dac Close Media documentation handoff`
+`b0fadca Complete Media Picker rollout`
 
-The current Media Picker rollout is implemented and runtime-verified but is still UNCOMMITTED.
+The current `Leads / CRM Management` module is implemented, reviewed, runtime-verified, documented, and fully staged.
 
-Do not start the next roadmap module until this rollout is staged, reviewed, committed, pushed, and the working tree is verified clean.
+Exactly 18 intended paths are staged:
+
+- 16 CRM implementation files
+- `docs/PROJECT_MEMORY.md`
+- `docs/SESSION_HANDOFF.md`
+
+There is no unstaged overlay, and `git diff --cached --check` has passed.
+
+The final staged Codex review is the current checkpoint.
+
+Do not start the next roadmap module until the staged CRM work is reviewed, committed, pushed, and the working tree is verified clean.
 
 ## Current Active Work
 
-### Media Picker Rollout Across Existing Admin Forms
+### Leads / CRM Management Closeout
 
-The rollout extends the reusable Media Library picker to compatible media URL fields across existing Admin modules while preserving manual URL entry.
+The CRM extends the existing Contact Message enquiry system rather than duplicating inquiry capture.
 
-Integrated modules:
+Architecture:
 
-- Site Settings
-- Services
-- Statistics
-- Skills
-- Education
-- Experience
-- Testimonials
-- Posts / Blog / News
-- Team
-- Companies
+- `ContactMessage` = raw enquiry / inbox
+- `Lead` = CRM sales opportunity
+- Contact Message -> Lead conversion is explicit and Admin-driven
+- the original Contact Message remains unchanged after conversion
+- `Lead.sourceContactMessage` is the source-of-truth conversion relation
+- there is no public Lead API or public Lead page
 
-Existing Project Media Picker integration remains in place.
+Model:
 
-### Shared Media Picker Improvements
+- `Lead`
+- collection: `leads`
 
-The rollout also adds/updates:
+Admin API:
 
-- server-backed `mediaTypes` filtering for multiple compatible Media types
-- `mediaType` for single-type filtering
-- `mediaType` / `mediaTypes` mutual exclusivity by query-key presence
-- structured `400` for blank/invalid `mediaTypes`
-- accurate multi-type pagination/count using the same MongoDB filter
-- `All Compatible` picker option for multi-type fields
-- stable Media unauthorized callbacks in Admin editors
-- `MediaField` accessibility via `aria-invalid` and `aria-describedby`
-- companion alt-text auto-fill only when the existing alt field is blank
-- public Service icon rendering with numeric fallback
+- `GET /api/admin/leads`
+- `POST /api/admin/leads`
+- `GET /api/admin/leads/:id`
+- `PATCH /api/admin/leads/:id`
+- `POST /api/admin/leads/:id/notes`
+- `DELETE /api/admin/leads/:id`
 
-Manual external URLs remain supported.
+Conversion API:
 
-Normal website, institution, portfolio, social, email, and phone fields remain normal URL/contact fields and were not converted into Media fields.
+- `POST /api/admin/contact-messages/:id/convert-to-lead`
 
-## Field Coverage
+Admin routes:
 
-### Site Settings
+- `/admin/leads`
+- `/admin/leads/new`
+- `/admin/leads/:id/edit`
 
-- `brand.logoUrl` -> image/SVG
-- `brand.faviconUrl` -> image/SVG
-- `owner.profileImageUrl` -> image/SVG
-- `owner.resumeUrl` -> document/PDF
-- `seo.ogImageUrl` -> image/SVG
+Dashboard:
 
-Manual external `.ico` favicon URLs remain possible.
+- `Leads / CRM` management card links to `/admin/leads`
 
-### Services
+## CRM Pipeline Contract
 
-- `iconUrl` -> image/SVG
-- existing text icon field remains unchanged
-- public `ServiceCard` renders `iconUrl` when valid
-- missing/broken icons fall back to the existing `01/02/03` marker
+Statuses:
 
-### Statistics
+- `new`
+- `qualified`
+- `contacted`
+- `proposal`
+- `negotiation`
+- `won`
+- `lost`
+- `archived`
 
-- `iconUrl` -> image/SVG
-- text icon field remains unchanged
+Priorities:
 
-### Skills
+- `low`
+- `medium`
+- `high`
+- `urgent`
 
-- `iconUrl` -> image/SVG
-- text icon field remains unchanged
+Lead management supports:
 
-### Education
+- name/email/phone/company/source
+- optional `sourceContactMessage`
+- optional Service relation
+- Service slug/title historical snapshots
+- subject/requirement summary
+- status/priority
+- estimated value/currency
+- active Admin assignment
+- next follow-up and last-contacted dates
+- lost/won/archive status metadata
+- private CRM notes
+- display order
+- created/updated Admin audit fields
 
-- `certificateUrl` -> document/image/SVG
-- `logoUrl` -> image/SVG
-- institution website URL remains unchanged
+Lead email is intentionally not unique.
 
-### Experience
+Manual Leads without a Contact Message relation are valid.
 
-- `organizationLogoUrl` -> image/SVG
-- organization website URL remains unchanged
+## RBAC
 
-### Testimonials
+Read:
 
-- `profileImageUrl` -> image/SVG
-- selected Media `altText` fills `profileImageAlt` only when the current alt field is blank
+- any authenticated active Admin
 
-### Posts
+Create/update/private note/Contact Message conversion:
 
-- `featuredImageUrl` -> image/SVG
-- selected Media `altText` fills `featuredImageAlt` only when blank
-- `seo.ogImageUrl` -> image/SVG
-- existing request abort, request-ID, mounted-state, and navigation protections remain intact
+- `super-admin`
+- `admin`
+- `editor`
 
-### Team
+Permanent delete:
 
-- `profileImageUrl` -> image/SVG
-- selected Media `altText` fills `profileImageAlt` only when blank
-- `coverImageUrl` -> image/SVG
-- flattened `seoOgImageUrl` -> image/SVG
-- website, portfolio, and social URLs remain unchanged
+- `super-admin`
+- `admin`
 
-### Companies
+## Duplicate Conversion Protection
 
-- `logoUrl` -> image/SVG
-- `coverImageUrl` -> image/SVG
-- flattened `seoOgImageUrl` -> image/SVG
-- website and social URLs remain unchanged
+`Lead.sourceContactMessage` has partial unique protection so:
 
-## Review Findings and Resolution
+- one Contact Message cannot create multiple Leads
+- concurrent duplicate conversion is protected
+- duplicate conversion returns structured `409`
+- manual Leads with null/no `sourceContactMessage` remain valid
 
-Initial complete-integration Codex review found:
+The UI surfaces duplicate conversion cleanly.
 
-A. MUST FIX
+A reverse Lead ID is intentionally not stored on ContactMessage.
 
-- `mediaType` / `mediaTypes` exclusivity could be bypassed with empty query values.
+## Historical Service Snapshot Contract
 
-B. RECOMMENDED
+Historical Service snapshots are protected during Lead maintenance.
 
-- corrected Service icon URLs could remain hidden after an earlier image error
-- Team profile alt-error clearing depended on a deferred state updater
-- `MediaField` had lost invalid-state accessibility associations
+Final behavior:
 
-All findings were fixed.
+- unchanged Service relation -> preserve the existing Lead snapshot
+- current Service rename does not silently rewrite old Lead history
+- Service A -> Service B -> save B's authoritative current slug/title
+- Service A -> null -> relation is cleared but A's historical slug/title remain
+- null -> valid Service -> relation and authoritative snapshot are saved
+- Contact Message-converted Leads preserve enquiry Service snapshots
 
-Re-review result:
+The backend is the final enforcement layer; frontend form behavior is compatible with the same contract.
 
-- A. MUST FIX BEFORE COMMIT: None
-- B. RECOMMENDED: None
-- C. OPTIONAL / FUTURE: No rollout-specific work identified
-- D. REJECT / NOT AN ISSUE: rollout behavior and safeguards verified
+## Private CRM Notes
 
-Codex verdict:
+Private Lead notes are Admin-only.
 
-`VERDICT: READY FOR FINAL STAGED REVIEW`
+Behavior:
+
+- notes are added through `/api/admin/leads/:id/notes`
+- notes are not mass-assignable through normal create/update payloads
+- note text is trimmed and validated server-side
+- maximum length is 3000 characters
+- note creator is the acting Admin
+- note timestamp is server-controlled
+- notes persist on reload
+- editor UI shows saved notes newest-first
+- note text is rendered as escaped React text
+
+## Final Review Status
+
+Backend/security checkpoint:
+
+- previous type/query/date/status/safe-integer findings fixed
+- final backend review returned no A/B findings
+- verdict: `BACKEND READY FOR FRONTEND`
+
+Full CRM integration review initially found:
+
+- historical Service snapshots could be overwritten/erased
+- missing estimated value displayed as zero
+
+Both were fixed.
+
+Further Service snapshot re-review found one final unchanged-relation backend guard issue.
+
+That was fixed and re-reviewed successfully.
+
+Final complete UNSTAGED Codex review:
+
+- A. MUST FIX BEFORE DOCUMENTATION/STAGING: None
+- B. RECOMMENDED BEFORE DOCUMENTATION/STAGING: None
+- C. OPTIONAL / FUTURE: None
+
+Final verdict:
+
+`VERDICT: CRM READY FOR DOCUMENTATION AND STAGING`
+
+## Runtime Verification
+
+The user manually tested the CRM against the real local Vite client, Express server, and MongoDB.
+
+Startup:
+
+- Vite localhost:5173 — passed
+- Express localhost:5000 — passed
+- MongoDB `rakeshnexify_portfolio` connection — passed
+
+Admin UI/routes:
+
+- Dashboard Leads / CRM card — passed
+- `/admin/leads` — passed
+- `/admin/leads/new` — passed
+- create/edit forms — passed
+
+Manual Lead behavior:
+
+- create — passed
+- edit — passed
+- status counts — passed
+- priority — passed
+- estimated value formatting — passed
+- null estimated value -> `Not estimated` — passed
+- follow-up persistence — passed
+
+Filters:
+
+- search — passed
+- status — passed
+- priority — passed
+- follow-up — passed
+- clear filters — passed
+
+Contact Message conversion:
+
+- conversion UI — passed
+- conversion POST — passed
+- redirect to Lead editor — passed
+- Contact Message data copied — passed
+- Contact Message Lead source banner — passed
+- Service snapshots copied — passed
+- duplicate conversion rejected — passed
+- only one Lead created per Contact Message — passed
+
+Historical Service behavior:
+
+- unrelated edit preserved snapshots — passed
+- clearing Service relation preserved snapshots — passed
+- cleared relation reopened as `No linked Service` with historical snapshots intact — passed
+- linking a different Service refreshed authoritative snapshots — passed
+- save/reopen persistence — passed
+
+Status metadata:
+
+- New -> Lost — passed
+- lostReason persisted — passed
+- Lost -> Archived — passed
+- lostReason cleared — passed
+- switching Archived -> Lost before save showed an empty lostReason, confirming stale data removal — passed
+- cancel preserved Archived database state
+
+Assignment:
+
+- assign current Admin — passed
+- unassign — passed
+
+Private CRM notes:
+
+- add note — passed
+- reload/reopen persistence — passed
+
+Delete/cleanup:
+
+- permanent Lead delete — passed
+- runtime-test Leads removed
+- final runtime Lead state: 0 Leads
+- all Lead status counts: 0
+- overdue follow-ups: 0
+- follow-ups today: 0
+- original Contact Message remained in the enquiry inbox
 
 ## Current Validation Status
 
-Latest verified checks after all review fixes:
+Latest user-run validation after the final CRM code changes:
 
 - `npm run check` — passed
 - Vite production build — passed
-- 189 modules transformed
+- 195 modules transformed
+- Lead model/controller/routes syntax checks — passed
+- existing project syntax checks — passed
 - `git diff --check` — no actual whitespace errors
-- Media Picker runtime verification — passed across rollout modules
-- Companies runtime verification — passed
-- Team profile/cover Media save and public rendering — passed
-- Service public icon rendering — passed
-- SVG multi-type picker behavior — passed
 
 Known non-blocking output:
 
 - Vite client bundle remains above the recommended 500 kB chunk-size threshold.
 - CRLF-to-LF Git messages are line-ending conversion warnings, not whitespace errors.
 
-## Current Staged Working Tree
+## Current Staged Working Tree Scope
 
-The final rollout scope is staged.
+The intended CRM implementation scope is exactly 16 files, and all 16 implementation files plus the 2 active documentation files are staged.
 
-Exactly 28 modified files are staged:
+Modified implementation files:
 
-- 26 implementation files
+- `client/src/pages/admin/AdminContactMessagesPage.jsx`
+- `client/src/pages/admin/AdminDashboardPage.jsx`
+- `client/src/routes/AppRoutes.jsx`
+- `client/src/services/adminContactMessagesApi.js`
+- `package.json`
+- `server/src/app.js`
+- `server/src/routes/adminContactMessage.routes.js`
+
+New implementation files:
+
+- `client/src/components/admin/leads/LeadForm.jsx`
+- `client/src/hooks/useAdminLeads.js`
+- `client/src/pages/admin/AdminLeadEditorPage.jsx`
+- `client/src/pages/admin/AdminLeadsPage.jsx`
+- `client/src/services/adminLeadsApi.js`
+- `client/src/utils/leadForm.js`
+- `server/src/controllers/adminLead.controller.js`
+- `server/src/models/Lead.js`
+- `server/src/routes/adminLead.routes.js`
+
+Staged active documentation files:
+
 - `docs/PROJECT_MEMORY.md`
 - `docs/SESSION_HANDOFF.md`
 
-The staged implementation files are:
-
-- `client/src/components/admin/companies/CompanyForm.jsx`
-- `client/src/components/admin/education/EducationForm.jsx`
-- `client/src/components/admin/experience/ExperienceForm.jsx`
-- `client/src/components/admin/media/MediaField.jsx`
-- `client/src/components/admin/media/MediaPicker.jsx`
-- `client/src/components/admin/posts/PostForm.jsx`
-- `client/src/components/admin/services/ServiceForm.jsx`
-- `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
-- `client/src/components/admin/skills/SkillForm.jsx`
-- `client/src/components/admin/statistics/StatisticForm.jsx`
-- `client/src/components/admin/team/TeamMemberForm.jsx`
-- `client/src/components/admin/testimonials/TestimonialForm.jsx`
-- `client/src/components/services/ServiceCard.jsx`
-- `client/src/hooks/useAdminMedia.js`
-- `client/src/pages/admin/AdminCompanyEditorPage.jsx`
-- `client/src/pages/admin/AdminEducationEditorPage.jsx`
-- `client/src/pages/admin/AdminExperienceEditorPage.jsx`
-- `client/src/pages/admin/AdminPostEditorPage.jsx`
-- `client/src/pages/admin/AdminServiceEditorPage.jsx`
-- `client/src/pages/admin/AdminSiteSettingsEditorPage.jsx`
-- `client/src/pages/admin/AdminSkillEditorPage.jsx`
-- `client/src/pages/admin/AdminStatisticEditorPage.jsx`
-- `client/src/pages/admin/AdminTeamMemberEditorPage.jsx`
-- `client/src/pages/admin/AdminTestimonialEditorPage.jsx`
-- `client/src/services/adminMediaApi.js`
-- `server/src/controllers/adminMedia.controller.js`
-
 Verified staged scope:
 
-- 28 modified files
-- 1,113 insertions
-- 517 deletions
-- no unstaged overlays
-- no added, removed, renamed, or unexpected staged paths
+- 16 CRM implementation files
+- 2 active documentation files
+- 18 total paths
+- no unstaged overlay
 - `git diff --cached --check` passed
 
-The final staged Codex review is the current checkpoint.
+No other documentation is part of this CRM closeout.
 
 ## Documentation State
 
@@ -228,21 +348,23 @@ Active development-memory files:
 - `docs/PROJECT_MEMORY.md`
 - `docs/SESSION_HANDOFF.md`
 
-`PROJECT_MEMORY.md` has been updated for the durable Media Picker rollout architecture, including:
+`PROJECT_MEMORY.md` has been updated for permanent CRM architecture including:
 
-- full compatible Admin-field rollout
-- server-backed multi-type filtering contract
-- manual URL compatibility
-- alt-text auto-fill rule
-- `MediaField` accessibility
-- Service icon rendering/fallback
-- removal of the obsolete partial-adoption limitation
+- Lead model/API/routes
+- Contact Message -> Lead conversion contract
+- duplicate conversion protection
+- pipeline/status/priority contract
+- RBAC
+- Service historical snapshot rules
+- private CRM notes
+- completed module inventory
+- remaining roadmap now starting with Certifications & Achievements
 
-This handoff records the current uncommitted rollout and final closeout sequence.
+This handoff records the current fully staged CRM closeout state and the exact commit/push sequence that follows a clear staged review.
 
 ## Open Issues
 
-No confirmed Media Picker rollout blocker is open.
+No confirmed Leads / CRM blocker is open.
 
 Known non-blocking project items:
 
@@ -260,56 +382,58 @@ Do not run:
 
 ## Next Action
 
-The implementation rollout is staged and the final staged review is the current checkpoint.
+The CRM implementation and both active documentation files are already staged.
 
-After this handoff correction is staged again:
+Current checkpoint:
 
-1. Run:
-   - `git diff --cached --check`
-   - `git diff --cached --stat`
-   - `git status -sb`
-2. Confirm the staged scope is still exactly the intended 28 files with no unstaged overlay.
-3. Run one final READ-ONLY Codex review of the STAGED diff only.
-4. If the staged review returns `VERDICT: READY TO COMMIT`, commit and push the rollout.
-5. Verify:
+- exactly 18 intended paths staged
+- no unstaged overlay
+- `git diff --cached --check` passed
+- final staged Codex review in progress
+
+If the final staged review returns `VERDICT: READY TO COMMIT`:
+
+1. Commit the staged CRM module.
+2. Push `main` to `origin`.
+3. Verify:
    - `git status -sb`
    - latest Git log
    - `main` and `origin/main` synchronized
    - working tree clean
-6. Only then move to `Leads / CRM Management`.
+4. Only then begin the next roadmap module.
+
+Do not repeat staging unless this handoff itself is changed again before commit.
 
 ## Next Development Module
 
-After Media Picker rollout closeout:
+After CRM closeout:
 
-`Leads / CRM Management`
+`Certifications & Achievements`
 
 Before implementation:
 
-- inspect the current `ContactMessage` model
-- inspect public contact submission
-- inspect Admin Contact Messages UI/API
-- extend the existing inquiry architecture rather than duplicating it
-- preserve the existing public contact API contract unless repository evidence justifies a compatible migration
+- inspect current Education certificate fields
+- inspect Experience achievement fields
+- determine overlap before creating a new model
+- avoid duplicating existing certificate/achievement data unless a separate domain is justified
+- preserve existing publication, SEO, Media Picker, Admin/RBAC, and relation conventions
 
 ## Upcoming Modules
 
-After Leads / CRM Management:
+After Certifications & Achievements:
 
-1. Certifications & Achievements
-2. Service Packages / Pricing
-3. FAQ
-4. Clients / Partners
-5. Case Studies
-6. Appointment / Consultation Booking
-7. Newsletter / Subscribers Management
-8. Admin Analytics Dashboard
-9. Admin Activity / Audit Log
-10. Menu / Navigation Management
+1. Service Packages / Pricing
+2. FAQ
+3. Clients / Partners
+4. Case Studies
+5. Appointment / Consultation Booking
+6. Newsletter / Subscribers Management
+7. Admin Analytics Dashboard
+8. Admin Activity / Audit Log
+9. Menu / Navigation Management
 
 Overlap reminders:
 
-- Leads/CRM must extend beyond Contact Messages rather than duplicate inquiry capture.
 - Certifications/Achievements overlaps Education certificates and Experience achievements.
 - Service Packages/Pricing overlaps Services.
 - Clients/Partners overlaps Companies, Projects, and Testimonials.

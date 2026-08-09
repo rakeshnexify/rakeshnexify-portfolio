@@ -87,6 +87,13 @@ const dashboardModules = [
     path: "/admin/testimonials",
   },
   {
+    title: "Leads / CRM",
+    description:
+      "Manage qualified enquiries and sales opportunities, pipeline status, priority, estimated value, assignments and follow-up schedules.",
+    status: "Management ready",
+    path: "/admin/leads",
+  },
+  {
     title: "Contact Messages",
     description:
       "Review client enquiries, update response status, save private notes and archive completed conversations.",
@@ -167,8 +174,8 @@ function AdminDashboardPage() {
             <p className="mt-4 max-w-2xl break-words leading-7 text-slate-400">
               Manage your portfolio content, services, Skills, Education,
               Experience, projects, Media Library, Blog and News, Team members,
-              companies, Testimonials, enquiries and website settings from this
-              secure dashboard.
+              companies, Testimonials, Leads / CRM, enquiries and website
+              settings from this secure dashboard.
             </p>
           </div>
 

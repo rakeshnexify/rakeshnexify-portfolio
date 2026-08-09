@@ -28,6 +28,8 @@ import AdminEducationEditorPage from "../pages/admin/AdminEducationEditorPage";
 import AdminEducationPage from "../pages/admin/AdminEducationPage";
 import AdminExperienceEditorPage from "../pages/admin/AdminExperienceEditorPage";
 import AdminExperiencePage from "../pages/admin/AdminExperiencePage";
+import AdminLeadEditorPage from "../pages/admin/AdminLeadEditorPage";
+import AdminLeadsPage from "../pages/admin/AdminLeadsPage";
 import AdminLoginPage from "../pages/admin/AdminLoginPage";
 import AdminMediaPage from "../pages/admin/AdminMediaPage";
 import AdminPostEditorPage from "../pages/admin/AdminPostEditorPage";
@@ -335,6 +337,16 @@ function AppRoutes() {
           <Route
             path="/admin/contact-messages"
             element={<AdminContactMessagesPage />}
+          />
+
+          <Route path="/admin/leads" element={<AdminLeadsPage />} />
+          <Route
+            path="/admin/leads/new"
+            element={<AdminLeadEditorPage mode="create" />}
+          />
+          <Route
+            path="/admin/leads/:id/edit"
+            element={<AdminLeadEditorPage mode="edit" />}
           />
 
           <Route path="/admin/services" element={<AdminServicesPage />} />
