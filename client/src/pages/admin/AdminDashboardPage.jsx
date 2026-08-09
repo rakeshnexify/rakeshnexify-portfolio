@@ -45,6 +45,13 @@ const dashboardModules = [
     path: "/admin/experience",
   },
   {
+    title: "Certifications & Achievements",
+    description:
+      "Create and manage independent certifications, licenses, awards and achievements, credential evidence, optional Education or Experience relations, display order, featured status and public visibility.",
+    status: "Management ready",
+    path: "/admin/achievements",
+  },
+  {
     title: "Projects",
     description:
       "Manage portfolio projects, case studies, images and project links.",
@@ -173,9 +180,10 @@ function AdminDashboardPage() {
 
             <p className="mt-4 max-w-2xl break-words leading-7 text-slate-400">
               Manage your portfolio content, services, Skills, Education,
-              Experience, projects, Media Library, Blog and News, Team members,
-              companies, Testimonials, Leads / CRM, enquiries and website
-              settings from this secure dashboard.
+              Experience, Certifications & Achievements, projects, Media
+              Library, Blog and News, Team members, companies, Testimonials,
+              Leads / CRM, enquiries and website settings from this secure
+              dashboard.
             </p>
           </div>
 

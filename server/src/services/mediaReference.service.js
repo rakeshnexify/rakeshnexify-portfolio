@@ -1,4 +1,5 @@
 import Company from "../models/Company.js";
+import CertificationAchievement from "../models/CertificationAchievement.js";
 import Education from "../models/Education.js";
 import Experience from "../models/Experience.js";
 import Post from "../models/Post.js";
@@ -69,6 +70,15 @@ const MEDIA_REFERENCE_DEFINITIONS = Object.freeze([
     labelField: "organizationName",
     fields: [
       "organizationLogoUrl",
+    ],
+  },
+
+  {
+    resourceType: "certification-achievement",
+    model: CertificationAchievement,
+    labelField: "title",
+    fields: [
+      "mediaUrl",
     ],
   },
 

@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import PageSeo from "../components/seo/PageSeo";
 import BlogPage from "../pages/BlogPage";
+import CertificationAchievementsPage from "../pages/CertificationAchievementsPage";
 import CompaniesPage from "../pages/CompaniesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import EducationPage from "../pages/EducationPage";
@@ -20,6 +21,8 @@ import TestimonialsPage from "../pages/TestimonialsPage";
 import TeamPage from "../pages/TeamPage";
 import TeamMemberDetailsPage from "../pages/TeamMemberDetailsPage";
 
+import AdminCertificationAchievementEditorPage from "../pages/admin/AdminCertificationAchievementEditorPage";
+import AdminCertificationAchievementsPage from "../pages/admin/AdminCertificationAchievementsPage";
 import AdminCompaniesPage from "../pages/admin/AdminCompaniesPage";
 import AdminCompanyEditorPage from "../pages/admin/AdminCompanyEditorPage";
 import AdminContactMessagesPage from "../pages/admin/AdminContactMessagesPage";
@@ -273,6 +276,15 @@ function AppRoutes() {
             <Route path="/experience" element={<ExperiencePage />} />
           </Route>
 
+          <Route
+            element={<PublicPageVisibilityRoute sectionKey="achievements" />}
+          >
+            <Route
+              path="/achievements"
+              element={<CertificationAchievementsPage />}
+            />
+          </Route>
+
           <Route element={<PublicPageVisibilityRoute sectionKey="blog" />}>
             <Route path="/blog" element={<BlogPage />} />
             <Route
@@ -347,6 +359,21 @@ function AppRoutes() {
           <Route
             path="/admin/leads/:id/edit"
             element={<AdminLeadEditorPage mode="edit" />}
+          />
+
+          <Route
+            path="/admin/achievements"
+            element={<AdminCertificationAchievementsPage />}
+          />
+          <Route
+            path="/admin/achievements/new"
+            element={
+              <AdminCertificationAchievementEditorPage mode="create" />
+            }
+          />
+          <Route
+            path="/admin/achievements/:id/edit"
+            element={<AdminCertificationAchievementEditorPage mode="edit" />}
           />
 
           <Route path="/admin/services" element={<AdminServicesPage />} />

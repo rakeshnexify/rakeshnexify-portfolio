@@ -96,6 +96,17 @@ const defaultNavigationItems = [
     navigationOrder: 8,
   },
   {
+    key: "achievements",
+    label: "Achievements",
+    href: "/achievements",
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 9,
+    navigationOrder: 9,
+  },
+  {
     key: "team",
     label: "Team",
     href: "/team",
@@ -103,8 +114,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 9,
-    navigationOrder: 9,
+    order: 10,
+    navigationOrder: 10,
   },
   {
     key: "companies",
@@ -114,8 +125,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 10,
-    navigationOrder: 10,
+    order: 11,
+    navigationOrder: 11,
   },
   {
     key: "testimonials",
@@ -125,8 +136,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 11,
-    navigationOrder: 11,
+    order: 12,
+    navigationOrder: 12,
   },
   {
     key: "contact",
@@ -136,8 +147,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 12,
-    navigationOrder: 12,
+    order: 13,
+    navigationOrder: 13,
   },
   {
     key: "blog",
@@ -147,8 +158,8 @@ const defaultNavigationItems = [
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 14,
-    navigationOrder: 13,
+    order: 15,
+    navigationOrder: 14,
   },
   {
     key: "news",
@@ -158,8 +169,8 @@ const defaultNavigationItems = [
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 15,
-    navigationOrder: 14,
+    order: 16,
+    navigationOrder: 15,
   },
 ];
 

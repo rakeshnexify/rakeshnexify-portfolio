@@ -10,106 +10,153 @@ Repository: `D:\rakeshnexify-portfolio`
 
 Branch: `main`
 
-Latest verified pushed checkpoint before the current CRM work:
+Latest verified pushed checkpoint before the current module:
 
-`b0fadca Complete Media Picker rollout`
+`a64c60b Add Leads CRM management module`
 
-The current `Leads / CRM Management` module is implemented, reviewed, runtime-verified, documented, and fully staged.
+Current active module:
 
-Exactly 18 intended paths are staged:
+`Certifications & Achievements`
 
-- 16 CRM implementation files
+The module is implemented end-to-end, manually runtime-tested, reviewed by Codex in read-only mode, and the two recommended review findings have been fixed.
+
+Latest user-run validation after those fixes:
+
+- `npm run check` — passed
+- Vite production build — passed
+- 205 modules transformed
+- CertificationAchievement backend syntax checks — passed
+- existing project syntax checks — passed
+- `git diff --check` — no actual whitespace errors
+
+Known non-blocking output:
+
+- client production bundle remains above Vite's recommended 500 kB chunk threshold
+- CRLF-to-LF Git messages are informational line-ending warnings
+
+The module is fully staged with exactly 34 intended paths:
+
+- 32 implementation paths
 - `docs/PROJECT_MEMORY.md`
 - `docs/SESSION_HANDOFF.md`
 
-There is no unstaged overlay, and `git diff --cached --check` has passed.
+Closeout staging history:
 
-The final staged Codex review is the current checkpoint.
+1. First final staged-review checkpoint:
+   - 34 staged paths
+   - no unstaged overlay
+   - `git diff --cached --check` passed
 
-Do not start the next roadmap module until the staged CRM work is reviewed, committed, pushed, and the working tree is verified clean.
+2. The Retry loading-state correction and subsequent handoff-only corrections were re-staged without adding or removing any path.
 
-## Current Active Work
+Current source-of-truth rules for the commit gate:
 
-### Leads / CRM Management Closeout
+- staged path count must remain exactly 34
+- no unstaged overlay may exist
+- `git diff --cached --check` must pass
+- live insertion/deletion totals must be read from `git diff --cached --stat`
 
-The CRM extends the existing Contact Message enquiry system rather than duplicating inquiry capture.
+Exact live insertion/deletion totals are intentionally not hard-coded as the current handoff state because editing this staged handoff itself changes those totals.
 
-Architecture:
+The implementation is already approved. The current checkpoint is final documentation-only approval before commit.
 
-- `ContactMessage` = raw enquiry / inbox
-- `Lead` = CRM sales opportunity
-- Contact Message -> Lead conversion is explicit and Admin-driven
-- the original Contact Message remains unchanged after conversion
-- `Lead.sourceContactMessage` is the source-of-truth conversion relation
-- there is no public Lead API or public Lead page
+## Current Module Architecture
 
-Model:
+Dedicated domain:
 
-- `Lead`
-- collection: `leads`
+`CertificationAchievement`
+
+MongoDB collection:
+
+`certification_achievements`
+
+Locked types:
+
+- `certification`
+- `license`
+- `award`
+- `achievement`
+
+Issuer rules:
+
+- certification -> required
+- license -> required
+- award -> required
+- achievement -> optional
+
+Domain ownership:
+
+- Education owns formal academic/course/training/learning records and its supporting `certificateUrl`
+- Experience owns short role-specific achievement bullets
+- CertificationAchievement owns independently publishable/verifiable certifications, licenses, awards, and achievements
+- no migration, copy, auto-sync, or dual-write exists between these domains
+
+## Data Contract
+
+Core supported fields:
+
+- `type`
+- `title`
+- `slug`
+- private normalized `identityKey`
+- `issuerName`
+- `shortDescription`
+- `description`
+- `issueDate`
+- `doesNotExpire`
+- `expirationDate`
+- `credentialId`
+- `verificationUrl`
+- `mediaUrl`
+- `mediaAlt`
+- optional `relatedEducation`
+- optional `relatedExperience`
+- `order`
+- `isFeatured`
+- `isVisible`
+- `createdBy`
+- `updatedBy`
+- timestamps
+
+Backend protections include:
+
+- locked supported types
+- conditional issuer validation
+- unique normalized slug
+- unique private normalized `identityKey`
+- private-field serialization protection
+- real date-only validation
+- expiration/no-expiration consistency
+- relation ObjectId and existence validation
+- strict body/query allowlists
+- credential-free HTTP/HTTPS validation
+- safe integer order validation
+- database duplicate conflict protection
+- structured `400`, `404`, and `409` errors
+
+Expiration filtering uses the intended UTC+05:45 business-date boundary and same-day expiration remains active through that date.
+
+## APIs and Routes
+
+Public API:
+
+- `GET /api/achievements`
 
 Admin API:
 
-- `GET /api/admin/leads`
-- `POST /api/admin/leads`
-- `GET /api/admin/leads/:id`
-- `PATCH /api/admin/leads/:id`
-- `POST /api/admin/leads/:id/notes`
-- `DELETE /api/admin/leads/:id`
-
-Conversion API:
-
-- `POST /api/admin/contact-messages/:id/convert-to-lead`
+- `/api/admin/achievements`
 
 Admin routes:
 
-- `/admin/leads`
-- `/admin/leads/new`
-- `/admin/leads/:id/edit`
+- `/admin/achievements`
+- `/admin/achievements/new`
+- `/admin/achievements/:id/edit`
 
-Dashboard:
+Public route:
 
-- `Leads / CRM` management card links to `/admin/leads`
+- `/achievements`
 
-## CRM Pipeline Contract
-
-Statuses:
-
-- `new`
-- `qualified`
-- `contacted`
-- `proposal`
-- `negotiation`
-- `won`
-- `lost`
-- `archived`
-
-Priorities:
-
-- `low`
-- `medium`
-- `high`
-- `urgent`
-
-Lead management supports:
-
-- name/email/phone/company/source
-- optional `sourceContactMessage`
-- optional Service relation
-- Service slug/title historical snapshots
-- subject/requirement summary
-- status/priority
-- estimated value/currency
-- active Admin assignment
-- next follow-up and last-contacted dates
-- lost/won/archive status metadata
-- private CRM notes
-- display order
-- created/updated Admin audit fields
-
-Lead email is intentionally not unique.
-
-Manual Leads without a Contact Message relation are valid.
+No public detail route or public write route exists.
 
 ## RBAC
 
@@ -117,7 +164,7 @@ Read:
 
 - any authenticated active Admin
 
-Create/update/private note/Contact Message conversion:
+Create/update:
 
 - `super-admin`
 - `admin`
@@ -128,253 +175,374 @@ Permanent delete:
 - `super-admin`
 - `admin`
 
-## Duplicate Conversion Protection
+Server authorization remains the enforcement layer.
 
-`Lead.sourceContactMessage` has partial unique protection so:
+## Public Publication Contract
 
-- one Contact Message cannot create multiple Leads
-- concurrent duplicate conversion is protected
-- duplicate conversion returns structured `409`
-- manual Leads with null/no `sourceContactMessage` remain valid
+Homepage/publication registry key:
 
-The UI surfaces duplicate conversion cleanly.
+`achievements`
 
-A reverse Lead ID is intentionally not stored on ContactMessage.
+Site Settings content field:
 
-## Historical Service Snapshot Contract
+`achievementsSection`
 
-Historical Service snapshots are protected during Lead maintenance.
+Default homepage order:
 
-Final behavior:
+`Education -> Experience -> Certifications & Achievements -> Team`
 
-- unchanged Service relation -> preserve the existing Lead snapshot
-- current Service rename does not silently rewrite old Lead history
-- Service A -> Service B -> save B's authoritative current slug/title
-- Service A -> null -> relation is cleared but A's historical slug/title remain
-- null -> valid Service -> relation and authoritative snapshot are saved
-- Contact Message-converted Leads preserve enquiry Service snapshots
+Independent controls:
 
-The backend is the final enforcement layer; frontend form behavior is compatible with the same contract.
+- homepage visibility
+- Navbar visibility
+- public-page visibility
+- homepage order
+- navigation order
+- navigation label
 
-## Private CRM Notes
+The public page is wrapped by:
 
-Private Lead notes are Admin-only.
+`PublicPageVisibilityRoute sectionKey="achievements"`
 
-Behavior:
+Navbar, PublicPageHeader, Footer, homepage CTA, and sitemap respect public-page visibility so disabling `/achievements` does not leave broken dedicated-page destinations.
 
-- notes are added through `/api/admin/leads/:id/notes`
-- notes are not mass-assignable through normal create/update payloads
-- note text is trimmed and validated server-side
-- maximum length is 3000 characters
-- note creator is the acting Admin
-- note timestamp is server-controlled
-- notes persist on reload
-- editor UI shows saved notes newest-first
-- note text is rendered as escaped React text
+Old Site Settings records remain backward-compatible through `mergeHomepageSections`.
 
-## Final Review Status
+## Public Experience
 
-Backend/security checkpoint:
+Homepage:
 
-- previous type/query/date/status/safe-integer findings fixed
-- final backend review returned no A/B findings
-- verdict: `BACKEND READY FOR FRONTEND`
+- `CertificationAchievementsSection`
+- maximum four preview records
+- dynamic Site Settings heading/content/CTA
+- loading/error/empty states
+- evidence Media rendering
+- CTA visibility respects public-page state
 
-Full CRM integration review initially found:
+Public page:
 
-- historical Service snapshots could be overwritten/erased
-- missing estimated value displayed as zero
+`/achievements`
 
-Both were fixed.
+Supports:
 
-Further Service snapshot re-review found one final unchanged-relation backend guard issue.
+- All
+- Certification
+- License
+- Award
+- Achievement
 
-That was fixed and re-reviewed successfully.
+Public card behavior supports:
 
-Final complete UNSTAGED Codex review:
+- type badge
+- issuer
+- issue/expiration dates
+- no-expiration state
+- credential ID
+- verification URL
+- image/SVG evidence preview
+- PDF/document evidence link
+- safe external evidence link
+- broken-image fallback
 
-- A. MUST FIX BEFORE DOCUMENTATION/STAGING: None
-- B. RECOMMENDED BEFORE DOCUMENTATION/STAGING: None
-- C. OPTIONAL / FUTURE: None
+Public ordering:
 
-Final verdict:
+1. featured first
+2. display order
+3. newest issue date
 
-`VERDICT: CRM READY FOR DOCUMENTATION AND STAGING`
+Only visible records are exposed publicly.
+
+## SEO and Sitemap
+
+`/achievements` has collection-level `PageSeo`.
+
+Structured data uses:
+
+- `CollectionPage`
+- `ItemList`
+- `EducationalOccupationalCredential` for certification/license records
+- generic item representation for award/achievement records
+
+After the final review fix, structured-data `image` is emitted only for recognized image/SVG evidence.
+
+PDF or arbitrary non-image evidence is not incorrectly emitted as Schema.org `image`.
+
+Sitemap behavior:
+
+- `/achievements` is present only while the achievements public page is enabled
+- no per-record achievement sitemap URLs exist
+- existing Projects, Team, Companies, Blog, and News sitemap behavior remains preserved
+
+## Media Integration
+
+`CertificationAchievement.mediaUrl` supports Media Picker and compatible manual external URLs.
+
+Admin evidence rendering supports:
+
+- image/SVG thumbnail
+- PDF/document evidence link
+- safe fallback for other evidence
+- broken-image fallback
+
+Public cards support equivalent safe evidence behavior.
+
+Media deletion-reference protection includes:
+
+`CertificationAchievement.mediaUrl`
+
+Referenced Media remains blocked from normal permanent deletion.
+
+## Admin UI
+
+Dashboard includes:
+
+`Certifications & Achievements`
+
+Admin list supports:
+
+- search
+- type
+- visibility
+- featured
+- active/expired
+- quick visibility action
+- quick featured action
+- delete for roles allowed by server RBAC
+
+Admin editor supports:
+
+- all core fields
+- Media Picker
+- optional Education relation
+- optional Experience relation
+
+Education/Experience APIs are used only to populate optional relation selectors; no domain ownership was transferred.
 
 ## Runtime Verification
 
-The user manually tested the CRM against the real local Vite client, Express server, and MongoDB.
+The user manually verified the module against the local React/Vite client, Express server, and MongoDB.
 
-Startup:
+Admin smoke test:
 
-- Vite localhost:5173 — passed
-- Express localhost:5000 — passed
-- MongoDB `rakeshnexify_portfolio` connection — passed
+- dashboard card — passed
+- `/admin/achievements` — passed
+- `/admin/achievements/new` — passed
+- editor form — passed
 
-Admin UI/routes:
-
-- Dashboard Leads / CRM card — passed
-- `/admin/leads` — passed
-- `/admin/leads/new` — passed
-- create/edit forms — passed
-
-Manual Lead behavior:
+Admin CRUD test:
 
 - create — passed
 - edit — passed
-- status counts — passed
-- priority — passed
-- estimated value formatting — passed
-- null estimated value -> `Not estimated` — passed
-- follow-up persistence — passed
+- type change — passed
+- visibility/featured behavior — passed
+- search/type/visibility/display/expiration filters — passed
+- Media Picker — passed
+- Admin Media preview — passed
 
-Filters:
+Public integration:
 
-- search — passed
-- status — passed
-- priority — passed
-- follow-up — passed
-- clear filters — passed
+- homepage section — passed
+- homepage record evidence — passed
+- `/achievements` — passed
+- public type filters — passed
+- Navbar integration — passed
+- PublicPageHeader integration — passed
+- Footer integration — passed
+- Site Settings listing-section content — passed
+- publication/navigation controls — passed
+- sitemap `/achievements` entry — passed
 
-Contact Message conversion:
+Publication independence was manually tested in all requested combinations:
 
-- conversion UI — passed
-- conversion POST — passed
-- redirect to Lead editor — passed
-- Contact Message data copied — passed
-- Contact Message Lead source banner — passed
-- Service snapshots copied — passed
-- duplicate conversion rejected — passed
-- only one Lead created per Contact Message — passed
+1. homepage OFF / navbar ON / page ON — passed
+2. homepage ON / navbar OFF / page ON — passed
+3. homepage ON / navbar ON / page OFF — passed
 
-Historical Service behavior:
+Final intended state is all three controls ON.
 
-- unrelated edit preserved snapshots — passed
-- clearing Service relation preserved snapshots — passed
-- cleared relation reopened as `No linked Service` with historical snapshots intact — passed
-- linking a different Service refreshed authoritative snapshots — passed
-- save/reopen persistence — passed
+The temporary `Runtime Test Achievement Award` record was used only for runtime verification and must not remain as intentional production content. Its cleanup was part of module closeout verification.
 
-Status metadata:
+## Codex Review Status
 
-- New -> Lost — passed
-- lostReason persisted — passed
-- Lost -> Archived — passed
-- lostReason cleared — passed
-- switching Archived -> Lost before save showed an empty lostReason, confirming stale data removal — passed
-- cancel preserved Archived database state
+Codex role for this project is review-only unless explicitly changed by the user.
 
-Assignment:
+Backend/security review before frontend:
 
-- assign current Admin — passed
-- unassign — passed
+- A findings — none
+- B findings — none
+- verdict — backend ready for frontend
 
-Private CRM notes:
+Complete integration review:
 
-- add note — passed
-- reload/reopen persistence — passed
+### A. MUST FIX BEFORE COMMIT
 
-Delete/cleanup:
+None.
 
-- permanent Lead delete — passed
-- runtime-test Leads removed
-- final runtime Lead state: 0 Leads
-- all Lead status counts: 0
-- overdue follow-ups: 0
-- follow-ups today: 0
-- original Contact Message remained in the enquiry inbox
+### B. RECOMMENDED FIX
 
-## Current Validation Status
+Two findings:
 
-Latest user-run validation after the final CRM code changes:
+1. `client/src/hooks/useCertificationAchievements.js`
+   - independent refresh request lacked stale-response/unmount protection
 
-- `npm run check` — passed
-- Vite production build — passed
-- 195 modules transformed
-- Lead model/controller/routes syntax checks — passed
-- existing project syntax checks — passed
-- `git diff --check` — no actual whitespace errors
+2. `client/src/pages/CertificationAchievementsPage.jsx`
+   - structured-data `image` could include PDF or arbitrary non-image evidence
 
-Known non-blocking output:
+Both were fixed by ChatGPT, not Codex.
 
-- Vite client bundle remains above the recommended 500 kB chunk-size threshold.
-- CRLF-to-LF Git messages are line-ending conversion warnings, not whitespace errors.
+Final fix behavior:
+
+- public retry increments a `refreshKey` consumed by the existing AbortController-managed effect
+- stale/previous requests are aborted through effect cleanup
+- structured-data image is limited to recognized image/SVG evidence
+
+Validation after both fixes passed.
+
+### Final staged review
+
+The first final staged review verified:
+
+- exactly 34 staged paths
+- 32 implementation paths + 2 active documentation paths
+- 6,226 insertions and 367 deletions
+- no unstaged overlay
+- `git diff --cached --check` passed
+- both earlier integration-review B findings were correctly resolved
+- implementation, security, publication, Media, SEO, sitemap, and permanent project memory remained aligned
+
+That review found two closeout corrections before commit:
+
+1. `docs/SESSION_HANDOFF.md`
+   - the active Git/checkpoint instructions still described the earlier pre-staging state
+
+2. `client/src/hooks/useCertificationAchievements.js`
+   - Retry correctly used the abort-managed `refreshKey` effect, but needed `setIsLoading(true)` synchronously before clearing the error to prevent a transient empty-state render
+
+Both corrections are now implemented.
+
+The Retry callback now:
+
+- sets loading immediately
+- clears the previous error
+- increments `refreshKey`
+- leaves request ownership/cancellation with the existing AbortController-managed effect
+
+The handoff now records the actual final-staging checkpoint rather than instructing the next operator to repeat completed documentation/staging work.
+
+The focused final staged re-review is complete. It verified the code correction and staged Git state and found only stale handoff wording. This corrected handoff records that result. After final documentation-only approval, the next actions are commit, push, and clean/synchronized Git verification.
+
+### Optional future review observations
+
+Not blockers:
+
+- optional Education/Experience selector requests could load independently so selector failure does not block the whole editor
+- featured quick action could locally re-sort immediately instead of waiting for refresh
+- evidence preview `imageFailed` state could reset when `mediaUrl` changes without remounting
+
+These were intentionally not expanded into the current closeout scope.
 
 ## Current Staged Working Tree Scope
 
-The intended CRM implementation scope is exactly 16 files, and all 16 implementation files plus the 2 active documentation files are staged.
+The final staged-review checkpoint contains exactly 34 intended paths:
 
-Modified implementation files:
+- 32 implementation paths
+- 2 active documentation paths
 
-- `client/src/pages/admin/AdminContactMessagesPage.jsx`
+The staged implementation scope is:
+
+Modified:
+
+- `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
+- `client/src/components/layout/Footer.jsx`
+- `client/src/components/layout/Navbar.jsx`
+- `client/src/components/layout/PublicPageHeader.jsx`
+- `client/src/config/homepageSections.js`
+- `client/src/config/siteSettingsPages.js`
+- `client/src/pages/HomePage.jsx`
 - `client/src/pages/admin/AdminDashboardPage.jsx`
 - `client/src/routes/AppRoutes.jsx`
-- `client/src/services/adminContactMessagesApi.js`
+- `client/src/utils/siteSettingsForm.js`
 - `package.json`
 - `server/src/app.js`
-- `server/src/routes/adminContactMessage.routes.js`
+- `server/src/config/homepageSections.js`
+- `server/src/controllers/adminSiteSettings.controller.js`
+- `server/src/models/SiteSettings.js`
+- `server/src/services/mediaReference.service.js`
+- `server/src/utils/createSitemapXml.js`
 
-New implementation files:
+New:
 
-- `client/src/components/admin/leads/LeadForm.jsx`
-- `client/src/hooks/useAdminLeads.js`
-- `client/src/pages/admin/AdminLeadEditorPage.jsx`
-- `client/src/pages/admin/AdminLeadsPage.jsx`
-- `client/src/services/adminLeadsApi.js`
-- `client/src/utils/leadForm.js`
-- `server/src/controllers/adminLead.controller.js`
-- `server/src/models/Lead.js`
-- `server/src/routes/adminLead.routes.js`
+- `client/src/components/admin/certification-achievements/CertificationAchievementForm.jsx`
+- `client/src/components/certification-achievements/CertificationAchievementCard.jsx`
+- `client/src/components/sections/CertificationAchievementsSection.jsx`
+- `client/src/hooks/useCertificationAchievements.js`
+- `client/src/pages/CertificationAchievementsPage.jsx`
+- `client/src/pages/admin/AdminCertificationAchievementEditorPage.jsx`
+- `client/src/pages/admin/AdminCertificationAchievementsPage.jsx`
+- `client/src/services/adminCertificationAchievementsApi.js`
+- `client/src/services/certificationAchievementsApi.js`
+- `client/src/utils/certificationAchievementForm.js`
+- `server/src/controllers/adminCertificationAchievement.controller.js`
+- `server/src/controllers/certificationAchievement.controller.js`
+- `server/src/models/CertificationAchievement.js`
+- `server/src/routes/adminCertificationAchievement.routes.js`
+- `server/src/routes/certificationAchievement.routes.js`
 
-Staged active documentation files:
+Active documentation files for this closeout:
 
 - `docs/PROJECT_MEMORY.md`
 - `docs/SESSION_HANDOFF.md`
 
-Verified staged scope:
+Verified staged-scope history:
 
-- 16 CRM implementation files
-- 2 active documentation files
-- 18 total paths
-- no unstaged overlay
-- `git diff --cached --check` passed
+- the module scope has remained exactly 34 paths throughout final closeout
+- 32 paths are implementation
+- 2 paths are active documentation
+- no corrective step added or removed a staged path
+- no unstaged overlay existed at the verified checkpoints
+- `git diff --cached --check` passed at the verified checkpoints
 
-No other documentation is part of this CRM closeout.
+For final commit approval, do not treat a hard-coded insertion/deletion count in this handoff as authoritative. Because `SESSION_HANDOFF.md` itself is staged, changing its wording changes those totals. Use the live Git command below as the source of truth:
+
+`git diff --cached --stat`
+
 
 ## Documentation State
 
-Active development-memory files:
+Permanent architecture belongs in:
 
-- `docs/PROJECT_MEMORY.md`
-- `docs/SESSION_HANDOFF.md`
+`docs/PROJECT_MEMORY.md`
 
-`PROJECT_MEMORY.md` has been updated for permanent CRM architecture including:
+Current closeout/session state belongs in:
 
-- Lead model/API/routes
-- Contact Message -> Lead conversion contract
-- duplicate conversion protection
-- pipeline/status/priority contract
-- RBAC
-- Service historical snapshot rules
-- private CRM notes
+`docs/SESSION_HANDOFF.md`
+
+No large legacy documentation matrix needs to be updated for this module.
+
+`PROJECT_MEMORY.md` has been updated with:
+
+- completed CertificationAchievement domain
+- ownership boundaries with Education/Experience
+- model/API/routes
+- publication registry and `achievementsSection`
+- Media/reference protection
+- SEO/sitemap behavior
 - completed module inventory
-- remaining roadmap now starting with Certifications & Achievements
-
-This handoff records the current fully staged CRM closeout state and the exact commit/push sequence that follows a clear staged review.
+- roadmap now beginning with Service Packages / Pricing
 
 ## Open Issues
 
-No confirmed Leads / CRM blocker is open.
+No confirmed implementation blocker remains after the final Retry loading-state correction. The focused read-only staged re-review of the corrected closeout paths is complete. Final documentation-only approval is the sole remaining pre-commit gate.
 
-Known non-blocking project items:
+Known non-blocking project-wide items:
 
-- Media reference-detail display is capped at 25 records.
-- Media deletion has a narrow reference-check/provider-delete TOCTOU window.
-- Client production bundle remains above Vite's recommended chunk-size threshold.
-- Current client dependency audit has previously reported two high-severity dependency-chain findings and requires a separate controlled review.
-- Automated test coverage remains limited.
-- Source code contains the correct Site Settings tagline, but the deployed MongoDB value remains unverified.
-- `README.md` remains materially stale and should receive a separate focused refresh later.
+- Media reference-detail display is capped at 25 records
+- Media deletion has a narrow reference-check/provider-delete TOCTOU window
+- client production bundle remains above Vite's recommended chunk-size threshold
+- current client dependency audit previously reported two high-severity dependency-chain findings and requires a separate controlled review
+- automated test coverage remains limited
+- source code contains the intended Site Settings tagline, but the deployed MongoDB value remains unverified
+- `README.md` remains materially stale and should receive a separate focused refresh later
 
 Do not run:
 
@@ -382,67 +550,61 @@ Do not run:
 
 ## Next Action
 
-The CRM implementation and both active documentation files are already staged.
-
 Current checkpoint:
 
-- exactly 18 intended paths staged
+`Final documentation-only approval before commit`
+
+Current commit-gate requirements:
+
+- exactly 34 staged paths
+- 32 implementation paths
+- 2 active documentation paths
 - no unstaged overlay
-- `git diff --cached --check` passed
-- final staged Codex review in progress
+- `git diff --cached --check` passes
+- live staged diff totals are taken from `git diff --cached --stat`
+- the Retry loading-state correction is already verified
+- no additional implementation issue remains
 
-If the final staged review returns `VERDICT: READY TO COMMIT`:
+The implementation and staging scope are complete. Final documentation-only approval is the only remaining pre-commit gate.
 
-1. Commit the staged CRM module.
+After final documentation-only approval:
+
+1. Commit the complete staged Certifications & Achievements module.
 2. Push `main` to `origin`.
 3. Verify:
    - `git status -sb`
    - latest Git log
    - `main` and `origin/main` synchronized
    - working tree clean
-4. Only then begin the next roadmap module.
+4. Only then begin Service Packages / Pricing.
 
-Do not repeat staging unless this handoff itself is changed again before commit.
+Do not repeat full-module staging or reopen already-approved implementation work unless a new concrete issue is discovered.
 
 ## Next Development Module
 
-After CRM closeout:
+After this module is committed and pushed:
 
-`Certifications & Achievements`
+`Service Packages / Pricing`
 
 Before implementation:
 
-- inspect current Education certificate fields
-- inspect Experience achievement fields
-- determine overlap before creating a new model
-- avoid duplicating existing certificate/achievement data unless a separate domain is justified
-- preserve existing publication, SEO, Media Picker, Admin/RBAC, and relation conventions
+- audit the existing Service model/API/Admin/public architecture
+- determine which pricing/package data belongs on Service versus a related package domain
+- avoid duplicating Service definitions
+- preserve existing publication, SEO, Media Picker, RBAC, and relation conventions
 
 ## Upcoming Modules
 
-After Certifications & Achievements:
+After Service Packages / Pricing:
 
-1. Service Packages / Pricing
-2. FAQ
-3. Clients / Partners
-4. Case Studies
-5. Appointment / Consultation Booking
-6. Newsletter / Subscribers Management
-7. Admin Analytics Dashboard
-8. Admin Activity / Audit Log
-9. Menu / Navigation Management
-
-Overlap reminders:
-
-- Certifications/Achievements overlaps Education certificates and Experience achievements.
-- Service Packages/Pricing overlaps Services.
-- Clients/Partners overlaps Companies, Projects, and Testimonials.
-- Case Studies substantially overlaps Projects.
-- Appointment/Booking is distinct from Contact Message inquiry capture.
-- Admin Analytics extends the existing Admin dashboard.
-- Audit Log is distinct from `createdBy`/`updatedBy`.
-- Menu/Navigation must account for the Site Settings publication/navigation registry.
-- Newsletter scope is subscriber management only.
+1. FAQ
+2. Clients / Partners
+3. Case Studies
+4. Appointment / Consultation Booking
+5. Newsletter / Subscribers Management
+6. Admin Analytics Dashboard
+7. Admin Activity / Audit Log
+8. Menu / Navigation Management
 
 ## Future Separate Phases
 

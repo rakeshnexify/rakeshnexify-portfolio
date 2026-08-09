@@ -26,6 +26,10 @@ const publicPageDefinitions = [
     pathname: "/experience",
   },
   {
+    key: "achievements",
+    pathname: "/achievements",
+  },
+  {
     key: "team",
     pathname: "/team",
   },

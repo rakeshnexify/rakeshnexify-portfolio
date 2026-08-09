@@ -9,6 +9,7 @@ import corsOptions from "./config/cors.js";
 import helmetOptions from "./config/helmet.js";
 
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
+import adminCertificationAchievementRoutes from "./routes/adminCertificationAchievement.routes.js";
 import adminCompanyRoutes from "./routes/adminCompany.routes.js";
 import adminContactMessageRoutes from "./routes/adminContactMessage.routes.js";
 import adminEducationRoutes from "./routes/adminEducation.routes.js";
@@ -24,6 +25,7 @@ import adminStatisticRoutes from "./routes/adminStatistic.routes.js";
 import adminTestimonialRoutes from "./routes/adminTestimonial.routes.js";
 import adminTeamMemberRoutes from "./routes/adminTeamMember.routes.js";
 
+import certificationAchievementRoutes from "./routes/certificationAchievement.routes.js";
 import companyRoutes from "./routes/company.routes.js";
 import contactMessageRoutes from "./routes/contactMessage.routes.js";
 import educationRoutes from "./routes/education.routes.js";
@@ -97,6 +99,7 @@ app.use("/api/statistics", statisticRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/education", educationRoutes);
 app.use("/api/experience", experienceRoutes);
+app.use("/api/achievements", certificationAchievementRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/team", teamMemberRoutes);
@@ -109,6 +112,10 @@ app.use("/api/admin/statistics", adminStatisticRoutes);
 app.use("/api/admin/skills", adminSkillRoutes);
 app.use("/api/admin/education", adminEducationRoutes);
 app.use("/api/admin/experience", adminExperienceRoutes);
+app.use(
+  "/api/admin/achievements",
+  adminCertificationAchievementRoutes,
+);
 app.use("/api/admin/leads", adminLeadRoutes);
 app.use("/api/admin/testimonials", adminTestimonialRoutes);
 app.use("/api/admin/posts", adminPostRoutes);

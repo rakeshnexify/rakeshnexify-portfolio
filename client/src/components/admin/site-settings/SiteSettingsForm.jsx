@@ -40,6 +40,7 @@ const dedicatedPageSectionKeys = new Set([
   "projects",
   "education",
   "experience",
+  "achievements",
   "team",
   "companies",
   "testimonials",
@@ -56,6 +57,7 @@ const homepageSectionKeys = new Set([
   "projects",
   "education",
   "experience",
+  "achievements",
   "team",
   "companies",
   "posts",
@@ -72,6 +74,7 @@ const navigationSectionKeys = new Set([
   "projects",
   "education",
   "experience",
+  "achievements",
   "team",
   "companies",
   "testimonials",
@@ -257,6 +260,10 @@ function validateDynamicContentUrls(formValues, errors) {
       value: formValues?.experienceSection?.ctaButton?.url,
     },
     {
+      fieldName: "achievementsSection.ctaButton.url",
+      value: formValues?.achievementsSection?.ctaButton?.url,
+    },
+    {
       fieldName: "teamSection.ctaButton.url",
       value: formValues?.teamSection?.ctaButton?.url,
     },
@@ -355,6 +362,14 @@ function prepareInitialValues(initialValues = {}) {
 
       ctaButton: {
         ...normalizedValues.experienceSection.ctaButton,
+      },
+    },
+
+    achievementsSection: {
+      ...normalizedValues.achievementsSection,
+
+      ctaButton: {
+        ...normalizedValues.achievementsSection.ctaButton,
       },
     },
 
@@ -1443,6 +1458,17 @@ function SiteSettingsForm({
         description="Manage the heading, description and call-to-action displayed above your public Experience timeline."
         fieldName="experienceSection"
         values={formValues.experienceSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Certifications & Achievements Section Content"
+        description="Manage the heading, description and call-to-action displayed above your public certifications, licenses, awards and achievements."
+        fieldName="achievementsSection"
+        values={formValues.achievementsSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}

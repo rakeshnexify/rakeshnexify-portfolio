@@ -197,6 +197,7 @@ Private identity examples:
 - Skill `nameKey`
 - Education `identityKey`
 - Experience `identityKey`
+- CertificationAchievement `identityKey`
 
 ## Site Settings and Publication System
 
@@ -204,7 +205,7 @@ Private identity examples:
 
 Registry keys include:
 
-`hero`, `about`, `statistics`, `skills`, `services`, `projects`, `education`, `experience`, `team`, `companies`, `posts`, `testimonials`, `contact`, `blog`, `news`.
+`hero`, `about`, `statistics`, `skills`, `services`, `projects`, `education`, `experience`, `achievements`, `team`, `companies`, `posts`, `testimonials`, `contact`, `blog`, `news`.
 
 Registry controls:
 
@@ -324,6 +325,7 @@ Media Picker integration now covers compatible fields across:
 - Skills
 - Education
 - Experience
+- Certifications & Achievements
 - Testimonials
 - Posts / Blog / News
 - Projects
@@ -340,11 +342,179 @@ Project video URLs intentionally remain hybrid: uploaded Media video and externa
 
 ### Reference Protection
 
-Exact Media URL references are checked across Site Settings, Services, Statistics, Skills, Education, Experience, Testimonials, Posts, Projects, Companies, and Team.
+Exact Media URL references are checked across Site Settings, Services, Statistics, Skills, Education, Experience, Certifications & Achievements, Testimonials, Posts, Projects, Companies, and Team.
 
 Referenced Media is blocked from normal permanent deletion with `409 Conflict`.
 
 See `Permanent Architectural Limitations` for the current reference-detail cap and deletion TOCTOU window.
+
+## Certifications & Achievements
+
+Certifications & Achievements is the dedicated independently publishable credential-and-recognition domain.
+
+Model: `CertificationAchievement`
+
+Collection: `certification_achievements`
+
+Public API:
+
+- `GET /api/achievements`
+
+Admin API:
+
+- `/api/admin/achievements`
+
+Public page:
+
+- `/achievements`
+
+Admin routes:
+
+- `/admin/achievements`
+- `/admin/achievements/new`
+- `/admin/achievements/:id/edit`
+
+Homepage/publication registry key:
+
+`achievements`
+
+Site Settings content field:
+
+`achievementsSection`
+
+Default homepage placement:
+
+`Education -> Experience -> Certifications & Achievements -> Team`
+
+### Domain Ownership
+
+Education remains responsible for formal academic, course, training, and learning records, including its supporting `certificateUrl`.
+
+Experience remains responsible for short job-context achievement bullets attached to a professional role.
+
+`CertificationAchievement` owns independently publishable or verifiable:
+
+- certifications
+- licenses
+- awards
+- achievements
+
+There is no automatic migration, copy, synchronization, or dual-write between Education, Experience, and CertificationAchievement.
+
+### Supported Types
+
+Locked values:
+
+- `certification`
+- `license`
+- `award`
+- `achievement`
+
+Issuer rules:
+
+- certification -> issuer required
+- license -> issuer required
+- award -> issuer required
+- achievement -> issuer optional
+
+### Core Data Contract
+
+Supported fields include:
+
+- `type`
+- `title`
+- `slug`
+- private normalized `identityKey`
+- `issuerName`
+- `shortDescription`
+- `description`
+- `issueDate`
+- `doesNotExpire`
+- `expirationDate`
+- `credentialId`
+- `verificationUrl`
+- `mediaUrl`
+- `mediaAlt`
+- optional `relatedEducation`
+- optional `relatedExperience`
+- `order`
+- `isFeatured`
+- `isVisible`
+- `createdBy`
+- `updatedBy`
+- timestamps
+
+`identityKey` is private and must not be exposed in public or Admin API responses.
+
+Slug and identity uniqueness are protected by database indexes and duplicate conflicts map to structured `409` responses.
+
+Dates are date-only values. Expiration filtering uses the intended UTC+05:45 business-date boundary and treats the expiration date itself as active through that date.
+
+### Public Behavior
+
+Only visible records are exposed publicly.
+
+Public ordering is:
+
+1. featured first
+2. display order
+3. newest issue date
+
+The public API supports the four locked type filters.
+
+There is intentionally no public detail endpoint or per-record public route in the initial architecture.
+
+The public `/achievements` page provides collection-level SEO and structured data. Image structured data is emitted only for recognized image/SVG evidence, not PDF or arbitrary non-image evidence.
+
+The sitemap includes `/achievements` only while the public page is enabled. No per-record sitemap URLs exist.
+
+### Admin Behavior and RBAC
+
+Read:
+
+- any authenticated active Admin
+
+Create/update:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Permanent delete:
+
+- `super-admin`
+- `admin`
+
+Admin management supports search, type, visibility, featured, and active/expired filtering.
+
+Optional Education and Experience relations are selectors only; they do not transfer domain ownership or create dual-write behavior.
+
+### Evidence Media
+
+`mediaUrl` supports Media Picker selection and compatible manual external URLs.
+
+Admin and public rendering support:
+
+- image/SVG preview
+- PDF/document evidence link
+- safe external evidence link
+- broken-image fallback
+
+Media reference protection includes `CertificationAchievement.mediaUrl`, so referenced Media is blocked from normal permanent deletion.
+
+### Publication Controls
+
+The `achievements` registry item has independent controls for:
+
+- homepage visibility
+- Navbar visibility
+- dedicated public-page visibility
+- homepage order
+- navigation order
+- label
+
+Disabling the dedicated public page removes broken Navbar/Footer/CTA destinations while allowing homepage visibility to remain independently controlled.
+
 
 ## Leads / CRM Management
 
@@ -464,6 +634,7 @@ Permanent delete:
 | Skills | `Skill` / `skills` | `/api/skills` | `/api/admin/skills` | `/skills` | `/admin/skills`, `/admin/skills/new`, `/admin/skills/:id/edit`; private `nameKey` |
 | Education | `Education` / `education` | `/api/education` | `/api/admin/education` | `/education` | `/admin/education`, `/admin/education/new`, `/admin/education/:id/edit`; private `identityKey` |
 | Experience | `Experience` / `experiences` | `/api/experience` | `/api/admin/experience` | `/experience` | `/admin/experience`, `/admin/experience/new`, `/admin/experience/:id/edit`; private `identityKey` |
+| Certifications & Achievements | `CertificationAchievement` / `certification_achievements` | `/api/achievements` | `/api/admin/achievements` | `/achievements` | `/admin/achievements`, `/admin/achievements/new`, `/admin/achievements/:id/edit`; locked types, optional Education/Experience relations, evidence Media, private `identityKey` |
 | Testimonials | `Testimonial` / `testimonials` | `/api/testimonials` | `/api/admin/testimonials` | `/testimonials` | `/admin/testimonials`, `/admin/testimonials/new`, `/admin/testimonials/:id/edit`; optional Project relation |
 | Blog / News | `Post` / `posts` | `/api/posts` | `/api/admin/posts` | `/blog`, `/news`, `/blog/:slug`, `/news/:slug` | `/admin/posts`, `/admin/posts/new`, `/admin/posts/:id/edit`; shared model and Project relations; Media Picker integrated |
 | Media | `Media` / `media` | None | `/api/admin/media` | None | `/admin/media`; Cloudinary-backed binary storage |
@@ -511,6 +682,8 @@ Prefer extending these instead of duplicating architecture:
 - Contact Message -> Lead conversion stays explicit and Admin-driven rather than automatic.
 - `Lead.sourceContactMessage` remains the source-of-truth conversion relation; do not require a reverse Lead ID on ContactMessage unless a future feature justifies it.
 - Historical Lead Service snapshots must be preserved when the relation is unchanged or cleared, and refreshed only when a genuinely different Service is linked.
+- Education retains formal learning records, Experience retains role-context achievement bullets, and CertificationAchievement owns independently publishable certifications/licenses/awards/achievements.
+- Do not auto-sync or dual-write CertificationAchievement records with Education or Experience.
 - Avoid duplicate models where an existing module substantially owns the domain.
 - Commit only verified work.
 - Never run `npm audit fix --force` without review.
@@ -535,20 +708,18 @@ Temporary build/audit/test warnings belong in `SESSION_HANDOFF.md`.
 
 Approved order:
 
-1. Certifications & Achievements
-2. Service Packages / Pricing
-3. FAQ
-4. Clients / Partners
-5. Case Studies
-6. Appointment / Consultation Booking
-7. Newsletter / Subscribers Management
-8. Admin Analytics Dashboard
-9. Admin Activity / Audit Log
-10. Menu / Navigation Management
+1. Service Packages / Pricing
+2. FAQ
+3. Clients / Partners
+4. Case Studies
+5. Appointment / Consultation Booking
+6. Newsletter / Subscribers Management
+7. Admin Analytics Dashboard
+8. Admin Activity / Audit Log
+9. Menu / Navigation Management
 
 Overlap rules:
 
-- Certifications/Achievements overlaps Education certificates and Experience achievements.
 - Service Packages/Pricing must extend or relate to the existing Services domain rather than duplicate service definitions.
 - Clients/Partners overlaps Companies, Projects, and Testimonials.
 - Case Studies substantially overlaps Projects; prefer extension unless review justifies a separate module.

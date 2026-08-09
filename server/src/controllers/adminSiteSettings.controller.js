@@ -19,6 +19,7 @@ const listingSectionFields = [
   "projectsSection",
   "educationSection",
   "experienceSection",
+  "achievementsSection",
   "teamSection",
   "companiesSection",
   "testimonialsSection",

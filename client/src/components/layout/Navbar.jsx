@@ -82,8 +82,8 @@ const defaultNavigationSections = [
     navigationOrder: 8,
   },
   {
-    key: "team",
-    label: "Team",
+    key: "achievements",
+    label: "Achievements",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -91,8 +91,8 @@ const defaultNavigationSections = [
     navigationOrder: 9,
   },
   {
-    key: "companies",
-    label: "Companies",
+    key: "team",
+    label: "Team",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -100,8 +100,8 @@ const defaultNavigationSections = [
     navigationOrder: 10,
   },
   {
-    key: "testimonials",
-    label: "Testimonials",
+    key: "companies",
+    label: "Companies",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -109,8 +109,8 @@ const defaultNavigationSections = [
     navigationOrder: 11,
   },
   {
-    key: "contact",
-    label: "Contact",
+    key: "testimonials",
+    label: "Testimonials",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -118,13 +118,22 @@ const defaultNavigationSections = [
     navigationOrder: 12,
   },
   {
+    key: "contact",
+    label: "Contact",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 13,
+    navigationOrder: 13,
+  },
+  {
     key: "blog",
     label: "Blog",
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 14,
-    navigationOrder: 13,
+    order: 15,
+    navigationOrder: 14,
   },
   {
     key: "news",
@@ -132,8 +141,8 @@ const defaultNavigationSections = [
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 15,
-    navigationOrder: 14,
+    order: 16,
+    navigationOrder: 15,
   },
 ];
 
@@ -169,6 +178,10 @@ const sectionDestinations = {
   experience: {
     type: "page",
     target: "/experience",
+  },
+  achievements: {
+    type: "page",
+    target: "/achievements",
   },
   team: {
     type: "page",

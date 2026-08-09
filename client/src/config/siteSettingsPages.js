@@ -36,7 +36,7 @@ const siteSettingsPageDefinitions = [
     title: "Listing Sections",
     shortTitle: "Section Content",
     description:
-      "Manage Statistics, Services, Projects and Companies section headings and buttons.",
+      "Manage Statistics, Skills, Services, Projects, Education, Experience, Certifications & Achievements, Team, Companies, Testimonials and article section headings and buttons.",
     path: "/admin/site-settings/listing-sections",
   },
   {
