@@ -114,8 +114,17 @@ const defaultNavigationSections = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 12,
+    order: 13,
     navigationOrder: 12,
+  },
+  {
+    key: "faq",
+    label: "FAQ",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 14,
+    navigationOrder: 13,
   },
   {
     key: "contact",
@@ -123,8 +132,8 @@ const defaultNavigationSections = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 13,
-    navigationOrder: 13,
+    order: 15,
+    navigationOrder: 14,
   },
   {
     key: "blog",
@@ -132,8 +141,8 @@ const defaultNavigationSections = [
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 15,
-    navigationOrder: 14,
+    order: 16,
+    navigationOrder: 15,
   },
   {
     key: "news",
@@ -141,8 +150,8 @@ const defaultNavigationSections = [
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 16,
-    navigationOrder: 15,
+    order: 17,
+    navigationOrder: 16,
   },
 ];
 
@@ -194,6 +203,10 @@ const sectionDestinations = {
   testimonials: {
     type: "page",
     target: "/testimonials",
+  },
+  faq: {
+    type: "page",
+    target: "/faq",
   },
   blog: {
     type: "page",

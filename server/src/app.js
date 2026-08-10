@@ -14,6 +14,7 @@ import adminCompanyRoutes from "./routes/adminCompany.routes.js";
 import adminContactMessageRoutes from "./routes/adminContactMessage.routes.js";
 import adminEducationRoutes from "./routes/adminEducation.routes.js";
 import adminExperienceRoutes from "./routes/adminExperience.routes.js";
+import adminFaqRoutes from "./routes/adminFaq.routes.js";
 import adminLeadRoutes from "./routes/adminLead.routes.js";
 import adminMediaRoutes from "./routes/adminMedia.routes.js";
 import adminPackageDesignRoutes from "./routes/adminPackageDesign.routes.js";
@@ -33,6 +34,7 @@ import companyRoutes from "./routes/company.routes.js";
 import contactMessageRoutes from "./routes/contactMessage.routes.js";
 import educationRoutes from "./routes/education.routes.js";
 import experienceRoutes from "./routes/experience.routes.js";
+import faqRoutes from "./routes/faq.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 import packageDesignRoutes from "./routes/packageDesign.routes.js";
 import postRoutes from "./routes/post.routes.js";
@@ -138,6 +140,7 @@ app.use("/api/statistics", statisticRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/education", educationRoutes);
 app.use("/api/experience", experienceRoutes);
+app.use("/api/faqs", faqRoutes);
 app.use("/api/achievements", certificationAchievementRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/posts", postRoutes);
@@ -154,6 +157,7 @@ app.use("/api/admin/statistics", adminStatisticRoutes);
 app.use("/api/admin/skills", adminSkillRoutes);
 app.use("/api/admin/education", adminEducationRoutes);
 app.use("/api/admin/experience", adminExperienceRoutes);
+app.use("/api/admin/faqs", adminFaqRoutes);
 app.use(
   "/api/admin/achievements",
   adminCertificationAchievementRoutes,

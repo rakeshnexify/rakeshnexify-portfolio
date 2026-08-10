@@ -44,6 +44,7 @@ const dedicatedPageSectionKeys = new Set([
   "team",
   "companies",
   "testimonials",
+  "faq",
   "blog",
   "news",
 ]);
@@ -62,6 +63,7 @@ const homepageSectionKeys = new Set([
   "companies",
   "posts",
   "testimonials",
+  "faq",
   "contact",
 ]);
 
@@ -78,6 +80,7 @@ const navigationSectionKeys = new Set([
   "team",
   "companies",
   "testimonials",
+  "faq",
   "contact",
   "blog",
   "news",
@@ -276,6 +279,10 @@ function validateDynamicContentUrls(formValues, errors) {
       value: formValues?.testimonialsSection?.ctaButton?.url,
     },
     {
+      fieldName: "faqSection.ctaButton.url",
+      value: formValues?.faqSection?.ctaButton?.url,
+    },
+    {
       fieldName: "postsSection.ctaButton.url",
       value: formValues?.postsSection?.ctaButton?.url,
     },
@@ -394,6 +401,14 @@ function prepareInitialValues(initialValues = {}) {
 
       ctaButton: {
         ...normalizedValues.testimonialsSection.ctaButton,
+      },
+    },
+
+    faqSection: {
+      ...normalizedValues.faqSection,
+
+      ctaButton: {
+        ...normalizedValues.faqSection.ctaButton,
       },
     },
 
@@ -1502,6 +1517,17 @@ function SiteSettingsForm({
         description="Manage the heading, description and call-to-action displayed above your public client Testimonials."
         fieldName="testimonialsSection"
         values={formValues.testimonialsSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="FAQ Section Content"
+        description="Manage the heading, description and call-to-action displayed above your public FAQ accordion."
+        fieldName="faqSection"
+        values={formValues.faqSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}

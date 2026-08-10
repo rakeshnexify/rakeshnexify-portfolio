@@ -83,28 +83,35 @@ const defaultNavigationSections = [
     label: "Testimonials",
     href: "/testimonials",
     isVisible: true,
-    order: 11,
+    order: 13,
+  },
+  {
+    key: "faq",
+    label: "FAQ",
+    href: "/faq",
+    isVisible: true,
+    order: 14,
   },
   {
     key: "contact",
     label: "Contact",
     href: "/#contact",
     isVisible: true,
-    order: 12,
+    order: 15,
   },
   {
     key: "blog",
     label: "Blog",
     href: "/blog",
     isVisible: true,
-    order: 13,
+    order: 16,
   },
   {
     key: "news",
     label: "News",
     href: "/news",
     isVisible: true,
-    order: 14,
+    order: 17,
   },
 ];
 
@@ -122,6 +129,7 @@ const dedicatedPageSectionKeys = new Set([
   "team",
   "companies",
   "testimonials",
+  "faq",
   "blog",
   "news",
 ]);

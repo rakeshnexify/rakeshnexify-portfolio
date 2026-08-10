@@ -23,6 +23,7 @@ const listingSectionFields = [
   "teamSection",
   "companiesSection",
   "testimonialsSection",
+  "faqSection",
   "postsSection",
 ];
 

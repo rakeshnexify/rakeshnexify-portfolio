@@ -8,6 +8,7 @@ import CompaniesPage from "../pages/CompaniesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import EducationPage from "../pages/EducationPage";
 import ExperiencePage from "../pages/ExperiencePage";
+import FaqPage from "../pages/FaqPage";
 import HomePage from "../pages/HomePage";
 import NewsPage from "../pages/NewsPage";
 import NotFoundPage from "../pages/NotFoundPage";
@@ -31,6 +32,8 @@ import AdminEducationEditorPage from "../pages/admin/AdminEducationEditorPage";
 import AdminEducationPage from "../pages/admin/AdminEducationPage";
 import AdminExperienceEditorPage from "../pages/admin/AdminExperienceEditorPage";
 import AdminExperiencePage from "../pages/admin/AdminExperiencePage";
+import AdminFaqEditorPage from "../pages/admin/AdminFaqEditorPage";
+import AdminFaqsPage from "../pages/admin/AdminFaqsPage";
 import AdminLeadEditorPage from "../pages/admin/AdminLeadEditorPage";
 import AdminLeadsPage from "../pages/admin/AdminLeadsPage";
 import AdminLoginPage from "../pages/admin/AdminLoginPage";
@@ -329,6 +332,10 @@ function AppRoutes() {
             <Route path="/testimonials" element={<TestimonialsPage />} />
           </Route>
 
+          <Route element={<PublicPageVisibilityRoute sectionKey="faq" />}>
+            <Route path="/faq" element={<FaqPage />} />
+          </Route>
+
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 
@@ -380,6 +387,16 @@ function AppRoutes() {
           <Route
             path="/admin/achievements/:id/edit"
             element={<AdminCertificationAchievementEditorPage mode="edit" />}
+          />
+
+          <Route path="/admin/faqs" element={<AdminFaqsPage />} />
+          <Route
+            path="/admin/faqs/new"
+            element={<AdminFaqEditorPage mode="create" />}
+          />
+          <Route
+            path="/admin/faqs/:id/edit"
+            element={<AdminFaqEditorPage mode="edit" />}
           />
 
           <Route path="/admin/services" element={<AdminServicesPage />} />

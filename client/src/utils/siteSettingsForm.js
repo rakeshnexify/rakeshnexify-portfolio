@@ -473,6 +473,8 @@ function createSiteSettingsFormValues(settings = {}) {
       settings?.testimonialsSection,
     ),
 
+    faqSection: normalizeListingSection(settings?.faqSection),
+
     postsSection: normalizeListingSection(settings?.postsSection),
 
     contactSection: normalizeContactSection(settings?.contactSection),
@@ -641,6 +643,8 @@ function createSiteSettingsPayload(formValues = {}) {
     testimonialsSection: createListingSectionPayload(
       values.testimonialsSection,
     ),
+
+    faqSection: createListingSectionPayload(values.faqSection),
 
     postsSection: createListingSectionPayload(values.postsSection),
 

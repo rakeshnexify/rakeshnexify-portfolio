@@ -115,6 +115,13 @@ const dashboardModules = [
     path: "/admin/testimonials",
   },
   {
+    title: "FAQs",
+    description:
+      "Create and manage customer questions, answers, dynamic categories, display order, featured priority and public visibility.",
+    status: "Management ready",
+    path: "/admin/faqs",
+  },
+  {
     title: "Leads / CRM",
     description:
       "Manage qualified enquiries and sales opportunities, pipeline status, priority, estimated value, assignments and follow-up schedules.",
@@ -203,7 +210,7 @@ function AdminDashboardPage() {
               Manage your portfolio content, services, Service Packages,
               pricing, Package Designs, Skills, Education, Experience,
               Certifications & Achievements, projects, Media Library, Blog and
-              News, Team members, companies, Testimonials, Leads / CRM,
+              News, Team members, companies, Testimonials, FAQs, Leads / CRM,
               enquiries and website settings from this secure dashboard.
             </p>
           </div>

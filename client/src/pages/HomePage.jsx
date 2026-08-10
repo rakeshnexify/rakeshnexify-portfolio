@@ -5,6 +5,7 @@ import CompaniesSection from "../components/sections/CompaniesSection";
 import ContactSection from "../components/sections/ContactSection";
 import EducationSection from "../components/sections/EducationSection";
 import ExperienceSection from "../components/sections/ExperienceSection";
+import FaqSection from "../components/sections/FaqSection";
 import HeroSection from "../components/sections/HeroSection";
 import LatestPostsSection from "../components/sections/LatestPostsSection";
 import ProjectsSection from "../components/sections/ProjectsSection";
@@ -34,6 +35,7 @@ const sectionComponents = {
   companies: CompaniesSection,
   posts: LatestPostsSection,
   testimonials: TestimonialsSection,
+  faq: FaqSection,
   contact: ContactSection,
 };
 

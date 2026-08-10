@@ -117,8 +117,8 @@ const homepageSectionDefinitions = [
     navigationOrder: 12,
   },
   {
-    key: "contact",
-    label: "Contact",
+    key: "faq",
+    label: "FAQ",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -126,13 +126,22 @@ const homepageSectionDefinitions = [
     navigationOrder: 13,
   },
   {
+    key: "contact",
+    label: "Contact",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 15,
+    navigationOrder: 14,
+  },
+  {
     key: "blog",
     label: "Blog",
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 15,
-    navigationOrder: 14,
+    order: 16,
+    navigationOrder: 15,
   },
   {
     key: "news",
@@ -140,8 +149,8 @@ const homepageSectionDefinitions = [
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 16,
-    navigationOrder: 15,
+    order: 17,
+    navigationOrder: 16,
   },
 ];
 

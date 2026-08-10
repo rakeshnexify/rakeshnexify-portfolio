@@ -732,6 +732,20 @@ const siteSettingsSchema = new mongoose.Schema(
       default: () => ({}),
     },
 
+    faqSection: {
+      type: listingSectionContentSchema,
+      default: () => ({
+        eyebrow: "Frequently Asked Questions",
+        heading: "Answers to common questions",
+        description:
+          "Find quick answers about development, pricing, timelines, support and working together.",
+        ctaButton: {
+          label: "View All FAQs",
+          url: "/faq",
+        },
+      }),
+    },
+
     postsSection: {
       type: listingSectionContentSchema,
       default: () => ({}),

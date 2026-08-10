@@ -42,6 +42,10 @@ const publicPageDefinitions = [
     pathname: "/testimonials",
   },
   {
+    key: "faq",
+    pathname: "/faq",
+  },
+  {
     key: "blog",
     pathname: "/blog",
   },

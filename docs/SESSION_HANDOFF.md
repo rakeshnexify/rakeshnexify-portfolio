@@ -10,600 +10,292 @@ Repository: `D:\rakeshnexify-portfolio`
 
 Branch: `main`
 
-Latest verified pushed checkpoint before the current module:
+Latest verified pushed checkpoint before FAQ:
 
-`b6e9efe Add certifications and achievements management module`
+`60f8122 Add service packages pricing designs and orders`
 
 Current completed-but-not-yet-committed module:
 
-`Service Packages / Pricing / Package Designs / Service Orders`
+`FAQ`
 
-The module is implemented end-to-end, manually runtime-tested, reviewed by Codex in read-only mode, and the two recommended final-review findings have been fixed and re-reviewed.
+Current module status:
 
-Latest user-run validation after the final Codex fixes:
+- Backend: FULL PASS
+- Admin FAQ UI: FULL PASS
+- Public FAQ UI: FULL PASS
+- SEO + sitemap: FULL PASS
+- Codex final verdict: `READY`
 
-- `npm run check` — passed
-- Vite production build — passed
-- 230 modules transformed
-- all ServicePackage, PackageDesign, and ServiceOrder backend syntax checks — passed
-- existing project syntax checks — passed
-- `git diff --check` — no actual whitespace errors
+Codex confirmed:
 
-Known non-blocking output:
+`NO BLOCKING OR RECOMMENDED ISSUES REMAIN FROM THE PREVIOUS REVIEW.`
 
-- client production bundle remains above Vite's recommended 500 kB chunk threshold
-- CRLF-to-LF Git messages are informational line-ending warnings
+Current closeout:
 
-Current Codex verdict:
+`compact docs -> final validation -> staging -> commit -> push`
 
-`VERDICT: READY`
+Do not reopen FAQ implementation unless a new concrete failure appears.
 
-No blocking or recommended review issue remains.
+## FAQ Architecture
 
-The active closeout state is:
-
-`documentation update -> final Git validation/staging -> commit/push`
-
-Do not reopen implementation unless a new concrete failure is discovered.
-
-## Domain Architecture
-
-The completed ownership chain is:
-
-`Service -> ServicePackage -> PackageDesign`
-
-Service remains the master Service definition.
-
-ServicePackage extends Service with pricing/package choices.
-
-PackageDesign belongs only to ServicePackage; Service is derived through the package and is not duplicated as PackageDesign ownership.
-
-Website package orders are stored in the separate:
-
-`ServiceOrder`
-
-ContactMessage remains the raw enquiry domain.
-
-Lead remains the CRM/sales-opportunity domain.
-
-ServiceOrder is the actual website package-order domain.
-
-## ServicePackage
+FAQ is collection-only.
 
 Model:
 
-`ServicePackage`
+`Faq`
 
 Collection:
 
-`service_packages`
-
-Groups:
-
-- `development`
-- `management`
-
-Pricing modes:
-
-- `fixed`
-- `starting-from`
-- `custom`
-
-Billing cycles:
-
-- `one-time`
-- `monthly`
-- `yearly`
-- `custom`
+`faqs`
 
 Public API:
 
-- `GET /api/service-packages`
-- `GET /api/service-packages/:serviceSlug/:group/:packageSlug`
+`GET /api/faqs`
 
 Admin API:
 
-- `/api/admin/service-packages`
+- `GET /api/admin/faqs`
+- `GET /api/admin/faqs/:id`
+- `POST /api/admin/faqs`
+- `PATCH /api/admin/faqs/:id`
+- `DELETE /api/admin/faqs/:id`
+
+Public page:
+
+`/faq`
 
 Admin routes:
 
-- `/admin/service-packages`
-- `/admin/service-packages/new`
-- `/admin/service-packages/:id/edit`
-
-Core behavior includes:
-
-- required Service parent
-- Service/group-scoped package slug uniqueness
-- structured package comparison features
-- price/currency/price labels
-- billing labels
-- best-for/delivery/support/revision labels
-- badges and CTA labels
-- `whatsappEnabled`
-- order/featured/visible state
-- strict Admin validation
-- deterministic public sorting
-- visible Package + visible parent Service requirement
-
-A shared transactional ServicePackage parent-guard protocol protects:
-
-- package create/reassignment
-- Service deletion
-- relevant create/delete races
-
-A Service cannot be deleted while packages reference it.
-
-RBAC:
-
-- read: authenticated active Admin
-- create/update: `super-admin`, `admin`, `editor`
-- delete: `super-admin`, `admin`
-
-## PackageDesign
-
-Model:
-
-`PackageDesign`
-
-Collection:
-
-`package_designs`
-
-Public API:
-
-- `GET /api/package-designs`
-- `GET /api/package-designs/:serviceSlug/:group/:packageSlug/:designSlug`
-
-Admin API:
-
-- `/api/admin/package-designs`
-
-Admin routes:
-
-- `/admin/package-designs`
-- `/admin/package-designs/new`
-- `/admin/package-designs/:id/edit`
-
-Core behavior includes:
-
-- required ServicePackage parent
-- no duplicated Service ownership
-- scoped slug/name identity protection
-- thumbnail Media URL
-- responsive screenshots
-- supported devices: desktop/tablet/mobile
-- live-demo URL/label
-- order/default/featured/visible state
-
-Exactly one default design per package is protected through transaction-safe switching plus a database uniqueness rule.
-
-A shared transactional PackageDesign parent-guard protocol protects:
-
-- design create/reassignment
-- ServicePackage deletion
-- relevant create/move/delete races
-
-Public visibility requires:
-
-- visible PackageDesign
-- visible ServicePackage
-- visible Service
-
-Media reference protection includes:
-
-- `PackageDesign.thumbnailUrl`
-- `PackageDesign.screenshots.url`
-
-RBAC:
-
-- read: authenticated active Admin
-- create/update: `super-admin`, `admin`, `editor`
-- delete: `super-admin`, `admin`
-
-## Public Services / Pricing Flow
-
-Public route:
-
-`/services`
-
-The current functional flow is intentionally simple:
-
-`All Services -> Service -> Development/Management -> Compare Packages -> Choose Package -> Choose Design -> Responsive Preview -> Order`
-
-Before package selection:
-
-- package comparison is visible
-- Development/Management package groups are available
-- mobile comparison supports horizontal viewing
-
-After package selection:
-
-- package comparison disappears
-- selected package remains visible with a checkmark
-- Change Package is available
-- the next visible phase is Choose Design
-
-Design phase:
-
-- compact design cards
-- user explicitly chooses a design
-- Desktop/Tablet/Mobile preview controls
-- long screenshots scroll vertically in the preview
-- Live Demo when configured
-- Order actions appear only after design selection
-
-Shareable query state:
-
-- `service`
-- `group`
-- `package`
-- `design`
-
-Query-only navigation does not intentionally reset the page to the top.
-
-Desktop:
-
-- sticky Services sidebar
-
-Mobile:
-
-- narrow sliding Services drawer
-- Service -> Package Type submenu
-- drawer remains open while navigating its Service/Package Type submenu
-- closes only by intentional outside/close action
-- sticky Services Menu remains available during page scrolling
-
-Important:
-
-The user manually tuned the current mobile `ServicePricingSidebar.jsx` typography/spacing after generated iterations.
-
-Future work must use the current repository file as source of truth and must not replace it from an older generated artifact.
-
-The overall all-module Professional UI/UX redesign is intentionally deferred until the advanced module roadmap is complete. This Services package flow is functionally accepted and should not be redesigned during normal module development.
-
-## WhatsApp Ordering
-
-Website Order and WhatsApp Order are separate.
-
-WhatsApp:
-
-- uses dynamic Site Settings `contact.whatsapp`
-- respects `ServicePackage.whatsappEnabled`
-- includes Service
-- includes Package
-- includes Price
-- includes Design
-- includes selected public Services URL
-- opens WhatsApp with a prefilled message
-- user manually sends the message
-
-No private WhatsApp number is hard-coded in the ordering component.
-
-## ServiceOrder
-
-Model:
-
-`ServiceOrder`
-
-Collection:
-
-`service_orders`
-
-Public API:
-
-`POST /api/service-orders`
-
-There is intentionally no public order list or detail API.
-
-Admin API:
-
-- `GET /api/admin/service-orders`
-- `GET /api/admin/service-orders/:id`
-- `PATCH /api/admin/service-orders/:id`
-- `DELETE /api/admin/service-orders/:id`
-
-Admin routes:
-
-- `/admin/service-orders`
-- `/admin/service-orders/:id`
-
-### Public Order Contract
-
-Customer-submitted fields:
-
-- ServicePackage ID
-- optional PackageDesign ID
-- name
-- email
-- phone / WhatsApp
-- optional company
-- project requirements
-- optional preferred start date
-- optional notes
-
-The backend must not trust public claims for:
-
-- Service name
-- Package name
-- Package price
-- currency
-- billing details
-- Design name
-- selected Services path
-
-The server resolves current visible records and derives historical snapshots for:
-
-- Service title/slug
-- Package name/slug/group
-- pricing mode
-- price/currency/price label
-- billing cycle/label
-- Design name/slug/thumbnail
-- selected Services path
-
-Public creation validates:
-
-- strict body allowlist
-- non-object bodies
-- ObjectIds
-- name/email/phone
-- requirements
-- optional company/start date/notes
-- visible ServicePackage
-- visible parent Service
-- selected PackageDesign ownership and visibility
-
-Order number behavior:
-
-- `RN-YYYYMMDD-######`
-- unique database index
-- bounded collision retries
-
-Statuses:
-
-- `new`
-- `reviewing`
-- `confirmed`
-- `in-progress`
-- `completed`
-- `cancelled`
-- `rejected`
-
-### ServiceOrder Admin Contract
-
-Read:
+- `/admin/faqs`
+- `/admin/faqs/new`
+- `/admin/faqs/:id/edit`
+
+There is intentionally no `/faq/:slug`.
+
+Core fields:
+
+- question
+- private `questionKey`
+- answer
+- dynamic category
+- private `categoryKey`
+- order
+- `isFeatured`
+- `isVisible`
+- audit fields
+- timestamps
+
+Permanent validation rules:
+
+- question identity is normalized and DB-unique
+- category identity is normalized
+- private keys do not leak
+- Admin text fields must be actual strings
+- public/Admin query values must be single values
+- repeated/multi-value arrays/objects return structured errors
+- Mongoose sync normalization hook does not use callback-style `next()`
+
+## RBAC
+
+Admin read:
 
 - authenticated active Admin
 
-Update:
+Create/update:
 
 - `super-admin`
 - `admin`
 - `editor`
 
-Delete:
+Permanent delete:
 
 - `super-admin`
 - `admin`
 
-Normal Admin PATCH intentionally allows only:
+## Public FAQ Behavior
 
-- status
-- private `adminNotes`
+Public filters:
 
-Customer data and historical snapshots are immutable through the Admin update API.
+- `search`
+- `category`
+- `featured`
 
-Admin UI supports:
+Only visible FAQs are returned.
 
-- list
+Homepage default placement:
+
+`Testimonials -> FAQ -> Contact`
+
+Homepage FAQ includes:
+
+- accessible accordion preview
+- limited preview count
+- CTA to `/faq`
+- CTA hiding when `/faq` is publication-disabled
+
+Dedicated `/faq` includes:
+
+- count
 - search
-- status filter
-- group filter
-- Service filter
-- pagination
-- detail view
-- status update
-- private Admin notes
-- role-restricted delete
+- dynamic categories
+- filter clear
+- native `<details>/<summary>`
+- loading/error/retry/empty states
 
-## Rate Limiting and Proxy Trust
+## Site Settings / Publication
 
-Public ServiceOrder submission is rate-limited.
+FAQ registry controls:
 
-Final Codex review identified deployment-aware proxy trust as a recommended pre-commit fix.
+- Show homepage section
+- Show in Navbar
+- Enable public page
+- homepage order
+- navigation order
+- label
 
-That fix is complete.
+FAQ content settings:
 
-`server/src/app.js` now uses:
+- eyebrow
+- heading
+- description
+- CTA label
+- CTA URL
 
-`TRUST_PROXY_HOPS`
+Publication flags are independent.
 
-Behavior:
+Verified behavior:
 
-- missing value -> `0`
-- accepted whole-number values -> `0` through `10`
-- invalid value -> startup failure
-- no unconditional `trust proxy: true`
-- validated value passed to `app.set("trust proxy", trustProxyHops)`
+Navbar OFF:
 
-`server/.env.example` documents:
+- Navbar FAQ hidden
+- homepage FAQ can remain
+- `/faq` can remain
 
-`TRUST_PROXY_HOPS=0`
+Homepage OFF:
 
-Local/direct traffic therefore uses the safe default `0`.
+- homepage FAQ hidden
+- `/faq` can remain
 
-Production deployment must set the real trusted proxy hop count for the actual hosting topology.
+Public page OFF:
 
-## Public Order Dialog Accessibility
+- `/faq` blocked
+- Navbar/Footer page links removed
+- homepage FAQ may remain
+- CTA to `/faq` hidden
+- sitemap `/faq` removed
 
-The final Codex review also identified the Order modal's focus behavior as a recommended pre-commit fix.
+## SEO / Sitemap
 
-That fix is complete.
+Canonical:
 
-Current modal behavior includes:
+`/faq`
 
-- `role="dialog"`
-- `aria-modal="true"`
-- `aria-labelledby`
-- labelled close control
-- initial focus
-- Tab and Shift+Tab focus containment
-- Escape close when safe
-- body-scroll lock while open
-- focus restoration to the Order Now opener
-- success-state focus
+Structured data:
 
-Real ServiceOrder submission and separate WhatsApp ordering remain unchanged.
+`FAQPage`
+
+`mainEntity` uses public visible FAQ data only.
+
+Real browser validation confirmed:
+
+- `@type = FAQPage`
+- visible FAQ appears in `mainEntity`
+
+Sitemap route:
+
+`GET /sitemap.xml`
+
+Real runtime validation confirmed:
+
+`FAQ IN SITEMAP: True`
+
+No per-record FAQ URLs exist.
 
 ## Runtime Verification
 
-### ServicePackage
+### Backend
 
-Verified:
+Passed:
 
-- Admin create/read/update/delete
-- public visibility
-- duplicate/conflict handling
-- Service reference deletion protection
-- create/reassignment versus Service-delete concurrency behavior
-- Admin UI
-- package comparison data
-
-Result:
-
-`FULL PASS`
-
-### PackageDesign
-
-Verified:
-
-- Admin create/read/update/delete
-- public list/detail
-- default switching
-- duplicate/default rollback behavior
-- visibility
-- ServicePackage deletion protection
-- create versus package-delete race
-- reassignment versus destination-package-delete race
-- Media reference protection
-- Admin UI + Media Picker
-
-Result:
-
-`FULL PASS`
-
-### Public Services / Pricing
-
-Verified through iterative browser testing:
-
-- desktop package flow
-- mobile package flow
-- query-state navigation
-- scroll-reset correction
-- sticky desktop Services navigation
-- sticky mobile Services Menu
-- mobile drawer behavior
-- package comparison
-- selected-package phase
-- compact design cards
-- responsive screenshot previews
-- long screenshot scrolling
-- Live Demo
-- separate Order and WhatsApp actions
-
-The current clean three-phase flow was accepted by the user.
-
-### ServiceOrder Backend
-
-Real public runtime create returned:
-
-- `success: true`
-- generated RN order number
-- `status: new`
-- correct MERN Stack Development Service snapshot
-- correct Professional Package snapshot
-- correct NPR 30000 price
-- correct Modern Store Design snapshot
-- correct selected Services path
-
-Temporary backend test order:
-
-`RN-20260810-266474`
-
-Admin runtime verification passed:
-
-- GET by ID
-- status `new -> reviewing`
-- Admin Notes save
-- search by order number
+- create
+- read
+- update
 - delete
-- post-delete count `0`
-
-The temporary backend test order was deleted.
-
-### ServiceOrder Frontend
-
-Real website Order Now submission passed.
-
-Frontend-created test order:
-
-`RN-20260810-145160`
-
-Verified:
-
-- real modal form
-- real POST `/api/service-orders`
-- MongoDB persistence
-- success state
-- real Order Number
-- no WhatsApp redirect from website submission
-
-### Admin Service Orders UI
-
-The frontend-created order `RN-20260810-145160` was used for the final Admin UI test.
-
-Verified:
-
-- Dashboard Service Orders card
-- order listing
-- order-number search
-- status/group/Service filters
-- Open Order
-- customer data
-- package/design snapshots
-- project requirement
-- status update
-- private Admin Notes
-- refresh persistence
-- delete
-- post-delete absence
+- public list
+- public search
+- public category
+- public featured
+- duplicate question conflict
+- private key non-exposure
+- hidden FAQ excluded publicly
+- hidden FAQ available in Admin
+- Admin filters/pagination
+- unsupported query/body rejection
+- non-object body rejection
+- unauthenticated Admin rejection
+- invalid ID handling
+- post-delete cleanup
 
 Result:
 
-`FULL PASS`
+`FAQ BACKEND FULL PASS`
 
-The frontend-created test order was deleted during Admin UI cleanup.
+### Admin UI
 
-## Codex Review Status
+Passed:
 
-Codex is review-only unless the user explicitly changes that role.
+- Dashboard card
+- create
+- edit
+- search
+- category filter
+- visibility filter
+- featured filter
+- pagination
+- Show/Hide
+- Feature/Unfeature
+- delete permission behavior
 
-### Previous PackageDesign backend checkpoint
+Result:
 
-A findings:
+`ADMIN FAQ UI FULL PASS`
 
-None.
+### Public UI
 
-B findings:
+Passed:
 
-None.
+- homepage FAQ
+- accordion
+- `/faq`
+- search
+- no-match state
+- Clear
+- category filtering
+- Navbar
+- mobile nav
+- Footer
+- Site Settings content
+- publication matrix
 
-Verdict:
+Result:
 
-`PACKAGEDESIGN BACKEND READY`
+`PUBLIC FAQ UI FULL PASS`
 
-### Final complete module review
+### SEO / Sitemap
+
+Passed:
+
+- FAQPage JSON-LD
+- visible FAQ in `mainEntity`
+- `/faq` in sitemap
+
+Result:
+
+`FAQ SEO + SITEMAP FULL PASS`
+
+## Codex Review
+
+Initial final review:
 
 A MUST FIX:
 
@@ -611,28 +303,17 @@ None.
 
 B RECOMMENDED:
 
-1. deployment-aware proxy handling for ServiceOrder rate limiting
-2. public Order modal dialog/focus accessibility
+1. repeated FAQ query values could be silently string-coerced
+2. FAQ text fields could accept arrays/objects through coercion
 
-C OPTIONAL:
+Both fixes were implemented and runtime-tested.
 
-- automated API tests
-- automated browser coverage
-- route-level code splitting later
+Focused re-review:
 
-The two B findings were fixed by ChatGPT.
+1. repeated-query finding: `CLOSED`
+2. text-type coercion finding: `CLOSED`
 
-### Focused re-review of both B fixes
-
-1. Proxy/rate-limit finding:
-
-`CLOSED`
-
-2. Order modal accessibility finding:
-
-`CLOSED`
-
-Codex explicitly reported:
+Final Codex statement:
 
 `NO BLOCKING OR RECOMMENDED ISSUES REMAIN FROM THE PREVIOUS REVIEW.`
 
@@ -640,11 +321,11 @@ Final verdict:
 
 `VERDICT: READY`
 
-Do not repeat a broad Codex review for this completed module unless a new concrete issue appears.
+Do not run another broad FAQ review unless new evidence appears.
 
-## Validation State
+## Latest Validation
 
-Latest validation after the final B fixes:
+User ran after final fixes/docs replacement:
 
 `npm run check`
 
@@ -654,140 +335,126 @@ Result:
 
 Vite:
 
-- 230 modules transformed
+- 240 modules transformed
 - production build passed
 
 `git diff --check`
 
 Result:
 
-- no actual whitespace error
-- line-ending warnings only
+- no actual whitespace errors
+- CRLF/LF warnings only
 
-Known non-blocking project-wide warning:
+Known non-blocking project warning:
 
-- production client bundle remains above Vite's recommended 500 kB chunk threshold
+- client main bundle remains above Vite's recommended 500 kB chunk threshold
 
-## Current Working Tree Scope
+## Current Working Tree
 
-The current module has not yet received its final commit.
+FAQ is not yet staged/committed.
 
-Expected current working tree includes ServicePackage, PackageDesign, ServiceOrder, Admin UI, public pricing UI, routing, and supporting modifications.
+Current modified shared files reported by Git:
 
-Important modified/shared files include:
-
-- `client/src/pages/ServicesPage.jsx`
+- `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
+- `client/src/components/layout/Footer.jsx`
+- `client/src/components/layout/Navbar.jsx`
+- `client/src/components/layout/PublicPageHeader.jsx`
+- `client/src/config/homepageSections.js`
+- `client/src/config/siteSettingsPages.js`
+- `client/src/pages/HomePage.jsx`
 - `client/src/pages/admin/AdminDashboardPage.jsx`
 - `client/src/routes/AppRoutes.jsx`
+- `client/src/utils/siteSettingsForm.js`
+- `docs/PROJECT_MEMORY.md`
+- `docs/SESSION_HANDOFF.md`
 - `package.json`
 - `server/src/app.js`
-- `server/src/controllers/adminService.controller.js`
-- `server/src/models/Service.js`
-- `server/src/services/mediaReference.service.js`
-- `server/.env.example`
+- `server/src/config/homepageSections.js`
+- `server/src/controllers/adminSiteSettings.controller.js`
+- `server/src/models/SiteSettings.js`
+- `server/src/utils/createSitemapXml.js`
 
-Important new client areas include:
+Current new FAQ client areas:
 
-- `client/src/components/admin/service-packages/`
-- `client/src/components/admin/package-designs/`
-- `client/src/components/services/pricing/`
-- `client/src/hooks/useServicePackages.js`
-- `client/src/hooks/usePackageDesigns.js`
-- `client/src/pages/admin/AdminServicePackagesPage.jsx`
-- `client/src/pages/admin/AdminServicePackageEditorPage.jsx`
-- `client/src/pages/admin/AdminPackageDesignsPage.jsx`
-- `client/src/pages/admin/AdminPackageDesignEditorPage.jsx`
-- `client/src/pages/admin/AdminServiceOrdersPage.jsx`
-- `client/src/pages/admin/AdminServiceOrderDetailPage.jsx`
-- `client/src/services/adminServicePackagesApi.js`
-- `client/src/services/adminPackageDesignsApi.js`
-- `client/src/services/adminServiceOrdersApi.js`
-- `client/src/services/servicePackagesApi.js`
-- `client/src/services/packageDesignsApi.js`
-- `client/src/services/serviceOrdersApi.js`
-- `client/src/utils/servicePackageForm.js`
-- `client/src/utils/packageDesignForm.js`
+- `client/src/components/admin/faqs/`
+- `client/src/components/faqs/`
+- `client/src/components/sections/FaqSection.jsx`
+- `client/src/hooks/useFaqs.js`
+- `client/src/pages/FaqPage.jsx`
+- `client/src/pages/admin/AdminFaqEditorPage.jsx`
+- `client/src/pages/admin/AdminFaqsPage.jsx`
+- `client/src/services/adminFaqsApi.js`
+- `client/src/services/faqsApi.js`
+- `client/src/utils/faqForm.js`
 
-Important new server areas include:
+Current new FAQ server files:
 
-- `server/src/models/ServicePackage.js`
-- `server/src/models/PackageDesign.js`
-- `server/src/models/ServiceOrder.js`
-- `server/src/controllers/servicePackage.controller.js`
-- `server/src/controllers/adminServicePackage.controller.js`
-- `server/src/controllers/packageDesign.controller.js`
-- `server/src/controllers/adminPackageDesign.controller.js`
-- `server/src/controllers/serviceOrder.controller.js`
-- `server/src/controllers/adminServiceOrder.controller.js`
-- `server/src/routes/servicePackage.routes.js`
-- `server/src/routes/adminServicePackage.routes.js`
-- `server/src/routes/packageDesign.routes.js`
-- `server/src/routes/adminPackageDesign.routes.js`
-- `server/src/routes/serviceOrder.routes.js`
-- `server/src/routes/adminServiceOrder.routes.js`
-- `server/src/services/servicePackageParentGuard.service.js`
-- `server/src/services/packageDesignParentGuard.service.js`
-- `server/src/middleware/serviceOrderRateLimiter.js`
+- `server/src/controllers/adminFaq.controller.js`
+- `server/src/controllers/faq.controller.js`
+- `server/src/models/Faq.js`
+- `server/src/routes/adminFaq.routes.js`
+- `server/src/routes/faq.routes.js`
 
-Use live Git commands as the source of truth for exact path count and diff totals.
+Use live Git output as final source of truth before staging.
 
-Do not copy a hard-coded staged-path count from an older module handoff.
+## Runtime Data Note
 
-## Runtime Data Notes
+The original low-level backend test FAQ was deleted.
 
-The original low-level backend PackageDesign runtime test data was explicitly cleaned.
+A later Admin/public integration FAQ was intentionally retained during final public/SEO testing:
 
-The two ServiceOrder runtime test orders were also explicitly deleted:
+Question:
 
-- `RN-20260810-266474`
-- `RN-20260810-145160`
+`How much does a professional MERN website cost?`
 
-Public UI testing created package/design content such as:
+Category:
 
-- Starter
-- Professional
-- Premium
-- Monthly Care
-- Modern Store
-- Classic Store
+`General`
 
-Those records were used to exercise the real public flow and were not explicitly removed in the recorded session.
+Order:
 
-Treat current MongoDB contents as runtime source of truth.
+`15`
 
-Do not blindly delete those package/design records during Git closeout. Review them separately as content if production content cleanup is desired.
+Featured:
+
+OFF
+
+Visible:
+
+ON
+
+Treat current MongoDB as source of truth.
+
+Do not blindly delete this record during Git closeout. Decide separately whether it is useful real content or temporary test content.
 
 ## Documentation State
 
-Active development-memory files:
+Active docs only:
 
 - `docs/PROJECT_MEMORY.md`
 - `docs/SESSION_HANDOFF.md`
 
-For this closeout:
+For FAQ closeout:
 
-- `PROJECT_MEMORY.md` must record the completed ServicePackage/PackageDesign/ServiceOrder architecture and roadmap advancement.
-- `SESSION_HANDOFF.md` must record the current READY closeout state.
+- PROJECT_MEMORY contains permanent FAQ architecture and roadmap advancement
+- SESSION_HANDOFF contains current FAQ READY state and immediate Git closeout
 - no large legacy documentation matrix needs updating
-
-These two updated files are the intended documentation scope for this module closeout.
 
 ## Open Issues
 
-No confirmed implementation blocker remains.
+No confirmed FAQ blocker remains.
 
-No Codex A or B finding remains.
+No Codex A/B finding remains.
 
 Known non-blocking project-wide items:
 
-- Media reference-detail display is capped at 25 records
-- Media deletion has a narrow reference-check/provider-delete TOCTOU window
-- client production bundle remains above Vite's recommended chunk-size threshold
-- current client dependency audit previously reported two high-severity dependency-chain findings and requires a separate controlled review
-- automated test coverage remains limited
-- source code contains the intended Site Settings tagline, but the deployed MongoDB value remains unverified
-- `README.md` remains materially stale and should receive a separate focused refresh later
-- production `TRUST_PROXY_HOPS` must match the actual deployment topology
+- Media reference-detail display capped at 25
+- narrow Media reference-check/delete TOCTOU window
+- large client bundle warning
+- limited automated test coverage
+- dependency audit requires separate controlled review
+- README remains stale
+- production `TRUST_PROXY_HOPS` must match deployment topology
 
 Do not run:
 
@@ -795,64 +462,55 @@ Do not run:
 
 ## Next Action
 
-Current checkpoint:
+After replacing the compact docs:
 
-`Module implementation approved; documentation closeout in progress`
-
-After replacing the two updated documentation files:
-
-1. Run:
+1. run:
    - `npm run check`
    - `git diff --check`
    - `git status --short`
-2. Review the final intended working-tree scope.
-3. Stage the complete Service Packages / Pricing / Package Designs / Service Orders module plus:
-   - `docs/PROJECT_MEMORY.md`
-   - `docs/SESSION_HANDOFF.md`
-4. Run:
+2. verify FAQ-only scope
+3. stage intended FAQ module + both docs
+4. run:
    - `git diff --cached --check`
    - `git diff --cached --stat`
+   - `git diff --cached --name-only`
    - `git status --short`
-5. Commit the complete module.
-6. Push `main` to `origin`.
-7. Verify:
+5. commit
+6. push `main`
+7. verify:
    - `git status -sb`
-   - latest Git log
-   - `main` and `origin/main` synchronized
+   - `git log -1 --oneline`
+   - local `main` and `origin/main` synchronized
    - working tree clean
-
-Do not reopen already-approved implementation work unless a new concrete issue is discovered.
 
 ## Next Development Module
 
-After this module is committed and pushed:
+After FAQ commit/push:
 
-`FAQ`
+`Clients / Partners`
 
 Before implementation:
 
-- audit the existing Site Settings/publication/page patterns
-- decide whether FAQ is collection-only or also needs detail/category structure
-- preserve existing publication, SEO, sitemap, Media, API, Admin, and RBAC conventions
-- avoid overlap with Services content where FAQ belongs inside a specific Service/package experience
+- audit overlap with Companies, Projects, Testimonials, Services, Team
+- decide extension vs new collection
+- prevent duplicate ownership
+- define logo/relationship/relations/publication/SEO requirements
+- preserve Media, Site Settings, sitemap, Admin, RBAC, and validation patterns
 
-## Upcoming Modules
+## Remaining Roadmap
 
-After FAQ:
+After Clients / Partners:
 
-1. Clients / Partners
-2. Case Studies
-3. Appointment / Consultation Booking
-4. Newsletter / Subscribers Management
-5. Admin Analytics Dashboard
-6. Admin Activity / Audit Log
-7. Menu / Navigation Management
+1. Case Studies
+2. Appointment / Consultation Booking
+3. Newsletter / Subscribers Management
+4. Admin Analytics Dashboard
+5. Admin Activity / Audit Log
+6. Menu / Navigation Management
 
 ## Future Separate Phases
 
-After the remaining advanced modules:
-
-- Professional UI/UX redesign
+- Professional UI/UX
 - Email and Notifications
-- Final SEO, testing, performance, and security
+- Final SEO/testing/performance/security
 - Production deployment
