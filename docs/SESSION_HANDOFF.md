@@ -1,6 +1,6 @@
 ﻿# Session Handoff
 
-Last updated: 2026-08-10
+Last updated: 2026-08-11
 
 ## Current Project State
 
@@ -10,322 +10,148 @@ Repository: `D:\rakeshnexify-portfolio`
 
 Branch: `main`
 
-Latest verified pushed checkpoint before FAQ:
+Latest verified pushed checkpoint before this module:
 
-`60f8122 Add service packages pricing designs and orders`
+`fe8411b Add dynamic FAQ management module`
 
 Current completed-but-not-yet-committed module:
 
-`FAQ`
+`Clients / Partners`
 
 Current module status:
 
-- Backend: FULL PASS
-- Admin FAQ UI: FULL PASS
-- Public FAQ UI: FULL PASS
+- architecture audit: PASS
+- public UI: FULL PASS
+- publication matrix: FULL PASS
+- listing settings: FULL PASS
 - SEO + sitemap: FULL PASS
-- Codex final verdict: `READY`
+- cross-publication routing/sitemap tests: FULL PASS
+- relationship-aware route/sitemap tests: FULL PASS
+- final Codex verdict: `READY`
+- temporary Client/Partner test records: cleaned
+- final source validation: PASS
 
-Codex confirmed:
+Do not reopen implementation unless a new concrete failure appears.
 
-`NO BLOCKING OR RECOMMENDED ISSUES REMAIN FROM THE PREVIOUS REVIEW.`
+## Clients / Partners Architecture
 
-Current closeout:
+Clients / Partners does not own organization identity.
 
-`compact docs -> final validation -> staging -> commit -> push`
+Canonical entity:
 
-Do not reopen FAQ implementation unless a new concrete failure appears.
+`Company`
 
-## FAQ Architecture
+There is intentionally no:
 
-FAQ is collection-only.
+- Client model
+- Partner model
+- ClientPartner model
+- separate Clients / Partners collection
+- separate Clients / Partners API
+- separate Clients / Partners Admin CRUD
+- `/clients-partners/:slug`
 
-Model:
+Existing Company relationships provide the presentation split:
 
-`Faq`
+- `client`
+- `partner`
 
-Collection:
+Admin management remains:
 
-`faqs`
+`/admin/companies`
 
-Public API:
+Public collection:
 
-`GET /api/faqs`
+`/clients-partners`
 
-Admin API:
+Canonical detail route:
 
-- `GET /api/admin/faqs`
-- `GET /api/admin/faqs/:id`
-- `POST /api/admin/faqs`
-- `PATCH /api/admin/faqs/:id`
-- `DELETE /api/admin/faqs/:id`
+`/companies/:slug`
 
-Public page:
+Registry key:
 
-`/faq`
+`clients-partners`
 
-Admin routes:
+Site Settings content field:
 
-- `/admin/faqs`
-- `/admin/faqs/new`
-- `/admin/faqs/:id/edit`
+`clientsPartnersSection`
 
-There is intentionally no `/faq/:slug`.
+## Public Behavior
 
-Core fields:
+Homepage Clients & Partners:
 
-- question
-- private `questionKey`
-- answer
-- dynamic category
-- private `categoryKey`
-- order
-- `isFeatured`
-- `isVisible`
-- audit fields
-- timestamps
+- visible Company records only
+- relationship must be `client` or `partner`
+- featured first, then order, then name
+- compact preview cards
+- canonical links to `/companies/:slug`
+- CTA hides when `/clients-partners` public page is disabled
 
-Permanent validation rules:
+Dedicated `/clients-partners`:
 
-- question identity is normalized and DB-unique
-- category identity is normalized
-- private keys do not leak
-- Admin text fields must be actual strings
-- public/Admin query values must be single values
-- repeated/multi-value arrays/objects return structured errors
-- Mongoose sync normalization hook does not use callback-style `next()`
+- All
+- Clients
+- Partners
+- loading/error/empty states
+- compact Company-backed cards
+- no new detail route
 
-## RBAC
+## Publication Contract
 
-Admin read:
+Collection routes remain independent:
 
-- authenticated active Admin
+- `/companies` -> Companies public-page control only
+- `/clients-partners` -> Clients & Partners public-page control only
 
-Create/update:
+Canonical Company detail publication:
 
-- `super-admin`
-- `admin`
-- `editor`
+Companies ON:
 
-Permanent delete:
+- all visible Company detail profiles may work
 
-- `super-admin`
-- `admin`
+Companies OFF + Clients & Partners ON:
 
-## Public FAQ Behavior
+- visible `client` profile -> allowed
+- visible `partner` profile -> allowed
+- visible `owned` / `managed` / `other` -> Not Found
 
-Public filters:
+Companies OFF + Clients & Partners OFF:
 
-- `search`
-- `category`
-- `featured`
+- Company details are blocked through these publication paths
 
-Only visible FAQs are returned.
-
-Homepage default placement:
-
-`Testimonials -> FAQ -> Contact`
-
-Homepage FAQ includes:
-
-- accessible accordion preview
-- limited preview count
-- CTA to `/faq`
-- CTA hiding when `/faq` is publication-disabled
-
-Dedicated `/faq` includes:
-
-- count
-- search
-- dynamic categories
-- filter clear
-- native `<details>/<summary>`
-- loading/error/retry/empty states
-
-## Site Settings / Publication
-
-FAQ registry controls:
-
-- Show homepage section
-- Show in Navbar
-- Enable public page
-- homepage order
-- navigation order
-- label
-
-FAQ content settings:
-
-- eyebrow
-- heading
-- description
-- CTA label
-- CTA URL
-
-Publication flags are independent.
-
-Verified behavior:
-
-Navbar OFF:
-
-- Navbar FAQ hidden
-- homepage FAQ can remain
-- `/faq` can remain
-
-Homepage OFF:
-
-- homepage FAQ hidden
-- `/faq` can remain
-
-Public page OFF:
-
-- `/faq` blocked
-- Navbar/Footer page links removed
-- homepage FAQ may remain
-- CTA to `/faq` hidden
-- sitemap `/faq` removed
+`PublicPageVisibilityRoute` now supports existing single `sectionKey` behavior plus intentional OR-style `sectionKeys` for shared canonical routes.
 
 ## SEO / Sitemap
 
-Canonical:
+`/clients-partners`:
 
-`/faq`
+- canonical `/clients-partners`
+- `CollectionPage`
+- `mainEntity` uses `ItemList`
+- ItemList detail URLs use `/companies/:slug`
 
-Structured data:
+Sitemap rules match routing:
 
-`FAQPage`
+Companies ON:
 
-`mainEntity` uses public visible FAQ data only.
+- all visible Company detail URLs may be indexed
 
-Real browser validation confirmed:
+Companies OFF + Clients & Partners ON:
 
-- `@type = FAQPage`
-- visible FAQ appears in `mainEntity`
+- only visible client/partner Company details remain
+- owned/managed/other Company details are excluded
 
-Sitemap route:
+Both OFF:
 
-`GET /sitemap.xml`
+- Company detail entries are excluded
 
-Real runtime validation confirmed:
+Collection sitemap entries remain independently publication-controlled.
 
-`FAQ IN SITEMAP: True`
+No `/clients-partners/:slug` sitemap entries exist.
 
-No per-record FAQ URLs exist.
+## Validation
 
-## Runtime Verification
-
-### Backend
-
-Passed:
-
-- create
-- read
-- update
-- delete
-- public list
-- public search
-- public category
-- public featured
-- duplicate question conflict
-- private key non-exposure
-- hidden FAQ excluded publicly
-- hidden FAQ available in Admin
-- Admin filters/pagination
-- unsupported query/body rejection
-- non-object body rejection
-- unauthenticated Admin rejection
-- invalid ID handling
-- post-delete cleanup
-
-Result:
-
-`FAQ BACKEND FULL PASS`
-
-### Admin UI
-
-Passed:
-
-- Dashboard card
-- create
-- edit
-- search
-- category filter
-- visibility filter
-- featured filter
-- pagination
-- Show/Hide
-- Feature/Unfeature
-- delete permission behavior
-
-Result:
-
-`ADMIN FAQ UI FULL PASS`
-
-### Public UI
-
-Passed:
-
-- homepage FAQ
-- accordion
-- `/faq`
-- search
-- no-match state
-- Clear
-- category filtering
-- Navbar
-- mobile nav
-- Footer
-- Site Settings content
-- publication matrix
-
-Result:
-
-`PUBLIC FAQ UI FULL PASS`
-
-### SEO / Sitemap
-
-Passed:
-
-- FAQPage JSON-LD
-- visible FAQ in `mainEntity`
-- `/faq` in sitemap
-
-Result:
-
-`FAQ SEO + SITEMAP FULL PASS`
-
-## Codex Review
-
-Initial final review:
-
-A MUST FIX:
-
-None.
-
-B RECOMMENDED:
-
-1. repeated FAQ query values could be silently string-coerced
-2. FAQ text fields could accept arrays/objects through coercion
-
-Both fixes were implemented and runtime-tested.
-
-Focused re-review:
-
-1. repeated-query finding: `CLOSED`
-2. text-type coercion finding: `CLOSED`
-
-Final Codex statement:
-
-`NO BLOCKING OR RECOMMENDED ISSUES REMAIN FROM THE PREVIOUS REVIEW.`
-
-Final verdict:
-
-`VERDICT: READY`
-
-Do not run another broad FAQ review unless new evidence appears.
-
-## Latest Validation
-
-User ran after final fixes/docs replacement:
+Latest user-run validation after all fixes and test-data cleanup:
 
 `npm run check`
 
@@ -333,10 +159,11 @@ Result:
 
 `PASS`
 
-Vite:
+Vite production build:
 
-- 240 modules transformed
-- production build passed
+- 243 modules transformed
+- build passed
+- main bundle remains above Vite's recommended 500 kB warning threshold
 
 `git diff --check`
 
@@ -345,15 +172,11 @@ Result:
 - no actual whitespace errors
 - CRLF/LF warnings only
 
-Known non-blocking project warning:
+Final source working-tree scope before docs:
 
-- client main bundle remains above Vite's recommended 500 kB chunk threshold
+19 intended implementation paths.
 
-## Current Working Tree
-
-FAQ is not yet staged/committed.
-
-Current modified shared files reported by Git:
+Modified:
 
 - `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
 - `client/src/components/layout/Footer.jsx`
@@ -361,88 +184,99 @@ Current modified shared files reported by Git:
 - `client/src/components/layout/PublicPageHeader.jsx`
 - `client/src/config/homepageSections.js`
 - `client/src/config/siteSettingsPages.js`
+- `client/src/pages/CompanyDetailsPage.jsx`
 - `client/src/pages/HomePage.jsx`
-- `client/src/pages/admin/AdminDashboardPage.jsx`
 - `client/src/routes/AppRoutes.jsx`
+- `client/src/routes/PublicPageVisibilityRoute.jsx`
 - `client/src/utils/siteSettingsForm.js`
-- `docs/PROJECT_MEMORY.md`
-- `docs/SESSION_HANDOFF.md`
-- `package.json`
-- `server/src/app.js`
 - `server/src/config/homepageSections.js`
 - `server/src/controllers/adminSiteSettings.controller.js`
+- `server/src/controllers/sitemap.controller.js`
 - `server/src/models/SiteSettings.js`
 - `server/src/utils/createSitemapXml.js`
 
-Current new FAQ client areas:
+New:
 
-- `client/src/components/admin/faqs/`
-- `client/src/components/faqs/`
-- `client/src/components/sections/FaqSection.jsx`
-- `client/src/hooks/useFaqs.js`
-- `client/src/pages/FaqPage.jsx`
-- `client/src/pages/admin/AdminFaqEditorPage.jsx`
-- `client/src/pages/admin/AdminFaqsPage.jsx`
-- `client/src/services/adminFaqsApi.js`
-- `client/src/services/faqsApi.js`
-- `client/src/utils/faqForm.js`
+- `client/src/components/companies/ClientPartnerCard.jsx`
+- `client/src/components/sections/ClientsPartnersSection.jsx`
+- `client/src/pages/ClientsPartnersPage.jsx`
 
-Current new FAQ server files:
+After this documentation replacement, expected closeout scope is:
 
-- `server/src/controllers/adminFaq.controller.js`
-- `server/src/controllers/faq.controller.js`
-- `server/src/models/Faq.js`
-- `server/src/routes/adminFaq.routes.js`
-- `server/src/routes/faq.routes.js`
+- 19 implementation paths
+- 2 active documentation paths
+- 21 total intended paths
 
-Use live Git output as final source of truth before staging.
+Use live Git output as source of truth before staging.
 
-## Runtime Data Note
+## Runtime Test Data
 
-The original low-level backend test FAQ was deleted.
+Temporary records used during testing were explicitly deleted:
 
-A later Admin/public integration FAQ was intentionally retained during final public/SEO testing:
+- `Demo Client Company`
+- `Demo Partner Company`
 
-Question:
+Verified after cleanup:
 
-`How much does a professional MERN website cost?`
+- total public Companies: 1
+- client Companies: 0
+- partner Companies: 0
 
-Category:
+Remaining real Company:
 
-`General`
+- `UniQuick Mart`
+- slug `uniquick-mart`
+- relationship `owned`
+- visible `true`
 
-Order:
+UniQuick Mart was used only to verify relationship-aware blocking. Do not delete or modify it during Git closeout.
 
-`15`
+## Codex Review
 
-Featured:
+Initial final review found one B issue:
 
-OFF
+- Clients / Partners linked to canonical Company details that became inaccessible when Companies public page was disabled
 
-Visible:
+First fix introduced shared OR routing/sitemap behavior.
 
-ON
+Focused re-review then found one B issue:
 
-Treat current MongoDB as source of truth.
+- OR behavior was too broad and allowed owned/managed/other Company details when only Clients & Partners was enabled
 
-Do not blindly delete this record during Git closeout. Decide separately whether it is useful real content or temporary test content.
+Second fix added relationship-aware detail publication and sitemap filtering.
+
+Final focused review:
+
+A MUST FIX:
+
+None.
+
+B RECOMMENDED:
+
+None.
+
+Final verdict:
+
+`VERDICT: READY`
+
+Do not run another broad Clients / Partners review unless new evidence appears.
 
 ## Documentation State
 
-Active docs only:
+Active development-memory files only:
 
 - `docs/PROJECT_MEMORY.md`
 - `docs/SESSION_HANDOFF.md`
 
-For FAQ closeout:
+For this closeout:
 
-- PROJECT_MEMORY contains permanent FAQ architecture and roadmap advancement
-- SESSION_HANDOFF contains current FAQ READY state and immediate Git closeout
+- PROJECT_MEMORY records the permanent Company-backed Clients / Partners architecture, shared canonical-detail publication rule, limitation, completed inventory, and roadmap advancement
+- SESSION_HANDOFF records the current READY state and immediate Git closeout
 - no large legacy documentation matrix needs updating
 
 ## Open Issues
 
-No confirmed FAQ blocker remains.
+No confirmed Clients / Partners blocker remains.
 
 No Codex A/B finding remains.
 
@@ -450,10 +284,10 @@ Known non-blocking project-wide items:
 
 - Media reference-detail display capped at 25
 - narrow Media reference-check/delete TOCTOU window
-- large client bundle warning
+- client production bundle remains above Vite's recommended chunk-size threshold
 - limited automated test coverage
-- dependency audit requires separate controlled review
-- README remains stale
+- client dependency audit requires separate controlled review
+- README remains materially stale
 - production `TRUST_PROXY_HOPS` must match deployment topology
 
 Do not run:
@@ -462,22 +296,23 @@ Do not run:
 
 ## Next Action
 
-After replacing the compact docs:
+After replacing these two active docs:
 
-1. run:
-   - `npm run check`
+1. Run:
    - `git diff --check`
    - `git status --short`
-2. verify FAQ-only scope
-3. stage intended FAQ module + both docs
-4. run:
+2. Verify exactly the intended Clients / Partners implementation plus the two docs.
+3. Stage the complete module plus:
+   - `docs/PROJECT_MEMORY.md`
+   - `docs/SESSION_HANDOFF.md`
+4. Run:
    - `git diff --cached --check`
    - `git diff --cached --stat`
    - `git diff --cached --name-only`
    - `git status --short`
-5. commit
-6. push `main`
-7. verify:
+5. If staged scope is correct, commit.
+6. Push `main`.
+7. Verify:
    - `git status -sb`
    - `git log -1 --oneline`
    - local `main` and `origin/main` synchronized
@@ -485,28 +320,27 @@ After replacing the compact docs:
 
 ## Next Development Module
 
-After FAQ commit/push:
+After Clients / Partners is committed and pushed:
 
-`Clients / Partners`
+`Case Studies`
 
 Before implementation:
 
-- audit overlap with Companies, Projects, Testimonials, Services, Team
-- decide extension vs new collection
-- prevent duplicate ownership
-- define logo/relationship/relations/publication/SEO requirements
-- preserve Media, Site Settings, sitemap, Admin, RBAC, and validation patterns
+- audit overlap with Projects first
+- prefer extending the existing Project domain unless a separate Case Study domain is justified
+- avoid duplicate project identity/content ownership
+- define case-study narrative, challenge/solution/results, metrics, media, relations, publication, SEO, and sitemap responsibilities
+- preserve existing Media, Site Settings, Admin, RBAC, validation, and canonical-route patterns
 
 ## Remaining Roadmap
 
-After Clients / Partners:
+After Case Studies:
 
-1. Case Studies
-2. Appointment / Consultation Booking
-3. Newsletter / Subscribers Management
-4. Admin Analytics Dashboard
-5. Admin Activity / Audit Log
-6. Menu / Navigation Management
+1. Appointment / Consultation Booking
+2. Newsletter / Subscribers Management
+3. Admin Analytics Dashboard
+4. Admin Activity / Audit Log
+5. Menu / Navigation Management
 
 ## Future Separate Phases
 

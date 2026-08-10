@@ -6,6 +6,7 @@ import PublicPageHeader from "../components/layout/PublicPageHeader";
 import PageSeo from "../components/seo/PageSeo";
 import useCompany from "../hooks/useCompany";
 import useSiteSettings from "../hooks/useSiteSettings";
+import NotFoundPage from "./NotFoundPage";
 
 const relationshipLabels = {
   owned: "Owned Company",
@@ -69,6 +70,43 @@ const defaultCompanySeo = {
     "business development",
   ],
 };
+
+function normalizeSectionKey(value) {
+  const key = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  return key === "home" ? "hero" : key;
+}
+
+function isSectionPageVisible(sections, requiredSectionKey) {
+  if (!Array.isArray(sections)) {
+    return true;
+  }
+
+  const normalizedRequiredKey = normalizeSectionKey(requiredSectionKey);
+
+  const section =
+    sections.find(
+      (sectionItem) =>
+        normalizeSectionKey(sectionItem?.key) === normalizedRequiredKey,
+    ) || null;
+
+  /*
+   * Purane Site Settings records mein section ya isPageVisible missing ho
+   * sakta hai. Existing publication system ki backward-compatible behavior
+   * preserve karne ke liye aise records visible-by-default rahenge.
+   */
+  return section?.isPageVisible !== false;
+}
+
+function isClientPartnerRelationship(value) {
+  const relationship = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  return relationship === "client" || relationship === "partner";
+}
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -355,7 +393,14 @@ function CompanyLoadingState() {
   );
 }
 
-function CompanyErrorState({ error, status, onRetry, isRetrying }) {
+function CompanyErrorState({
+  error,
+  status,
+  onRetry,
+  isRetrying,
+  returnPath = "/companies",
+  returnLabel = "View All Companies",
+}) {
   const isNotFound = status === 404;
 
   return (
@@ -401,10 +446,10 @@ function CompanyErrorState({ error, status, onRetry, isRetrying }) {
             )}
 
             <Link
-              to="/companies"
+              to={returnPath}
               className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-center text-sm font-semibold text-slate-700 transition hover:border-brand-600 hover:text-brand-600"
             >
-              View All Companies
+              {returnLabel}
             </Link>
 
             <Link
@@ -429,6 +474,28 @@ function CompanyDetailsPage() {
     useCompany(slug);
 
   const { settings } = useSiteSettings();
+
+  const companiesPageVisible = isSectionPageVisible(
+    settings?.sections,
+    "companies",
+  );
+
+  const clientsPartnersPageVisible = isSectionPageVisible(
+    settings?.sections,
+    "clients-partners",
+  );
+
+  const returnPath = companiesPageVisible
+    ? "/companies"
+    : clientsPartnersPageVisible
+      ? "/clients-partners"
+      : "/";
+
+  const returnLabel = companiesPageVisible
+    ? "View All Companies"
+    : clientsPartnersPageVisible
+      ? "View Clients & Partners"
+      : "Return Home";
 
   const brandName =
     String(settings?.brand?.name || "").trim() || "RakeshNexify";
@@ -530,9 +597,20 @@ function CompanyDetailsPage() {
           status={status}
           onRetry={refreshCompany}
           isRetrying={isLoading}
+          returnPath={returnPath}
+          returnLabel={returnLabel}
         />
       </>
     );
+  }
+
+  const isCompanyProfilePublished =
+    companiesPageVisible ||
+    (clientsPartnersPageVisible &&
+      isClientPartnerRelationship(company.relationship));
+
+  if (!isCompanyProfilePublished) {
+    return <NotFoundPage />;
   }
 
   const businessAreas = getTextItems(company.businessAreas);

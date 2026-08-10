@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-10
+Last updated: 2026-08-11
 
 ## Purpose
 
@@ -111,7 +111,7 @@ Private identity examples: Skill `nameKey`; Education/Experience/CertificationAc
 
 Registry keys include:
 
-`hero`, `about`, `statistics`, `skills`, `services`, `projects`, `education`, `experience`, `achievements`, `team`, `companies`, `posts`, `testimonials`, `faq`, `contact`, `blog`, `news`.
+`hero`, `about`, `statistics`, `skills`, `services`, `projects`, `education`, `experience`, `achievements`, `team`, `companies`, `clients-partners`, `posts`, `testimonials`, `faq`, `contact`, `blog`, `news`.
 
 Registry controls:
 
@@ -122,13 +122,16 @@ Registry controls:
 - `navigationOrder`
 - `label`
 
-`PublicPageVisibilityRoute` blocks disabled dedicated pages. Navbar, PublicPageHeader, Footer, homepage registry, and sitemap must stay aligned.
+`PublicPageVisibilityRoute` blocks disabled dedicated pages. It also supports an OR-style `sectionKeys` contract for intentionally shared canonical detail routes. Existing single-section guards retain their normal behavior.
+
+Navbar, PublicPageHeader, Footer, homepage registry, route guards, and sitemap must stay aligned.
 
 Special cases:
 
 - `posts`: combined homepage Articles & News
 - `blog` / `news`: dedicated experiences
 - `faq`: independent homepage/Navbar/public-page publication
+- `clients-partners`: presentation layer over Company; independent collection publication while reusing canonical Company details
 - Hero/About/Contact: anchor-oriented
 - Media/Contact Messages: Admin-only
 
@@ -136,7 +139,7 @@ Special cases:
 
 `PageSeo.jsx` handles title, description, keywords, canonical, robots, Open Graph, Twitter metadata, social image, and JSON-LD. Managed JSON-LD must update/clean on route changes.
 
-Sitemap must respect publication state, record visibility, and supported detail routes.
+Sitemap must respect publication state, record visibility, supported detail routes, and shared canonical-detail publication rules.
 
 ## Media Management
 
@@ -367,6 +370,70 @@ If `/faq` public page is disabled:
 
 SEO: canonical `/faq`, collection-level `FAQPage` JSON-LD from visible public FAQ data only. Sitemap contains `/faq` only; no per-record FAQ URLs.
 
+## Clients / Partners
+
+Clients / Partners is intentionally a presentation/publication layer over the existing `Company` domain.
+
+There is no separate Client, Partner, or ClientPartner model/collection/API/Admin CRUD.
+
+Canonical organization source:
+
+`Company`
+
+Relationship mapping:
+
+- client: `Company.relationship === "client"`
+- partner: `Company.relationship === "partner"`
+
+Public collection page:
+
+`/clients-partners`
+
+There is intentionally no:
+
+`/clients-partners/:slug`
+
+Canonical detail identity remains:
+
+`/companies/:slug`
+
+Admin management remains:
+
+`/admin/companies`
+
+Permanent rules:
+
+- only visible Companies with relationship `client` or `partner` appear in the Clients / Partners homepage section and collection page
+- compact Clients / Partners cards must link to canonical Company detail URLs
+- homepage preview sorts featured first, then order, then name
+- dedicated page supports All / Clients / Partners filters
+- registry key is `clients-partners`
+- Site Settings content field is `clientsPartnersSection`
+- homepage, Navbar, and dedicated-page publication controls remain independent
+- disabling Clients / Partners public page does not globally hide Company records from the Companies module
+- homepage CTA to `/clients-partners` must hide if that page is publication-disabled
+
+Shared canonical-detail publication rule:
+
+- Companies ON -> all visible Company detail profiles may remain public/indexable
+- Companies OFF + Clients & Partners ON -> only visible `client`/`partner` Company details may remain public/indexable
+- Companies OFF + Clients & Partners OFF -> no Company detail route/sitemap publication through these modules
+- `/companies` collection remains controlled only by Companies
+- `/clients-partners` collection remains controlled only by Clients & Partners
+
+SEO:
+
+- canonical `/clients-partners`
+- collection-level `CollectionPage`
+- `mainEntity` uses `ItemList`
+- ItemList entries point to canonical `/companies/:slug`
+- sitemap contains `/clients-partners` when enabled
+- no duplicate `/clients-partners/:slug` sitemap URLs
+
+Known deliberate limitation:
+
+`Company.relationship` is single-valued, so one Company cannot simultaneously be both client and partner. Migrate to a multi-value relationship model only if a real requirement emerges.
+
 ## Completed Module Inventory
 
 | Module | Public | Admin | Public Route / Notes |
@@ -378,7 +445,8 @@ SEO: canonical `/faq`, collection-level `FAQPage` JSON-LD from visible public FA
 | Service Orders | public POST | `/api/admin/service-orders` | Services order flow |
 | Statistics | `/api/statistics` | `/api/admin/statistics` | `/statistics` |
 | Projects | `/api/projects` | `/api/admin/projects` | `/projects`, slug detail |
-| Companies | `/api/companies` | `/api/admin/companies` | `/companies`, slug detail |
+| Companies | `/api/companies` | `/api/admin/companies` | `/companies`, canonical slug detail |
+| Clients / Partners | reuses `/api/companies` | reuses `/admin/companies` | `/clients-partners`, Company-backed presentation layer |
 | Contact Messages | public POST | `/api/admin/contact-messages` | Contact workflow |
 | Leads / CRM | None | `/api/admin/leads` | Admin-only |
 | Team | `/api/team` | `/api/admin/team` | `/team`, slug detail |
@@ -398,7 +466,7 @@ Prefer extending:
 
 - Admin auth/RBAC
 - Site Settings/publication registry
-- `PublicPageVisibilityRoute`
+- `PublicPageVisibilityRoute`, including explicit shared-route `sectionKeys`
 - `PageSeo`
 - dynamic sitemap
 - slug/private identity patterns
@@ -413,6 +481,7 @@ Prefer extending:
 - immutable server-derived snapshots
 - Services query-state pattern
 - collection-level structured data
+- canonical shared-detail publication pattern for overlapping public collections
 
 ## Long-Term Decisions
 
@@ -442,6 +511,8 @@ Prefer extending:
 - FAQ remains collection-only with dynamic categories
 - FAQ request validation must not reintroduce silent string coercion
 - FAQ publication flags remain independent
+- Clients / Partners reuses Company and must not duplicate organization identity
+- Company detail routes may be shared across public collections only with relationship-aware publication and matching sitemap behavior
 - commit only verified work
 - never run `npm audit fix --force` without controlled review
 
@@ -451,6 +522,7 @@ Prefer extending:
 - Media deletion has a narrow reference-check/provider-delete TOCTOU window
 - older controllers are not uniformly as strict as newer modules
 - navigation is registry-based, not arbitrary hierarchical navigation
+- `Company.relationship` is single-valued
 - `TRUST_PROXY_HOPS` depends on deployment topology
 
 Temporary warnings belong in `SESSION_HANDOFF.md`.
@@ -465,17 +537,15 @@ Do not recreate a large historical documentation matrix after every module.
 
 ## Remaining Roadmap
 
-1. Clients / Partners
-2. Case Studies
-3. Appointment / Consultation Booking
-4. Newsletter / Subscribers Management
-5. Admin Analytics Dashboard
-6. Admin Activity / Audit Log
-7. Menu / Navigation Management
+1. Case Studies
+2. Appointment / Consultation Booking
+3. Newsletter / Subscribers Management
+4. Admin Analytics Dashboard
+5. Admin Activity / Audit Log
+6. Menu / Navigation Management
 
 Overlap rules:
 
-- Clients/Partners overlaps Companies, Projects, Testimonials
 - Case Studies substantially overlaps Projects; prefer extension unless justified
 - Appointment/Consultation is distinct from Contact Messages and Service Orders
 - Admin Analytics extends dashboard

@@ -5,6 +5,7 @@ import PageSeo from "../components/seo/PageSeo";
 import BlogPage from "../pages/BlogPage";
 import CertificationAchievementsPage from "../pages/CertificationAchievementsPage";
 import CompaniesPage from "../pages/CompaniesPage";
+import ClientsPartnersPage from "../pages/ClientsPartnersPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import EducationPage from "../pages/EducationPage";
 import ExperiencePage from "../pages/ExperiencePage";
@@ -323,7 +324,27 @@ function AppRoutes() {
 
           <Route element={<PublicPageVisibilityRoute sectionKey="companies" />}>
             <Route path="/companies" element={<CompaniesPage />} />
+          </Route>
+
+          <Route
+            element={
+              <PublicPageVisibilityRoute
+                sectionKeys={["companies", "clients-partners"]}
+              />
+            }
+          >
             <Route path="/companies/:slug" element={<CompanyDetailsPage />} />
+          </Route>
+
+          <Route
+            element={
+              <PublicPageVisibilityRoute sectionKey="clients-partners" />
+            }
+          >
+            <Route
+              path="/clients-partners"
+              element={<ClientsPartnersPage />}
+            />
           </Route>
 
           <Route

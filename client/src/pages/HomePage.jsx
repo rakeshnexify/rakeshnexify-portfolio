@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import CertificationAchievementsSection from "../components/sections/CertificationAchievementsSection";
 import CompaniesSection from "../components/sections/CompaniesSection";
+import ClientsPartnersSection from "../components/sections/ClientsPartnersSection";
 import ContactSection from "../components/sections/ContactSection";
 import EducationSection from "../components/sections/EducationSection";
 import ExperienceSection from "../components/sections/ExperienceSection";
@@ -33,6 +34,7 @@ const sectionComponents = {
   achievements: CertificationAchievementsSection,
   team: TeamSection,
   companies: CompaniesSection,
+  "clients-partners": ClientsPartnersSection,
   posts: LatestPostsSection,
   testimonials: TestimonialsSection,
   faq: FaqSection,

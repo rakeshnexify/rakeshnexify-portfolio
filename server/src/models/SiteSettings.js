@@ -727,6 +727,20 @@ const siteSettingsSchema = new mongoose.Schema(
       default: () => ({}),
     },
 
+    clientsPartnersSection: {
+      type: listingSectionContentSchema,
+      default: () => ({
+        eyebrow: "Clients & Partners",
+        heading: "Trusted clients and business partners",
+        description:
+          "Companies and organizations I have worked with, supported or partnered with.",
+        ctaButton: {
+          label: "View All Clients & Partners",
+          url: "/clients-partners",
+        },
+      }),
+    },
+
     testimonialsSection: {
       type: listingSectionContentSchema,
       default: () => ({}),

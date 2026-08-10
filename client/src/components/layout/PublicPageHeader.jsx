@@ -129,6 +129,17 @@ const defaultNavigationItems = [
     navigationOrder: 11,
   },
   {
+    key: "clients-partners",
+    label: "Clients & Partners",
+    href: "/clients-partners",
+    type: "page",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 12,
+    navigationOrder: 12,
+  },
+  {
     key: "testimonials",
     label: "Testimonials",
     href: "/testimonials",
@@ -136,8 +147,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 13,
-    navigationOrder: 12,
+    order: 14,
+    navigationOrder: 13,
   },
   {
     key: "faq",
@@ -147,8 +158,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 14,
-    navigationOrder: 13,
+    order: 15,
+    navigationOrder: 14,
   },
   {
     key: "contact",
@@ -158,8 +169,8 @@ const defaultNavigationItems = [
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 15,
-    navigationOrder: 14,
+    order: 16,
+    navigationOrder: 15,
   },
   {
     key: "blog",
@@ -169,8 +180,8 @@ const defaultNavigationItems = [
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 16,
-    navigationOrder: 15,
+    order: 17,
+    navigationOrder: 16,
   },
   {
     key: "news",
@@ -180,8 +191,8 @@ const defaultNavigationItems = [
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 17,
-    navigationOrder: 16,
+    order: 18,
+    navigationOrder: 17,
   },
 ];
 

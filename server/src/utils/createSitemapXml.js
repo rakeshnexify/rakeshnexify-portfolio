@@ -38,6 +38,10 @@ const publicPageDefinitions = [
     pathname: "/companies",
   },
   {
+    key: "clients-partners",
+    pathname: "/clients-partners",
+  },
+  {
     key: "testimonials",
     pathname: "/testimonials",
   },
@@ -78,6 +82,12 @@ function normalizeSectionKey(value) {
     .toLowerCase();
 
   return key === "home" ? "hero" : key;
+}
+
+function normalizeRelationship(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
 }
 
 function findSectionByKey(sections, requiredKey) {
@@ -185,6 +195,39 @@ function createDynamicEntries({ items, basePath }) {
     .filter(Boolean);
 }
 
+function isClientPartnerCompany(company) {
+  const relationship = normalizeRelationship(company?.relationship);
+
+  return relationship === "client" || relationship === "partner";
+}
+
+function createCompanyEntries({ companies, sections }) {
+  const companiesPageVisible = isPublicPageVisible(sections, "companies");
+
+  if (companiesPageVisible) {
+    return createDynamicEntries({
+      items: companies,
+      basePath: "/companies",
+    });
+  }
+
+  const clientsPartnersPageVisible = isPublicPageVisible(
+    sections,
+    "clients-partners",
+  );
+
+  if (!clientsPartnersPageVisible) {
+    return [];
+  }
+
+  return createDynamicEntries({
+    items: Array.isArray(companies)
+      ? companies.filter(isClientPartnerCompany)
+      : [],
+    basePath: "/companies",
+  });
+}
+
 function removeDuplicateEntries(entries) {
   const entriesByPath = new Map();
 
@@ -244,12 +287,23 @@ export function createSitemapXml({
       })
     : [];
 
-  const companyEntries = isPublicPageVisible(sections, "companies")
-    ? createDynamicEntries({
-        items: companies,
-        basePath: "/companies",
-      })
-    : [];
+  /*
+   * Company detail pages are canonical organization profiles.
+   *
+   * Companies public page ON:
+   *   all visible Company profiles remain indexable.
+   *
+   * Companies OFF + Clients & Partners ON:
+   *   only visible client/partner Company profiles remain indexable because
+   *   those are the only Company details still published by that collection.
+   *
+   * Both OFF:
+   *   no Company detail profiles are included.
+   */
+  const companyEntries = createCompanyEntries({
+    companies,
+    sections,
+  });
 
   const blogPostEntries = isPublicPageVisible(sections, "blog")
     ? createDynamicEntries({

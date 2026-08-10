@@ -25,7 +25,18 @@ function findSectionByKey(sections, requiredSectionKey) {
   );
 }
 
-function PublicPageVisibilityRoute({ sectionKey }) {
+function isSectionPageVisible(sections, requiredSectionKey) {
+  const section = findSectionByKey(sections, requiredSectionKey);
+
+  /*
+   * Purane database records mein section ya
+   * isPageVisible field absent ho sakti hai.
+   * Backward compatibility ke liye visible rakhenge.
+   */
+  return section?.isPageVisible !== false;
+}
+
+function PublicPageVisibilityRoute({ sectionKey, sectionKeys = [] }) {
   const { settings, isLoading } = useSiteSettings();
 
   /*
@@ -37,14 +48,29 @@ function PublicPageVisibilityRoute({ sectionKey }) {
     return null;
   }
 
-  const section = findSectionByKey(settings?.sections, sectionKey);
+  const requiredSectionKeys = [
+    ...new Set(
+      [sectionKey, ...(Array.isArray(sectionKeys) ? sectionKeys : [])]
+        .map((key) => normalizeSectionKey(key))
+        .filter(Boolean),
+    ),
+  ];
 
   /*
-   * Purane database records mein isPageVisible
-   * field absent ho sakti hai. Aise records ko
-   * backward compatibility ke liye visible rakhenge.
+   * Existing single-section routes ka behavior
+   * unchanged rahega.
+   *
+   * Shared canonical detail routes multiple public
+   * modules ke liye reusable ho sakte hain. Aise
+   * cases mein sectionKeys diya ja sakta hai aur
+   * kam se kam ek related public page enabled hone
+   * par route accessible rahega.
    */
-  const isPageVisible = section?.isPageVisible !== false;
+  const isPageVisible =
+    requiredSectionKeys.length === 0 ||
+    requiredSectionKeys.some((requiredSectionKey) =>
+      isSectionPageVisible(settings?.sections, requiredSectionKey),
+    );
 
   if (!isPageVisible) {
     return <NotFoundPage />;

@@ -11,55 +11,52 @@ async function getSitemapXml(req, res, next) {
   try {
     const [projects, companies, teamMembers, posts, siteSettings] =
       await Promise.all([
-      Project.find({
-        isVisible: true,
-      })
-        .select({
-          slug: 1,
-          updatedAt: 1,
+        Project.find({
+          isVisible: true,
         })
-        .lean(),
+          .select({
+            slug: 1,
+            updatedAt: 1,
+          })
+          .lean(),
 
-      Company.find({
-        isVisible: true,
-      })
-        .select({
-          slug: 1,
-          updatedAt: 1,
+        Company.find({
+          isVisible: true,
         })
-        .lean(),
+          .select({
+            slug: 1,
+            relationship: 1,
+            updatedAt: 1,
+          })
+          .lean(),
 
-      TeamMember.find({
-        isVisible: true,
-      })
-        .select({
-          slug: 1,
-          updatedAt: 1,
+        TeamMember.find({
+          isVisible: true,
         })
-        .lean(),
+          .select({
+            slug: 1,
+            updatedAt: 1,
+          })
+          .lean(),
 
-      Post.find({
-        isVisible: true,
-        type: {
-          $in: ["blog", "news"],
-        },
-      })
-        .select({
-          slug: 1,
-          type: 1,
-          isVisible: 1,
-          updatedAt: 1,
+        Post.find({
+          isVisible: true,
         })
-        .lean(),
+          .select({
+            slug: 1,
+            type: 1,
+            updatedAt: 1,
+          })
+          .lean(),
 
-      SiteSettings.findOne({
-        siteKey: MAIN_SITE_KEY,
-      })
-        .select({
-          sections: 1,
+        SiteSettings.findOne({
+          siteKey: MAIN_SITE_KEY,
         })
-        .lean(),
-    ]);
+          .select({
+            sections: 1,
+          })
+          .lean(),
+      ]);
 
     const sitemapXml = createSitemapXml({
       projects,

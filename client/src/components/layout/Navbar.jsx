@@ -109,17 +109,17 @@ const defaultNavigationSections = [
     navigationOrder: 11,
   },
   {
-    key: "testimonials",
-    label: "Testimonials",
+    key: "clients-partners",
+    label: "Clients & Partners",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 13,
+    order: 12,
     navigationOrder: 12,
   },
   {
-    key: "faq",
-    label: "FAQ",
+    key: "testimonials",
+    label: "Testimonials",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -127,8 +127,8 @@ const defaultNavigationSections = [
     navigationOrder: 13,
   },
   {
-    key: "contact",
-    label: "Contact",
+    key: "faq",
+    label: "FAQ",
     isVisible: true,
     isNavigationVisible: true,
     isPageVisible: true,
@@ -136,13 +136,22 @@ const defaultNavigationSections = [
     navigationOrder: 14,
   },
   {
+    key: "contact",
+    label: "Contact",
+    isVisible: true,
+    isNavigationVisible: true,
+    isPageVisible: true,
+    order: 16,
+    navigationOrder: 15,
+  },
+  {
     key: "blog",
     label: "Blog",
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 16,
-    navigationOrder: 15,
+    order: 17,
+    navigationOrder: 16,
   },
   {
     key: "news",
@@ -150,8 +159,8 @@ const defaultNavigationSections = [
     isVisible: false,
     isNavigationVisible: true,
     isPageVisible: true,
-    order: 17,
-    navigationOrder: 16,
+    order: 18,
+    navigationOrder: 17,
   },
 ];
 
@@ -199,6 +208,10 @@ const sectionDestinations = {
   companies: {
     type: "page",
     target: "/companies",
+  },
+  "clients-partners": {
+    type: "page",
+    target: "/clients-partners",
   },
   testimonials: {
     type: "page",

@@ -43,6 +43,7 @@ const dedicatedPageSectionKeys = new Set([
   "achievements",
   "team",
   "companies",
+  "clients-partners",
   "testimonials",
   "faq",
   "blog",
@@ -61,6 +62,7 @@ const homepageSectionKeys = new Set([
   "achievements",
   "team",
   "companies",
+  "clients-partners",
   "posts",
   "testimonials",
   "faq",
@@ -79,6 +81,7 @@ const navigationSectionKeys = new Set([
   "achievements",
   "team",
   "companies",
+  "clients-partners",
   "testimonials",
   "faq",
   "contact",
@@ -275,6 +278,10 @@ function validateDynamicContentUrls(formValues, errors) {
       value: formValues?.companiesSection?.ctaButton?.url,
     },
     {
+      fieldName: "clientsPartnersSection.ctaButton.url",
+      value: formValues?.clientsPartnersSection?.ctaButton?.url,
+    },
+    {
       fieldName: "testimonialsSection.ctaButton.url",
       value: formValues?.testimonialsSection?.ctaButton?.url,
     },
@@ -393,6 +400,14 @@ function prepareInitialValues(initialValues = {}) {
 
       ctaButton: {
         ...normalizedValues.companiesSection.ctaButton,
+      },
+    },
+
+    clientsPartnersSection: {
+      ...normalizedValues.clientsPartnersSection,
+
+      ctaButton: {
+        ...normalizedValues.clientsPartnersSection.ctaButton,
       },
     },
 
@@ -1506,6 +1521,17 @@ function SiteSettingsForm({
         description="Manage the heading, description and call-to-action displayed above your companies and brands."
         fieldName="companiesSection"
         values={formValues.companiesSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Clients & Partners Section Content"
+        description="Manage the heading, description and call-to-action displayed above your public Clients & Partners."
+        fieldName="clientsPartnersSection"
+        values={formValues.clientsPartnersSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}
