@@ -37,9 +37,15 @@ import AdminLoginPage from "../pages/admin/AdminLoginPage";
 import AdminMediaPage from "../pages/admin/AdminMediaPage";
 import AdminPostEditorPage from "../pages/admin/AdminPostEditorPage";
 import AdminPostsPage from "../pages/admin/AdminPostsPage";
+import AdminPackageDesignEditorPage from "../pages/admin/AdminPackageDesignEditorPage";
+import AdminPackageDesignsPage from "../pages/admin/AdminPackageDesignsPage";
 import AdminProjectEditorPage from "../pages/admin/AdminProjectEditorPage";
 import AdminProjectsPage from "../pages/admin/AdminProjectsPage";
 import AdminServiceEditorPage from "../pages/admin/AdminServiceEditorPage";
+import AdminServiceOrderDetailPage from "../pages/admin/AdminServiceOrderDetailPage";
+import AdminServiceOrdersPage from "../pages/admin/AdminServiceOrdersPage";
+import AdminServicePackageEditorPage from "../pages/admin/AdminServicePackageEditorPage";
+import AdminServicePackagesPage from "../pages/admin/AdminServicePackagesPage";
 import AdminServicesPage from "../pages/admin/AdminServicesPage";
 import AdminSkillEditorPage from "../pages/admin/AdminSkillEditorPage";
 import AdminSkillsPage from "../pages/admin/AdminSkillsPage";
@@ -88,7 +94,7 @@ function AdminSeoManager() {
 }
 
 function RouteScrollManager() {
-  const { pathname, search, hash } = useLocation();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
     if (!("scrollRestoration" in window.history)) {
@@ -236,7 +242,7 @@ function RouteScrollManager() {
 
       resizeObserver?.disconnect();
     };
-  }, [pathname, search, hash]);
+  }, [pathname, hash]);
 
   return null;
 }
@@ -384,6 +390,41 @@ function AppRoutes() {
           <Route
             path="/admin/services/:id/edit"
             element={<AdminServiceEditorPage mode="edit" />}
+          />
+
+          <Route
+            path="/admin/service-packages"
+            element={<AdminServicePackagesPage />}
+          />
+          <Route
+            path="/admin/service-packages/new"
+            element={<AdminServicePackageEditorPage mode="create" />}
+          />
+          <Route
+            path="/admin/service-packages/:id/edit"
+            element={<AdminServicePackageEditorPage mode="edit" />}
+          />
+
+          <Route
+            path="/admin/service-orders"
+            element={<AdminServiceOrdersPage />}
+          />
+          <Route
+            path="/admin/service-orders/:id"
+            element={<AdminServiceOrderDetailPage />}
+          />
+
+          <Route
+            path="/admin/package-designs"
+            element={<AdminPackageDesignsPage />}
+          />
+          <Route
+            path="/admin/package-designs/new"
+            element={<AdminPackageDesignEditorPage mode="create" />}
+          />
+          <Route
+            path="/admin/package-designs/:id/edit"
+            element={<AdminPackageDesignEditorPage mode="edit" />}
           />
 
           <Route path="/admin/statistics" element={<AdminStatisticsPage />} />

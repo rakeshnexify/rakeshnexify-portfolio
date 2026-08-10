@@ -2,6 +2,7 @@ import Company from "../models/Company.js";
 import CertificationAchievement from "../models/CertificationAchievement.js";
 import Education from "../models/Education.js";
 import Experience from "../models/Experience.js";
+import PackageDesign from "../models/PackageDesign.js";
 import Post from "../models/Post.js";
 import Project from "../models/Project.js";
 import Service from "../models/Service.js";
@@ -33,6 +34,16 @@ const MEDIA_REFERENCE_DEFINITIONS = Object.freeze([
     labelField: "title",
     fields: [
       "iconUrl",
+    ],
+  },
+
+  {
+    resourceType: "package-design",
+    model: PackageDesign,
+    labelField: "name",
+    fields: [
+      "thumbnailUrl",
+      "screenshots.url",
     ],
   },
 

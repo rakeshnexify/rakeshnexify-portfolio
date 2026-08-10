@@ -16,9 +16,12 @@ import adminEducationRoutes from "./routes/adminEducation.routes.js";
 import adminExperienceRoutes from "./routes/adminExperience.routes.js";
 import adminLeadRoutes from "./routes/adminLead.routes.js";
 import adminMediaRoutes from "./routes/adminMedia.routes.js";
+import adminPackageDesignRoutes from "./routes/adminPackageDesign.routes.js";
 import adminPostRoutes from "./routes/adminPost.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
+import adminServicePackageRoutes from "./routes/adminServicePackage.routes.js";
+import adminServiceOrderRoutes from "./routes/adminServiceOrder.routes.js";
 import adminSiteSettingsRoutes from "./routes/adminSiteSettings.routes.js";
 import adminSkillRoutes from "./routes/adminSkill.routes.js";
 import adminStatisticRoutes from "./routes/adminStatistic.routes.js";
@@ -31,9 +34,12 @@ import contactMessageRoutes from "./routes/contactMessage.routes.js";
 import educationRoutes from "./routes/education.routes.js";
 import experienceRoutes from "./routes/experience.routes.js";
 import healthRoutes from "./routes/health.routes.js";
+import packageDesignRoutes from "./routes/packageDesign.routes.js";
 import postRoutes from "./routes/post.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import serviceRoutes from "./routes/service.routes.js";
+import servicePackageRoutes from "./routes/servicePackage.routes.js";
+import serviceOrderRoutes from "./routes/serviceOrder.routes.js";
 import siteSettingsRoutes from "./routes/siteSettings.routes.js";
 import skillRoutes from "./routes/skill.routes.js";
 import sitemapRoutes from "./routes/sitemap.routes.js";
@@ -42,6 +48,36 @@ import testimonialRoutes from "./routes/testimonial.routes.js";
 import teamMemberRoutes from "./routes/teamMember.routes.js";
 
 const app = express();
+
+function readTrustProxyHops() {
+  const rawValue = String(
+    process.env.TRUST_PROXY_HOPS ?? "0",
+  ).trim();
+
+  if (!/^\d+$/.test(rawValue)) {
+    throw new Error(
+      "TRUST_PROXY_HOPS must be a whole number from 0 to 10.",
+    );
+  }
+
+  const hopCount = Number(rawValue);
+
+  if (
+    !Number.isSafeInteger(hopCount) ||
+    hopCount < 0 ||
+    hopCount > 10
+  ) {
+    throw new Error(
+      "TRUST_PROXY_HOPS must be a whole number from 0 to 10.",
+    );
+  }
+
+  return hopCount;
+}
+
+const trustProxyHops = readTrustProxyHops();
+
+app.set("trust proxy", trustProxyHops);
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -95,6 +131,9 @@ app.use("/", sitemapRoutes);
 app.use("/api/health", healthRoutes);
 app.use("/api/site-settings", siteSettingsRoutes);
 app.use("/api/services", serviceRoutes);
+app.use("/api/service-packages", servicePackageRoutes);
+app.use("/api/service-orders", serviceOrderRoutes);
+app.use("/api/package-designs", packageDesignRoutes);
 app.use("/api/statistics", statisticRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/education", educationRoutes);
@@ -108,6 +147,9 @@ app.use("/api/companies", companyRoutes);
 
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/services", adminServiceRoutes);
+app.use("/api/admin/service-packages", adminServicePackageRoutes);
+app.use("/api/admin/service-orders", adminServiceOrderRoutes);
+app.use("/api/admin/package-designs", adminPackageDesignRoutes);
 app.use("/api/admin/statistics", adminStatisticRoutes);
 app.use("/api/admin/skills", adminSkillRoutes);
 app.use("/api/admin/education", adminEducationRoutes);

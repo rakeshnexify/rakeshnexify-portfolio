@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 ## Purpose
 
@@ -121,7 +121,7 @@ Secrets must remain outside committed source.
 
 ## API Conventions
 
-Public content APIs mainly use `GET`. Public contact submission is a notable `POST` exception.
+Public content APIs mainly use `GET`. Public contact submission and public Service Order submission are intentional `POST` exceptions.
 
 Admin APIs generally live under `/api/admin/*`.
 
@@ -342,11 +342,335 @@ Project video URLs intentionally remain hybrid: uploaded Media video and externa
 
 ### Reference Protection
 
-Exact Media URL references are checked across Site Settings, Services, Statistics, Skills, Education, Experience, Certifications & Achievements, Testimonials, Posts, Projects, Companies, and Team.
+Exact Media URL references are checked across Site Settings, Services, Statistics, Skills, Education, Experience, Certifications & Achievements, Testimonials, Posts, Projects, Companies, Team, and Package Designs.
 
 Referenced Media is blocked from normal permanent deletion with `409 Conflict`.
 
 See `Permanent Architectural Limitations` for the current reference-detail cap and deletion TOCTOU window.
+
+
+## Service Packages, Pricing, Package Designs, and Orders
+
+The Services domain now supports a complete dynamic package-pricing and ordering flow without duplicating Service definitions.
+
+Ownership:
+
+`Service -> ServicePackage -> PackageDesign`
+
+Orders are stored independently as `ServiceOrder`.
+
+### ServicePackage
+
+Model: `ServicePackage`
+
+Collection: `service_packages`
+
+Public API:
+
+- `GET /api/service-packages`
+- `GET /api/service-packages/:serviceSlug/:group/:packageSlug`
+
+Admin API:
+
+- `/api/admin/service-packages`
+
+Admin routes:
+
+- `/admin/service-packages`
+- `/admin/service-packages/new`
+- `/admin/service-packages/:id/edit`
+
+Supported package groups:
+
+- `development`
+- `management`
+
+Pricing modes:
+
+- `fixed`
+- `starting-from`
+- `custom`
+
+Billing cycles:
+
+- `one-time`
+- `monthly`
+- `yearly`
+- `custom`
+
+Core package data includes:
+
+- required Service relation
+- group
+- name
+- slug
+- short/full description
+- pricing mode
+- numeric price
+- currency
+- optional price label
+- billing cycle/label
+- structured comparison features
+- best-for text
+- delivery/support/revision labels
+- badge
+- CTA label
+- `whatsappEnabled`
+- order
+- featured/visible state
+- Admin audit fields
+- timestamps
+
+Package slugs are unique within the owning Service + group scope.
+
+ServicePackage create/reassignment and Service deletion use a shared transactional parent-guard protocol. A Service cannot be deleted while packages reference it, including relevant create/delete races.
+
+Public package results require both the package and parent Service to be visible.
+
+Public ordering is deterministic and keeps featured packages before display order.
+
+RBAC:
+
+- read: any authenticated active Admin
+- create/update: `super-admin`, `admin`, `editor`
+- permanent delete: `super-admin`, `admin`
+
+### PackageDesign
+
+Model: `PackageDesign`
+
+Collection: `package_designs`
+
+Public API:
+
+- `GET /api/package-designs`
+- `GET /api/package-designs/:serviceSlug/:group/:packageSlug/:designSlug`
+
+Admin API:
+
+- `/api/admin/package-designs`
+
+Admin routes:
+
+- `/admin/package-designs`
+- `/admin/package-designs/new`
+- `/admin/package-designs/:id/edit`
+
+PackageDesign belongs only to ServicePackage; Service ownership is always derived through the package rather than duplicated.
+
+Core data includes:
+
+- required ServicePackage relation
+- name
+- slug
+- private normalized identity key
+- short/full description
+- thumbnail URL/alt
+- responsive screenshots with device + order
+- live-demo URL/label
+- order
+- default/featured/visible state
+- Admin audit fields
+- timestamps
+
+Supported screenshot devices:
+
+- `desktop`
+- `tablet`
+- `mobile`
+
+Exactly one default design per package is enforced through transactional switching plus a database uniqueness rule.
+
+PackageDesign create/reassignment and ServicePackage deletion use a shared transactional parent-guard protocol so relevant races cannot create orphaned designs.
+
+Public PackageDesign results require the design, ServicePackage, and Service to all be visible.
+
+Media reference protection includes:
+
+- `PackageDesign.thumbnailUrl`
+- `PackageDesign.screenshots.url`
+
+RBAC:
+
+- read: any authenticated active Admin
+- create/update: `super-admin`, `admin`, `editor`
+- permanent delete: `super-admin`, `admin`
+
+### Public Services / Pricing Experience
+
+The public `/services` page now owns the package-selection flow.
+
+Current functional flow:
+
+`All Services -> Service -> Development/Management -> Compare Packages -> Choose Package -> Choose Design -> Responsive Preview -> Order`
+
+The current interaction contract is intentionally simple:
+
+- before package selection, the user compares package rows/features
+- after package selection, the comparison is hidden
+- the selected package remains visible with a Change Package action
+- the next phase contains only design selection
+- design cards are intentionally compact
+- selected designs expose Desktop/Tablet/Mobile screenshot viewing
+- long screenshots scroll vertically inside the preview
+- Live Demo is shown when available
+- Order buttons appear only after a design is selected
+- website Order and WhatsApp Order remain separate actions
+
+Shareable query state:
+
+- `service`
+- `group`
+- `package`
+- `design`
+
+Query-only navigation is configured not to force unwanted scroll-to-top behavior.
+
+Desktop uses a sticky Services sidebar. Mobile uses a narrow sliding Services drawer with Service -> Package Type navigation. The current mobile sidebar has user-tuned compact typography and must be preserved from the repository rather than replaced from an older generated copy.
+
+A later all-project Professional UI/UX phase may polish presentation, but this functional interaction structure is considered complete unless a concrete issue is found.
+
+### WhatsApp Ordering
+
+WhatsApp ordering is separate from website ServiceOrder submission.
+
+The WhatsApp number comes from dynamic Site Settings rather than a hard-coded private number.
+
+The Package's `whatsappEnabled` flag is respected.
+
+The message includes the current Service, Package, Price, Design, and shareable selected Services URL. The user manually sends the message in WhatsApp.
+
+### ServiceOrder
+
+Model: `ServiceOrder`
+
+Collection: `service_orders`
+
+Public API:
+
+- `POST /api/service-orders`
+
+There is intentionally no public ServiceOrder list or detail endpoint.
+
+Admin API:
+
+- `GET /api/admin/service-orders`
+- `GET /api/admin/service-orders/:id`
+- `PATCH /api/admin/service-orders/:id`
+- `DELETE /api/admin/service-orders/:id`
+
+Admin routes:
+
+- `/admin/service-orders`
+- `/admin/service-orders/:id`
+
+ServiceOrder is the actual package-order domain.
+
+ContactMessage remains the raw inquiry domain.
+
+Lead remains the CRM/sales-opportunity domain.
+
+A public order contains customer-submitted:
+
+- name
+- email
+- phone / WhatsApp
+- optional company
+- project requirements
+- optional preferred start date
+- optional customer notes
+- selected ServicePackage ID
+- optional selected PackageDesign ID
+
+The server must not trust public client claims for Service/package/design identity or commercial details.
+
+Before persistence the backend resolves current visible database records and derives immutable historical snapshots for:
+
+- Service title/slug
+- Package name/slug/group
+- pricing mode
+- price/currency/price label
+- billing cycle/label
+- Design name/slug/thumbnail
+- selected Services URL path
+
+This preserves the commercial record even if live Service/Package/Design content changes later.
+
+Public ServiceOrder creation uses a strict body allowlist, ObjectId validation, structured field validation, Service/Package/Design visibility and ownership checks, and submission rate limiting.
+
+Order numbers use a unique database index and bounded collision retries.
+
+ServiceOrder statuses:
+
+- `new`
+- `reviewing`
+- `confirmed`
+- `in-progress`
+- `completed`
+- `cancelled`
+- `rejected`
+
+Admin PATCH intentionally allows only:
+
+- `status`
+- private `adminNotes`
+
+Customer data and historical snapshots are not editable through the Admin update endpoint.
+
+RBAC:
+
+- read: any authenticated active Admin
+- update: `super-admin`, `admin`, `editor`
+- permanent delete: `super-admin`, `admin`
+
+The Admin UI supports:
+
+- order listing
+- order-number/customer/service search
+- status/group/service filters
+- pagination
+- order detail
+- status update
+- private Admin notes
+- role-restricted deletion
+
+### Order Rate Limiting and Proxy Trust
+
+ServiceOrder public submission is protected by `express-rate-limit`.
+
+Express proxy trust is deployment-aware through:
+
+`TRUST_PROXY_HOPS`
+
+Rules:
+
+- missing value defaults to `0`
+- accepted values are validated whole-number hop counts from `0` through `10`
+- invalid values fail startup
+- unconditional `trust proxy: true` is not used
+- `app.set("trust proxy", trustProxyHops)` uses the validated value
+
+`server/.env.example` documents:
+
+`TRUST_PROXY_HOPS=0`
+
+Production deployment must set the actual trusted proxy-hop count based on the real hosting topology.
+
+### Order Dialog Accessibility
+
+The public website Order modal includes:
+
+- `role="dialog"`
+- `aria-modal="true"`
+- title association
+- labelled close control
+- initial focus
+- Tab / Shift+Tab focus containment
+- Escape close when safe
+- background body-scroll lock
+- focus restoration to the Order Now opener
+- sensible success-state focus
+
 
 ## Certifications & Achievements
 
@@ -625,6 +949,9 @@ Permanent delete:
 | --- | --- | --- | --- | --- | --- |
 | Site Settings | `SiteSettings` / `site_settings` | `GET /api/site-settings` | `/api/admin/site-settings` | No standalone public page | `/admin/site-settings` |
 | Services | `Service` / `services` | `/api/services` | `/api/admin/services` | `/services` | `/admin/services`, `/admin/services/new`, `/admin/services/:id/edit` |
+| Service Packages / Pricing | `ServicePackage` / `service_packages` | `/api/service-packages` | `/api/admin/service-packages` | Integrated into `/services` | `/admin/service-packages`, `/admin/service-packages/new`, `/admin/service-packages/:id/edit`; Service-owned development/management pricing packages with comparison features and transactional parent guards |
+| Package Designs | `PackageDesign` / `package_designs` | `/api/package-designs` | `/api/admin/package-designs` | Integrated into `/services` | `/admin/package-designs`, `/admin/package-designs/new`, `/admin/package-designs/:id/edit`; default/featured/visible designs, Media screenshots, live demos, transactional parent guards |
+| Service Orders | `ServiceOrder` / `service_orders` | `POST /api/service-orders` | `/api/admin/service-orders` | Website order flow in `/services` | `/admin/service-orders`, `/admin/service-orders/:id`; server-derived historical snapshots, statuses, private Admin notes, rate-limited public create |
 | Statistics | `Statistic` / `statistics` | `/api/statistics` | `/api/admin/statistics` | `/statistics` | Admin list/create/edit routes |
 | Projects | `Project` / `projects` | `/api/projects` | `/api/admin/projects` | `/projects`, `/projects/:slug` | Admin list/create/edit; Media Picker integrated |
 | Companies | `Company` / `companies` | `/api/companies` | `/api/admin/companies` | `/companies`, `/companies/:slug` | Admin list/create/edit; Media Picker integrated |
@@ -658,6 +985,9 @@ Prefer extending these instead of duplicating architecture:
 - Contact Message -> Lead conversion pattern
 - CRM pipeline/follow-up/private-note patterns
 - Media Picker
+- transactional parent-guard pattern for relation create/reassignment versus parent deletion
+- server-derived immutable commercial snapshot pattern for Service Orders
+- public Services query-state selection pattern
 
 ## Long-Term Decisions
 
@@ -688,6 +1018,18 @@ Prefer extending these instead of duplicating architecture:
 - Commit only verified work.
 - Never run `npm audit fix --force` without review.
 
+- Service remains the master Service definition; ServicePackage extends Service pricing/package choices rather than duplicating Service.
+- PackageDesign belongs only to ServicePackage; do not duplicate Service ownership on PackageDesign.
+- ServicePackage and PackageDesign parent-deletion races must continue using their shared transactional guard protocols.
+- ServiceOrder is separate from ContactMessage and Lead.
+- Public ServiceOrder creation must derive Service/package/design commercial snapshots server-side rather than trusting client-supplied names/prices.
+- Customer/order historical snapshots remain immutable through normal Admin order maintenance.
+- Website Order and WhatsApp Order remain separate flows.
+- Production proxy trust must use the narrowly configured `TRUST_PROXY_HOPS` value; do not switch to unconditional `trust proxy: true`.
+- Preserve the current simple three-phase public flow: Compare Package -> Choose Design -> Order.
+- Public Services query changes should not force unwanted scroll-to-top behavior.
+- The current user-tuned mobile Services sidebar/menu should be preserved from the repository during future changes.
+
 Documentation policy:
 
 - `docs/PROJECT_MEMORY.md` is permanent memory.
@@ -701,6 +1043,7 @@ Documentation policy:
 - Media deletion has a narrow reference-check/provider-delete TOCTOU window.
 - Older controllers are not uniformly as strict as newer Post/Media controllers.
 - Navigation is registry-based, not arbitrary hierarchical navigation.
+- `TRUST_PROXY_HOPS` is deployment-topology-specific; default `0` is correct for direct/local traffic but production must set the real trusted hop count.
 
 Temporary build/audit/test warnings belong in `SESSION_HANDOFF.md`.
 
@@ -708,22 +1051,20 @@ Temporary build/audit/test warnings belong in `SESSION_HANDOFF.md`.
 
 Approved order:
 
-1. Service Packages / Pricing
-2. FAQ
-3. Clients / Partners
-4. Case Studies
-5. Appointment / Consultation Booking
-6. Newsletter / Subscribers Management
-7. Admin Analytics Dashboard
-8. Admin Activity / Audit Log
-9. Menu / Navigation Management
+1. FAQ
+2. Clients / Partners
+3. Case Studies
+4. Appointment / Consultation Booking
+5. Newsletter / Subscribers Management
+6. Admin Analytics Dashboard
+7. Admin Activity / Audit Log
+8. Menu / Navigation Management
 
 Overlap rules:
 
-- Service Packages/Pricing must extend or relate to the existing Services domain rather than duplicate service definitions.
 - Clients/Partners overlaps Companies, Projects, and Testimonials.
 - Case Studies substantially overlaps Projects; prefer extension unless review justifies a separate module.
-- Appointment/Consultation Booking is distinct from Contact Message inquiry capture even though both feed lead intake.
+- Appointment/Consultation Booking is distinct from Contact Message inquiry capture and ServiceOrder package ordering even though all may feed future lead intake.
 - Admin Analytics extends the existing dashboard.
 - Audit Log is distinct from existing `createdBy`/`updatedBy`.
 - Menu/Navigation must account for the existing Site Settings registry.

@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 import Service from "../models/Service.js";
+import ServicePackage from "../models/ServicePackage.js";
+import {
+  acquireServicePackageParentGuards,
+  runServicePackageParentTransaction,
+} from "../services/servicePackageParentGuard.service.js";
 
 const editableStringFields = [
   "title",
@@ -339,11 +344,55 @@ async function deleteAdminService(req, res, next) {
   try {
     validateServiceId(req.params.id);
 
-    const deletedService = await Service.findByIdAndDelete(req.params.id);
+    const deletedService = await runServicePackageParentTransaction(
+      async (session) => {
+        const guardResult = await acquireServicePackageParentGuards(
+          [req.params.id],
+          session,
+        );
 
-    if (!deletedService) {
-      throw createHttpError("Service not found.", 404);
-    }
+        if (!guardResult.ok) {
+          throw createHttpError("Service not found.", 404);
+        }
+
+        const service = await Service.findById(req.params.id)
+          .select("_id title")
+          .session(session)
+          .lean();
+
+        if (!service) {
+          throw createHttpError("Service not found.", 404);
+        }
+
+        const referencedPackage = await ServicePackage.exists({
+          service: service._id,
+        }).session(session);
+
+        if (referencedPackage) {
+          throw createHttpError(
+            "Service cannot be deleted while Service Packages reference it.",
+            409,
+            {
+              servicePackages:
+                "Delete or move the related Service Packages before deleting this Service.",
+            },
+          );
+        }
+
+        const deleteResult = await Service.deleteOne(
+          {
+            _id: service._id,
+          },
+          { session },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Service not found.", 404);
+        }
+
+        return service;
+      },
+    );
 
     return res.status(200).json({
       success: true,

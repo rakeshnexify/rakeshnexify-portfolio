@@ -17,6 +17,27 @@ const dashboardModules = [
     path: "/admin/services",
   },
   {
+    title: "Service Packages / Pricing",
+    description:
+      "Create and manage Development and Management packages, pricing, billing cycles, comparison features, featured state, WhatsApp readiness and public visibility.",
+    status: "Management ready",
+    path: "/admin/service-packages",
+  },
+  {
+    title: "Package Designs",
+    description:
+      "Create and manage selectable package designs, reusable Media thumbnails, responsive screenshots, live demos, default selection, featured state and public visibility.",
+    status: "Management ready",
+    path: "/admin/package-designs",
+  },
+  {
+    title: "Service Orders",
+    description:
+      "Review customer package orders, selected designs, project requirements, order status and private Admin notes.",
+    status: "Management ready",
+    path: "/admin/service-orders",
+  },
+  {
     title: "Statistics",
     description:
       "Create, edit, reorder, feature and control the visibility of portfolio statistics.",
@@ -179,11 +200,11 @@ function AdminDashboardPage() {
             </h1>
 
             <p className="mt-4 max-w-2xl break-words leading-7 text-slate-400">
-              Manage your portfolio content, services, Skills, Education,
-              Experience, Certifications & Achievements, projects, Media
-              Library, Blog and News, Team members, companies, Testimonials,
-              Leads / CRM, enquiries and website settings from this secure
-              dashboard.
+              Manage your portfolio content, services, Service Packages,
+              pricing, Package Designs, Skills, Education, Experience,
+              Certifications & Achievements, projects, Media Library, Blog and
+              News, Team members, companies, Testimonials, Leads / CRM,
+              enquiries and website settings from this secure dashboard.
             </p>
           </div>
 

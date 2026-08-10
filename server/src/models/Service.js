@@ -140,6 +140,11 @@ const serviceSchema = new mongoose.Schema(
       default: () => ({}),
     },
 
+    servicePackageGuardVersion: {
+      type: Number,
+      select: false,
+    },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "AdminUser",
