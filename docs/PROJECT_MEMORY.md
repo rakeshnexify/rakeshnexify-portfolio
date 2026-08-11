@@ -111,7 +111,7 @@ Private identity examples: Skill `nameKey`; Education/Experience/CertificationAc
 
 Registry keys include:
 
-`hero`, `about`, `statistics`, `skills`, `services`, `projects`, `education`, `experience`, `achievements`, `team`, `companies`, `clients-partners`, `posts`, `testimonials`, `faq`, `contact`, `blog`, `news`.
+`hero`, `about`, `statistics`, `skills`, `services`, `projects`, `case-studies`, `education`, `experience`, `achievements`, `team`, `companies`, `clients-partners`, `posts`, `testimonials`, `faq`, `contact`, `blog`, `news`.
 
 Registry controls:
 
@@ -132,6 +132,7 @@ Special cases:
 - `blog` / `news`: dedicated experiences
 - `faq`: independent homepage/Navbar/public-page publication
 - `clients-partners`: presentation layer over Company; independent collection publication while reusing canonical Company details
+- `case-studies`: publication/presentation layer over Project; independent collection publication while reusing canonical Project details
 - Hero/About/Contact: anchor-oriented
 - Media/Contact Messages: Admin-only
 
@@ -434,6 +435,121 @@ Known deliberate limitation:
 
 `Company.relationship` is single-valued, so one Company cannot simultaneously be both client and partner. Migrate to a multi-value relationship model only if a real requirement emerges.
 
+## Case Studies
+
+Case Studies is intentionally a publication/presentation layer over the existing `Project` domain.
+
+There is no separate CaseStudy model, MongoDB collection, API, Admin CRUD, or detail route.
+
+Canonical content source:
+
+`Project`
+
+Embedded Project publication metadata:
+
+```js
+caseStudy: {
+  isPublished: false,
+  isFeatured: false,
+  order: 0
+}
+```
+
+Legacy Projects missing `caseStudy` metadata are treated as unpublished and unfeatured.
+
+`Project.isFeatured` and `Project.caseStudy.isFeatured` are intentionally independent.
+
+Existing `links.caseStudyUrl` remains an external-link field only.
+
+Public collection page:
+
+`/case-studies`
+
+There is intentionally no:
+
+`/case-studies/:slug`
+
+Canonical detail identity remains:
+
+`/projects/:slug`
+
+Admin management remains:
+
+- `/admin/projects`
+- `/admin/projects/new`
+- `/admin/projects/:id/edit`
+
+Public Case Study query:
+
+`GET /api/projects?caseStudy=true`
+
+Public Case Study filtering:
+
+- Project must be `isVisible: true`
+- `caseStudy.isPublished` must be explicitly `true`
+
+Sort priority:
+
+1. `caseStudy.isFeatured` descending
+2. `caseStudy.order` ascending
+3. Project `order` ascending
+4. `createdAt` ascending
+
+Admin rules:
+
+- Case Study publish/featured/order live in existing Project forms/listing
+- Admin listing supports publication/featured filters and quick actions
+- unpublishing clears Case Study featured state in the UI
+- partial nested Case Study PATCH uses dotted paths so omitted sibling metadata is preserved
+- normal Project featured state remains independent
+
+Registry key:
+
+`case-studies`
+
+Site Settings content field:
+
+`caseStudiesSection`
+
+Default homepage placement:
+
+`Projects -> Case Studies -> Education`
+
+Homepage, Navbar, and dedicated-page publication controls remain independent.
+
+Homepage CTA behavior is target-aware:
+
+- disabling `/case-studies` hides a CTA only when its resolved destination is the disabled Case Studies route
+- valid external/contact/other destinations may remain visible
+
+Shared canonical-detail publication rule:
+
+- Projects ON -> all visible Project details may remain public/indexable
+- Projects OFF + Case Studies ON -> only visible Projects with `caseStudy.isPublished === true` may remain available at `/projects/:slug`
+- Projects OFF + Case Studies OFF -> Project details are blocked through these publication paths
+- `/projects` collection remains controlled only by Projects
+- `/case-studies` collection remains controlled only by Case Studies
+
+SEO:
+
+- canonical `/case-studies`
+- collection-level `CollectionPage`
+- nested `ItemList`
+- ItemList entries use absolute canonical `/projects/:slug` URLs
+- successful empty collections may emit zero-item structured data
+- loading/terminal error states do not emit Case Studies collection JSON-LD
+- no duplicate `/case-studies/:slug`
+
+Sitemap follows the same four-state Projects/Case Studies publication matrix as routing.
+
+Accessibility:
+
+- Case Study category filters expose group semantics and `aria-pressed` state
+
+Known deliberate limitation:
+
+Project `clientName` remains plain text; Case Studies does not introduce a new Project-to-Company relation. Add a formal relation only when a real requirement justifies it.
+
 ## Completed Module Inventory
 
 | Module | Public | Admin | Public Route / Notes |
@@ -445,6 +561,7 @@ Known deliberate limitation:
 | Service Orders | public POST | `/api/admin/service-orders` | Services order flow |
 | Statistics | `/api/statistics` | `/api/admin/statistics` | `/statistics` |
 | Projects | `/api/projects` | `/api/admin/projects` | `/projects`, slug detail |
+| Case Studies | reuses `/api/projects?caseStudy=true` | reuses `/admin/projects` | `/case-studies`, Project-backed publication layer |
 | Companies | `/api/companies` | `/api/admin/companies` | `/companies`, canonical slug detail |
 | Clients / Partners | reuses `/api/companies` | reuses `/admin/companies` | `/clients-partners`, Company-backed presentation layer |
 | Contact Messages | public POST | `/api/admin/contact-messages` | Contact workflow |
@@ -513,6 +630,9 @@ Prefer extending:
 - FAQ publication flags remain independent
 - Clients / Partners reuses Company and must not duplicate organization identity
 - Company detail routes may be shared across public collections only with relationship-aware publication and matching sitemap behavior
+- Case Studies reuses Project and must not duplicate Project identity/content ownership
+- Project detail routes may be shared across Projects and Case Studies only with record-aware publication and matching sitemap behavior
+- Project Case Study featured state remains independent from normal Project featured state
 - commit only verified work
 - never run `npm audit fix --force` without controlled review
 
@@ -523,6 +643,7 @@ Prefer extending:
 - older controllers are not uniformly as strict as newer modules
 - navigation is registry-based, not arbitrary hierarchical navigation
 - `Company.relationship` is single-valued
+- Project `clientName` is plain text; no formal Project-to-Company relation exists
 - `TRUST_PROXY_HOPS` depends on deployment topology
 
 Temporary warnings belong in `SESSION_HANDOFF.md`.
@@ -537,16 +658,14 @@ Do not recreate a large historical documentation matrix after every module.
 
 ## Remaining Roadmap
 
-1. Case Studies
-2. Appointment / Consultation Booking
-3. Newsletter / Subscribers Management
-4. Admin Analytics Dashboard
-5. Admin Activity / Audit Log
-6. Menu / Navigation Management
+1. Appointment / Consultation Booking
+2. Newsletter / Subscribers Management
+3. Admin Analytics Dashboard
+4. Admin Activity / Audit Log
+5. Menu / Navigation Management
 
 Overlap rules:
 
-- Case Studies substantially overlaps Projects; prefer extension unless justified
 - Appointment/Consultation is distinct from Contact Messages and Service Orders
 - Admin Analytics extends dashboard
 - Audit Log is distinct from audit fields

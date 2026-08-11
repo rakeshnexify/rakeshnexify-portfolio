@@ -41,6 +41,10 @@ function createDefaultProjectFormValues() {
     caseStudyUrl: "",
     videoUrl: "",
 
+    caseStudyIsPublished: false,
+    caseStudyIsFeatured: false,
+    caseStudyOrder: "0",
+
     order: "0",
     isFeatured: false,
     isVisible: true,
@@ -113,6 +117,7 @@ function createProjectResultFormValue(result = {}) {
 function createProjectFormValues(project = {}) {
   const links = project.links || {};
   const seo = project.seo || {};
+  const caseStudy = project.caseStudy || {};
 
   return {
     title: project.title || "",
@@ -161,6 +166,12 @@ function createProjectFormValues(project = {}) {
     caseStudyUrl: links.caseStudyUrl || "",
 
     videoUrl: links.videoUrl || "",
+
+    caseStudyIsPublished: Boolean(caseStudy.isPublished),
+
+    caseStudyIsFeatured: Boolean(caseStudy.isFeatured),
+
+    caseStudyOrder: String(caseStudy.order ?? 0),
 
     order: String(project.order ?? 0),
 
@@ -265,6 +276,14 @@ function createProjectPayload(formValues) {
       caseStudyUrl: String(formValues.caseStudyUrl || "").trim(),
 
       videoUrl: String(formValues.videoUrl || "").trim(),
+    },
+
+    caseStudy: {
+      isPublished: Boolean(formValues.caseStudyIsPublished),
+
+      isFeatured: Boolean(formValues.caseStudyIsFeatured),
+
+      order: Number(formValues.caseStudyOrder || 0),
     },
 
     order: Number(formValues.order || 0),

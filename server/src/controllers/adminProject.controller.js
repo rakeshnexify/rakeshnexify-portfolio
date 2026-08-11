@@ -227,6 +227,50 @@ function buildResultsPayload(resultsValue) {
   });
 }
 
+function buildCaseStudyPayload(caseStudyValue) {
+  if (
+    !caseStudyValue ||
+    typeof caseStudyValue !== "object" ||
+    Array.isArray(caseStudyValue)
+  ) {
+    throw createHttpError("Case study settings must be an object.", 400, {
+      caseStudy: "Case study settings must be an object.",
+    });
+  }
+
+  const caseStudy = {};
+
+  if (hasOwnProperty(caseStudyValue, "isPublished")) {
+    caseStudy.isPublished = cleanBoolean(
+      caseStudyValue.isPublished,
+      "caseStudy.isPublished",
+    );
+  }
+
+  if (hasOwnProperty(caseStudyValue, "isFeatured")) {
+    caseStudy.isFeatured = cleanBoolean(
+      caseStudyValue.isFeatured,
+      "caseStudy.isFeatured",
+    );
+  }
+
+  if (hasOwnProperty(caseStudyValue, "order")) {
+    caseStudy.order = cleanOrder(caseStudyValue.order, "caseStudy.order");
+  }
+
+  if (Object.keys(caseStudy).length === 0) {
+    throw createHttpError(
+      "At least one case study setting is required.",
+      400,
+      {
+        caseStudy: "At least one case study setting is required.",
+      },
+    );
+  }
+
+  return caseStudy;
+}
+
 function buildSeoPayload(seoValue) {
   if (!seoValue || typeof seoValue !== "object" || Array.isArray(seoValue)) {
     throw createHttpError("SEO settings must be an object.", 400, {
@@ -319,6 +363,10 @@ function buildProjectPayload(requestBody = {}) {
     payload.links = buildLinksPayload(requestBody.links);
   }
 
+  if (hasOwnProperty(requestBody, "caseStudy")) {
+    payload.caseStudy = buildCaseStudyPayload(requestBody.caseStudy);
+  }
+
   if (hasOwnProperty(requestBody, "order")) {
     payload.order = cleanOrder(requestBody.order);
   }
@@ -338,12 +386,62 @@ function buildProjectPayload(requestBody = {}) {
   return payload;
 }
 
+function buildProjectUpdateSet(projectData) {
+  const updateSet = {
+    ...projectData,
+  };
+
+  if (
+    updateSet.caseStudy &&
+    typeof updateSet.caseStudy === "object" &&
+    !Array.isArray(updateSet.caseStudy)
+  ) {
+    const caseStudy = updateSet.caseStudy;
+
+    delete updateSet.caseStudy;
+
+    Object.entries(caseStudy).forEach(([fieldName, fieldValue]) => {
+      updateSet[`caseStudy.${fieldName}`] = fieldValue;
+    });
+  }
+
+  return updateSet;
+}
+
 function parseBooleanQuery(value, fieldName) {
   if (value === undefined) {
     return undefined;
   }
 
   return cleanBoolean(value, fieldName);
+}
+
+function addNestedBooleanFilter(filter, fieldPath, value) {
+  if (value === undefined) {
+    return;
+  }
+
+  if (value === true) {
+    filter[fieldPath] = true;
+    return;
+  }
+
+  const falseOrMissingCondition = {
+    $or: [
+      {
+        [fieldPath]: false,
+      },
+      {
+        [fieldPath]: {
+          $exists: false,
+        },
+      },
+    ],
+  };
+
+  filter.$and = Array.isArray(filter.$and)
+    ? [...filter.$and, falseOrMissingCondition]
+    : [falseOrMissingCondition];
 }
 
 function escapeRegularExpression(value) {
@@ -415,6 +513,16 @@ async function getAdminProjects(req, res, next) {
 
     const isFeatured = parseBooleanQuery(req.query.isFeatured, "isFeatured");
 
+    const caseStudyPublished = parseBooleanQuery(
+      req.query.caseStudyPublished,
+      "caseStudyPublished",
+    );
+
+    const caseStudyFeatured = parseBooleanQuery(
+      req.query.caseStudyFeatured,
+      "caseStudyFeatured",
+    );
+
     if (search) {
       const safeSearch = escapeRegularExpression(search);
 
@@ -482,6 +590,18 @@ async function getAdminProjects(req, res, next) {
     if (isFeatured !== undefined) {
       filter.isFeatured = isFeatured;
     }
+
+    addNestedBooleanFilter(
+      filter,
+      "caseStudy.isPublished",
+      caseStudyPublished,
+    );
+
+    addNestedBooleanFilter(
+      filter,
+      "caseStudy.isFeatured",
+      caseStudyFeatured,
+    );
 
     const projects = await Project.find(filter)
       .sort({
@@ -566,10 +686,12 @@ async function updateAdminProject(req, res, next) {
 
     projectData.updatedBy = req.admin._id;
 
+    const updateSet = buildProjectUpdateSet(projectData);
+
     const updatedProject = await Project.findByIdAndUpdate(
       req.params.id,
       {
-        $set: projectData,
+        $set: updateSet,
       },
       {
         new: true,

@@ -38,6 +38,7 @@ const dedicatedPageSectionKeys = new Set([
   "skills",
   "services",
   "projects",
+  "case-studies",
   "education",
   "experience",
   "achievements",
@@ -57,6 +58,7 @@ const homepageSectionKeys = new Set([
   "skills",
   "services",
   "projects",
+  "case-studies",
   "education",
   "experience",
   "achievements",
@@ -76,6 +78,7 @@ const navigationSectionKeys = new Set([
   "skills",
   "services",
   "projects",
+  "case-studies",
   "education",
   "experience",
   "achievements",
@@ -258,6 +261,10 @@ function validateDynamicContentUrls(formValues, errors) {
       value: formValues?.projectsSection?.ctaButton?.url,
     },
     {
+      fieldName: "caseStudiesSection.ctaButton.url",
+      value: formValues?.caseStudiesSection?.ctaButton?.url,
+    },
+    {
       fieldName: "educationSection.ctaButton.url",
       value: formValues?.educationSection?.ctaButton?.url,
     },
@@ -360,6 +367,14 @@ function prepareInitialValues(initialValues = {}) {
 
       ctaButton: {
         ...normalizedValues.projectsSection.ctaButton,
+      },
+    },
+
+    caseStudiesSection: {
+      ...normalizedValues.caseStudiesSection,
+
+      ctaButton: {
+        ...normalizedValues.caseStudiesSection.ctaButton,
       },
     },
 
@@ -1466,6 +1481,17 @@ function SiteSettingsForm({
         description="Manage the heading, description and call-to-action displayed above your public projects."
         fieldName="projectsSection"
         values={formValues.projectsSection}
+        disabled={isSubmitting}
+        onChange={handleFieldChange}
+        getFieldError={getFieldError}
+      />
+
+      <ListingSectionSettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Case Studies Section Content"
+        description="Manage the heading, description and call-to-action displayed above your published Project Case Studies."
+        fieldName="caseStudiesSection"
+        values={formValues.caseStudiesSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}

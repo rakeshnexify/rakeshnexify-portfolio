@@ -6,6 +6,7 @@ import BlogPage from "../pages/BlogPage";
 import CertificationAchievementsPage from "../pages/CertificationAchievementsPage";
 import CompaniesPage from "../pages/CompaniesPage";
 import ClientsPartnersPage from "../pages/ClientsPartnersPage";
+import CaseStudiesPage from "../pages/CaseStudiesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import EducationPage from "../pages/EducationPage";
 import ExperiencePage from "../pages/ExperiencePage";
@@ -313,7 +314,22 @@ function AppRoutes() {
 
           <Route element={<PublicPageVisibilityRoute sectionKey="projects" />}>
             <Route path="/projects" element={<ProjectsPage />} />
+          </Route>
+
+          <Route
+            element={
+              <PublicPageVisibilityRoute
+                sectionKeys={["projects", "case-studies"]}
+              />
+            }
+          >
             <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
+          </Route>
+
+          <Route
+            element={<PublicPageVisibilityRoute sectionKey="case-studies" />}
+          >
+            <Route path="/case-studies" element={<CaseStudiesPage />} />
           </Route>
 
           <Route element={<PublicPageVisibilityRoute sectionKey="team" />}>

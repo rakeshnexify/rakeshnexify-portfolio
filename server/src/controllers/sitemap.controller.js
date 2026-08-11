@@ -16,6 +16,7 @@ async function getSitemapXml(req, res, next) {
         })
           .select({
             slug: 1,
+            caseStudy: 1,
             updatedAt: 1,
           })
           .lean(),

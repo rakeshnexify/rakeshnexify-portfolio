@@ -6,6 +6,7 @@ import PublicPageHeader from "../components/layout/PublicPageHeader";
 import PageSeo from "../components/seo/PageSeo";
 import useProject from "../hooks/useProject";
 import useSiteSettings from "../hooks/useSiteSettings";
+import NotFoundPage from "./NotFoundPage";
 
 const statusLabels = {
   planning: "Planning",
@@ -48,6 +49,35 @@ const defaultProjectSeo = {
     "web development portfolio",
   ],
 };
+
+function normalizeSectionKey(value) {
+  const key = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  return key === "home" ? "hero" : key;
+}
+
+function isSectionPageVisible(sections, requiredSectionKey) {
+  if (!Array.isArray(sections)) {
+    return true;
+  }
+
+  const normalizedRequiredKey = normalizeSectionKey(requiredSectionKey);
+
+  const section =
+    sections.find(
+      (sectionItem) =>
+        normalizeSectionKey(sectionItem?.key) === normalizedRequiredKey,
+    ) || null;
+
+  /*
+   * Preserve the existing publication system's backward-compatible behavior:
+   * older Site Settings records with a missing section or missing
+   * isPageVisible field are treated as visible by default.
+   */
+  return section?.isPageVisible !== false;
+}
 
 function formatDate(value) {
   if (!value) {
@@ -180,7 +210,14 @@ function ProjectLoadingState() {
   );
 }
 
-function ProjectErrorState({ error, status, onRetry, isRetrying }) {
+function ProjectErrorState({
+  error,
+  status,
+  onRetry,
+  isRetrying,
+  returnPath = "/projects",
+  returnLabel = "View All Projects",
+}) {
   const isNotFound = status === 404;
 
   return (
@@ -226,10 +263,10 @@ function ProjectErrorState({ error, status, onRetry, isRetrying }) {
             )}
 
             <Link
-              to="/projects"
+              to={returnPath}
               className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-center text-sm font-semibold text-slate-700 transition hover:border-brand-600 hover:text-brand-600"
             >
-              View All Projects
+              {returnLabel}
             </Link>
 
             <Link
@@ -253,6 +290,28 @@ function ProjectDetailsPage() {
     useProject(slug);
 
   const { settings } = useSiteSettings();
+
+  const projectsPageVisible = isSectionPageVisible(
+    settings?.sections,
+    "projects",
+  );
+
+  const caseStudiesPageVisible = isSectionPageVisible(
+    settings?.sections,
+    "case-studies",
+  );
+
+  const returnPath = projectsPageVisible
+    ? "/projects"
+    : caseStudiesPageVisible
+      ? "/case-studies"
+      : "/";
+
+  const returnLabel = projectsPageVisible
+    ? "View All Projects"
+    : caseStudiesPageVisible
+      ? "View Case Studies"
+      : "Return Home";
 
   const brandName =
     String(settings?.brand?.name || "").trim() || "RakeshNexify";
@@ -365,9 +424,19 @@ function ProjectDetailsPage() {
           status={status}
           onRetry={refreshProject}
           isRetrying={isLoading}
+          returnPath={returnPath}
+          returnLabel={returnLabel}
         />
       </>
     );
+  }
+
+  const isProjectProfilePublished =
+    projectsPageVisible ||
+    (caseStudiesPageVisible && project.caseStudy?.isPublished === true);
+
+  if (!isProjectProfilePublished) {
+    return <NotFoundPage />;
   }
 
   const technologies = projectTechnologies;

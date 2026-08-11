@@ -7,6 +7,7 @@ function useProjects({
   search = "",
   category = "",
   featured,
+  caseStudy,
 } = {}) {
   const [projects, setProjects] = useState(fallbackProjects);
 
@@ -26,6 +27,7 @@ function useProjects({
             search,
             category,
             featured,
+            caseStudy,
           },
           {
             signal: controller.signal,
@@ -60,7 +62,14 @@ function useProjects({
     return () => {
       controller.abort();
     };
-  }, [category, fallbackProjects, featured, refreshKey, search]);
+  }, [
+    caseStudy,
+    category,
+    fallbackProjects,
+    featured,
+    refreshKey,
+    search,
+  ]);
 
   function refreshProjects() {
     setIsLoading(true);

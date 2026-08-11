@@ -702,6 +702,21 @@ const siteSettingsSchema = new mongoose.Schema(
       default: () => ({}),
     },
 
+    caseStudiesSection: {
+      type: listingSectionContentSchema,
+      default: () => ({
+        eyebrow: "Case Studies",
+        heading:
+          "Selected projects with the problem, process and measurable results",
+        description:
+          "Explore selected project case studies covering the challenge, solution, technologies, implementation decisions and outcomes behind the finished work.",
+        ctaButton: {
+          label: "View All Case Studies",
+          url: "/case-studies",
+        },
+      }),
+    },
+
     educationSection: {
       type: listingSectionContentSchema,
       default: () => ({}),

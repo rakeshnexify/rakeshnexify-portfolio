@@ -18,6 +18,10 @@ const publicPageDefinitions = [
     pathname: "/projects",
   },
   {
+    key: "case-studies",
+    pathname: "/case-studies",
+  },
+  {
     key: "education",
     pathname: "/education",
   },
@@ -195,6 +199,37 @@ function createDynamicEntries({ items, basePath }) {
     .filter(Boolean);
 }
 
+function isPublishedCaseStudyProject(project) {
+  return project?.caseStudy?.isPublished === true;
+}
+
+function createProjectEntries({ projects, sections }) {
+  const projectsPageVisible = isPublicPageVisible(sections, "projects");
+
+  if (projectsPageVisible) {
+    return createDynamicEntries({
+      items: projects,
+      basePath: "/projects",
+    });
+  }
+
+  const caseStudiesPageVisible = isPublicPageVisible(
+    sections,
+    "case-studies",
+  );
+
+  if (!caseStudiesPageVisible) {
+    return [];
+  }
+
+  return createDynamicEntries({
+    items: Array.isArray(projects)
+      ? projects.filter(isPublishedCaseStudyProject)
+      : [],
+    basePath: "/projects",
+  });
+}
+
 function isClientPartnerCompany(company) {
   const relationship = normalizeRelationship(company?.relationship);
 
@@ -273,12 +308,23 @@ export function createSitemapXml({
     pathname,
   }));
 
-  const projectEntries = isPublicPageVisible(sections, "projects")
-    ? createDynamicEntries({
-        items: projects,
-        basePath: "/projects",
-      })
-    : [];
+  /*
+   * Project detail pages remain canonical at /projects/:slug.
+   *
+   * Projects public page ON:
+   *   all visible Project profiles remain indexable.
+   *
+   * Projects OFF + Case Studies ON:
+   *   only visible Projects explicitly published as Case Studies remain
+   *   indexable because those are the only Project details still published.
+   *
+   * Both OFF:
+   *   no Project detail profiles are included.
+   */
+  const projectEntries = createProjectEntries({
+    projects,
+    sections,
+  });
 
   const teamMemberEntries = isPublicPageVisible(sections, "team")
     ? createDynamicEntries({

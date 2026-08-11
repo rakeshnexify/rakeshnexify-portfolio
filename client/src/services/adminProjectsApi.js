@@ -74,6 +74,14 @@ function buildAdminProjectsQuery(filters = {}) {
     query.set("isFeatured", String(filters.isFeatured));
   }
 
+  if (typeof filters.caseStudyPublished === "boolean") {
+    query.set("caseStudyPublished", String(filters.caseStudyPublished));
+  }
+
+  if (typeof filters.caseStudyFeatured === "boolean") {
+    query.set("caseStudyFeatured", String(filters.caseStudyFeatured));
+  }
+
   const queryString = query.toString();
 
   return queryString ? `?${queryString}` : "";

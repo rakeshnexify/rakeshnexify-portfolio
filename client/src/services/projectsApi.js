@@ -44,6 +44,10 @@ function buildProjectsQuery(filters = {}) {
     query.set("featured", String(filters.featured));
   }
 
+  if (typeof filters.caseStudy === "boolean") {
+    query.set("caseStudy", String(filters.caseStudy));
+  }
+
   const queryString = query.toString();
 
   return queryString ? `?${queryString}` : "";

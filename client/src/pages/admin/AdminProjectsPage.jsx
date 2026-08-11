@@ -16,6 +16,8 @@ const initialFilters = {
   status: "",
   visibility: "all",
   featured: "all",
+  caseStudyPublished: "all",
+  caseStudyFeatured: "all",
 };
 
 const statusLabels = {
@@ -64,6 +66,22 @@ function createApiFilters(filters) {
 
   if (filters.featured === "standard") {
     apiFilters.isFeatured = false;
+  }
+
+  if (filters.caseStudyPublished === "published") {
+    apiFilters.caseStudyPublished = true;
+  }
+
+  if (filters.caseStudyPublished === "not-published") {
+    apiFilters.caseStudyPublished = false;
+  }
+
+  if (filters.caseStudyFeatured === "featured") {
+    apiFilters.caseStudyFeatured = true;
+  }
+
+  if (filters.caseStudyFeatured === "standard") {
+    apiFilters.caseStudyFeatured = false;
   }
 
   return apiFilters;
@@ -310,6 +328,79 @@ function AdminProjectsPage() {
         response.project.isFeatured
           ? `"${response.project.title}" is now featured.`
           : `"${response.project.title}" is now a standard project.`,
+      );
+
+      setRefreshKey((currentKey) => currentKey + 1);
+    } catch (requestError) {
+      handleProjectActionError(requestError);
+    } finally {
+      setActionProjectId("");
+    }
+  }
+
+  async function handleToggleCaseStudyPublication(project) {
+    if (!project?._id || actionProjectId) {
+      return;
+    }
+
+    const isPublished = Boolean(project.caseStudy?.isPublished);
+
+    const caseStudyPayload = isPublished
+      ? {
+          isPublished: false,
+          isFeatured: false,
+        }
+      : {
+          isPublished: true,
+        };
+
+    try {
+      setActionProjectId(project._id);
+      setError("");
+      setSuccessMessage("");
+
+      const response = await updateAdminProject(accessToken, project._id, {
+        caseStudy: caseStudyPayload,
+      });
+
+      setSuccessMessage(
+        response.project.caseStudy?.isPublished
+          ? `"${response.project.title}" is now published as a Case Study.`
+          : `"${response.project.title}" was removed from Case Studies.`,
+      );
+
+      setRefreshKey((currentKey) => currentKey + 1);
+    } catch (requestError) {
+      handleProjectActionError(requestError);
+    } finally {
+      setActionProjectId("");
+    }
+  }
+
+  async function handleToggleCaseStudyFeatured(project) {
+    if (
+      !project?._id ||
+      actionProjectId ||
+      !project.caseStudy?.isPublished
+    ) {
+      return;
+    }
+
+    try {
+      setActionProjectId(project._id);
+      setError("");
+      setSuccessMessage("");
+
+      const response = await updateAdminProject(accessToken, project._id, {
+        caseStudy: {
+          isFeatured: !Boolean(project.caseStudy?.isFeatured),
+        },
+      });
+
+      setSuccessMessage(
+        response.project.caseStudy?.isFeatured
+          ? `"${response.project.title}" is now a featured Case Study.`
+          : `"${response.project.title}" is now a standard Case Study.`,
       );
 
       setRefreshKey((currentKey) => currentKey + 1);
@@ -578,6 +669,52 @@ function AdminProjectsPage() {
                 <option value="standard">Standard</option>
               </select>
             </div>
+
+            <div>
+              <label
+                htmlFor="project-case-study-publication"
+                className="text-sm font-semibold text-slate-700"
+              >
+                Case Study publication
+              </label>
+
+              <select
+                id="project-case-study-publication"
+                name="caseStudyPublished"
+                value={formFilters.caseStudyPublished}
+                onChange={handleFilterChange}
+                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+              >
+                <option value="all">All projects</option>
+
+                <option value="published">Published Case Studies</option>
+
+                <option value="not-published">Not published</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="project-case-study-featured"
+                className="text-sm font-semibold text-slate-700"
+              >
+                Case Study featured
+              </label>
+
+              <select
+                id="project-case-study-featured"
+                name="caseStudyFeatured"
+                value={formFilters.caseStudyFeatured}
+                onChange={handleFilterChange}
+                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+              >
+                <option value="all">All projects</option>
+
+                <option value="featured">Featured Case Studies</option>
+
+                <option value="standard">Standard / not featured</option>
+              </select>
+            </div>
           </div>
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
@@ -719,6 +856,19 @@ function AdminProjectsPage() {
                         >
                           {project.isVisible ? "Visible" : "Hidden"}
                         </span>
+
+                        {project.caseStudy?.isPublished && (
+                          <span className="rounded-full bg-cyan-500 px-3 py-1.5 text-xs font-bold text-slate-950">
+                            Case Study
+                          </span>
+                        )}
+
+                        {project.caseStudy?.isPublished &&
+                          project.caseStudy?.isFeatured && (
+                            <span className="rounded-full bg-fuchsia-500 px-3 py-1.5 text-xs font-bold text-white">
+                              Featured Case Study
+                            </span>
+                          )}
                       </div>
                     </div>
                   </div>
@@ -768,6 +918,26 @@ function AdminProjectsPage() {
                       </div>
                     )}
 
+                    <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                            Case Study
+                          </p>
+
+                          <p className="mt-1 text-sm font-semibold text-slate-700">
+                            {project.caseStudy?.isPublished
+                              ? "Published"
+                              : "Not published"}
+                          </p>
+                        </div>
+
+                        <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600">
+                          Order {project.caseStudy?.order ?? 0}
+                        </span>
+                      </div>
+                    </div>
+
                     <div className="mt-auto border-t border-slate-100 pt-5">
                       <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
                         <span>{technologies.length} Technologies</span>
@@ -815,6 +985,50 @@ function AdminProjectsPage() {
                             : project.isFeatured
                               ? "Make Standard"
                               : "Make Featured"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleToggleCaseStudyPublication(project)
+                          }
+                          disabled={Boolean(actionProjectId)}
+                          className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                            project.caseStudy?.isPublished
+                              ? "border border-cyan-300 bg-cyan-50 text-cyan-800 hover:bg-cyan-100"
+                              : "bg-cyan-600 text-white hover:bg-cyan-700"
+                          }`}
+                        >
+                          {actionProjectId === project._id
+                            ? "Updating..."
+                            : project.caseStudy?.isPublished
+                              ? "Unpublish Case Study"
+                              : "Publish Case Study"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggleCaseStudyFeatured(project)}
+                          disabled={
+                            Boolean(actionProjectId) ||
+                            !project.caseStudy?.isPublished
+                          }
+                          title={
+                            project.caseStudy?.isPublished
+                              ? "Toggle Case Study featured state"
+                              : "Publish this Project as a Case Study first"
+                          }
+                          className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                            project.caseStudy?.isFeatured
+                              ? "border border-fuchsia-300 bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100"
+                              : "bg-fuchsia-600 text-white hover:bg-fuchsia-700"
+                          }`}
+                        >
+                          {actionProjectId === project._id
+                            ? "Updating..."
+                            : project.caseStudy?.isFeatured
+                              ? "Unfeature Case Study"
+                              : "Feature Case Study"}
                         </button>
 
                         <button

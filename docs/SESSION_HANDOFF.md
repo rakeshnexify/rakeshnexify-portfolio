@@ -12,146 +12,211 @@ Branch: `main`
 
 Latest verified pushed checkpoint before this module:
 
-`fe8411b Add dynamic FAQ management module`
+`2c62486 Add dynamic clients and partners module`
 
 Current completed-but-not-yet-committed module:
 
-`Clients / Partners`
+`Case Studies`
 
 Current module status:
 
-- architecture audit: PASS
-- public UI: FULL PASS
-- publication matrix: FULL PASS
-- listing settings: FULL PASS
+- architecture lock: PASS
+- backend Project extension: PASS
+- Admin Project integration: PASS
+- public Case Studies homepage/page integration: PASS
+- Site Settings integration: PASS
+- Navbar/PublicPageHeader/Footer integration: PASS
 - SEO + sitemap: FULL PASS
-- cross-publication routing/sitemap tests: FULL PASS
-- relationship-aware route/sitemap tests: FULL PASS
-- final Codex verdict: `READY`
-- temporary Client/Partner test records: cleaned
+- four-state Projects/Case Studies publication matrix: FULL PASS
+- final broad Codex review: no A findings; 3 B findings fixed
+- focused Codex re-review: B1 PASS, B2 PASS, B3 PASS
+- final Codex verdict: `READY TO COMMIT`
 - final source validation: PASS
 
 Do not reopen implementation unless a new concrete failure appears.
 
-## Clients / Partners Architecture
+## Case Studies Architecture
 
-Clients / Partners does not own organization identity.
+Case Studies does not own separate content identity.
 
 Canonical entity:
 
-`Company`
+`Project`
 
 There is intentionally no:
 
-- Client model
-- Partner model
-- ClientPartner model
-- separate Clients / Partners collection
-- separate Clients / Partners API
-- separate Clients / Partners Admin CRUD
-- `/clients-partners/:slug`
+- CaseStudy model
+- `case_studies` MongoDB collection
+- `/api/case-studies`
+- `/api/admin/case-studies`
+- separate Case Studies Admin CRUD
+- `/case-studies/:slug`
 
-Existing Company relationships provide the presentation split:
+Project embedded publication metadata:
 
-- `client`
-- `partner`
+```js
+caseStudy: {
+  isPublished: false,
+  isFeatured: false,
+  order: 0
+}
+```
+
+Legacy missing metadata:
+
+- unpublished
+- unfeatured
+
+Normal `Project.isFeatured` and `caseStudy.isFeatured` are independent.
+
+Existing `links.caseStudyUrl` remains external only.
 
 Admin management remains:
 
-`/admin/companies`
+- `/admin/projects`
+- `/admin/projects/new`
+- `/admin/projects/:id/edit`
 
 Public collection:
 
-`/clients-partners`
+`/case-studies`
 
-Canonical detail route:
+Canonical detail:
 
-`/companies/:slug`
+`/projects/:slug`
 
 Registry key:
 
-`clients-partners`
+`case-studies`
 
 Site Settings content field:
 
-`clientsPartnersSection`
+`caseStudiesSection`
 
-## Public Behavior
+## Public API / Sorting
 
-Homepage Clients & Partners:
+Case Study collection API:
 
-- visible Company records only
-- relationship must be `client` or `partner`
-- featured first, then order, then name
-- compact preview cards
-- canonical links to `/companies/:slug`
-- CTA hides when `/clients-partners` public page is disabled
+`GET /api/projects?caseStudy=true`
 
-Dedicated `/clients-partners`:
+Public filter:
 
-- All
-- Clients
-- Partners
-- loading/error/empty states
-- compact Company-backed cards
-- no new detail route
+- Project `isVisible: true`
+- `caseStudy.isPublished: true`
+
+Sort:
+
+1. Case Study featured descending
+2. Case Study order ascending
+3. Project order ascending
+4. createdAt ascending
+
+Admin Project UI supports:
+
+- Case Study publish/unpublish
+- Case Study featured/unfeatured
+- Case Study order
+- listing filters
+- quick actions
+- normal Project featured independently
+
+Partial nested Case Study PATCH preserves sibling fields.
 
 ## Publication Contract
 
-Collection routes remain independent:
+State 1 - Projects ON + Case Studies ON:
 
-- `/companies` -> Companies public-page control only
-- `/clients-partners` -> Clients & Partners public-page control only
+- `/projects` open
+- `/case-studies` open
+- published Case Study detail open
+- normal visible Project detail open
 
-Canonical Company detail publication:
+State 2 - Projects OFF + Case Studies ON:
 
-Companies ON:
+- `/projects` blocked
+- `/case-studies` open
+- visible published Case Study `/projects/:slug` open
+- normal/non-published Project detail blocked
 
-- all visible Company detail profiles may work
+State 3 - Projects ON + Case Studies OFF:
 
-Companies OFF + Clients & Partners ON:
+- `/projects` open
+- `/case-studies` blocked
+- all visible Project details open
 
-- visible `client` profile -> allowed
-- visible `partner` profile -> allowed
-- visible `owned` / `managed` / `other` -> Not Found
+State 4 - both OFF:
 
-Companies OFF + Clients & Partners OFF:
+- both collection routes blocked
+- Project detail routes blocked through these publication paths
 
-- Company details are blocked through these publication paths
+All four states were manually runtime-tested and passed.
 
-`PublicPageVisibilityRoute` now supports existing single `sectionKey` behavior plus intentional OR-style `sectionKeys` for shared canonical routes.
+Original Site Settings were restored after the matrix test:
+
+- Projects page visible: `true`
+- Case Studies page visible: `true`
 
 ## SEO / Sitemap
 
-`/clients-partners`:
+`/case-studies` verified:
 
-- canonical `/clients-partners`
-- `CollectionPage`
-- `mainEntity` uses `ItemList`
-- ItemList detail URLs use `/companies/:slug`
+- canonical production URL
+- `CollectionPage` JSON-LD
+- nested `ItemList`
+- runtime `numberOfItems` matched published Case Studies
+- ItemList entries use absolute production `/projects/:slug` URLs
+- no `/case-studies/:slug`
 
-Sitemap rules match routing:
+Structured data behavior after final review fix:
 
-Companies ON:
+- loading state: no Case Studies collection JSON-LD
+- terminal API error: no Case Studies collection JSON-LD
+- successful response: CollectionPage + ItemList
+- successful empty response: zero-item collection allowed
 
-- all visible Company detail URLs may be indexed
+Sitemap publication matrix matches routing.
 
-Companies OFF + Clients & Partners ON:
+Verified actual endpoint:
 
-- only visible client/partner Company details remain
-- owned/managed/other Company details are excluded
+- `/sitemap.xml` returned `200`
+- content type was XML
+- `/case-studies` collection entry present when enabled
 
-Both OFF:
+## Homepage / Navigation / Accessibility
 
-- Company detail entries are excluded
+Homepage default placement:
 
-Collection sitemap entries remain independently publication-controlled.
+`Projects -> Case Studies -> Education`
 
-No `/clients-partners/:slug` sitemap entries exist.
+Case Studies is integrated with:
+
+- homepage registry
+- Site Settings
+- Navbar
+- PublicPageHeader
+- Footer
+- AppRoutes
+- HomePage
+
+Publication controls remain independent:
+
+- homepage visibility
+- navigation visibility
+- dedicated-page visibility
+
+Homepage CTA is target-aware:
+
+- if `/case-studies` is disabled, only a CTA targeting that disabled route is suppressed
+- valid external/contact/other CTA destinations remain available
+
+Dedicated page category filters:
+
+- filter container uses group semantics
+- active filter buttons expose `aria-pressed`
 
 ## Validation
 
-Latest user-run validation after all fixes and test-data cleanup:
+Latest user-run validation after the final Codex B fixes:
 
 `npm run check`
 
@@ -161,7 +226,7 @@ Result:
 
 Vite production build:
 
-- 243 modules transformed
+- 246 modules transformed
 - build passed
 - main bundle remains above Vite's recommended 500 kB warning threshold
 
@@ -170,96 +235,92 @@ Vite production build:
 Result:
 
 - no actual whitespace errors
-- CRLF/LF warnings only
+- CRLF/LF conversion warnings only
 
-Final source working-tree scope before docs:
+Final focused Codex re-review:
 
-19 intended implementation paths.
+- B1 CTA fix: PASS
+- B2 accessibility fix: PASS
+- B3 JSON-LD error-state fix: PASS
+- regressions: None
+
+Final verdict:
+
+`READY TO COMMIT`
+
+## Current Working Tree
+
+Latest user-reported source working tree before documentation replacement:
+
+27 intended Case Studies implementation paths.
 
 Modified:
 
+- `client/src/components/admin/projects/ProjectForm.jsx`
 - `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
 - `client/src/components/layout/Footer.jsx`
 - `client/src/components/layout/Navbar.jsx`
 - `client/src/components/layout/PublicPageHeader.jsx`
 - `client/src/config/homepageSections.js`
 - `client/src/config/siteSettingsPages.js`
-- `client/src/pages/CompanyDetailsPage.jsx`
+- `client/src/hooks/useProjects.js`
 - `client/src/pages/HomePage.jsx`
+- `client/src/pages/ProjectDetailsPage.jsx`
+- `client/src/pages/admin/AdminProjectsPage.jsx`
 - `client/src/routes/AppRoutes.jsx`
-- `client/src/routes/PublicPageVisibilityRoute.jsx`
+- `client/src/services/adminProjectsApi.js`
+- `client/src/services/projectsApi.js`
+- `client/src/utils/projectForm.js`
 - `client/src/utils/siteSettingsForm.js`
 - `server/src/config/homepageSections.js`
+- `server/src/controllers/adminProject.controller.js`
 - `server/src/controllers/adminSiteSettings.controller.js`
+- `server/src/controllers/project.controller.js`
 - `server/src/controllers/sitemap.controller.js`
+- `server/src/models/Project.js`
 - `server/src/models/SiteSettings.js`
 - `server/src/utils/createSitemapXml.js`
 
 New:
 
-- `client/src/components/companies/ClientPartnerCard.jsx`
-- `client/src/components/sections/ClientsPartnersSection.jsx`
-- `client/src/pages/ClientsPartnersPage.jsx`
+- `client/src/components/projects/CaseStudyCard.jsx`
+- `client/src/components/sections/CaseStudiesSection.jsx`
+- `client/src/pages/CaseStudiesPage.jsx`
 
-After this documentation replacement, expected closeout scope is:
+After replacing the two active docs, expected closeout scope:
 
-- 19 implementation paths
+- 27 implementation paths
 - 2 active documentation paths
-- 21 total intended paths
+- 29 total intended paths
 
 Use live Git output as source of truth before staging.
 
-## Runtime Test Data
+## Runtime Data Notes
 
-Temporary records used during testing were explicitly deleted:
+No temporary Project remains from the low-level Case Study implementation tests.
 
-- `Demo Client Company`
-- `Demo Partner Company`
+The final publication-matrix test reused existing records.
 
-Verified after cleanup:
+Verified published Case Study examples during runtime testing:
 
-- total public Companies: 1
-- client Companies: 0
-- partner Companies: 0
-
-Remaining real Company:
+- `RakeshNexify Portfolio`
+- slug `rakeshnexify-portfolio`
+- published `true`
 
 - `UniQuick Mart`
 - slug `uniquick-mart`
-- relationship `owned`
-- visible `true`
+- published `true`
 
-UniQuick Mart was used only to verify relationship-aware blocking. Do not delete or modify it during Git closeout.
+A visible legacy Project used as the normal non-Case-Study control:
 
-## Codex Review
+- `Test`
+- slug `test`
+- `caseStudy.isPublished` missing
+- treated as unpublished
 
-Initial final review found one B issue:
+Treat current MongoDB as source of truth.
 
-- Clients / Partners linked to canonical Company details that became inaccessible when Companies public page was disabled
-
-First fix introduced shared OR routing/sitemap behavior.
-
-Focused re-review then found one B issue:
-
-- OR behavior was too broad and allowed owned/managed/other Company details when only Clients & Partners was enabled
-
-Second fix added relationship-aware detail publication and sitemap filtering.
-
-Final focused review:
-
-A MUST FIX:
-
-None.
-
-B RECOMMENDED:
-
-None.
-
-Final verdict:
-
-`VERDICT: READY`
-
-Do not run another broad Clients / Partners review unless new evidence appears.
+Do not blindly delete or modify these records during Git closeout.
 
 ## Documentation State
 
@@ -270,15 +331,19 @@ Active development-memory files only:
 
 For this closeout:
 
-- PROJECT_MEMORY records the permanent Company-backed Clients / Partners architecture, shared canonical-detail publication rule, limitation, completed inventory, and roadmap advancement
+- PROJECT_MEMORY records the permanent Project-backed Case Studies architecture, publication matrix, SEO/sitemap contract, completed inventory, limitation, and roadmap advancement
 - SESSION_HANDOFF records the current READY state and immediate Git closeout
 - no large legacy documentation matrix needs updating
 
 ## Open Issues
 
-No confirmed Clients / Partners blocker remains.
+No confirmed Case Studies blocker remains.
 
 No Codex A/B finding remains.
+
+Optional later observation:
+
+- category identity on `/case-studies` could be normalized consistently so differently-cased category labels cannot create duplicate filter buttons
 
 Known non-blocking project-wide items:
 
@@ -288,6 +353,7 @@ Known non-blocking project-wide items:
 - limited automated test coverage
 - client dependency audit requires separate controlled review
 - README remains materially stale
+- source contains intended Site Settings tagline but deployed DB value remains unverified
 - production `TRUST_PROXY_HOPS` must match deployment topology
 
 Do not run:
@@ -301,7 +367,7 @@ After replacing these two active docs:
 1. Run:
    - `git diff --check`
    - `git status --short`
-2. Verify exactly the intended Clients / Partners implementation plus the two docs.
+2. Verify exactly the intended Case Studies implementation plus the two docs.
 3. Stage the complete module plus:
    - `docs/PROJECT_MEMORY.md`
    - `docs/SESSION_HANDOFF.md`
@@ -320,27 +386,25 @@ After replacing these two active docs:
 
 ## Next Development Module
 
-After Clients / Partners is committed and pushed:
+After Case Studies is committed and pushed:
 
-`Case Studies`
+`Appointment / Consultation Booking`
 
 Before implementation:
 
-- audit overlap with Projects first
-- prefer extending the existing Project domain unless a separate Case Study domain is justified
-- avoid duplicate project identity/content ownership
-- define case-study narrative, challenge/solution/results, metrics, media, relations, publication, SEO, and sitemap responsibilities
-- preserve existing Media, Site Settings, Admin, RBAC, validation, and canonical-route patterns
+- audit overlap with Contact Messages, Leads/CRM, Service Orders, Services, and Site Settings
+- keep appointment/consultation identity distinct from raw inquiries and package orders
+- define booking types, availability/schedule ownership, customer fields, status lifecycle, admin workflow, rate limiting, validation, notifications boundary, SEO/publication responsibilities, and timezone rules
+- preserve existing Admin auth/RBAC, Site Settings, security, validation, and two-file documentation workflow
 
 ## Remaining Roadmap
 
-After Case Studies:
+After Appointment / Consultation Booking:
 
-1. Appointment / Consultation Booking
-2. Newsletter / Subscribers Management
-3. Admin Analytics Dashboard
-4. Admin Activity / Audit Log
-5. Menu / Navigation Management
+1. Newsletter / Subscribers Management
+2. Admin Analytics Dashboard
+3. Admin Activity / Audit Log
+4. Menu / Navigation Management
 
 ## Future Separate Phases
 

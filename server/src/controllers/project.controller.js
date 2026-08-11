@@ -51,6 +51,8 @@ async function getPublicProjects(req, res, next) {
 
     const featured = parseBooleanQuery(req.query.featured);
 
+    const caseStudy = parseBooleanQuery(req.query.caseStudy);
+
     if (search) {
       const safeSearch = escapeRegularExpression(search);
 
@@ -93,12 +95,25 @@ async function getPublicProjects(req, res, next) {
       filter.isFeatured = featured;
     }
 
+    if (caseStudy === true) {
+      filter["caseStudy.isPublished"] = true;
+    }
+
+    const sort = caseStudy
+      ? {
+          "caseStudy.isFeatured": -1,
+          "caseStudy.order": 1,
+          order: 1,
+          createdAt: 1,
+        }
+      : {
+          order: 1,
+          createdAt: 1,
+        };
+
     const projects = await Project.find(filter)
       .select("-createdBy -updatedBy -challenges -solutions -results")
-      .sort({
-        order: 1,
-        createdAt: 1,
-      })
+      .sort(sort)
       .lean();
 
     return res.status(200).json({

@@ -90,6 +90,33 @@ const projectResultSchema = new mongoose.Schema(
   },
 );
 
+
+const projectCaseStudySchema = new mongoose.Schema(
+  {
+    isPublished: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
+    isFeatured: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
+    order: {
+      type: Number,
+      min: [0, "Case study order cannot be negative."],
+      default: 0,
+      index: true,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
 const seoSchema = new mongoose.Schema(
   {
     title: {
@@ -313,6 +340,11 @@ const projectSchema = new mongoose.Schema(
       default: () => ({}),
     },
 
+    caseStudy: {
+      type: projectCaseStudySchema,
+      default: () => ({}),
+    },
+
     order: {
       type: Number,
       min: [0, "Project order cannot be negative."],
@@ -361,6 +393,15 @@ projectSchema.index({
   isFeatured: 1,
   order: 1,
   createdAt: -1,
+});
+
+projectSchema.index({
+  isVisible: 1,
+  "caseStudy.isPublished": 1,
+  "caseStudy.isFeatured": -1,
+  "caseStudy.order": 1,
+  order: 1,
+  createdAt: 1,
 });
 
 projectSchema.index({

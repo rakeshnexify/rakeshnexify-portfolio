@@ -35,6 +35,13 @@ function validateProjectForm(formValues) {
     errors.order = "Display order must be a non-negative number.";
   }
 
+  const numericCaseStudyOrder = Number(formValues.caseStudyOrder);
+
+  if (!Number.isFinite(numericCaseStudyOrder) || numericCaseStudyOrder < 0) {
+    errors["caseStudy.order"] =
+      "Case study display order must be a non-negative number.";
+  }
+
   if (
     formValues.startedAt &&
     formValues.completedAt &&
@@ -159,6 +166,10 @@ function ProjectForm({
         updatedValues.slug = createProjectSlug(value);
       }
 
+      if (name === "caseStudyIsPublished" && !checked) {
+        updatedValues.caseStudyIsFeatured = false;
+      }
+
       return updatedValues;
     });
 
@@ -176,6 +187,22 @@ function ProjectForm({
       ["liveUrl", "sourceCodeUrl", "caseStudyUrl", "videoUrl"].includes(name)
     ) {
       clearFieldErrors("links", `links.${name}`);
+    }
+
+    if (
+      [
+        "caseStudyIsPublished",
+        "caseStudyIsFeatured",
+        "caseStudyOrder",
+      ].includes(name)
+    ) {
+      const caseStudyFieldMap = {
+        caseStudyIsPublished: "caseStudy.isPublished",
+        caseStudyIsFeatured: "caseStudy.isFeatured",
+        caseStudyOrder: "caseStudy.order",
+      };
+
+      clearFieldErrors("caseStudy", caseStudyFieldMap[name]);
     }
 
     setSubmitError("");
@@ -683,6 +710,122 @@ function ProjectForm({
             </span>
           </label>
         </div>
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-slate-950">
+              Case Study Publication
+            </h2>
+
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+              Publish this existing Project inside the Case Studies experience
+              without creating duplicate project content or a second detail
+              page.
+            </p>
+          </div>
+
+          <span
+            className={`inline-flex w-fit rounded-full px-3 py-1.5 text-xs font-bold ${
+              formValues.caseStudyIsPublished
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-slate-100 text-slate-600"
+            }`}
+          >
+            {formValues.caseStudyIsPublished
+              ? "Published as Case Study"
+              : "Not a Case Study"}
+          </span>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <label className="flex cursor-pointer items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <input
+              name="caseStudyIsPublished"
+              type="checkbox"
+              checked={formValues.caseStudyIsPublished}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-1 size-4 accent-brand-600"
+            />
+
+            <span>
+              <span className="block text-sm font-bold text-slate-900">
+                Publish as Case Study
+              </span>
+
+              <span className="mt-1 block text-sm leading-6 text-slate-500">
+                Include this visible Project in the Case Studies homepage
+                section and dedicated Case Studies page.
+              </span>
+            </span>
+          </label>
+
+          <label
+            className={`flex items-start gap-4 rounded-2xl border p-4 ${
+              formValues.caseStudyIsPublished
+                ? "cursor-pointer border-slate-200 bg-slate-50"
+                : "cursor-not-allowed border-slate-200 bg-slate-100 opacity-60"
+            }`}
+          >
+            <input
+              name="caseStudyIsFeatured"
+              type="checkbox"
+              checked={formValues.caseStudyIsFeatured}
+              onChange={handleInputChange}
+              disabled={isSubmitting || !formValues.caseStudyIsPublished}
+              className="mt-1 size-4 accent-brand-600"
+            />
+
+            <span>
+              <span className="block text-sm font-bold text-slate-900">
+                Featured Case Study
+              </span>
+
+              <span className="mt-1 block text-sm leading-6 text-slate-500">
+                Prioritize this Case Study before standard published Case
+                Studies.
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <div className="mt-5 max-w-sm">
+          <label
+            htmlFor="project-case-study-order"
+            className="text-sm font-semibold text-slate-700"
+          >
+            Case Study display order
+          </label>
+
+          <input
+            id="project-case-study-order"
+            name="caseStudyOrder"
+            type="number"
+            min="0"
+            step="1"
+            value={formValues.caseStudyOrder}
+            onChange={handleInputChange}
+            disabled={isSubmitting}
+            className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+          />
+
+          <ProjectFieldError
+            message={getFieldError(
+              "caseStudy.order",
+              "caseStudyOrder",
+              "caseStudy",
+            )}
+          />
+
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Featured status is evaluated first, then this Case Study order,
+            then the normal Project order.
+          </p>
+        </div>
+
+        <ProjectFieldError message={getFieldError("caseStudy")} />
       </section>
 
       <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
