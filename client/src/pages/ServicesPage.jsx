@@ -5,6 +5,7 @@ import Container from "../components/layout/Container";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import PageSeo from "../components/seo/PageSeo";
+import { mergeHomepageSections } from "../config/homepageSections";
 import DesignPreviewGallery from "../components/services/pricing/DesignPreviewGallery";
 import PackageComparison from "../components/services/pricing/PackageComparison";
 import PackageDesignSelector from "../components/services/pricing/PackageDesignSelector";
@@ -193,6 +194,18 @@ function ServicesPage() {
 
   const { services: loadedServices, isLoading, error } = useServices();
   const { settings } = useSiteSettings();
+
+  const sectionsByKey = useMemo(() => {
+    return new Map(
+      mergeHomepageSections(settings?.sections).map((section) => [
+        section.key,
+        section,
+      ]),
+    );
+  }, [settings?.sections]);
+
+  const isConsultationPageVisible =
+    sectionsByKey.get("consultation")?.isPageVisible !== false;
 
   const brand = settings?.brand || {};
   const sectionContent = settings?.servicesSection || {};
@@ -662,6 +675,7 @@ function ServicesPage() {
                             servicePackage={selectedPackage}
                             design={selectedDesign}
                             whatsapp={settings?.contact?.whatsapp || ""}
+                            consultationEnabled={isConsultationPageVisible}
                           />
                         )}
                       </div>

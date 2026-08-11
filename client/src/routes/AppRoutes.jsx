@@ -9,6 +9,7 @@ import ClientsPartnersPage from "../pages/ClientsPartnersPage";
 import CaseStudiesPage from "../pages/CaseStudiesPage";
 import CompanyDetailsPage from "../pages/CompanyDetailsPage";
 import EducationPage from "../pages/EducationPage";
+import ConsultationPage from "../pages/ConsultationPage";
 import ExperiencePage from "../pages/ExperiencePage";
 import FaqPage from "../pages/FaqPage";
 import HomePage from "../pages/HomePage";
@@ -24,6 +25,8 @@ import TestimonialsPage from "../pages/TestimonialsPage";
 import TeamPage from "../pages/TeamPage";
 import TeamMemberDetailsPage from "../pages/TeamMemberDetailsPage";
 
+import AdminAppointmentDetailPage from "../pages/admin/AdminAppointmentDetailPage";
+import AdminAppointmentsPage from "../pages/admin/AdminAppointmentsPage";
 import AdminCertificationAchievementEditorPage from "../pages/admin/AdminCertificationAchievementEditorPage";
 import AdminCertificationAchievementsPage from "../pages/admin/AdminCertificationAchievementsPage";
 import AdminCompaniesPage from "../pages/admin/AdminCompaniesPage";
@@ -277,6 +280,12 @@ function AppRoutes() {
             <Route path="/services" element={<ServicesPage />} />
           </Route>
 
+          <Route
+            element={<PublicPageVisibilityRoute sectionKey="consultation" />}
+          >
+            <Route path="/consultation" element={<ConsultationPage />} />
+          </Route>
+
           <Route element={<PublicPageVisibilityRoute sectionKey="education" />}>
             <Route path="/education" element={<EducationPage />} />
           </Route>
@@ -394,6 +403,16 @@ function AppRoutes() {
           <Route
             path="/admin/site-settings/:pageKey"
             element={<AdminSiteSettingsEditorPage />}
+          />
+
+          <Route
+            path="/admin/appointments"
+            element={<AdminAppointmentsPage />}
+          />
+
+          <Route
+            path="/admin/appointments/:id"
+            element={<AdminAppointmentDetailPage />}
           />
 
           <Route

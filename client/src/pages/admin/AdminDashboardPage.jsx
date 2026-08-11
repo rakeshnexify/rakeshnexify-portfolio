@@ -38,6 +38,13 @@ const dashboardModules = [
     path: "/admin/service-orders",
   },
   {
+    title: "Appointments / Consultations",
+    description:
+      "Review consultation requests, confirm schedules, assign Admin ownership, manage lifecycle status and convert qualified requests into Leads.",
+    status: "Management ready",
+    path: "/admin/appointments",
+  },
+  {
     title: "Statistics",
     description:
       "Create, edit, reorder, feature and control the visibility of portfolio statistics.",
@@ -210,8 +217,9 @@ function AdminDashboardPage() {
               Manage your portfolio content, services, Service Packages,
               pricing, Package Designs, Skills, Education, Experience,
               Certifications & Achievements, projects, Media Library, Blog and
-              News, Team members, companies, Testimonials, FAQs, Leads / CRM,
-              enquiries and website settings from this secure dashboard.
+              News, Team members, companies, Testimonials, FAQs, consultation
+              requests, Leads / CRM, enquiries and website settings from this
+              secure dashboard.
             </p>
           </div>
 

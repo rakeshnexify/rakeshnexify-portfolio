@@ -1,6 +1,6 @@
 ﻿# Session Handoff
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 ## Current Project State
 
@@ -12,211 +12,365 @@ Branch: `main`
 
 Latest verified pushed checkpoint before this module:
 
-`2c62486 Add dynamic clients and partners module`
+`c4628c0 Add dynamic case studies module`
 
 Current completed-but-not-yet-committed module:
 
-`Case Studies`
+`Appointment / Consultation Booking`
 
-Current module status:
+Current Module 23 status:
 
 - architecture lock: PASS
-- backend Project extension: PASS
-- Admin Project integration: PASS
-- public Case Studies homepage/page integration: PASS
-- Site Settings integration: PASS
-- Navbar/PublicPageHeader/Footer integration: PASS
-- SEO + sitemap: FULL PASS
-- four-state Projects/Case Studies publication matrix: FULL PASS
-- final broad Codex review: no A findings; 3 B findings fixed
-- focused Codex re-review: B1 PASS, B2 PASS, B3 PASS
-- final Codex verdict: `READY TO COMMIT`
-- final source validation: PASS
+- backend implementation: PASS
+- backend security/integrity review: PASS
+- public Consultation frontend: PASS
+- Admin Appointment management frontend: PASS
+- Appointment -> Lead conversion: PASS
+- shared publication/Site Settings integration: PASS
+- sitemap integration: PASS
+- contextual package Consultation CTA: PASS
+- publication ON/OFF runtime matrix: PASS
+- production build / `npm run check`: PASS
+- final complete-integration Codex review: no A findings
+- one B finding remained only for indentation in three shared-integration insertions
+- B indentation fix: APPLIED
+- post-fix source validation: PASS
 
 Do not reopen implementation unless a new concrete failure appears.
 
-## Case Studies Architecture
+## Appointment / Consultation Architecture
 
-Case Studies does not own separate content identity.
+Technical model:
 
-Canonical entity:
+`Appointment`
 
-`Project`
+Collection:
+
+`appointments`
+
+Public terminology:
+
+`Consultation`
+
+This is request-based scheduling only.
+
+Public preferred date/time values are preferences and do not reserve or guarantee a slot.
+
+Public timing:
+
+- `preferredDate`: strict `YYYY-MM-DD`
+- `preferredTime`: strict `HH:mm`
+- `timezone`: IANA timezone
+
+Admin confirmed timing:
+
+- `scheduledAt`: MongoDB Date
+
+Statuses:
+
+- `requested`
+- `confirmed`
+- `completed`
+- `cancelled`
+- `declined`
+- `no-show`
+
+Meeting types:
+
+- `video-call`
+- `phone-call`
+
+There is intentionally no permanent `rescheduled` status.
+
+Appointment remains separate from:
+
+- ContactMessage
+- Lead
+- ServiceOrder
+
+No realtime availability engine, calendar integration, email notification system, payment flow, public cancellation/rescheduling, public tracking, or meeting-link automation was added.
+
+## Public API / Validation
+
+Public endpoint:
+
+`POST /api/appointments`
+
+There is intentionally no public Appointment:
+
+- GET
+- PATCH
+- DELETE
+- cancel endpoint
+- reschedule endpoint
+- tracking/detail endpoint
+
+Public fields:
+
+- name
+- email
+- phone
+- companyName
+- service
+- servicePackage
+- preferredDate
+- preferredTime
+- timezone
+- meetingType
+- projectSummary
+- message
+
+Required:
+
+- name
+- email
+- preferredDate
+- preferredTime
+- timezone
+- meetingType
+- projectSummary
+
+Phone is additionally required when meeting type is `phone-call`.
+
+Public safeguards verified:
+
+- request body must be a plain non-array object
+- strict public allowlist
+- unknown-field rejection
+- honeypot
+- 5 requests per 15 minutes rate limit
+- strict string validation
+- normalized email/phone/text handling
+- valid calendar date
+- strict `HH:mm`
+- IANA timezone validation
+- non-past preferred date in submitted timezone
+- ObjectId validation
+- visible Service and ServicePackage resolution
+- package ownership under Service
+- server-derived Service/package snapshots
+- safe structured `fieldErrors`
+- no Admin workflow fields exposed publicly
+
+## Admin API / Workflow
+
+Admin endpoints:
+
+- `GET /api/admin/appointments`
+- `GET /api/admin/appointments/:id`
+- `PATCH /api/admin/appointments/:id`
+- `DELETE /api/admin/appointments/:id`
+- `POST /api/admin/appointments/:id/convert-to-lead`
+
+List parameters:
+
+- page
+- limit
+- search
+- status
+- service
+- assignedTo
+- preferredDateFrom
+- preferredDateTo
+- scheduledFrom
+- scheduledTo
+
+RBAC:
+
+- read: authenticated active Admin
+- update/convert: `super-admin`, `admin`, `editor`
+- delete: `super-admin`, `admin`
+
+Admin runtime verification passed for:
+
+- Dashboard module card
+- list page
+- detail page
+- search/status filtering
+- workflow update
+- Confirmed state
+- confirmed `scheduledAt`
+- Admin note
+- `statusUpdatedAt`
+- `statusUpdatedBy`
+- assignment backend behavior
+- linked Lead rendering
+- blocked converted Appointment deletion
+
+The Admin UI intentionally does not introduce an Admin-user directory. Assignment options are limited to already-known/current Admin identities.
+
+## Appointment -> Lead Conversion
+
+Relationship source of truth:
+
+`Lead.sourceAppointment`
 
 There is intentionally no:
 
-- CaseStudy model
-- `case_studies` MongoDB collection
-- `/api/case-studies`
-- `/api/admin/case-studies`
-- separate Case Studies Admin CRUD
-- `/case-studies/:slug`
+`Appointment.relatedLead`
 
-Project embedded publication metadata:
+Permanent rules:
 
-```js
-caseStudy: {
-  isPublished: false,
-  isFeatured: false,
-  order: 0
-}
-```
+- conversion is manual/Admin-driven
+- `Lead.sourceAppointment` uses a partial unique ObjectId index
+- duplicate conversion is blocked with `409`
+- project summary and additional message are preserved into the Lead requirement summary within model limits
+- estimated value accepts controlled decimal input only
+- priority, currency, assignment, and follow-up fields are validated
+- conversion uses a MongoDB transaction
+- the transaction touches the Appointment before Lead save to protect conversion-vs-delete races
+- converted Appointment deletion is blocked with `409`
 
-Legacy missing metadata:
+Runtime concurrency/integrity tests passed:
 
-- unpublished
-- unfeatured
+- concurrent duplicate conversion -> exactly one Lead
+- delete vs convert -> no dangling Lead
+- converted Appointment delete protection -> PASS
 
-Normal `Project.isFeatured` and `caseStudy.isFeatured` are independent.
+## Public Consultation Frontend
 
-Existing `links.caseStudyUrl` remains external only.
+Public route:
 
-Admin management remains:
+`/consultation`
 
-- `/admin/projects`
-- `/admin/projects/new`
-- `/admin/projects/:id/edit`
+Implemented:
 
-Public collection:
+- live public Services
+- ServicePackage dependency
+- query preselection:
+  - `service=<slug>`
+  - `package=<slug>`
+- browser timezone default with UTC fallback
+- local minimum date
+- conditional phone requirement
+- backend field error display
+- first-error focus
+- timeout/network/429 handling
+- success state that clearly says the Consultation request was received and awaits review
 
-`/case-studies`
+No wording promises a guaranteed reservation, availability slot, email confirmation, or calendar event.
 
-Canonical detail:
+Public submission runtime test passed and the created database record was verified.
 
-`/projects/:slug`
+## Admin Frontend
+
+Admin routes:
+
+- `/admin/appointments`
+- `/admin/appointments/:id`
+
+Admin Dashboard includes:
+
+`Appointments / Consultations`
+
+Admin list includes:
+
+- responsive cards
+- search
+- status filter
+- Service filter
+- preferred-date filters
+- pagination
+- snapshot-first Service/package display
+- requester contact actions
+- status and timing display
+
+Admin detail includes:
+
+- requester/context/preferred schedule/project/audit information
+- workflow update form
+- assignment
+- `scheduledAt`
+- Admin note
+- cancellation reason
+- manual Lead conversion form
+- linked Lead card
+- delete action with `409` protection handling
+
+Runtime UI tests passed.
+
+## Publication / Site Settings
 
 Registry key:
 
-`case-studies`
+`consultation`
 
-Site Settings content field:
+Server/client defaults are aligned:
 
-`caseStudiesSection`
+```js
+{
+  key: "consultation",
+  label: "Consultation",
+  isVisible: false,
+  isNavigationVisible: false,
+  isPageVisible: true,
+  order: 20,
+  navigationOrder: 20,
+}
+```
 
-## Public API / Sorting
+Consultation is a dedicated page-only publication key.
 
-Case Study collection API:
+It is intentionally absent from:
 
-`GET /api/projects?caseStudy=true`
+- homepage section keys
+- navigation section keys
 
-Public filter:
+It is included in:
 
-- Project `isVisible: true`
-- `caseStudy.isPublished: true`
+- dedicated page keys
 
-Sort:
+Existing SiteSettings remain backward compatible through `mergeHomepageSections`; no migration is required.
 
-1. Case Study featured descending
-2. Case Study order ascending
-3. Project order ascending
-4. createdAt ascending
+`PublicPageVisibilityRoute sectionKey="consultation"` controls `/consultation`.
 
-Admin Project UI supports:
+## Sitemap / Service Package CTA
 
-- Case Study publish/unpublish
-- Case Study featured/unfeatured
-- Case Study order
-- listing filters
-- quick actions
-- normal Project featured independently
+Sitemap:
 
-Partial nested Case Study PATCH preserves sibling fields.
+- `/consultation` is emitted only when Consultation is page-visible
+- no public Appointment detail URLs exist
+- no Appointment-specific priority/changefreq metadata was added
 
-## Publication Contract
+Service package flow preserves:
 
-State 1 - Projects ON + Case Studies ON:
+- `Order Now`
+- `Order on WhatsApp`
 
-- `/projects` open
-- `/case-studies` open
-- published Case Study detail open
-- normal visible Project detail open
+New additive secondary action:
 
-State 2 - Projects OFF + Case Studies ON:
+`Request a Consultation`
 
-- `/projects` blocked
-- `/case-studies` open
-- visible published Case Study `/projects/:slug` open
-- normal/non-published Project detail blocked
+URL:
 
-State 3 - Projects ON + Case Studies OFF:
+`/consultation?service=<service-slug>&package=<package-slug>`
 
-- `/projects` open
-- `/case-studies` blocked
-- all visible Project details open
+The CTA:
 
-State 4 - both OFF:
+- requires valid non-empty Service/package slugs
+- URL-encodes slugs
+- hides when Consultation page visibility is OFF
+- does not replace Service Order or WhatsApp behavior
 
-- both collection routes blocked
-- Project detail routes blocked through these publication paths
+Runtime publication matrix passed:
 
-All four states were manually runtime-tested and passed.
+Consultation ON:
 
-Original Site Settings were restored after the matrix test:
+- `/consultation` accessible
+- package Consultation CTA visible
+- sitemap includes `/consultation`
 
-- Projects page visible: `true`
-- Case Studies page visible: `true`
+Consultation OFF:
 
-## SEO / Sitemap
+- `/consultation` uses existing hidden-page / Not Found behavior
+- package Consultation CTA hidden
+- sitemap excludes `/consultation`
 
-`/case-studies` verified:
-
-- canonical production URL
-- `CollectionPage` JSON-LD
-- nested `ItemList`
-- runtime `numberOfItems` matched published Case Studies
-- ItemList entries use absolute production `/projects/:slug` URLs
-- no `/case-studies/:slug`
-
-Structured data behavior after final review fix:
-
-- loading state: no Case Studies collection JSON-LD
-- terminal API error: no Case Studies collection JSON-LD
-- successful response: CollectionPage + ItemList
-- successful empty response: zero-item collection allowed
-
-Sitemap publication matrix matches routing.
-
-Verified actual endpoint:
-
-- `/sitemap.xml` returned `200`
-- content type was XML
-- `/case-studies` collection entry present when enabled
-
-## Homepage / Navigation / Accessibility
-
-Homepage default placement:
-
-`Projects -> Case Studies -> Education`
-
-Case Studies is integrated with:
-
-- homepage registry
-- Site Settings
-- Navbar
-- PublicPageHeader
-- Footer
-- AppRoutes
-- HomePage
-
-Publication controls remain independent:
-
-- homepage visibility
-- navigation visibility
-- dedicated-page visibility
-
-Homepage CTA is target-aware:
-
-- if `/case-studies` is disabled, only a CTA targeting that disabled route is suppressed
-- valid external/contact/other CTA destinations remain available
-
-Dedicated page category filters:
-
-- filter container uses group semantics
-- active filter buttons expose `aria-pressed`
+Consultation was enabled again after the test.
 
 ## Validation
 
-Latest user-run validation after the final Codex B fixes:
+Latest user-run validation after the final indentation fix:
 
 `npm run check`
 
@@ -226,101 +380,114 @@ Result:
 
 Vite production build:
 
-- 246 modules transformed
+- 257 modules transformed
 - build passed
-- main bundle remains above Vite's recommended 500 kB warning threshold
+- main JS approximately 1.67 MB
+- gzip approximately 344 kB
+- existing >500 kB chunk-size warning remains non-blocking
 
 `git diff --check`
 
 Result:
 
 - no actual whitespace errors
-- CRLF/LF conversion warnings only
+- CRLF -> LF conversion warnings only
 
-Final focused Codex re-review:
+Final complete-integration Codex review before the indentation correction:
 
-- B1 CTA fix: PASS
-- B2 accessibility fix: PASS
-- B3 JSON-LD error-state fix: PASS
-- regressions: None
+- Backend Contract: PASS
+- Security / Integrity: PASS
+- Public Frontend: PASS
+- Admin Frontend: PASS
+- Appointment -> Lead: PASS
+- Publication / Site Settings: functionally PASS
+- Sitemap: functionally PASS
+- Package Consultation CTA: PASS
+- Routes / Dashboard: PASS
+- package.json check coverage: PASS
+- A findings: NONE
+- B finding: indentation only in three new shared-integration objects
 
-Final verdict:
+The three indentation-only B locations were corrected:
 
-`READY TO COMMIT`
+- `server/src/config/homepageSections.js`
+- `client/src/config/homepageSections.js`
+- `server/src/utils/createSitemapXml.js`
+
+Post-fix `npm run check` and `git diff --check` passed.
 
 ## Current Working Tree
 
-Latest user-reported source working tree before documentation replacement:
+Latest reviewed implementation scope before these two documentation replacements:
 
-27 intended Case Studies implementation paths.
+28 intended Module 23 implementation paths.
 
-Modified:
+Tracked modified implementation files:
 
-- `client/src/components/admin/projects/ProjectForm.jsx`
 - `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
-- `client/src/components/layout/Footer.jsx`
-- `client/src/components/layout/Navbar.jsx`
-- `client/src/components/layout/PublicPageHeader.jsx`
+- `client/src/components/services/pricing/PackageOrderActions.jsx`
 - `client/src/config/homepageSections.js`
-- `client/src/config/siteSettingsPages.js`
-- `client/src/hooks/useProjects.js`
-- `client/src/pages/HomePage.jsx`
-- `client/src/pages/ProjectDetailsPage.jsx`
-- `client/src/pages/admin/AdminProjectsPage.jsx`
+- `client/src/pages/ServicesPage.jsx`
+- `client/src/pages/admin/AdminDashboardPage.jsx`
 - `client/src/routes/AppRoutes.jsx`
-- `client/src/services/adminProjectsApi.js`
-- `client/src/services/projectsApi.js`
-- `client/src/utils/projectForm.js`
-- `client/src/utils/siteSettingsForm.js`
+- `package.json`
+- `server/src/app.js`
 - `server/src/config/homepageSections.js`
-- `server/src/controllers/adminProject.controller.js`
-- `server/src/controllers/adminSiteSettings.controller.js`
-- `server/src/controllers/project.controller.js`
-- `server/src/controllers/sitemap.controller.js`
-- `server/src/models/Project.js`
-- `server/src/models/SiteSettings.js`
+- `server/src/models/Lead.js`
 - `server/src/utils/createSitemapXml.js`
 
-New:
+New implementation files:
 
-- `client/src/components/projects/CaseStudyCard.jsx`
-- `client/src/components/sections/CaseStudiesSection.jsx`
-- `client/src/pages/CaseStudiesPage.jsx`
+- `client/src/components/admin/appointments/AppointmentStatusBadge.jsx`
+- `client/src/components/admin/appointments/AppointmentUpdateForm.jsx`
+- `client/src/components/admin/appointments/ConvertAppointmentToLeadForm.jsx`
+- `client/src/components/appointments/AppointmentForm.jsx`
+- `client/src/hooks/useAdminAppointments.js`
+- `client/src/pages/ConsultationPage.jsx`
+- `client/src/pages/admin/AdminAppointmentDetailPage.jsx`
+- `client/src/pages/admin/AdminAppointmentsPage.jsx`
+- `client/src/services/adminAppointmentsApi.js`
+- `client/src/services/appointmentsApi.js`
+- `client/src/utils/appointmentForm.js`
+- `server/src/controllers/adminAppointment.controller.js`
+- `server/src/controllers/appointment.controller.js`
+- `server/src/middleware/appointmentRateLimiter.js`
+- `server/src/models/Appointment.js`
+- `server/src/routes/adminAppointment.routes.js`
+- `server/src/routes/appointment.routes.js`
 
 After replacing the two active docs, expected closeout scope:
 
-- 27 implementation paths
+- 28 implementation paths
 - 2 active documentation paths
-- 29 total intended paths
+- 30 total intended paths
 
 Use live Git output as source of truth before staging.
 
 ## Runtime Data Notes
 
-No temporary Project remains from the low-level Case Study implementation tests.
+Temporary runtime test records were cleaned.
 
-The final publication-matrix test reused existing records.
+Deleted test Lead:
 
-Verified published Case Study examples during runtime testing:
+`6a7b65472973b01e52f5a003`
 
-- `RakeshNexify Portfolio`
-- slug `rakeshnexify-portfolio`
-- published `true`
+Deleted test Appointment:
 
-- `UniQuick Mart`
-- slug `uniquick-mart`
-- published `true`
+`6a7b62022973b01e52f5a002`
 
-A visible legacy Project used as the normal non-Case-Study control:
+Final cleanup search for:
 
-- `Test`
-- slug `test`
-- `caseStudy.isPublished` missing
-- treated as unpublished
+`Admin UI Appointment Test`
 
-Treat current MongoDB as source of truth.
+returned:
 
-Do not blindly delete or modify these records during Git closeout.
+- count: `0`
+- total: `0`
+
+No temporary Appointment/Lead record from the final Admin UI test should remain.
+
+Treat MongoDB as source of truth.
 
 ## Documentation State
 
@@ -331,29 +498,27 @@ Active development-memory files only:
 
 For this closeout:
 
-- PROJECT_MEMORY records the permanent Project-backed Case Studies architecture, publication matrix, SEO/sitemap contract, completed inventory, limitation, and roadmap advancement
-- SESSION_HANDOFF records the current READY state and immediate Git closeout
-- no large legacy documentation matrix needs updating
+- PROJECT_MEMORY records permanent Appointment/Consultation architecture, Lead relationship, publication/sitemap behavior, completed inventory, long-term decisions, and roadmap advancement
+- SESSION_HANDOFF records the current Module 23 READY state, validation, working tree, runtime cleanup, and immediate staged Git closeout
+- no legacy documentation matrix needs updating
 
 ## Open Issues
 
-No confirmed Case Studies blocker remains.
+No confirmed Module 23 functional/security blocker remains.
 
-No Codex A/B finding remains.
+No Codex A finding exists.
 
-Optional later observation:
-
-- category identity on `/case-studies` could be normalized consistently so differently-cased category labels cannot create duplicate filter buttons
+The only Codex B finding was source indentation in three newly added objects and has been fixed.
 
 Known non-blocking project-wide items:
 
+- client production bundle remains above Vite's recommended chunk-size threshold
+- CRLF -> LF warnings exist on several tracked files
+- limited automated test coverage
 - Media reference-detail display capped at 25
 - narrow Media reference-check/delete TOCTOU window
-- client production bundle remains above Vite's recommended chunk-size threshold
-- limited automated test coverage
-- client dependency audit requires separate controlled review
+- older controllers are not uniformly as strict as newer modules
 - README remains materially stale
-- source contains intended Site Settings tagline but deployed DB value remains unverified
 - production `TRUST_PROXY_HOPS` must match deployment topology
 
 Do not run:
@@ -367,18 +532,22 @@ After replacing these two active docs:
 1. Run:
    - `git diff --check`
    - `git status --short`
-2. Verify exactly the intended Case Studies implementation plus the two docs.
-3. Stage the complete module plus:
+   - `git diff --stat`
+   - `git diff --name-only`
+2. Verify exactly:
+   - 28 intended Module 23 implementation paths
    - `docs/PROJECT_MEMORY.md`
    - `docs/SESSION_HANDOFF.md`
+3. Stage only the complete Module 23 scope plus the two active docs.
 4. Run:
    - `git diff --cached --check`
    - `git diff --cached --stat`
    - `git diff --cached --name-only`
    - `git status --short`
-5. If staged scope is correct, commit.
-6. Push `main`.
-7. Verify:
+5. Run the required final staged-diff Codex review.
+6. If Codex staged verdict is clean, commit.
+7. Push `main`.
+8. Verify:
    - `git status -sb`
    - `git log -1 --oneline`
    - local `main` and `origin/main` synchronized
@@ -386,20 +555,25 @@ After replacing these two active docs:
 
 ## Next Development Module
 
-After Case Studies is committed and pushed:
+After Module 23 is committed and pushed:
 
-`Appointment / Consultation Booking`
+`Newsletter / Subscribers Management`
 
-Before implementation:
+Keep Newsletter scope focused on subscriber management. Email sending/automation remains part of the later separate Email and Notifications phase unless a concrete module requirement explicitly changes that boundary.
 
-- audit overlap with Contact Messages, Leads/CRM, Service Orders, Services, and Site Settings
-- keep appointment/consultation identity distinct from raw inquiries and package orders
-- define booking types, availability/schedule ownership, customer fields, status lifecycle, admin workflow, rate limiting, validation, notifications boundary, SEO/publication responsibilities, and timezone rules
-- preserve existing Admin auth/RBAC, Site Settings, security, validation, and two-file documentation workflow
+Before Newsletter implementation, audit overlap with:
+
+- Site Settings
+- Contact/lead email fields
+- Admin auth/RBAC
+- rate limiting
+- publication/public forms
+- duplicate subscriber identity
+- unsubscribe/status lifecycle
+- privacy/consent fields
+- future Email and Notifications phase boundary
 
 ## Remaining Roadmap
-
-After Appointment / Consultation Booking:
 
 1. Newsletter / Subscribers Management
 2. Admin Analytics Dashboard

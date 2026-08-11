@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router";
 
 import { createServiceOrder } from "../../../services/serviceOrdersApi";
 import { formatPackagePrice } from "./PackageCard";
@@ -36,6 +37,7 @@ function PackageOrderActions({
   servicePackage,
   design,
   whatsapp = "",
+  consultationEnabled = true,
 }) {
   const [open, setOpen] = useState(false);
   const [formValues, setFormValues] = useState(emptyForm);
@@ -53,6 +55,18 @@ function PackageOrderActions({
   const whatsappNumber = normalizeWhatsAppNumber(whatsapp);
   const canWhatsApp =
     Boolean(whatsappNumber) && servicePackage?.whatsappEnabled !== false;
+
+  const serviceSlug = String(service?.slug || "").trim();
+  const packageSlug = String(servicePackage?.slug || "").trim();
+  const canRequestConsultation = Boolean(
+    consultationEnabled && serviceSlug && packageSlug,
+  );
+
+  const consultationUrl = canRequestConsultation
+    ? `/consultation?service=${encodeURIComponent(
+        serviceSlug,
+      )}&package=${encodeURIComponent(packageSlug)}`
+    : "";
 
   const summary = useMemo(
     () => ({
@@ -294,7 +308,13 @@ function PackageOrderActions({
 
   return (
     <>
-      <section className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-5">
+      <section
+        className={`grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 ${
+          canRequestConsultation
+            ? "sm:grid-cols-2 lg:grid-cols-3"
+            : "sm:grid-cols-2"
+        }`}
+      >
         <button
           ref={orderButtonRef}
           type="button"
@@ -314,6 +334,16 @@ function PackageOrderActions({
           <span className="text-xl" aria-hidden="true">💬</span>
           Order on WhatsApp
         </button>
+
+        {canRequestConsultation && (
+          <Link
+            to={consultationUrl}
+            className="flex min-h-14 items-center justify-center gap-3 rounded-xl border border-brand-200 bg-brand-50 px-5 text-center text-base font-black text-brand-700 transition hover:border-brand-300 hover:bg-brand-100 sm:col-span-2 lg:col-span-1"
+          >
+            <span className="text-xl" aria-hidden="true">📅</span>
+            Request a Consultation
+          </Link>
+        )}
       </section>
 
       {open && (

@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 ## Purpose
 
@@ -111,7 +111,7 @@ Private identity examples: Skill `nameKey`; Education/Experience/CertificationAc
 
 Registry keys include:
 
-`hero`, `about`, `statistics`, `skills`, `services`, `projects`, `case-studies`, `education`, `experience`, `achievements`, `team`, `companies`, `clients-partners`, `posts`, `testimonials`, `faq`, `contact`, `blog`, `news`.
+`hero`, `about`, `statistics`, `skills`, `services`, `projects`, `case-studies`, `education`, `experience`, `achievements`, `team`, `companies`, `clients-partners`, `posts`, `testimonials`, `faq`, `contact`, `blog`, `news`, `consultation`.
 
 Registry controls:
 
@@ -133,6 +133,7 @@ Special cases:
 - `faq`: independent homepage/Navbar/public-page publication
 - `clients-partners`: presentation layer over Company; independent collection publication while reusing canonical Company details
 - `case-studies`: publication/presentation layer over Project; independent collection publication while reusing canonical Project details
+- `consultation`: dedicated transactional page only; no homepage section or required Navbar item; page visibility remains Admin-controlled
 - Hero/About/Contact: anchor-oriented
 - Media/Contact Messages: Admin-only
 
@@ -262,6 +263,200 @@ Statuses: `new`, `reviewing`, `confirmed`, `in-progress`, `completed`, `cancelle
 Proxy trust uses validated `TRUST_PROXY_HOPS`: default `0`, integer `0..10`, invalid startup failure, never unconditional `trust proxy: true`.
 
 Order modal accessibility must preserve dialog semantics, labelled title/close, focus entry/trap/restore, safe Escape close, body-scroll lock, and success-state focus.
+
+
+## Appointment / Consultation Booking
+
+Model/collection: `Appointment` / `appointments`
+
+Public terminology: `Consultation`
+
+Public API:
+
+`POST /api/appointments`
+
+Admin API:
+
+`/api/admin/appointments`
+
+Public page:
+
+`/consultation`
+
+Admin pages:
+
+- `/admin/appointments`
+- `/admin/appointments/:id`
+
+This module is request-based scheduling only. Public date/time values are preferences, not guaranteed or reserved slots.
+
+Public timing:
+
+- `preferredDate`: strict `YYYY-MM-DD`
+- `preferredTime`: strict `HH:mm`
+- `timezone`: IANA timezone string
+
+Admin confirmed timing:
+
+- `scheduledAt`: MongoDB Date
+
+Statuses:
+
+- `requested`
+- `confirmed`
+- `completed`
+- `cancelled`
+- `declined`
+- `no-show`
+
+Meeting types:
+
+- `video-call`
+- `phone-call`
+
+Public fields:
+
+- name
+- email
+- phone
+- companyName
+- service
+- servicePackage
+- preferredDate
+- preferredTime
+- timezone
+- meetingType
+- projectSummary
+- message
+
+Required public fields:
+
+- name
+- email
+- preferredDate
+- preferredTime
+- timezone
+- meetingType
+- projectSummary
+
+Phone is additionally required for `phone-call`.
+
+Service/package rules:
+
+- Service is optional
+- ServicePackage is optional
+- a submitted package requires a valid visible Service
+- package must belong to the submitted Service
+- both Service and ServicePackage must be public/visible
+- server derives historical snapshots:
+  - `serviceTitle`
+  - `serviceSlug`
+  - `servicePackageName`
+  - `servicePackageSlug`
+
+Public security/integrity:
+
+- strict allowed-field validation
+- unknown-field rejection
+- real string-type checks
+- normalization
+- honeypot
+- public rate limit: 5 requests per 15 minutes
+- strict date/time/timezone validation
+- preferred date cannot be in the past in the submitted timezone
+- controlled ObjectId validation
+- safe Mongoose validation errors with `fieldErrors`
+- no Admin workflow fields leak publicly
+
+Admin endpoints:
+
+- `GET /api/admin/appointments`
+- `GET /api/admin/appointments/:id`
+- `PATCH /api/admin/appointments/:id`
+- `DELETE /api/admin/appointments/:id`
+- `POST /api/admin/appointments/:id/convert-to-lead`
+
+Admin list filters include:
+
+- page
+- limit
+- search
+- status
+- service
+- assignedTo
+- preferredDateFrom / preferredDateTo
+- scheduledFrom / scheduledTo
+
+RBAC:
+
+- read: authenticated active Admin
+- update/convert: `super-admin`, `admin`, `editor`
+- delete: `super-admin`, `admin`
+
+Lead conversion:
+
+`Appointment -> Lead`
+
+Source of truth:
+
+`Lead.sourceAppointment`
+
+There is intentionally no `Appointment.relatedLead`.
+
+Permanent conversion rules:
+
+- conversion is explicit/manual Admin action only
+- `Lead.sourceAppointment` has a partial unique ObjectId index
+- duplicate conversion returns conflict
+- conversion preserves Appointment project summary and additional message within Lead limits
+- priority, currency, estimated value, assignment, and follow-up fields are strictly validated
+- conversion and Appointment transaction-touching protect delete-vs-convert races
+- converted Appointment deletion is blocked with `409`
+- ServiceOrder, ContactMessage, Appointment, and Lead remain separate domains
+
+Publication / sitemap:
+
+- registry key: `consultation`
+- page-only publication key
+- default `isVisible: false`
+- default `isNavigationVisible: false`
+- default `isPageVisible: true`
+- no homepage Consultation section
+- no required Navbar Consultation item
+- Admin Site Settings controls dedicated-page visibility
+- `/consultation` is included in sitemap only while page-visible
+- no Appointment detail URLs are public or indexed
+- existing SiteSettings records remain backward compatible through registry merge; no migration required
+
+Services integration:
+
+After package + design selection, existing order actions remain:
+
+- `Order Now`
+- `Order on WhatsApp`
+
+An additive, visually secondary:
+
+`Request a Consultation`
+
+links to:
+
+`/consultation?service=<service-slug>&package=<package-slug>`
+
+The Consultation CTA is hidden when the Consultation page is publication-disabled.
+
+Explicitly deferred from this module:
+
+- realtime availability / slot locking
+- business-hours / blackout / buffer engines
+- Google Calendar
+- email notifications
+- meeting links
+- public cancellation/rescheduling/tracking
+- payments
+- automatic Lead conversion
+- Admin-user directory
+- soft delete / generic workflow engine
 
 ## Certifications & Achievements
 
@@ -566,6 +761,7 @@ Project `clientName` remains plain text; Case Studies does not introduce a new P
 | Clients / Partners | reuses `/api/companies` | reuses `/admin/companies` | `/clients-partners`, Company-backed presentation layer |
 | Contact Messages | public POST | `/api/admin/contact-messages` | Contact workflow |
 | Leads / CRM | None | `/api/admin/leads` | Admin-only |
+| Appointment / Consultation Booking | `POST /api/appointments` | `/api/admin/appointments` | `/consultation`, `/admin/appointments`, `/admin/appointments/:id` |
 | Team | `/api/team` | `/api/admin/team` | `/team`, slug detail |
 | Skills | `/api/skills` | `/api/admin/skills` | `/skills` |
 | Education | `/api/education` | `/api/admin/education` | `/education` |
@@ -592,6 +788,7 @@ Prefer extending:
 - Admin list/editor/form patterns
 - loading/error/empty states
 - Contact Message -> Lead conversion
+- Appointment -> Lead manual conversion with `Lead.sourceAppointment`
 - CRM notes/follow-up patterns
 - Media Picker/reference protection
 - transactional parent guards
@@ -616,6 +813,10 @@ Prefer extending:
 - referenced Media remains deletion-protected
 - ContactMessage and Lead remain separate
 - ContactMessage -> Lead stays explicit/manual
+- Appointment remains separate from ContactMessage, ServiceOrder, and Lead
+- Appointment scheduling remains request-based; preferred public date/time is not a guaranteed slot
+- Appointment -> Lead stays explicit/manual through `Lead.sourceAppointment`
+- converted Appointment deletion remains protected
 - Lead Service snapshots follow locked preservation rules
 - Education/Experience/Achievement ownership stays distinct
 - Service remains master Service; PackageDesign belongs only to ServicePackage
@@ -658,11 +859,10 @@ Do not recreate a large historical documentation matrix after every module.
 
 ## Remaining Roadmap
 
-1. Appointment / Consultation Booking
-2. Newsletter / Subscribers Management
-3. Admin Analytics Dashboard
-4. Admin Activity / Audit Log
-5. Menu / Navigation Management
+1. Newsletter / Subscribers Management
+2. Admin Analytics Dashboard
+3. Admin Activity / Audit Log
+4. Menu / Navigation Management
 
 Overlap rules:
 

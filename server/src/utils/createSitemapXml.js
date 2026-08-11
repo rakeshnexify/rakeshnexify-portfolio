@@ -14,6 +14,10 @@ const publicPageDefinitions = [
     pathname: "/services",
   },
   {
+    key: "consultation",
+    pathname: "/consultation",
+  },
+  {
     key: "projects",
     pathname: "/projects",
   },

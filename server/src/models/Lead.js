@@ -92,6 +92,12 @@ const leadSchema = new mongoose.Schema(
       default: null,
     },
 
+    sourceAppointment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Appointment",
+      default: null,
+    },
+
     service: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Service",
@@ -259,6 +265,20 @@ leadSchema.index(
     unique: true,
     partialFilterExpression: {
       sourceContactMessage: {
+        $type: "objectId",
+      },
+    },
+  },
+);
+
+leadSchema.index(
+  {
+    sourceAppointment: 1,
+  },
+  {
+    unique: true,
+    partialFilterExpression: {
+      sourceAppointment: {
         $type: "objectId",
       },
     },

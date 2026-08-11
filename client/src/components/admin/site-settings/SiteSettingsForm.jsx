@@ -49,6 +49,7 @@ const dedicatedPageSectionKeys = new Set([
   "faq",
   "blog",
   "news",
+  "consultation",
 ]);
 
 const homepageSectionKeys = new Set([

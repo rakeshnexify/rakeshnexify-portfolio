@@ -170,6 +170,15 @@ const homepageSectionDefinitions = [
     order: 19,
     navigationOrder: 18,
   },
+  {
+    key: "consultation",
+    label: "Consultation",
+    isVisible: false,
+    isNavigationVisible: false,
+    isPageVisible: true,
+    order: 20,
+    navigationOrder: 20,
+  },
 ];
 
 const defaultOrderBySectionKey = Object.fromEntries(
