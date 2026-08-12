@@ -4,6 +4,7 @@ import { mergeHomepageSections } from "../../config/homepageSections";
 import siteData from "../../data/siteData";
 import useServices from "../../hooks/useServices";
 import useSiteSettings from "../../hooks/useSiteSettings";
+import NewsletterSignupForm from "../newsletter/NewsletterSignupForm";
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
@@ -820,6 +821,10 @@ function Footer() {
               )}
             </div>
           )}
+        </div>
+
+        <div className="pb-12 sm:pb-16">
+          <NewsletterSignupForm />
         </div>
 
         <div className="flex min-w-0 flex-col gap-4 border-t border-slate-800 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">

@@ -1,5 +1,6 @@
 import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
+import NewsletterSignupForm from "../newsletter/NewsletterSignupForm";
 import Section from "../layout/Section";
 import Button from "../ui/Button";
 import Logo from "../ui/Logo";
@@ -115,7 +116,11 @@ function HeroSection() {
             </Button>
           </div>
 
-          <div className="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-medium text-slate-500">
+          <div className="mx-auto mt-8 max-w-2xl">
+            <NewsletterSignupForm variant="light" />
+          </div>
+
+          <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-medium text-slate-500">
             <span>MERN Stack</span>
             <span aria-hidden="true">•</span>
             <span>WordPress</span>

@@ -73,7 +73,7 @@ Preserve JWT validation, active Admin lookup, password-change invalidation, bcry
 
 ## API Conventions
 
-Public content APIs are mainly `GET`; intentional public `POST` exceptions include Contact Messages and Service Orders. Admin APIs live under `/api/admin/*`.
+Public content APIs are mainly `GET`; intentional public `POST` exceptions include Contact Messages, Service Orders, Appointments, and Newsletter Subscribers. Admin APIs live under `/api/admin/*`.
 
 Success shape:
 
@@ -458,6 +458,206 @@ Explicitly deferred from this module:
 - Admin-user directory
 - soft delete / generic workflow engine
 
+
+## Newsletter / Subscribers Management
+
+Model/collection: `Subscriber` / `subscribers`
+
+Public API:
+
+`POST /api/subscribers`
+
+Admin API:
+
+`/api/admin/subscribers`
+
+Admin page:
+
+`/admin/subscribers`
+
+Subscriber is a separate domain from:
+
+- ContactMessage
+- Lead
+- Appointment
+- ServiceOrder
+- AdminUser
+
+The same email may independently exist in those other domains.
+
+Statuses exactly:
+
+- `active`
+- `unsubscribed`
+
+Core fields:
+
+- `email`
+- `status`
+- `consentAccepted`
+- `consentedAt`
+- `subscribedAt`
+- `unsubscribedAt`
+- `createdAt`
+- `updatedAt`
+
+Email identity rules:
+
+- required string
+- trim
+- lowercase
+- maximum 254 characters
+- validated email format
+- one explicit unique DB index
+- one normalized email = one Subscriber record
+- the unique index remains the final duplicate/concurrency authority
+
+Public body allowlist:
+
+- `email`
+- `consentAccepted`
+- `website`
+
+`website` is a honeypot field.
+
+Public consent rules:
+
+- consent must be present
+- consent must be an actual Boolean
+- consent must equal `true`
+- string `"true"` and numeric `1` are invalid
+- no unsafe string/Boolean coercion
+
+Public rate limit:
+
+- 5 requests per 15 minutes per IP
+
+Valid public outcomes intentionally return the same anti-enumeration response:
+
+```json
+{
+  "success": true,
+  "message": "Your newsletter subscription request has been received."
+}
+```
+
+The same HTTP `200` generic response is used for:
+
+- new subscription
+- already-active duplicate
+- previously-unsubscribed reactivation
+- honeypot submission
+
+Public responses must not reveal Subscriber ID, status, timestamps, prior existence, or Admin metadata.
+
+Subscription lifecycle:
+
+New:
+
+- status `active`
+- `consentAccepted: true`
+- fresh `consentedAt`
+- fresh `subscribedAt`
+- `unsubscribedAt: null`
+
+Active duplicate:
+
+- no duplicate record
+- `consentedAt` unchanged
+- `subscribedAt` unchanged
+- `unsubscribedAt` unchanged
+- harmless `updatedAt` touch is acceptable
+
+Public resubscription after Admin unsubscribe:
+
+- same Subscriber record
+- status returns to `active`
+- fresh public consent required
+- fresh `consentedAt`
+- fresh `subscribedAt`
+- `unsubscribedAt: null`
+
+Only fresh public consent may reactivate an unsubscribed Subscriber. Admin has no reactivation action.
+
+Concurrency/integrity:
+
+- public subscription resolution uses MongoDB/Mongoose transactions
+- bounded retry covers duplicate/stale/transient transaction conditions
+- transactional create, active same-document touch, and conditional reactivation are used
+- concurrent creates converge to one record
+- concurrent reactivations converge to one active record
+- public success is not based only on a stale pre-delete read
+- Admin delete also uses a transaction so delete-vs-public-subscribe ordering remains serializable
+
+Admin endpoints:
+
+- `GET /api/admin/subscribers`
+- `PATCH /api/admin/subscribers/:id`
+- `DELETE /api/admin/subscribers/:id`
+
+There is intentionally no Admin create or separate Admin detail endpoint.
+
+Admin list filters:
+
+- `page`
+- `limit`
+- `search`
+- `status`
+
+Search targets normalized email only.
+
+Admin update allowlist:
+
+- `status`
+
+Allowed Admin transition only:
+
+`active -> unsubscribed`
+
+Server owns `unsubscribedAt`.
+
+RBAC:
+
+- list/read: authenticated active Admin
+- unsubscribe: `super-admin`, `admin`, `editor`
+- delete: `super-admin`, `admin`
+
+Concurrent Admin unsubscribe attempts resolve as one success and one `409`.
+
+Public UI placement is intentionally compact and does not create a separate Newsletter content page/section:
+
+- reusable `NewsletterSignupForm`
+- compact form inside the Hero
+- compact form in the Footer
+- Hero layout uses one connected email-input + Subscribe control with consent directly below
+- unique per-instance DOM IDs are required because Hero and Footer render the same form component
+
+Newsletter intentionally has no:
+
+- standalone homepage Newsletter registry item
+- Navbar item
+- `/newsletter` public page
+- sitemap entry
+- Newsletter Site Settings publication key
+
+Future outbound marketing email is outside this module. Before outbound marketing is enabled, token-based public unsubscribe must be added in the later Email and Notifications phase.
+
+Explicitly deferred:
+
+- campaign model
+- SMTP/provider integration
+- email sending
+- email verification/pending status
+- public unsubscribe token
+- raw-email public unsubscribe
+- templates
+- queues/workers
+- scheduled campaigns
+- open/click analytics
+- segments/tags
+- drip automation
+- A/B testing
+
 ## Certifications & Achievements
 
 Model/collection: `CertificationAchievement` / `certification_achievements`
@@ -762,6 +962,7 @@ Project `clientName` remains plain text; Case Studies does not introduce a new P
 | Contact Messages | public POST | `/api/admin/contact-messages` | Contact workflow |
 | Leads / CRM | None | `/api/admin/leads` | Admin-only |
 | Appointment / Consultation Booking | `POST /api/appointments` | `/api/admin/appointments` | `/consultation`, `/admin/appointments`, `/admin/appointments/:id` |
+| Newsletter / Subscribers | `POST /api/subscribers` | `/api/admin/subscribers` | Compact Hero + Footer signup; `/admin/subscribers`; no public Newsletter page |
 | Team | `/api/team` | `/api/admin/team` | `/team`, slug detail |
 | Skills | `/api/skills` | `/api/admin/skills` | `/skills` |
 | Education | `/api/education` | `/api/admin/education` | `/education` |
@@ -816,6 +1017,11 @@ Prefer extending:
 - Appointment remains separate from ContactMessage, ServiceOrder, and Lead
 - Appointment scheduling remains request-based; preferred public date/time is not a guaranteed slot
 - Appointment -> Lead stays explicit/manual through `Lead.sourceAppointment`
+- Newsletter Subscriber remains separate from ContactMessage, Lead, Appointment, ServiceOrder, and AdminUser
+- Subscriber email identity is normalized and uniquely indexed; public duplicate/resubscribe outcomes remain anti-enumeration safe
+- Subscriber reactivation requires fresh public Boolean consent; Admin cannot reactivate
+- Subscriber create/reactivation and Admin delete concurrency remains transaction-protected
+- Newsletter public UX stays compact in Hero + Footer without a separate Newsletter route/registry/sitemap entry
 - converted Appointment deletion remains protected
 - Lead Service snapshots follow locked preservation rules
 - Education/Experience/Achievement ownership stays distinct
@@ -859,18 +1065,17 @@ Do not recreate a large historical documentation matrix after every module.
 
 ## Remaining Roadmap
 
-1. Newsletter / Subscribers Management
-2. Admin Analytics Dashboard
-3. Admin Activity / Audit Log
-4. Menu / Navigation Management
+1. Admin Analytics Dashboard
+2. Admin Activity / Audit Log
+3. Menu / Navigation Management
 
 Overlap rules:
 
 - Appointment/Consultation is distinct from Contact Messages and Service Orders
-- Admin Analytics extends dashboard
-- Audit Log is distinct from audit fields
-- Menu/Navigation must account for Site Settings registry
-- Newsletter scope is subscriber management only
+- Newsletter Subscriber remains distinct from Contact Messages, Leads, Appointments, Service Orders, and Admin Users
+- Admin Analytics extends the existing dashboard rather than duplicating management modules
+- Audit Log is distinct from normal model audit fields
+- Menu/Navigation must account for the existing Site Settings registry
 
 ## Future Separate Phases
 

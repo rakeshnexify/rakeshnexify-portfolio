@@ -45,6 +45,13 @@ const dashboardModules = [
     path: "/admin/appointments",
   },
   {
+    title: "Newsletter / Subscribers",
+    description:
+      "Review newsletter Subscribers, search and filter subscription status, unsubscribe active Subscribers and perform restricted permanent deletion when necessary.",
+    status: "Management ready",
+    path: "/admin/subscribers",
+  },
+  {
     title: "Statistics",
     description:
       "Create, edit, reorder, feature and control the visibility of portfolio statistics.",
@@ -218,7 +225,7 @@ function AdminDashboardPage() {
               pricing, Package Designs, Skills, Education, Experience,
               Certifications & Achievements, projects, Media Library, Blog and
               News, Team members, companies, Testimonials, FAQs, consultation
-              requests, Leads / CRM, enquiries and website settings from this
+              requests, newsletter Subscribers, Leads / CRM, enquiries and website settings from this
               secure dashboard.
             </p>
           </div>

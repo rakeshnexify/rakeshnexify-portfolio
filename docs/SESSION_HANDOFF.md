@@ -12,365 +12,373 @@ Branch: `main`
 
 Latest verified pushed checkpoint before this module:
 
-`c4628c0 Add dynamic case studies module`
+`26fe70b Add appointment and consultation booking module`
 
 Current completed-but-not-yet-committed module:
 
-`Appointment / Consultation Booking`
+`Module 24 — Newsletter / Subscribers Management`
 
-Current Module 23 status:
+Current Module 24 status:
 
 - architecture lock: PASS
-- backend implementation: PASS
-- backend security/integrity review: PASS
-- public Consultation frontend: PASS
-- Admin Appointment management frontend: PASS
-- Appointment -> Lead conversion: PASS
-- shared publication/Site Settings integration: PASS
-- sitemap integration: PASS
-- contextual package Consultation CTA: PASS
-- publication ON/OFF runtime matrix: PASS
+- Subscriber model/public API: PASS
+- transaction/concurrency integrity: PASS
+- Admin Subscriber API/RBAC: PASS
+- public Newsletter client API: PASS
+- reusable Newsletter form: PASS
+- compact Hero integration: PASS
+- Footer integration: PASS
+- Admin `/admin/subscribers` UI: PASS
+- Admin Dashboard/route integration: PASS
+- runtime lifecycle/concurrency tests: PASS
 - production build / `npm run check`: PASS
-- final complete-integration Codex review: no A findings
-- one B finding remained only for indentation in three shared-integration insertions
-- B indentation fix: APPLIED
-- post-fix source validation: PASS
+- final pre-documentation Codex review: PASS
+- Codex A findings: NONE
+- Codex B findings: NONE
+- Codex C findings: NONE
+- final Codex verdict: `READY FOR FINAL DOCS`
 
-Do not reopen implementation unless a new concrete failure appears.
+Do not reopen Module 24 implementation unless a concrete failure appears.
 
-## Appointment / Consultation Architecture
+## Newsletter / Subscriber Architecture
 
 Technical model:
 
-`Appointment`
+`Subscriber`
 
 Collection:
 
-`appointments`
+`subscribers`
 
-Public terminology:
-
-`Consultation`
-
-This is request-based scheduling only.
-
-Public preferred date/time values are preferences and do not reserve or guarantee a slot.
-
-Public timing:
-
-- `preferredDate`: strict `YYYY-MM-DD`
-- `preferredTime`: strict `HH:mm`
-- `timezone`: IANA timezone
-
-Admin confirmed timing:
-
-- `scheduledAt`: MongoDB Date
-
-Statuses:
-
-- `requested`
-- `confirmed`
-- `completed`
-- `cancelled`
-- `declined`
-- `no-show`
-
-Meeting types:
-
-- `video-call`
-- `phone-call`
-
-There is intentionally no permanent `rescheduled` status.
-
-Appointment remains separate from:
+Subscriber remains separate from:
 
 - ContactMessage
 - Lead
+- Appointment
 - ServiceOrder
+- AdminUser
 
-No realtime availability engine, calendar integration, email notification system, payment flow, public cancellation/rescheduling, public tracking, or meeting-link automation was added.
+The same normalized email may independently exist in those other domains.
 
-## Public API / Validation
+Statuses exactly:
+
+- `active`
+- `unsubscribed`
+
+Fields:
+
+- `email`
+- `status`
+- `consentAccepted`
+- `consentedAt`
+- `subscribedAt`
+- `unsubscribedAt`
+- `createdAt`
+- `updatedAt`
+
+Email rules:
+
+- required string
+- trim
+- lowercase
+- maximum 254 characters
+- email-format validation
+- explicit unique database index
+- one normalized email = one Subscriber
+
+The unique email index remains the final duplicate/concurrency authority.
+
+## Public API / Consent / Anti-Enumeration
 
 Public endpoint:
 
-`POST /api/appointments`
+`POST /api/subscribers`
 
-There is intentionally no public Appointment:
+There is intentionally no public Subscriber:
 
 - GET
 - PATCH
 - DELETE
-- cancel endpoint
-- reschedule endpoint
-- tracking/detail endpoint
+- listing
+- detail
+- raw-email unsubscribe
 
-Public fields:
+Public allowed fields exactly:
 
-- name
-- email
-- phone
-- companyName
-- service
-- servicePackage
-- preferredDate
-- preferredTime
-- timezone
-- meetingType
-- projectSummary
-- message
+- `email`
+- `consentAccepted`
+- `website`
 
-Required:
+`website` is the honeypot.
 
-- name
-- email
-- preferredDate
-- preferredTime
-- timezone
-- meetingType
-- projectSummary
+Validation/security:
 
-Phone is additionally required when meeting type is `phone-call`.
+- body must be a plain non-array object
+- strict allowed-field validation
+- unknown fields rejected
+- email must be a real string
+- no unsafe string coercion
+- consent must be present
+- consent must be actual Boolean `true`
+- `"true"` and `1` are invalid
+- public rate limit: 5 requests per 15 minutes per IP
 
-Public safeguards verified:
+All valid public outcomes intentionally return the same response:
 
-- request body must be a plain non-array object
-- strict public allowlist
-- unknown-field rejection
-- honeypot
-- 5 requests per 15 minutes rate limit
-- strict string validation
-- normalized email/phone/text handling
-- valid calendar date
-- strict `HH:mm`
-- IANA timezone validation
-- non-past preferred date in submitted timezone
-- ObjectId validation
-- visible Service and ServicePackage resolution
-- package ownership under Service
-- server-derived Service/package snapshots
-- safe structured `fieldErrors`
-- no Admin workflow fields exposed publicly
+```json
+{
+  "success": true,
+  "message": "Your newsletter subscription request has been received."
+}
+```
 
-## Admin API / Workflow
+The same HTTP `200` response is used for:
+
+- new subscription
+- active duplicate
+- unsubscribed reactivation
+- honeypot submission
+
+Public responses do not expose Subscriber ID, status, timestamps, prior existence, or Admin metadata.
+
+## Subscription Lifecycle / Transactions
+
+New subscription:
+
+- status `active`
+- `consentAccepted: true`
+- fresh `consentedAt`
+- fresh `subscribedAt`
+- `unsubscribedAt: null`
+
+Active duplicate:
+
+- remains one record
+- `consentedAt` unchanged
+- `subscribedAt` unchanged
+- `unsubscribedAt` unchanged
+- harmless `updatedAt` touch is acceptable
+
+Public resubscribe after unsubscribe:
+
+- same Subscriber record
+- fresh public Boolean consent required
+- status becomes `active`
+- fresh `consentedAt`
+- fresh `subscribedAt`
+- `unsubscribedAt` cleared to `null`
+
+Admin cannot reactivate an unsubscribed Subscriber.
+
+Public resolution uses a Mongoose transaction with bounded retries.
+
+Retry coverage includes:
+
+- duplicate email E11000
+- internal stale-state retry
+- MongoDB code 112
+- `TransientTransactionError`
+- `UnknownTransactionCommitResult`
+
+Create, active same-document touch, and conditional reactivation are transactional.
+
+Admin delete is also transactional.
+
+Verified concurrency guarantees:
+
+- concurrent creates converge to one Subscriber
+- concurrent reactivations converge to one active Subscriber
+- Admin unsubscribe contention resolves as one success and one `409`
+- public success is not based only on a stale read during delete contention
+
+## Admin API / RBAC
 
 Admin endpoints:
 
-- `GET /api/admin/appointments`
-- `GET /api/admin/appointments/:id`
-- `PATCH /api/admin/appointments/:id`
-- `DELETE /api/admin/appointments/:id`
-- `POST /api/admin/appointments/:id/convert-to-lead`
+- `GET /api/admin/subscribers`
+- `PATCH /api/admin/subscribers/:id`
+- `DELETE /api/admin/subscribers/:id`
 
-List parameters:
+There is intentionally no:
+
+- Admin Subscriber create endpoint
+- separate Admin Subscriber detail endpoint
+
+Admin GET filters exactly:
 
 - page
 - limit
 - search
 - status
-- service
-- assignedTo
-- preferredDateFrom
-- preferredDateTo
-- scheduledFrom
-- scheduledTo
+
+Search targets email only.
+
+Statuses:
+
+- active
+- unsubscribed
+
+Admin PATCH allowlist exactly:
+
+- status
+
+Allowed transition only:
+
+`active -> unsubscribed`
+
+Server sets `unsubscribedAt`.
 
 RBAC:
 
-- read: authenticated active Admin
-- update/convert: `super-admin`, `admin`, `editor`
-- delete: `super-admin`, `admin`
+- GET: authenticated active Admin
+- PATCH: `super-admin`, `admin`, `editor`
+- DELETE: `super-admin`, `admin`
 
-Admin runtime verification passed for:
+Admin delete validates ObjectId and performs lookup/delete of the same document in one MongoDB transaction.
 
-- Dashboard module card
-- list page
-- detail page
-- search/status filtering
-- workflow update
-- Confirmed state
-- confirmed `scheduledAt`
-- Admin note
-- `statusUpdatedAt`
-- `statusUpdatedBy`
-- assignment backend behavior
-- linked Lead rendering
-- blocked converted Appointment deletion
+## Public Frontend
 
-The Admin UI intentionally does not introduce an Admin-user directory. Assignment options are limited to already-known/current Admin identities.
+Shared component:
 
-## Appointment -> Lead Conversion
+`client/src/components/newsletter/NewsletterSignupForm.jsx`
 
-Relationship source of truth:
+Final UX decision:
 
-`Lead.sourceAppointment`
+Newsletter is NOT a separate homepage section.
+
+Final public placements:
+
+1. compact form inside Hero
+2. compact form inside Footer
+
+Hero form appearance:
+
+```text
+[email input                         | Subscribe]
+[ ] I agree to receive newsletter and marketing updates.
+```
+
+The input and Subscribe button are one connected control.
+
+Consent sits immediately below.
+
+The shared form retains:
+
+- email validation
+- max 254
+- explicit consent
+- hidden honeypot
+- loading state
+- generic success state
+- backend `fieldErrors`
+- first-invalid-field focus
+- 429 handling
+- timeout handling
+- network handling
+- abort cleanup
+- accessible labels/errors
+
+Because Hero and Footer render the same component, each instance uses unique IDs so email/consent/error/honeypot labels do not collide.
 
 There is intentionally no:
 
-`Appointment.relatedLead`
-
-Permanent rules:
-
-- conversion is manual/Admin-driven
-- `Lead.sourceAppointment` uses a partial unique ObjectId index
-- duplicate conversion is blocked with `409`
-- project summary and additional message are preserved into the Lead requirement summary within model limits
-- estimated value accepts controlled decimal input only
-- priority, currency, assignment, and follow-up fields are validated
-- conversion uses a MongoDB transaction
-- the transaction touches the Appointment before Lead save to protect conversion-vs-delete races
-- converted Appointment deletion is blocked with `409`
-
-Runtime concurrency/integrity tests passed:
-
-- concurrent duplicate conversion -> exactly one Lead
-- delete vs convert -> no dangling Lead
-- converted Appointment delete protection -> PASS
-
-## Public Consultation Frontend
-
-Public route:
-
-`/consultation`
-
-Implemented:
-
-- live public Services
-- ServicePackage dependency
-- query preselection:
-  - `service=<slug>`
-  - `package=<slug>`
-- browser timezone default with UTC fallback
-- local minimum date
-- conditional phone requirement
-- backend field error display
-- first-error focus
-- timeout/network/429 handling
-- success state that clearly says the Consultation request was received and awaits review
-
-No wording promises a guaranteed reservation, availability slot, email confirmation, or calendar event.
-
-Public submission runtime test passed and the created database record was verified.
+- standalone Newsletter homepage section
+- Newsletter homepage registry item
+- Navbar Newsletter item
+- `/newsletter` route
+- Newsletter sitemap entry
+- Newsletter Site Settings publication key
 
 ## Admin Frontend
 
-Admin routes:
+Admin route:
 
-- `/admin/appointments`
-- `/admin/appointments/:id`
+`/admin/subscribers`
 
-Admin Dashboard includes:
+Admin Dashboard card:
 
-`Appointments / Consultations`
+`Newsletter / Subscribers`
 
-Admin list includes:
+Admin page supports:
 
-- responsive cards
-- search
+- email search
 - status filter
-- Service filter
-- preferred-date filters
 - pagination
-- snapshot-first Service/package display
-- requester contact actions
-- status and timing display
+- responsive desktop table
+- responsive mobile cards
+- Active / Unsubscribed badges
+- `subscribedAt`
+- `consentedAt`
+- `unsubscribedAt`
+- inline unsubscribe for active Subscribers
+- permanent delete for `super-admin` / `admin`
+- confirmation prompts
+- loading/empty/error/retry states
+- 401 logout/redirect
+- 409 refresh behavior
 
-Admin detail includes:
+No Admin reactivation action exists.
 
-- requester/context/preferred schedule/project/audit information
-- workflow update form
-- assignment
-- `scheduledAt`
-- Admin note
-- cancellation reason
-- manual Lead conversion form
-- linked Lead card
-- delete action with `409` protection handling
+## Runtime Verification
 
-Runtime UI tests passed.
+Public API tests passed:
 
-## Publication / Site Settings
+- new valid subscription -> `200` generic success
+- active duplicate -> same `200` generic success
+- invalid email -> `400` with `fieldErrors.email`
+- consent false -> `400` with `fieldErrors.consentAccepted`
+- unknown field -> `400`
+- public rate limit -> `429`
+- honeypot -> `200` generic success
+- Admin search confirmed honeypot record count `0`
 
-Registry key:
+Admin auth tests passed:
 
-`consultation`
+- unauthorized Admin list -> `401`
+- valid Admin token -> `200`
 
-Server/client defaults are aligned:
+Lifecycle test passed:
 
-```js
-{
-  key: "consultation",
-  label: "Consultation",
-  isVisible: false,
-  isNavigationVisible: false,
-  isPageVisible: true,
-  order: 20,
-  navigationOrder: 20,
-}
-```
+- CREATE -> `200`, one active record
+- active duplicate -> `200`, one record
+- consent timestamp unchanged
+- subscription timestamp unchanged
+- Admin unsubscribe -> `200 unsubscribed`
+- second unsubscribe -> `409`
+- public resubscribe -> `200 active`
+- consent timestamp refreshed
+- subscription timestamp refreshed
+- `unsubscribedAt` cleared
+- concurrent public requests -> `[200, 200]`
+- final record count -> `1`
+- final status -> `active`
+- Admin status filter -> `200`, one result
+- delete -> `200`
+- cleanup total -> `0`
 
-Consultation is a dedicated page-only publication key.
+Frontend runtime/manual checks passed:
 
-It is intentionally absent from:
-
-- homepage section keys
-- navigation section keys
-
-It is included in:
-
-- dedicated page keys
-
-Existing SiteSettings remain backward compatible through `mergeHomepageSections`; no migration is required.
-
-`PublicPageVisibilityRoute sectionKey="consultation"` controls `/consultation`.
-
-## Sitemap / Service Package CTA
-
-Sitemap:
-
-- `/consultation` is emitted only when Consultation is page-visible
-- no public Appointment detail URLs exist
-- no Appointment-specific priority/changefreq metadata was added
-
-Service package flow preserves:
-
-- `Order Now`
-- `Order on WhatsApp`
-
-New additive secondary action:
-
-`Request a Consultation`
-
-URL:
-
-`/consultation?service=<service-slug>&package=<package-slug>`
-
-The CTA:
-
-- requires valid non-empty Service/package slugs
-- URL-encodes slugs
-- hides when Consultation page visibility is OFF
-- does not replace Service Order or WhatsApp behavior
-
-Runtime publication matrix passed:
-
-Consultation ON:
-
-- `/consultation` accessible
-- package Consultation CTA visible
-- sitemap includes `/consultation`
-
-Consultation OFF:
-
-- `/consultation` uses existing hidden-page / Not Found behavior
-- package Consultation CTA hidden
-- sitemap excludes `/consultation`
-
-Consultation was enabled again after the test.
+- Footer Newsletter form
+- compact Hero Newsletter form
+- connected Hero input + Subscribe control
+- consent directly below
+- invalid email handling
+- unchecked-consent handling
+- generic success
+- active duplicate generic success
+- Admin Dashboard card
+- `/admin/subscribers`
+- search/status filter
+- unsubscribe
+- public resubscribe
+- Admin status returns Active
+- delete
+- final search returns no temporary test Subscriber
+- protected route redirects after logout
 
 ## Validation
 
-Latest user-run validation after the final indentation fix:
+Latest user-run:
 
 `npm run check`
 
@@ -380,10 +388,10 @@ Result:
 
 Vite production build:
 
-- 257 modules transformed
+- 262 modules transformed
 - build passed
-- main JS approximately 1.67 MB
-- gzip approximately 344 kB
+- main JS approximately 1,697.75 kB
+- gzip approximately 350.57 kB
 - existing >500 kB chunk-size warning remains non-blocking
 
 `git diff --check`
@@ -391,103 +399,88 @@ Vite production build:
 Result:
 
 - no actual whitespace errors
-- CRLF -> LF conversion warnings only
+- CRLF -> LF warnings only
 
-Final complete-integration Codex review before the indentation correction:
+Final pre-documentation Codex review:
 
-- Backend Contract: PASS
-- Security / Integrity: PASS
-- Public Frontend: PASS
-- Admin Frontend: PASS
-- Appointment -> Lead: PASS
-- Publication / Site Settings: functionally PASS
-- Sitemap: functionally PASS
-- Package Consultation CTA: PASS
-- Routes / Dashboard: PASS
-- package.json check coverage: PASS
+- Git scope: PASS
+- Subscriber model: PASS
+- Public API: PASS
+- Consent: PASS
+- duplicate/concurrency: PASS
+- Admin API/delete/unsubscribe: PASS
+- authentication/RBAC: PASS
+- public client API: PASS
+- Newsletter form: PASS
+- Hero integration: PASS
+- Footer integration: PASS
+- Admin frontend: PASS
+- routes/dashboard: PASS
+- server app integration: PASS
+- package checks: PASS
+- runtime evidence: PASS
 - A findings: NONE
-- B finding: indentation only in three new shared-integration objects
-
-The three indentation-only B locations were corrected:
-
-- `server/src/config/homepageSections.js`
-- `client/src/config/homepageSections.js`
-- `server/src/utils/createSitemapXml.js`
-
-Post-fix `npm run check` and `git diff --check` passed.
+- B findings: NONE
+- C findings: NONE
+- unexpected files: NONE
+- missing expected files: NONE
+- files requiring fix: NONE
+- verdict: `READY FOR FINAL DOCS`
 
 ## Current Working Tree
 
-Latest reviewed implementation scope before these two documentation replacements:
+Latest verified implementation scope before these two documentation replacements:
 
-28 intended Module 23 implementation paths.
+17 intended Module 24 implementation paths.
 
-Tracked modified implementation files:
+Modified existing implementation files:
 
-- `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
-- `client/src/components/services/pricing/PackageOrderActions.jsx`
-- `client/src/config/homepageSections.js`
-- `client/src/pages/ServicesPage.jsx`
+- `client/src/components/layout/Footer.jsx`
+- `client/src/components/sections/HeroSection.jsx`
 - `client/src/pages/admin/AdminDashboardPage.jsx`
 - `client/src/routes/AppRoutes.jsx`
 - `package.json`
 - `server/src/app.js`
-- `server/src/config/homepageSections.js`
-- `server/src/models/Lead.js`
-- `server/src/utils/createSitemapXml.js`
 
 New implementation files:
 
-- `client/src/components/admin/appointments/AppointmentStatusBadge.jsx`
-- `client/src/components/admin/appointments/AppointmentUpdateForm.jsx`
-- `client/src/components/admin/appointments/ConvertAppointmentToLeadForm.jsx`
-- `client/src/components/appointments/AppointmentForm.jsx`
-- `client/src/hooks/useAdminAppointments.js`
-- `client/src/pages/ConsultationPage.jsx`
-- `client/src/pages/admin/AdminAppointmentDetailPage.jsx`
-- `client/src/pages/admin/AdminAppointmentsPage.jsx`
-- `client/src/services/adminAppointmentsApi.js`
-- `client/src/services/appointmentsApi.js`
-- `client/src/utils/appointmentForm.js`
-- `server/src/controllers/adminAppointment.controller.js`
-- `server/src/controllers/appointment.controller.js`
-- `server/src/middleware/appointmentRateLimiter.js`
-- `server/src/models/Appointment.js`
-- `server/src/routes/adminAppointment.routes.js`
-- `server/src/routes/appointment.routes.js`
+- `client/src/components/newsletter/NewsletterSignupForm.jsx`
+- `client/src/hooks/useAdminSubscribers.js`
+- `client/src/pages/admin/AdminSubscribersPage.jsx`
+- `client/src/services/adminSubscribersApi.js`
+- `client/src/services/subscribersApi.js`
+- `server/src/controllers/adminSubscriber.controller.js`
+- `server/src/controllers/subscriber.controller.js`
+- `server/src/middleware/subscriberRateLimiter.js`
+- `server/src/models/Subscriber.js`
+- `server/src/routes/adminSubscriber.routes.js`
+- `server/src/routes/subscriber.routes.js`
 
 After replacing the two active docs, expected closeout scope:
 
-- 28 implementation paths
-- 2 active documentation paths
-- 30 total intended paths
+- 17 implementation paths
+- `docs/PROJECT_MEMORY.md`
+- `docs/SESSION_HANDOFF.md`
+- 19 total intended paths
 
 Use live Git output as source of truth before staging.
 
 ## Runtime Data Notes
 
-Temporary runtime test records were cleaned.
+Temporary Module 24 Subscriber runtime/UI records were cleaned.
 
-Deleted test Lead:
+The final lifecycle cleanup returned:
 
-`6a7b65472973b01e52f5a003`
+`CLEANUP_TOTAL: 0`
 
-Deleted test Appointment:
+The honeypot database search returned:
 
-`6a7b62022973b01e52f5a002`
-
-Final cleanup search for:
-
-`Admin UI Appointment Test`
-
-returned:
-
-- count: `0`
 - total: `0`
+- count: `0`
 
-No temporary Appointment/Lead record from the final Admin UI test should remain.
+No temporary Module 24 Subscriber record should remain.
 
-Treat MongoDB as source of truth.
+MongoDB remains source of truth.
 
 ## Documentation State
 
@@ -498,17 +491,20 @@ Active development-memory files only:
 
 For this closeout:
 
-- PROJECT_MEMORY records permanent Appointment/Consultation architecture, Lead relationship, publication/sitemap behavior, completed inventory, long-term decisions, and roadmap advancement
-- SESSION_HANDOFF records the current Module 23 READY state, validation, working tree, runtime cleanup, and immediate staged Git closeout
+- `PROJECT_MEMORY.md` records permanent Subscriber identity, consent, anti-enumeration, transaction/concurrency, RBAC, Hero/Footer placement, completed inventory, long-term decisions, and roadmap advancement
+- `SESSION_HANDOFF.md` records current Module 24 READY state, runtime/build/Codex verification, working tree, cleanup, and immediate staged Git closeout
+- stale “Appointment completed but not committed” wording has been removed
 - no legacy documentation matrix needs updating
 
 ## Open Issues
 
-No confirmed Module 23 functional/security blocker remains.
+No confirmed Module 24 functional, security, or data-integrity blocker remains.
 
-No Codex A finding exists.
+Codex findings:
 
-The only Codex B finding was source indentation in three newly added objects and has been fixed.
+- A: NONE
+- B: NONE
+- C: NONE
 
 Known non-blocking project-wide items:
 
@@ -525,7 +521,7 @@ Do not run:
 
 `npm audit fix --force`
 
-## Next Action
+## Immediate Next Action
 
 After replacing these two active docs:
 
@@ -535,10 +531,11 @@ After replacing these two active docs:
    - `git diff --stat`
    - `git diff --name-only`
 2. Verify exactly:
-   - 28 intended Module 23 implementation paths
+   - 17 intended Module 24 implementation paths
    - `docs/PROJECT_MEMORY.md`
    - `docs/SESSION_HANDOFF.md`
-3. Stage only the complete Module 23 scope plus the two active docs.
+   - 19 total intended paths
+3. Stage only the complete Module 24 scope plus the two active docs.
 4. Run:
    - `git diff --cached --check`
    - `git diff --cached --stat`
@@ -555,30 +552,32 @@ After replacing these two active docs:
 
 ## Next Development Module
 
-After Module 23 is committed and pushed:
+After Module 24 is committed and pushed:
 
-`Newsletter / Subscribers Management`
+`Module 25 — Admin Analytics Dashboard`
 
-Keep Newsletter scope focused on subscriber management. Email sending/automation remains part of the later separate Email and Notifications phase unless a concrete module requirement explicitly changes that boundary.
+Before implementation, audit overlap with:
 
-Before Newsletter implementation, audit overlap with:
+- existing Admin Dashboard
+- Service Orders
+- Appointments
+- Leads / CRM
+- Contact Messages
+- Subscribers
+- public content visibility/publication
+- available aggregate/index patterns
+- RBAC
+- date-range filtering
+- dashboard performance
+- PII/data-minimization requirements
 
-- Site Settings
-- Contact/lead email fields
-- Admin auth/RBAC
-- rate limiting
-- publication/public forms
-- duplicate subscriber identity
-- unsubscribe/status lifecycle
-- privacy/consent fields
-- future Email and Notifications phase boundary
+Keep Module 25 focused on Admin analytics/metrics. Do not silently expand it into Audit Log or generalized reporting/export unless a concrete requirement justifies it.
 
 ## Remaining Roadmap
 
-1. Newsletter / Subscribers Management
-2. Admin Analytics Dashboard
-3. Admin Activity / Audit Log
-4. Menu / Navigation Management
+1. Admin Analytics Dashboard
+2. Admin Activity / Audit Log
+3. Menu / Navigation Management
 
 ## Future Separate Phases
 

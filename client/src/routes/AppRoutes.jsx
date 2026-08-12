@@ -61,6 +61,7 @@ import AdminSiteSettingsEditorPage from "../pages/admin/AdminSiteSettingsEditorP
 import AdminSiteSettingsPage from "../pages/admin/AdminSiteSettingsPage";
 import AdminStatisticEditorPage from "../pages/admin/AdminStatisticEditorPage";
 import AdminStatisticsPage from "../pages/admin/AdminStatisticsPage";
+import AdminSubscribersPage from "../pages/admin/AdminSubscribersPage";
 import AdminTestimonialEditorPage from "../pages/admin/AdminTestimonialEditorPage";
 import AdminTestimonialsPage from "../pages/admin/AdminTestimonialsPage";
 import AdminTeamMemberEditorPage from "../pages/admin/AdminTeamMemberEditorPage";
@@ -413,6 +414,11 @@ function AppRoutes() {
           <Route
             path="/admin/appointments/:id"
             element={<AdminAppointmentDetailPage />}
+          />
+
+          <Route
+            path="/admin/subscribers"
+            element={<AdminSubscribersPage />}
           />
 
           <Route
