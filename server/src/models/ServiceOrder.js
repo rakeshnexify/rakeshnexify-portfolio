@@ -330,6 +330,10 @@ serviceOrderSchema.index({
   createdAt: -1,
 });
 
+serviceOrderSchema.index({
+  createdAt: -1,
+});
+
 const ServiceOrder =
   mongoose.models.ServiceOrder ||
   mongoose.model("ServiceOrder", serviceOrderSchema);

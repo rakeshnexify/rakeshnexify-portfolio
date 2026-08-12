@@ -74,6 +74,10 @@ subscriberSchema.index({
   _id: -1,
 });
 
+subscriberSchema.index({
+  subscribedAt: -1,
+});
+
 const Subscriber = mongoose.model(
   "Subscriber",
   subscriberSchema,

@@ -150,6 +150,10 @@ contactMessageSchema.index({
   serviceTitle: "text",
 });
 
+contactMessageSchema.index({
+  createdAt: -1,
+});
+
 const ContactMessage =
   mongoose.models.ContactMessage ||
   mongoose.model("ContactMessage", contactMessageSchema);

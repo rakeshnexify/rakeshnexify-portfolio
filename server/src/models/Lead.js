@@ -327,6 +327,10 @@ leadSchema.index({
   serviceTitle: "text",
 });
 
+leadSchema.index({
+  createdAt: -1,
+});
+
 const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
 
 export { leadPriorities, leadStatuses };

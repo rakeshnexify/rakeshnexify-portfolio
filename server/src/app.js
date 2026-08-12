@@ -9,6 +9,7 @@ import corsOptions from "./config/cors.js";
 import helmetOptions from "./config/helmet.js";
 
 import adminAuthRoutes from "./routes/adminAuth.routes.js";
+import adminAnalyticsRoutes from "./routes/adminAnalytics.routes.js";
 import adminAppointmentRoutes from "./routes/adminAppointment.routes.js";
 import adminCertificationAchievementRoutes from "./routes/adminCertificationAchievement.routes.js";
 import adminCompanyRoutes from "./routes/adminCompany.routes.js";
@@ -155,6 +156,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/companies", companyRoutes);
 
 app.use("/api/admin/auth", adminAuthRoutes);
+app.use("/api/admin/analytics", adminAnalyticsRoutes);
 app.use("/api/admin/services", adminServiceRoutes);
 app.use("/api/admin/service-packages", adminServicePackageRoutes);
 app.use("/api/admin/service-orders", adminServiceOrderRoutes);

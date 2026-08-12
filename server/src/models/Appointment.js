@@ -287,6 +287,10 @@ appointmentSchema.index({
   createdAt: -1,
 });
 
+appointmentSchema.index({
+  createdAt: -1,
+});
+
 const Appointment = mongoose.model("Appointment", appointmentSchema);
 
 export {

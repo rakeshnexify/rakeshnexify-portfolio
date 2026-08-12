@@ -658,6 +658,177 @@ Explicitly deferred:
 - drip automation
 - A/B testing
 
+## Admin Analytics Dashboard
+
+Admin Analytics extends the existing protected Admin Dashboard.
+
+Frontend location:
+
+`/admin/dashboard`
+
+There is intentionally no separate:
+
+- `/admin/analytics` page
+- frontend Analytics route
+- public Analytics page
+
+Admin API:
+
+`GET /api/admin/analytics`
+
+Authentication:
+
+`requireAdminAuth`
+
+All authenticated active Admin roles may read Analytics.
+
+Allowed query exactly:
+
+- `range`
+
+Supported values exactly:
+
+- `7d`
+- `30d`
+- `90d`
+- `all`
+
+Default:
+
+`30d`
+
+UTC range/bucket rules:
+
+- `7d`: current UTC day + previous 6 UTC days; daily buckets
+- `30d`: current UTC day + previous 29 UTC days; daily buckets
+- `90d`: current UTC day + previous 89 UTC days; weekly buckets starting Monday
+- `all`: no lower bound; current UTC upper bound; monthly buckets
+
+Source timestamps:
+
+- Service Orders: `createdAt`
+- Appointments: `createdAt`
+- Leads: `createdAt`
+- Contact Messages: `createdAt`
+- Subscriber activity: `subscribedAt`
+
+Selected-range overview metrics:
+
+- Orders
+- Appointments
+- Leads
+- Contact Messages / Enquiries
+- Subscriber activity
+
+Current Subscriber snapshot is intentionally global and separate from the selected range:
+
+- total
+- active
+- unsubscribed
+
+Status breakdowns are zero-filled for known statuses:
+
+- Service Orders
+- Appointments
+- Leads
+- Contact Messages
+- Subscriber activity
+
+Trend rows are aggregate-only and contain:
+
+- bucket start
+- Orders
+- Appointments
+- Leads
+- Contact Messages
+- Subscriber activity
+
+Conversion semantics:
+
+Contact Message -> Lead:
+
+- denominator = Contact Messages created in selected range
+- numerator = those currently referenced by a surviving Lead through `sourceContactMessage`
+- this is current conversion coverage, not immutable lifetime history
+
+Appointment -> Lead:
+
+- denominator = Appointments created in selected range
+- numerator = those currently referenced by a surviving Lead through `sourceAppointment`
+- this is current conversion coverage, not immutable lifetime history
+
+Lead won rate:
+
+`won / (won + lost)`
+
+Only Leads created in the selected range are considered.
+
+Lead source breakdown:
+
+- selected-range Leads only
+- normalized before grouping
+- blank/missing/whitespace values converge to `unknown`
+- bounded output
+
+Estimated Pipeline Value:
+
+- open Lead statuses only: `new`, `qualified`, `contacted`, `proposal`, `negotiation`
+- only non-negative numeric `estimatedValue`
+- grouped independently by currency
+- currencies are never merged or converted
+- this is explicitly estimated open pipeline value, not revenue/income/profit
+
+Top Ordered Services:
+
+- selected-range Service Orders only
+- uses immutable Service snapshots
+- canonical grouping identity is Service slug
+- historical title changes do not create duplicate Service rows
+- maximum five Services
+
+Privacy/data-minimization:
+
+Analytics responses are aggregate-only and must not expose customer/admin/subscriber identity or private text such as names, emails, phones, messages, project summaries, Lead requirement summaries, private/Admin notes, consent timestamps, or Admin identities.
+
+Frontend architecture:
+
+- `adminAnalyticsApi.js`
+- `useAdminAnalytics.js`
+- `AdminAnalyticsOverview.jsx`
+- `AnalyticsTrendChart.jsx`
+- integrated into existing `AdminDashboardPage.jsx`
+
+The trend chart uses native SVG; no chart library is required. It includes an accessible title/description, visible legend, and tabular data representation.
+
+Range-transition integrity:
+
+- rendered Analytics data must match the currently selected range through `data.range.key`
+- stale prior-range data must not render under a newly selected range
+- stale requests remain abort-safe
+
+Analytics indexes added for range performance:
+
+- ServiceOrder: `{ createdAt: -1 }`
+- Appointment: `{ createdAt: -1 }`
+- Lead: `{ createdAt: -1 }`
+- ContactMessage: `{ createdAt: -1 }`
+- Subscriber: `{ subscribedAt: -1 }`
+
+Intentionally deferred from this module:
+
+- visitor/page-view analytics
+- Google Analytics
+- realtime analytics/WebSockets
+- custom ranges
+- comparison periods
+- CSV/PDF export
+- Content Overview
+- payment/revenue analytics
+- caching
+- chart-library dependency
+- Audit Log
+- Menu / Navigation Management
+
 ## Certifications & Achievements
 
 Model/collection: `CertificationAchievement` / `certification_achievements`
@@ -963,6 +1134,7 @@ Project `clientName` remains plain text; Case Studies does not introduce a new P
 | Leads / CRM | None | `/api/admin/leads` | Admin-only |
 | Appointment / Consultation Booking | `POST /api/appointments` | `/api/admin/appointments` | `/consultation`, `/admin/appointments`, `/admin/appointments/:id` |
 | Newsletter / Subscribers | `POST /api/subscribers` | `/api/admin/subscribers` | Compact Hero + Footer signup; `/admin/subscribers`; no public Newsletter page |
+| Admin Analytics Dashboard | None | `GET /api/admin/analytics` | Integrated into existing `/admin/dashboard`; private aggregate-only operational analytics |
 | Team | `/api/team` | `/api/admin/team` | `/team`, slug detail |
 | Skills | `/api/skills` | `/api/admin/skills` | `/skills` |
 | Education | `/api/education` | `/api/admin/education` | `/education` |
@@ -997,6 +1169,7 @@ Prefer extending:
 - Services query-state pattern
 - collection-level structured data
 - canonical shared-detail publication pattern for overlapping public collections
+- aggregate-only Admin analytics with UTC range contracts, bounded response normalization, abort-safe hooks, and range-key stale-data gating
 
 ## Long-Term Decisions
 
@@ -1022,6 +1195,9 @@ Prefer extending:
 - Subscriber reactivation requires fresh public Boolean consent; Admin cannot reactivate
 - Subscriber create/reactivation and Admin delete concurrency remains transaction-protected
 - Newsletter public UX stays compact in Hero + Footer without a separate Newsletter route/registry/sitemap entry
+- Admin Analytics extends the existing `/admin/dashboard`; do not create a duplicate Analytics management page without a concrete future requirement
+- Admin Analytics remains aggregate-only and PII-minimized; operational estimates must not be labelled as revenue
+- Analytics date ranges remain server-defined UTC contracts: 7d/30d/90d/all
 - converted Appointment deletion remains protected
 - Lead Service snapshots follow locked preservation rules
 - Education/Experience/Achievement ownership stays distinct
@@ -1065,15 +1241,14 @@ Do not recreate a large historical documentation matrix after every module.
 
 ## Remaining Roadmap
 
-1. Admin Analytics Dashboard
-2. Admin Activity / Audit Log
-3. Menu / Navigation Management
+1. Admin Activity / Audit Log
+2. Menu / Navigation Management
 
 Overlap rules:
 
 - Appointment/Consultation is distinct from Contact Messages and Service Orders
 - Newsletter Subscriber remains distinct from Contact Messages, Leads, Appointments, Service Orders, and Admin Users
-- Admin Analytics extends the existing dashboard rather than duplicating management modules
+- Admin Analytics extends the existing dashboard rather than duplicating management modules; Audit Log remains a separate next module
 - Audit Log is distinct from normal model audit fields
 - Menu/Navigation must account for the existing Site Settings registry
 
