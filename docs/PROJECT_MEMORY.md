@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 ## Purpose
 
@@ -829,6 +829,249 @@ Intentionally deferred from this module:
 - Audit Log
 - Menu / Navigation Management
 
+
+## Admin Activity / Audit Log
+
+Admin Activity / Audit Log is a dedicated internal, append-only audit domain. It is distinct from normal per-model fields such as `createdBy` / `updatedBy` and distinct from Admin Analytics.
+
+Model/collection:
+
+`AuditLog` / `audit_logs`
+
+Admin read API:
+
+- `GET /api/admin/audit-logs`
+- `GET /api/admin/audit-logs/:id`
+
+Admin pages:
+
+- `/admin/audit-logs`
+- `/admin/audit-logs/:id`
+
+There is intentionally no public Audit API/page and no Admin Audit create/update/delete API.
+
+RBAC:
+
+- authentication: `requireAdminAuth`
+- viewing: `super-admin` only
+- frontend additionally hides/disables Audit UI for non-super-admin roles
+- backend RBAC remains authoritative
+
+Actor types:
+
+- `admin`
+- `system`
+- `anonymous`
+
+Admin actor role snapshots:
+
+- `super-admin`
+- `admin`
+- `editor`
+
+Categories:
+
+- `authentication`
+- `security`
+- `content`
+- `workflow`
+- `configuration`
+- `media`
+- `subscriber`
+
+Actions:
+
+- `create`
+- `update`
+- `delete`
+- `status-change`
+- `assignment-change`
+- `publish`
+- `unpublish`
+- `convert`
+- `note-added`
+- `upload`
+- `unsubscribe`
+- `login-success`
+- `login-failed`
+- `account-lock`
+
+Outcomes:
+
+- `success`
+- `failure`
+- `denied`
+
+Controlled resource types:
+
+- `admin-auth`
+- `admin-user`
+- `site-settings`
+- `service`
+- `service-package`
+- `package-design`
+- `service-order`
+- `appointment`
+- `contact-message`
+- `lead`
+- `subscriber`
+- `media`
+- `project`
+- `statistic`
+- `company`
+- `team-member`
+- `skill`
+- `education`
+- `experience`
+- `certification-achievement`
+- `testimonial`
+- `faq`
+- `post`
+
+Privacy / minimization rules:
+
+Audit records must never persist raw request bodies, passwords/password hashes, JWTs/tokens, Authorization headers, cookies, secrets, raw errors/stacks, unrestricted metadata, or private source-record content.
+
+Examples that must not enter Audit payloads include:
+
+- Contact Message name/email/phone/subject/message/Admin notes
+- Appointment name/email/phone/project summary/message/Admin notes/cancellation text
+- Lead name/email/phone/requirement summary/notes/lost-reason text
+- Service Order customer information/requirements/Admin notes
+- Subscriber email/consent details
+- raw Media/provider payloads/credentials
+- full Site Settings objects or secret-like values
+
+Changes are restricted to approved safe field names and bounded safe `from` / `to` values. Metadata is allowlisted and bounded.
+
+Request context is optional and sanitized:
+
+- HTTP method
+- route path without query string
+- IP, respecting validated `TRUST_PROXY_HOPS`
+- bounded User-Agent
+
+Actor integrity:
+
+- authenticated Admin identity comes from `req.admin`
+- immutable name/email/role snapshots may be stored for Admin actors
+- `req.adminAccessToken` is never logged
+- unknown-login attempts use an anonymous actor and do not persist the supplied unknown email
+- system/anonymous events do not invent Admin identity
+
+Append-only contract:
+
+- collection: `audit_logs`
+- `createdAt` only; no normal `updatedAt`
+- `versionKey: false`
+- strict schema
+- normal Mongoose update/replace/delete mutation paths are blocked
+- direct MongoDB collection access / `bulkWrite` remains a documented low-level limitation
+
+Transaction policy:
+
+- database-only Admin mutations use the same Mongoose transaction/session for the primary mutation and required Audit insert
+- required Audit failure aborts that database transaction
+- no success event is emitted before primary success
+
+External/auth side-effect policy:
+
+- completed login success and externally irreversible Cloudinary upload/delete operations use best-effort Audit writes
+- Audit outage must not falsely fail a successful primary auth/external side effect
+- database metadata-only Media mutations remain transaction-coupled
+
+Authentication events:
+
+- successful login -> `login-success`
+- known-account failed login -> `login-failed`
+- threshold request that actually creates the lock -> `account-lock`
+- threshold failure may intentionally emit both `login-failed` and `account-lock`
+
+Noise policy:
+
+Do not audit every GET, every 401/403, routine validation error, or routine not-found response. Audit meaningful Admin/security mutations and security events only.
+
+Current covered Admin domains:
+
+- Authentication / Admin security
+- Service Orders
+- Appointments
+- Contact Messages
+- Leads
+- Subscribers
+- Media
+- Services
+- Service Packages
+- Package Designs
+- Projects
+- Site Settings
+- Statistics
+- Companies / Clients / Partners
+- Team
+- Skills
+- Education
+- Experience
+- Certifications / Achievements
+- Testimonials
+- FAQ
+- Posts / News
+
+Admin list filters:
+
+- `page`
+- `limit`
+- `search`
+- `actorAdminId`
+- `actorRole`
+- `category`
+- `action`
+- `resourceType`
+- `resourceId`
+- `outcome`
+- `dateFrom`
+- `dateTo`
+
+List behavior:
+
+- newest-first
+- max limit 100
+- bounded search
+- strict enum/ObjectId/date validation
+- list excludes detail-only `changes`, metadata, and request context
+
+Detail behavior:
+
+- exposes only the sanitized Audit record
+- may include safe changed fields/changes
+- allowlisted metadata
+- sanitized request context
+- never enriches from the source resource
+
+Frontend architecture:
+
+- `adminAuditLogsApi.js`
+- `useAdminAuditLogs.js`
+- `useAdminAuditLog.js`
+- `AdminAuditLogsPage.jsx`
+- `AdminAuditLogDetailPage.jsx`
+- routes under protected Admin routing
+- Dashboard card visible only to `super-admin`
+- desktop table + mobile cards
+- read-only detail UI
+- 401 logs out/redirects; 403 does not log out
+- no Audit mutation controls
+
+Current deliberate/deferred limitations:
+
+- no TTL/retention policy yet
+- no SIEM/export pipeline
+- no cryptographic hash chain
+- no request-ID correlation
+- no public-form Audit
+- public Subscriber create/reactivation Audit deferred
+- direct collection/`bulkWrite` bypass remains possible at low level
+- frontend/backend Audit enums are duplicated and must be coordinated if changed
+
 ## Certifications & Achievements
 
 Model/collection: `CertificationAchievement` / `certification_achievements`
@@ -1135,6 +1378,7 @@ Project `clientName` remains plain text; Case Studies does not introduce a new P
 | Appointment / Consultation Booking | `POST /api/appointments` | `/api/admin/appointments` | `/consultation`, `/admin/appointments`, `/admin/appointments/:id` |
 | Newsletter / Subscribers | `POST /api/subscribers` | `/api/admin/subscribers` | Compact Hero + Footer signup; `/admin/subscribers`; no public Newsletter page |
 | Admin Analytics Dashboard | None | `GET /api/admin/analytics` | Integrated into existing `/admin/dashboard`; private aggregate-only operational analytics |
+| Admin Activity / Audit Log | None | `GET /api/admin/audit-logs`, `GET /api/admin/audit-logs/:id` | Super-admin-only, append-only internal Audit; `/admin/audit-logs`, `/admin/audit-logs/:id` |
 | Team | `/api/team` | `/api/admin/team` | `/team`, slug detail |
 | Skills | `/api/skills` | `/api/admin/skills` | `/skills` |
 | Education | `/api/education` | `/api/admin/education` | `/education` |
@@ -1170,6 +1414,7 @@ Prefer extending:
 - collection-level structured data
 - canonical shared-detail publication pattern for overlapping public collections
 - aggregate-only Admin analytics with UTC range contracts, bounded response normalization, abort-safe hooks, and range-key stale-data gating
+- append-only privacy-safe Admin Audit logging with transaction-coupled DB mutations, best-effort external/auth events, strict RBAC, and read-only UI
 
 ## Long-Term Decisions
 
@@ -1198,6 +1443,11 @@ Prefer extending:
 - Admin Analytics extends the existing `/admin/dashboard`; do not create a duplicate Analytics management page without a concrete future requirement
 - Admin Analytics remains aggregate-only and PII-minimized; operational estimates must not be labelled as revenue
 - Analytics date ranges remain server-defined UTC contracts: 7d/30d/90d/all
+- Admin Audit remains a separate append-only domain from normal model audit fields and Admin Analytics
+- Audit viewing remains super-admin-only; frontend hiding is defense-in-depth and backend RBAC is authoritative
+- DB-only audited mutations must couple the primary mutation and Audit insert in the same transaction/session
+- completed auth/external side effects use best-effort Audit so Audit failure does not falsely fail primary success
+- Audit payloads remain allowlisted, bounded, and privacy-minimized; never store raw request bodies/tokens/private source content
 - converted Appointment deletion remains protected
 - Lead Service snapshots follow locked preservation rules
 - Education/Experience/Achievement ownership stays distinct
@@ -1228,6 +1478,7 @@ Prefer extending:
 - `Company.relationship` is single-valued
 - Project `clientName` is plain text; no formal Project-to-Company relation exists
 - `TRUST_PROXY_HOPS` depends on deployment topology
+- Audit append-only protection does not prevent privileged direct MongoDB collection access / `bulkWrite`
 
 Temporary warnings belong in `SESSION_HANDOFF.md`.
 
@@ -1241,16 +1492,15 @@ Do not recreate a large historical documentation matrix after every module.
 
 ## Remaining Roadmap
 
-1. Admin Activity / Audit Log
-2. Menu / Navigation Management
+1. Menu / Navigation Management
 
 Overlap rules:
 
 - Appointment/Consultation is distinct from Contact Messages and Service Orders
 - Newsletter Subscriber remains distinct from Contact Messages, Leads, Appointments, Service Orders, and Admin Users
-- Admin Analytics extends the existing dashboard rather than duplicating management modules; Audit Log remains a separate next module
-- Audit Log is distinct from normal model audit fields
-- Menu/Navigation must account for the existing Site Settings registry
+- Admin Analytics extends the existing dashboard rather than duplicating management modules
+- Admin Audit Log is complete and remains distinct from normal model audit fields and Analytics
+- Menu/Navigation must account for the existing Site Settings registry and existing publication/navigation controls
 
 ## Future Separate Phases
 

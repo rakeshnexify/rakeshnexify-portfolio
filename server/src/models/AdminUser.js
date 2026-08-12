@@ -112,16 +112,119 @@ adminUserSchema.methods.registerFailedLogin =
   async function registerFailedLogin() {
     const maximumAttempts = 5;
     const lockDurationInMinutes = 15;
+    const now = new Date();
+    const nextLockUntil =
+      new Date(
+        now.getTime() +
+          lockDurationInMinutes *
+            60 *
+            1000,
+      );
 
-    this.failedLoginAttempts += 1;
+    /*
+     * This update is atomic so concurrent failed-login
+     * requests cannot create multiple "new lock"
+     * transitions from the same stale document state.
+     *
+     * An already-active lock is not extended here.
+     */
+    const updatedAdmin =
+      await this.constructor
+        .findOneAndUpdate(
+          {
+            _id: this._id,
+            $or: [
+              {
+                lockUntil: null,
+              },
+              {
+                lockUntil: {
+                  $lte: now,
+                },
+              },
+            ],
+          },
+          [
+            {
+              $set: {
+                failedLoginAttempts: {
+                  $add: [
+                    {
+                      $ifNull: [
+                        "$failedLoginAttempts",
+                        0,
+                      ],
+                    },
+                    1,
+                  ],
+                },
+              },
+            },
+            {
+              $set: {
+                lockUntil: {
+                  $cond: [
+                    {
+                      $gte: [
+                        "$failedLoginAttempts",
+                        maximumAttempts,
+                      ],
+                    },
+                    nextLockUntil,
+                    "$lockUntil",
+                  ],
+                },
+              },
+            },
+          ],
+          {
+            new: true,
+          },
+        )
+        .select(
+          "_id failedLoginAttempts lockUntil",
+        );
 
-    if (this.failedLoginAttempts >= maximumAttempts) {
-      this.lockUntil = new Date(Date.now() + lockDurationInMinutes * 60 * 1000);
+    if (!updatedAdmin) {
+      const currentAdmin =
+        await this.constructor
+          .findById(this._id)
+          .select(
+            "_id failedLoginAttempts lockUntil",
+          );
+
+      if (currentAdmin) {
+        this.failedLoginAttempts =
+          currentAdmin.failedLoginAttempts;
+        this.lockUntil =
+          currentAdmin.lockUntil;
+      }
+
+      return {
+        lockedNow: false,
+        isLocked:
+          this.isAccountLocked(),
+      };
     }
 
-    await this.save({
-      validateBeforeSave: false,
-    });
+    this.failedLoginAttempts =
+      updatedAdmin.failedLoginAttempts;
+    this.lockUntil =
+      updatedAdmin.lockUntil;
+
+    const lockedNow = Boolean(
+      updatedAdmin.lockUntil &&
+        updatedAdmin.lockUntil >
+          now &&
+        updatedAdmin.failedLoginAttempts >=
+          maximumAttempts,
+    );
+
+    return {
+      lockedNow,
+      isLocked:
+        this.isAccountLocked(),
+    };
   };
 
 adminUserSchema.methods.registerSuccessfulLogin =

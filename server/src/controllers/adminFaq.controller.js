@@ -11,6 +11,7 @@ import Faq, {
   normalizeFaqIdentity,
   normalizeSingleLineText,
 } from "../models/Faq.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableFaqFields = new Set([
   "question",
@@ -413,6 +414,47 @@ function buildFaqPayload(requestBody) {
   return payload;
 }
 
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function validateFaqId(faqId) {
   if (!mongoose.isValidObjectId(faqId)) {
     throw createHttpError("Invalid FAQ ID.", 400, {
@@ -618,7 +660,32 @@ async function createAdminFaq(req, res, next) {
     faqData.createdBy = req.admin._id;
     faqData.updatedBy = req.admin._id;
 
-    const faq = await Faq.create(faqData);
+    const faq = await mongoose.connection.transaction(
+      async (session) => {
+        const [createdFaq] = await Faq.create(
+          [faqData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "faq",
+            id: createdFaq._id,
+            label: "FAQ",
+          },
+          request: req,
+          session,
+        });
+
+        return createdFaq;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -649,20 +716,65 @@ async function updateAdminFaq(req, res, next) {
 
     faqData.updatedBy = req.admin._id;
 
-    const faq = await Faq.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: faqData,
-      },
-      {
-        new: true,
-        runValidators: true,
+    const faq = await mongoose.connection.transaction(
+      async (session) => {
+        const existingFaq = await Faq.findById(req.params.id)
+          .select("_id isVisible isFeatured order")
+          .session(session)
+          .lean();
+
+        if (!existingFaq) {
+          throw createHttpError("FAQ record not found.", 404);
+        }
+
+        const updatedFaq = await Faq.findByIdAndUpdate(
+          req.params.id,
+          {
+            $set: faqData,
+          },
+          {
+            new: true,
+            runValidators: true,
+            session,
+          },
+        );
+
+        if (!updatedFaq) {
+          throw createHttpError("FAQ record not found.", 404);
+        }
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          {
+            isVisible: existingFaq.isVisible,
+            isFeatured: existingFaq.isFeatured,
+            order: existingFaq.order,
+          },
+          {
+            isVisible: updatedFaq.isVisible,
+            isFeatured: updatedFaq.isFeatured,
+            order: updatedFaq.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "faq",
+            id: updatedFaq._id,
+            label: "FAQ",
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return updatedFaq;
       },
     );
-
-    if (!faq) {
-      throw createHttpError("FAQ record not found.", 404);
-    }
 
     return res.status(200).json({
       success: true,
@@ -678,11 +790,47 @@ async function deleteAdminFaq(req, res, next) {
   try {
     validateFaqId(req.params.id);
 
-    const faq = await Faq.findByIdAndDelete(req.params.id);
+    const faq = await mongoose.connection.transaction(
+      async (session) => {
+        const existingFaq = await Faq.findById(req.params.id)
+          .select("_id question")
+          .session(session)
+          .lean();
 
-    if (!faq) {
-      throw createHttpError("FAQ record not found.", 404);
-    }
+        if (!existingFaq) {
+          throw createHttpError("FAQ record not found.", 404);
+        }
+
+        const deleteResult = await Faq.deleteOne(
+          {
+            _id: existingFaq._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("FAQ record not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "faq",
+            id: existingFaq._id,
+            label: "FAQ",
+          },
+          request: req,
+          session,
+        });
+
+        return existingFaq;
+      },
+    );
 
     return res.status(200).json({
       success: true,

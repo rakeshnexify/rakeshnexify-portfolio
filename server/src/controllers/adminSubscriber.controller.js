@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Subscriber, {
   SUBSCRIBER_STATUSES,
 } from "../models/Subscriber.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const allowedListQueryFields =
   new Set([
@@ -344,154 +345,220 @@ async function updateAdminSubscriber(
   res,
   next,
 ) {
-  try {
-    if (
-      !mongoose.isValidObjectId(
-        req.params.id,
-      )
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
+  if (
+    !mongoose.isValidObjectId(
+      req.params.id,
+    )
+  ) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Subscriber ID is invalid.",
+      fieldErrors: {
+        id:
           "Subscriber ID is invalid.",
-        fieldErrors: {
-          id:
-            "Subscriber ID is invalid.",
-        },
-      });
-    }
+      },
+    });
+  }
 
-    if (
-      !isPlainObject(
-        req.body,
-      )
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
+  if (
+    !isPlainObject(
+      req.body,
+    )
+  ) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Subscriber update data must be a valid object.",
+      fieldErrors: {
+        body:
           "Subscriber update data must be a valid object.",
-        fieldErrors: {
-          body:
-            "Subscriber update data must be a valid object.",
-        },
-      });
-    }
+      },
+    });
+  }
 
-    const fieldErrors = {};
+  const fieldErrors = {};
 
+  Object.keys(
+    req.body,
+  ).forEach(
+    (fieldName) => {
+      if (
+        !allowedUpdateFields.has(
+          fieldName,
+        )
+      ) {
+        addFieldError(
+          fieldErrors,
+          fieldName,
+          "This field cannot be updated.",
+        );
+      }
+    },
+  );
+
+  if (
     Object.keys(
       req.body,
-    ).forEach(
-      (fieldName) => {
-        if (
-          !allowedUpdateFields.has(
-            fieldName,
-          )
-        ) {
-          addFieldError(
-            fieldErrors,
-            fieldName,
-            "This field cannot be updated.",
-          );
-        }
-      },
+    ).length === 0
+  ) {
+    addFieldError(
+      fieldErrors,
+      "body",
+      "Status is required.",
     );
+  }
 
+  if (
+    Object.prototype.hasOwnProperty.call(
+      req.body,
+      "status",
+    )
+  ) {
     if (
-      Object.keys(
-        req.body,
-      ).length === 0
+      typeof req.body
+        .status !== "string"
     ) {
       addFieldError(
         fieldErrors,
-        "body",
-        "Status is required.",
-      );
-    }
-
-    if (
-      Object.prototype.hasOwnProperty.call(
-        req.body,
         "status",
-      )
-    ) {
+        "Status must be a string.",
+      );
+    } else {
+      const requestedStatus =
+        req.body.status
+          .trim()
+          .toLowerCase();
+
       if (
-        typeof req.body
-          .status !== "string"
+        requestedStatus !==
+        "unsubscribed"
       ) {
         addFieldError(
           fieldErrors,
           "status",
-          "Status must be a string.",
+          "Admin may only unsubscribe an active Subscriber.",
         );
-      } else {
-        const requestedStatus =
-          req.body.status
-            .trim()
-            .toLowerCase();
-
-        if (
-          requestedStatus !==
-          "unsubscribed"
-        ) {
-          addFieldError(
-            fieldErrors,
-            "status",
-            "Admin may only unsubscribe an active Subscriber.",
-          );
-        }
       }
     }
+  }
+
+  if (
+    hasFieldErrors(
+      fieldErrors,
+    )
+  ) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Please correct the highlighted fields.",
+      fieldErrors,
+    });
+  }
+
+  const session =
+    await mongoose.startSession();
+
+  try {
+    let outcome = null;
+    let updatedSubscriber = null;
+
+    await session.withTransaction(
+      async () => {
+        const subscriber =
+          await Subscriber.findOneAndUpdate(
+            {
+              _id: req.params.id,
+              status: "active",
+            },
+            {
+              $set: {
+                status:
+                  "unsubscribed",
+                unsubscribedAt:
+                  new Date(),
+              },
+            },
+            {
+              new: true,
+              runValidators: true,
+              session,
+            },
+          );
+
+        if (!subscriber) {
+          const existingSubscriber =
+            await Subscriber.findById(
+              req.params.id,
+            )
+              .select("_id status")
+              .session(session)
+              .lean();
+
+          if (!existingSubscriber) {
+            outcome = {
+              type: "not-found",
+            };
+
+            return;
+          }
+
+          outcome = {
+            type: "already-unsubscribed",
+          };
+
+          return;
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "subscriber",
+          action: "unsubscribe",
+          outcome: "success",
+          resource: {
+            type: "subscriber",
+            id: subscriber._id,
+            label:
+              "Newsletter subscriber",
+          },
+          changedFields: [
+            "status",
+          ],
+          changes: {
+            status: {
+              from: "active",
+              to:
+                "unsubscribed",
+            },
+          },
+          request: req,
+          session,
+        });
+
+        updatedSubscriber =
+          subscriber.toObject();
+
+        outcome = {
+          type: "updated",
+        };
+      },
+    );
 
     if (
-      hasFieldErrors(
-        fieldErrors,
-      )
+      outcome?.type ===
+      "not-found"
     ) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message:
-          "Please correct the highlighted fields.",
-        fieldErrors,
+          "Subscriber was not found.",
       });
     }
 
-    const subscriber =
-      await Subscriber.findOneAndUpdate(
-        {
-          _id: req.params.id,
-          status: "active",
-        },
-        {
-          $set: {
-            status:
-              "unsubscribed",
-            unsubscribedAt:
-              new Date(),
-          },
-        },
-        {
-          new: true,
-          runValidators: true,
-        },
-      );
-
-    if (!subscriber) {
-      const existingSubscriber =
-        await Subscriber.findById(
-          req.params.id,
-        )
-          .select("_id status")
-          .lean();
-
-      if (!existingSubscriber) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "Subscriber was not found.",
-        });
-      }
-
+    if (
+      outcome?.type ===
+      "already-unsubscribed"
+    ) {
       return res.status(409).json({
         success: false,
         message:
@@ -508,28 +575,31 @@ async function updateAdminSubscriber(
       message:
         "Subscriber unsubscribed successfully.",
       data:
-        subscriber.toObject(),
+        updatedSubscriber,
     });
   } catch (error) {
-    const fieldErrors =
+    const mongooseFieldErrors =
       buildMongooseFieldErrors(
         error,
       );
 
     if (
       hasFieldErrors(
-        fieldErrors,
+        mongooseFieldErrors,
       )
     ) {
       return res.status(400).json({
         success: false,
         message:
           "Please correct the highlighted fields.",
-        fieldErrors,
+        fieldErrors:
+          mongooseFieldErrors,
       });
     }
 
     return next(error);
+  } finally {
+    await session.endSession();
   }
 }
 
@@ -598,6 +668,22 @@ async function deleteAdminSubscriber(
 
           return;
         }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "subscriber",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "subscriber",
+            id:
+              subscriber._id,
+            label:
+              "Newsletter subscriber",
+          },
+          request: req,
+          session,
+        });
 
         outcome = {
           type: "deleted",

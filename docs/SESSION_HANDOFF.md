@@ -1,6 +1,6 @@
 ﻿# Session Handoff
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 ## Current Project State
 
@@ -10,336 +10,544 @@ Repository: `D:\rakeshnexify-portfolio`
 
 Branch: `main`
 
-Latest verified pushed checkpoint before this module:
+Latest verified pushed checkpoint before Module 26:
 
-`037c336 Add newsletter subscriber management module`
+`799f74a Add admin analytics dashboard`
 
 Current completed-but-not-yet-committed module:
 
-`Module 25 — Admin Analytics Dashboard`
+`Module 26 — Admin Activity / Audit Log`
 
-Current Module 25 status:
+Current Module 26 status:
 
 - initial architecture audit: PASS
-- locked backend/frontend contract: PASS
-- backend implementation: PASS
-- backend Codex review after fixes: PASS
-- backend runtime API validation: PASS
-- frontend implementation: PASS
-- full integration Codex review: one B finding only
-- stale range/data mismatch fix: PASS
-- post-fix Codex review: PASS
-- Admin Dashboard UI runtime validation: PASS
-- responsive mobile validation: PASS
-- backend-off error/retry recovery: PASS
-- `npm run check`: PASS
-- `git diff --check`: no actual errors
-- final current Codex A findings: NONE
-- final current Codex B findings: NONE
-- final current Codex C findings: NONE
-- current verdict: `READY FOR FINAL DOCS / STAGED CLOSEOUT`
+- backend foundation: PASS
+- seven backend integration batches: PASS
+- final backend completeness/security/privacy review: PASS
+- frontend F1 service/hooks: PASS
+- frontend F2 list page/route: PASS
+- frontend F3 detail page/route: PASS
+- frontend F4 Dashboard integration: PASS
+- focused frontend Codex integration review: PASS
+- runtime/API/UI verification: PASS
+- final `npm run check`: PASS
+- `git diff --check`: no actual whitespace errors
+- final complete Module 26 Codex review:
+  - A findings: NONE
+  - B findings: NONE
+  - exact files requiring fix: NONE
+  - verdict: `MODULE 26 READY FOR DOCUMENTATION AND COMMIT`
 
-Do not reopen Module 25 implementation unless a concrete failure appears.
+Do not reopen Module 26 implementation unless a concrete failure appears.
 
-## Locked Admin Analytics Architecture
+## Locked Module 26 Architecture
 
-Admin Analytics extends the existing protected:
+Admin Activity / Audit Log is a dedicated append-only internal domain.
 
-`/admin/dashboard`
+It is distinct from:
+
+- per-model `createdBy` / `updatedBy`
+- Admin Analytics
+- normal application content models
+
+Model/collection:
+
+`AuditLog` / `audit_logs`
+
+Admin read API:
+
+- `GET /api/admin/audit-logs`
+- `GET /api/admin/audit-logs/:id`
+
+Frontend:
+
+- `/admin/audit-logs`
+- `/admin/audit-logs/:id`
+- Super Admin Dashboard card: `Admin Activity / Audit Log`
 
 There is intentionally no:
 
-- `/admin/analytics` frontend page
-- separate frontend Analytics route
-- public Analytics page
-- duplicate Analytics management module card
+- public Audit API
+- public Audit page
+- Admin Audit create API
+- Admin Audit update API
+- Admin Audit delete API
 
-Analytics renders:
+RBAC:
 
-1. after the existing welcome/account panel
-2. before the existing Management modules cards
+- `requireAdminAuth`
+- `requireAdminRoles("super-admin")`
 
-All existing 21 Management module cards and paths remain intact.
+Frontend also hides/disables Audit requests for non-super-admin users, but backend RBAC remains authoritative.
 
-Admin API:
+## Audit Registries
 
-`GET /api/admin/analytics`
+Actor types:
 
-Authentication:
+- `admin`
+- `system`
+- `anonymous`
 
-`requireAdminAuth`
+Actor role snapshots:
 
-All authenticated active Admin roles may read Analytics.
+- `super-admin`
+- `admin`
+- `editor`
 
-Allowed query exactly:
+Categories:
 
-- `range`
+- `authentication`
+- `security`
+- `content`
+- `workflow`
+- `configuration`
+- `media`
+- `subscriber`
 
-Supported values exactly:
+Actions:
 
-- `7d`
-- `30d`
-- `90d`
-- `all`
+- `create`
+- `update`
+- `delete`
+- `status-change`
+- `assignment-change`
+- `publish`
+- `unpublish`
+- `convert`
+- `note-added`
+- `upload`
+- `unsubscribe`
+- `login-success`
+- `login-failed`
+- `account-lock`
 
-Default:
+Outcomes:
 
-`30d`
+- `success`
+- `failure`
+- `denied`
 
-UTC bucket behavior:
+Resource types:
 
-- `7d` -> day
-- `30d` -> day
-- `90d` -> week, Monday-based
-- `all` -> month
+- `admin-auth`
+- `admin-user`
+- `site-settings`
+- `service`
+- `service-package`
+- `package-design`
+- `service-order`
+- `appointment`
+- `contact-message`
+- `lead`
+- `subscriber`
+- `media`
+- `project`
+- `statistic`
+- `company`
+- `team-member`
+- `skill`
+- `education`
+- `experience`
+- `certification-achievement`
+- `testimonial`
+- `faq`
+- `post`
 
-Source timestamps:
+## Privacy Contract
 
-- ServiceOrder -> `createdAt`
-- Appointment -> `createdAt`
-- Lead -> `createdAt`
-- ContactMessage -> `createdAt`
-- Subscriber activity -> `subscribedAt`
+Audit payloads never intentionally store:
 
-## Analytics Response Contract
+- raw `req.body`
+- passwords/password hashes
+- JWT/access tokens
+- Authorization headers
+- cookies
+- secrets
+- raw error objects/stacks
+- unrestricted source-record data
 
-Selected-range overview:
+Explicitly excluded examples:
 
-- orders
-- appointments
-- leads
-- contactMessages
-- subscriberActivity
+Contact Message:
 
-Separate global current Subscriber snapshot:
+- name
+- email
+- phone
+- subject
+- message
+- Admin notes
 
-- total
-- active
-- unsubscribed
+Appointment:
 
-Status breakdowns:
+- name
+- email
+- phone
+- project summary
+- message
+- Admin note
+- cancellation text
 
-- Orders
-- Appointments
-- Leads
-- Contact Messages
-- Subscriber activity
+Lead:
 
-Trend rows:
+- name
+- email
+- phone
+- requirement summary
+- notes
+- lost-reason text
 
-- `start`
-- orders
-- appointments
-- leads
-- contactMessages
-- subscriberActivity
+Service Order:
 
-Conversions:
+- customer information
+- requirements
+- Admin notes
 
-Contact Message -> Lead:
+Subscriber:
 
-- selected-range Contact Messages are eligible
-- currently surviving `Lead.sourceContactMessage` references count as converted
-- this is current conversion coverage, not immutable lifetime history
+- email
+- consent details
 
-Appointment -> Lead:
+Media:
 
-- selected-range Appointments are eligible
-- currently surviving `Lead.sourceAppointment` references count as converted
-- this is current conversion coverage, not immutable lifetime history
+- raw provider payloads
+- credentials
 
-Lead won rate:
+Site Settings:
 
-`won / (won + lost)`
+- complete settings object
+- secret-like values
 
-Only Leads created in the selected range are considered.
+Changes are restricted to safe allowlisted field names and bounded safe `from` / `to` values. Metadata is allowlisted and bounded.
 
-Lead source breakdown:
+## Actor / Request Context
 
-- normalized before grouping
-- blank/missing/whitespace -> `unknown`
-- bounded
+Authenticated Admin actor identity is server-derived from `req.admin`.
 
-Estimated Pipeline:
+Stored Admin snapshots may include:
 
-- open Lead statuses only
-- non-negative numeric `estimatedValue`
-- independent rows per currency
-- no currency merge/conversion
-- explicitly not Revenue/Income/Profit
+- Admin ID
+- name
+- email
+- role
 
-Top Ordered Services:
+`req.adminAccessToken` is never logged.
 
-- selected-range Service Orders only
-- immutable snapshots
-- canonical identity by Service slug
-- deterministic display title
-- maximum five
+Unknown login attempts:
 
-Analytics response remains aggregate-only and must not expose raw PII/private text.
+- anonymous actor
+- supplied unknown email is not persisted
 
-## Backend Implementation
+System/anonymous events never invent Admin identity.
 
-New:
+Sanitized request context may contain:
 
-- `server/src/controllers/adminAnalytics.controller.js`
-- `server/src/routes/adminAnalytics.routes.js`
+- method
+- route path without query string
+- IP
+- bounded User-Agent
 
-Modified:
+IP behavior respects validated `TRUST_PROXY_HOPS`.
 
-- `server/src/app.js`
-- `server/src/models/ServiceOrder.js`
-- `server/src/models/Appointment.js`
-- `server/src/models/Lead.js`
-- `server/src/models/ContactMessage.js`
-- `server/src/models/Subscriber.js`
-- `package.json`
+## Append-Only Contract
 
-Analytics indexes added exactly:
+`AuditLog` uses:
 
-- ServiceOrder: `{ createdAt: -1 }`
-- Appointment: `{ createdAt: -1 }`
-- Lead: `{ createdAt: -1 }`
-- ContactMessage: `{ createdAt: -1 }`
-- Subscriber: `{ subscribedAt: -1 }`
+- collection `audit_logs`
+- `createdAt` only
+- `versionKey: false`
+- strict schema
 
-`server/src/app.js` contains exactly one Analytics router import and one mount:
+Normal Mongoose update/replace/delete paths are blocked.
 
-`/api/admin/analytics`
+Low-level direct MongoDB collection access / `bulkWrite` remains a documented limitation.
 
-No public Analytics route exists.
+## Transaction Policy
+
+Database-only Admin mutations:
+
+- primary mutation and Audit insert use the same Mongoose session
+- required Audit failure aborts the transaction
+- no success Audit is created before primary success
+
+Externally irreversible/auth-completed operations:
+
+- successful authentication uses best-effort Audit
+- successful Cloudinary upload/delete uses best-effort Audit
+- Audit failure must not falsely fail the completed primary operation
+
+Database metadata-only Media changes remain transaction-coupled.
+
+## Authentication Audit
+
+Covered:
+
+- successful login -> `login-success`
+- known-account failed login -> `login-failed`
+- actual threshold lock transition -> `account-lock`
+
+The threshold request may intentionally create:
+
+- `login-failed`
+- `account-lock`
+
+Unknown login emails are not persisted.
+
+Passwords/tokens are not logged.
+
+## Backend Domain Coverage
+
+Final Codex matrix:
+
+| Domain | Coverage |
+| --- | --- |
+| Authentication | COVERED |
+| Admin Users/security | COVERED |
+| Service Orders | COVERED |
+| Appointments | COVERED |
+| Contact Messages | COVERED |
+| Leads | COVERED |
+| Subscribers | COVERED |
+| Media | COVERED |
+| Services | COVERED |
+| Service Packages | COVERED |
+| Package Designs | COVERED |
+| Projects | COVERED |
+| Site Settings | COVERED |
+| Statistics | COVERED |
+| Companies/Clients/Partners | COVERED |
+| Team | COVERED |
+| Skills | COVERED |
+| Education | COVERED |
+| Experience | COVERED |
+| Certifications/Achievements | COVERED |
+| Testimonials | COVERED |
+| FAQ | COVERED |
+| Posts/News | COVERED |
+
+Clients/Partners uses the existing Company domain; there is no separate Client/Partner backend module.
+
+## Audit Read API Contract
+
+List:
+
+`GET /api/admin/audit-logs`
+
+Supported query exactly:
+
+- `page`
+- `limit`
+- `search`
+- `actorAdminId`
+- `actorRole`
+- `category`
+- `action`
+- `resourceType`
+- `resourceId`
+- `outcome`
+- `dateFrom`
+- `dateTo`
+
+Rules:
+
+- newest-first
+- max limit 100
+- bounded search
+- strict enum/ObjectId/date validation
+- reversed date ranges rejected
+- list excludes detail-only `changes`, metadata, and request context
+
+Detail:
+
+`GET /api/admin/audit-logs/:id`
+
+Detail may expose only sanitized:
+
+- actor snapshot
+- classification
+- resource identity
+- `changedFields`
+- safe `changes`
+- safe metadata
+- request context:
+  - method
+  - path
+  - IP
+  - User-Agent
+
+The Audit controller does not fetch/populate source resources to enrich records.
 
 ## Frontend Implementation
 
 New:
 
-- `client/src/services/adminAnalyticsApi.js`
-- `client/src/hooks/useAdminAnalytics.js`
-- `client/src/components/admin/analytics/AdminAnalyticsOverview.jsx`
-- `client/src/components/admin/analytics/AnalyticsTrendChart.jsx`
+- `client/src/services/adminAuditLogsApi.js`
+- `client/src/hooks/useAdminAuditLogs.js`
+- `client/src/hooks/useAdminAuditLog.js`
+- `client/src/pages/admin/AdminAuditLogsPage.jsx`
+- `client/src/pages/admin/AdminAuditLogDetailPage.jsx`
 
 Modified:
 
 - `client/src/pages/admin/AdminDashboardPage.jsx`
+- `client/src/routes/AppRoutes.jsx`
 - `package.json`
 
 Frontend behavior:
 
-- default range `30d`
-- controls: 7 days / 30 days / 90 days / All time / Refresh
-- Bearer-authenticated API service
-- 15-second client request timeout
+- GET-only Audit API client
+- Bearer-authenticated requests
+- 15-second request timeout
 - caller AbortSignal support
-- structured errors and backend `fieldErrors`
-- 401 logout/redirect
-- abort/stale-safe hook
-- loading/error/retry/refresh states
-- native SVG trend chart
-- accessible trend title/description/legend/table
-- responsive desktop/tablet/mobile layouts
-- status bars supplemented by visible labels/counts
-- current Subscribers clearly separated from range-filtered activity
-- currency-separated estimated pipeline
-- no chart dependency
+- safe status/field-error preservation
+- stale-request-safe list/detail hooks
+- 401 -> logout + `/admin/login`
+- 403 -> restricted state, no logout
+- super-admin-only request enablement
+- search/filter/pagination
+- desktop table + mobile cards
+- read-only detail view
+- no create/edit/delete controls
+- Dashboard card visible only to `super-admin`
 
-Stale range/data fix:
+Frontend filter contract:
 
-`useAdminAnalytics` exposes whether loaded `data.range.key` matches the currently normalized selected range.
+- search
+- actor role
+- category
+- action
+- resource type
+- outcome
+- Actor Admin ID
+- Resource ID
+- date from
+- date to
 
-`AdminDashboardPage` renders the range summary and Analytics overview only while the loaded data belongs to the currently selected range.
+Date input behavior:
 
-Therefore a transition such as:
+- `dateFrom` -> `YYYY-MM-DDT00:00:00.000Z`
+- `dateTo` -> `YYYY-MM-DDT23:59:59.999Z`
 
-`30d -> 7d`
+## Backend / Root Implementation Scope
 
-cannot render old 30-day data under an active 7-day selection.
+Module 26 backend/root paths:
 
-## Backend Runtime Verification
+1. `package.json`
+2. `server/src/app.js`
+3. `server/src/constants/auditLog.constants.js`
+4. `server/src/models/AuditLog.js`
+5. `server/src/services/auditLog.service.js`
+6. `server/src/controllers/adminAuditLog.controller.js`
+7. `server/src/routes/adminAuditLog.routes.js`
+8. `server/src/models/AdminUser.js`
+9. `server/src/controllers/adminAuth.controller.js`
+10. `server/src/controllers/adminAppointment.controller.js`
+11. `server/src/controllers/adminSubscriber.controller.js`
+12. `server/src/controllers/adminServiceOrder.controller.js`
+13. `server/src/controllers/adminContactMessage.controller.js`
+14. `server/src/controllers/adminLead.controller.js`
+15. `server/src/controllers/adminMedia.controller.js`
+16. `server/src/controllers/adminService.controller.js`
+17. `server/src/controllers/adminServicePackage.controller.js`
+18. `server/src/controllers/adminPackageDesign.controller.js`
+19. `server/src/controllers/adminProject.controller.js`
+20. `server/src/controllers/adminSiteSettings.controller.js`
+21. `server/src/controllers/adminStatistic.controller.js`
+22. `server/src/controllers/adminCompany.controller.js`
+23. `server/src/controllers/adminTeamMember.controller.js`
+24. `server/src/controllers/adminSkill.controller.js`
+25. `server/src/controllers/adminEducation.controller.js`
+26. `server/src/controllers/adminExperience.controller.js`
+27. `server/src/controllers/adminCertificationAchievement.controller.js`
+28. `server/src/controllers/adminTestimonial.controller.js`
+29. `server/src/controllers/adminFaq.controller.js`
+30. `server/src/controllers/adminPost.controller.js`
 
-Passed:
+Frontend implementation paths:
 
-- default `30d` -> `200`
-- `7d` -> `200`
-- `90d` -> `200`
-- `all` -> `200`
-- invalid `range=365d` -> `400`
-- unauthorized request -> `401`
-- unknown query parameter -> `400`
-- repeated `range` parameter -> `400`
+31. `client/src/services/adminAuditLogsApi.js`
+32. `client/src/hooks/useAdminAuditLogs.js`
+33. `client/src/hooks/useAdminAuditLog.js`
+34. `client/src/pages/admin/AdminAuditLogsPage.jsx`
+35. `client/src/pages/admin/AdminAuditLogDetailPage.jsx`
+36. `client/src/pages/admin/AdminDashboardPage.jsx`
+37. `client/src/routes/AppRoutes.jsx`
 
-The live endpoint returned:
+Before documentation replacement, verified Module 26 implementation scope:
 
-`success: true`
+- 37 unique intended paths
 
-for all supported authenticated ranges.
+After replacing the two active docs, expected closeout scope:
 
-## Frontend / UI Runtime Verification
+- 37 implementation paths
+- `docs/PROJECT_MEMORY.md`
+- `docs/SESSION_HANDOFF.md`
+- 39 total intended paths
 
-Passed on `/admin/dashboard`:
+Use live Git output as source of truth before staging.
 
-- default 30-day Dashboard load
-- Admin header/welcome/account panel
-- Analytics inserted before Management modules
-- Overview metric cards
-- global Current Subscribers snapshot
-- trend chart
-- status breakdowns
-- conversion indicators
-- Top Services
-- Lead Sources
-- Estimated Pipeline
-- Management modules remain intact
-- 30d -> 7d range transition
-- 90d range
-- All time range
-- Refresh
-- mobile responsive layout around 390px width
-- no obvious text overlap/page overflow
-- deliberate horizontal trend-chart scrolling remains usable
-- backend stopped -> Analytics error state
-- Try again visible
-- Dashboard remains usable
-- backend restarted -> retry recovers Analytics successfully
+## Runtime / API / UI Verification
+
+Runtime verification was completed successfully.
+
+Verified behavior included:
+
+- Super Admin Dashboard Audit card
+- `/admin/audit-logs`
+- responsive list UI
+- Audit filters
+- pagination behavior
+- `/admin/audit-logs/:id`
+- read-only detail sections
+- request-context rendering
+- authentication Audit generation
+- no mutation controls
+- role-restricted frontend behavior
+
+Backend RBAC remained authoritative throughout.
 
 ## Codex Review History
 
-Initial backend review found two B findings:
+Final backend completeness review:
 
-1. Lead sources normalized only after grouping, which could create duplicate `unknown` rows.
-2. Top Services grouped by slug + title, which could split one canonical Service after historical title changes.
-
-Both were fixed.
-
-Post-fix backend Codex:
-
+- backend scope: PASS
+- append-only/privacy/RBAC/transaction/external-side-effect/domain coverage: PASS
 - A: NONE
 - B: NONE
 - C: NONE
-- verdict: `READY FOR BACKEND RUNTIME TESTING`
+- verdict: `BACKEND READY FOR FRONTEND INTEGRATION`
 
-Full frontend/integration Codex found one B finding:
+Focused frontend integration review:
 
-- a range button could activate one render before prior-range data was cleared, creating a transient old-data/new-selection mismatch
-
-The fix introduced explicit range-key gating.
-
-Post-fix Codex:
-
-- Previous B finding: RESOLVED
-- Hook: PASS
-- Dashboard rendering: PASS
-- Range transition: PASS
-- Loading/error/retry: PASS
-- Auth regression: PASS
-- Dashboard regression: PASS
 - Git scope: PASS
+- API/service/hooks/list/detail/routes/dashboard: PASS
+- frontend/backend contract: PASS
 - A: NONE
 - B: NONE
-- C: NONE
-- Exact files requiring fix: NONE
-- verdict: `READY FOR UI RUNTIME TESTING`
+- C1 only: duplicated frontend/backend enum registries may drift in a future release
+- verdict: `READY FOR RUNTIME/API/UI VERIFICATION`
 
-UI runtime testing then passed.
+Final complete Module 26 review:
+
+- Git scope: PASS
+- Build/check: PASS
+- foundation: PASS
+- append-only: PASS
+- privacy: PASS
+- actor integrity: PASS
+- request context: PASS
+- RBAC: PASS
+- transactions: PASS
+- external side effects: PASS
+- exactly-once/noise control: PASS
+- all intended domain coverage: PASS
+- frontend integration/security/contract: PASS
+- public/Admin regression: PASS
+- performance: PASS
+- A findings: NONE
+- B findings: NONE
+- C1: duplicated frontend/backend Audit enums; current values match
+- exact files requiring fix: NONE
+- verdict: `MODULE 26 READY FOR DOCUMENTATION AND COMMIT`
 
 ## Validation
 
@@ -353,70 +561,61 @@ Result:
 
 Vite production build:
 
-- 266 modules transformed
+- 271 modules transformed
 - build passed
-- main JS approximately 1,721.19 kB
-- gzip approximately 356.21 kB
+- main JS approximately 1,756.72 kB
+- gzip approximately 362.97 kB
 - existing >500 kB chunk-size warning remains non-blocking
 
-`git diff --check`
+`npm run check` permanently includes:
 
-Result:
+- `client/src/services/adminAuditLogsApi.js`
+- `client/src/hooks/useAdminAuditLogs.js`
+- `client/src/hooks/useAdminAuditLog.js`
+- `server/src/constants/auditLog.constants.js`
+- `server/src/models/AuditLog.js`
+- `server/src/services/auditLog.service.js`
+- `server/src/controllers/adminAuditLog.controller.js`
+- `server/src/routes/adminAuditLog.routes.js`
+
+`git diff --check`:
 
 - no actual whitespace errors
 - CRLF -> LF warnings only
 
-`package.json` now checks exactly once each:
+Important:
 
-- `client/src/services/adminAnalyticsApi.js`
-- `client/src/hooks/useAdminAnalytics.js`
-- `server/src/controllers/adminAnalytics.controller.js`
-- `server/src/routes/adminAnalytics.routes.js`
-
-No chart dependency or other dependency was added.
+Wrapped console output may visually concatenate command fragments such as `--checkclient`, but the actual current `package.json` command is valid and `npm run check` completed successfully.
 
 ## Current Working Tree
 
-Latest verified implementation scope before these two documentation replacements:
+Expected before these two documentation replacements:
 
-14 intended Module 25 implementation paths.
+- 37 intended Module 26 implementation paths
 
-Modified implementation files:
+Expected after replacing both active docs:
 
-- `client/src/pages/admin/AdminDashboardPage.jsx`
-- `package.json`
-- `server/src/app.js`
-- `server/src/models/Appointment.js`
-- `server/src/models/ContactMessage.js`
-- `server/src/models/Lead.js`
-- `server/src/models/ServiceOrder.js`
-- `server/src/models/Subscriber.js`
+- 39 total intended paths
 
-New implementation files:
+Documentation paths:
 
-- `client/src/components/admin/analytics/AdminAnalyticsOverview.jsx`
-- `client/src/components/admin/analytics/AnalyticsTrendChart.jsx`
-- `client/src/hooks/useAdminAnalytics.js`
-- `client/src/services/adminAnalyticsApi.js`
-- `server/src/controllers/adminAnalytics.controller.js`
-- `server/src/routes/adminAnalytics.routes.js`
-
-After replacing the two active docs, expected closeout scope:
-
-- 14 implementation paths
 - `docs/PROJECT_MEMORY.md`
 - `docs/SESSION_HANDOFF.md`
-- 16 total intended paths
 
-Use live Git output as source of truth before staging.
+Before staging, verify the real tree with:
 
-## Runtime Data Notes
+- `git status --short`
+- `git diff --check`
+- `git diff --stat`
+- `git diff --name-only`
+- `git ls-files --others --exclude-standard`
 
-Module 25 runtime testing used existing aggregate application data.
+Remember:
 
-No temporary Analytics-specific database record was intentionally created for the final UI verification.
+- `git diff --stat`
+- `git diff --name-only`
 
-MongoDB remains the source of truth.
+do not include untracked files.
 
 ## Documentation State
 
@@ -427,20 +626,23 @@ Active development-memory files only:
 
 For this closeout:
 
-- `PROJECT_MEMORY.md` records the permanent Admin Analytics architecture, UTC ranges, aggregate/privacy contract, conversion semantics, pipeline/top-Service rules, stale-range behavior, indexes, completed inventory, long-term decisions, and roadmap advancement
-- `SESSION_HANDOFF.md` records the complete Module 25 implementation/review/runtime/build state and staged-closeout instructions
-- stale Module 24 handoff wording is removed
+- `PROJECT_MEMORY.md` records permanent Audit architecture, privacy, actor integrity, append-only behavior, transaction/external-side-effect policies, RBAC, API/filter contracts, frontend architecture, completed inventory, long-term decisions, deliberate limitations, and roadmap advancement
+- `SESSION_HANDOFF.md` records the complete Module 26 implementation/review/runtime/build state and final closeout instructions
+- stale Module 25 handoff wording is removed
 - no legacy documentation matrix needs updating
 
 ## Open Issues
 
-No confirmed Module 25 functional, security, data-integrity, or UI-runtime blocker remains.
+No confirmed Module 26 functional, security, privacy, data-integrity, response-contract, or UI-runtime blocker remains.
 
-Current Codex findings:
+Current final Codex findings:
 
 - A: NONE
 - B: NONE
-- C: NONE
+
+Optional current finding:
+
+- frontend/backend Audit enum registries are duplicated and must remain coordinated
 
 Known non-blocking project-wide items:
 
@@ -452,6 +654,16 @@ Known non-blocking project-wide items:
 - older controllers are not uniformly as strict as newer modules
 - README remains materially stale
 - production `TRUST_PROXY_HOPS` must match deployment topology
+
+Audit-specific deferred items:
+
+- retention/TTL policy
+- SIEM/export integration
+- cryptographic hash chain
+- request IDs/correlation IDs
+- public form Audit
+- public Subscriber creation/reactivation Audit
+- low-level direct MongoDB collection / `bulkWrite` bypass protection
 
 Do not run:
 
@@ -466,12 +678,13 @@ After replacing these two active docs:
    - `git status --short`
    - `git diff --stat`
    - `git diff --name-only`
-2. Verify exactly:
-   - 14 intended Module 25 implementation paths
+   - `git ls-files --others --exclude-standard`
+2. Verify:
+   - 37 intended Module 26 implementation paths
    - `docs/PROJECT_MEMORY.md`
    - `docs/SESSION_HANDOFF.md`
-   - 16 total intended paths
-3. Stage only the complete Module 25 scope plus the two active docs.
+   - 39 total intended paths
+3. Stage only the complete Module 26 scope plus the two active docs.
 4. Run:
    - `git diff --cached --check`
    - `git diff --cached --stat`
@@ -479,7 +692,7 @@ After replacing these two active docs:
    - `git status --short`
 5. Run the required final staged-diff Codex review.
 6. If staged Codex verdict is clean, commit with:
-   - `Add admin analytics dashboard`
+   - `Add admin activity audit log`
 7. Push `main`.
 8. Verify:
    - `git status -sb`
@@ -489,29 +702,33 @@ After replacing these two active docs:
 
 ## Next Development Module
 
-After Module 25 is committed and pushed:
+After Module 26 is committed and pushed:
 
-`Module 26 — Admin Activity / Audit Log`
+`Module 27 — Menu / Navigation Management`
 
 Before implementation, audit overlap with:
 
-- existing per-model `createdBy` / `updatedBy`
-- Admin authentication
-- Admin role changes and security events
-- create/update/delete actions across Admin APIs
-- Service Orders / Appointments / Leads / Subscribers workflow events
-- privacy and retention requirements
-- transaction boundaries
-- query/index patterns
-- pagination/filter/search needs
-- whether system events and Admin-user actions require separate event types
+- current Site Settings registry navigation controls
+- Navbar
+- Footer
+- PublicPageHeader
+- homepage/publication registry
+- `isNavigationVisible`
+- `navigationOrder`
+- `label`
+- route/page visibility
+- shared canonical detail routes
+- active-link behavior
+- mobile navigation
+- accessibility/keyboard behavior
+- sitemap/publication behavior
+- whether arbitrary hierarchy/nesting is actually required versus extending the existing registry-based navigation system
 
-Keep Audit Log distinct from normal model audit fields and distinct from Analytics.
+Avoid creating a second conflicting navigation source of truth.
 
 ## Remaining Roadmap
 
-1. Admin Activity / Audit Log
-2. Menu / Navigation Management
+1. Menu / Navigation Management
 
 ## Future Separate Phases
 

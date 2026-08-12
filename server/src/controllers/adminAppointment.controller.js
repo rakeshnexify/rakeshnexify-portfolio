@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Appointment, { APPOINTMENT_STATUSES } from "../models/Appointment.js";
 import AdminUser from "../models/AdminUser.js";
 import Lead from "../models/Lead.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const allowedListQueryFields = new Set([
   "page",
@@ -342,6 +343,113 @@ async function resolveActiveAdmin(
   }
 
   return admin;
+}
+
+function objectIdValuesMatch(
+  first,
+  second,
+) {
+  const firstValue =
+    first
+      ? String(first)
+      : "";
+
+  const secondValue =
+    second
+      ? String(second)
+      : "";
+
+  return firstValue === secondValue;
+}
+
+function dateValuesMatch(
+  first,
+  second,
+) {
+  const firstValue =
+    first
+      ? new Date(first).getTime()
+      : null;
+
+  const secondValue =
+    second
+      ? new Date(second).getTime()
+      : null;
+
+  return firstValue === secondValue;
+}
+
+function buildAppointmentAuditChangeSet({
+  previousStatus,
+  nextStatus,
+  previousAssignedTo,
+  nextAssignedTo,
+  previousScheduledAt,
+  nextScheduledAt,
+}) {
+  const changedFields = [];
+  const changes = {};
+
+  if (previousStatus !== nextStatus) {
+    changedFields.push("status");
+    changes.status = {
+      from: previousStatus,
+      to: nextStatus,
+    };
+  }
+
+  if (
+    !objectIdValuesMatch(
+      previousAssignedTo,
+      nextAssignedTo,
+    )
+  ) {
+    changedFields.push("assignedTo");
+    changes.assignedTo = {
+      from:
+        previousAssignedTo || null,
+      to:
+        nextAssignedTo || null,
+    };
+  }
+
+  if (
+    !dateValuesMatch(
+      previousScheduledAt,
+      nextScheduledAt,
+    )
+  ) {
+    changedFields.push("scheduledAt");
+    changes.scheduledAt = {
+      from:
+        previousScheduledAt || null,
+      to:
+        nextScheduledAt || null,
+    };
+  }
+
+  let action = "update";
+
+  if (
+    changedFields.includes(
+      "status",
+    )
+  ) {
+    action = "status-change";
+  } else if (
+    changedFields.includes(
+      "assignedTo",
+    )
+  ) {
+    action =
+      "assignment-change";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
 }
 
 function populateAppointmentDetail(query) {
@@ -697,202 +805,290 @@ async function getAdminAppointmentById(req, res, next) {
 }
 
 async function updateAdminAppointment(req, res, next) {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Appointment ID is invalid.",
+      fieldErrors: {
+        id: "Appointment ID is invalid.",
+      },
+    });
+  }
+
+  if (!isPlainObject(req.body)) {
+    return res.status(400).json({
+      success: false,
+      message: "Appointment update data must be a valid object.",
+      fieldErrors: {
+        body: "Appointment update data must be a valid object.",
+      },
+    });
+  }
+
+  const fieldErrors = {};
+
+  Object.keys(req.body).forEach((fieldName) => {
+    if (!allowedUpdateFields.has(fieldName)) {
+      addFieldError(fieldErrors, fieldName, "This field cannot be updated.");
+    }
+  });
+
+  if (Object.keys(req.body).length === 0) {
+    addFieldError(
+      fieldErrors,
+      "body",
+      "At least one editable field is required.",
+    );
+  }
+
+  if (hasFieldErrors(fieldErrors)) {
+    return res.status(400).json({
+      success: false,
+      message: "Please correct the highlighted fields.",
+      fieldErrors,
+    });
+  }
+
+  const session = await mongoose.startSession();
+
   try {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Appointment ID is invalid.",
-        fieldErrors: {
-          id: "Appointment ID is invalid.",
-        },
-      });
-    }
+    let outcome = null;
+    let updatedAppointmentId = null;
 
-    if (!isPlainObject(req.body)) {
-      return res.status(400).json({
-        success: false,
-        message: "Appointment update data must be a valid object.",
-        fieldErrors: {
-          body: "Appointment update data must be a valid object.",
-        },
-      });
-    }
+    await session.withTransaction(async () => {
+      const appointment = await Appointment.findById(req.params.id)
+        .session(session);
 
-    const fieldErrors = {};
+      if (!appointment) {
+        outcome = {
+          type: "not-found",
+        };
 
-    Object.keys(req.body).forEach((fieldName) => {
-      if (!allowedUpdateFields.has(fieldName)) {
-        addFieldError(fieldErrors, fieldName, "This field cannot be updated.");
+        return;
       }
+
+      const previousStatus = appointment.status;
+      const previousAssignedTo = appointment.assignedTo;
+      const previousScheduledAt = appointment.scheduledAt;
+
+      let nextStatus = appointment.status;
+      let nextAssignedTo = appointment.assignedTo;
+      let nextScheduledAt = appointment.scheduledAt;
+      let nextAdminNote = appointment.adminNote || "";
+      let nextCancellationReason = appointment.cancellationReason || "";
+
+      if (hasOwn(req.body, "status")) {
+        if (typeof req.body.status !== "string") {
+          addFieldError(fieldErrors, "status", "Status must be a string.");
+        } else {
+          const cleanedStatus = req.body.status.trim().toLowerCase();
+
+          if (!APPOINTMENT_STATUSES.includes(cleanedStatus)) {
+            addFieldError(
+              fieldErrors,
+              "status",
+              "Please select a valid Appointment status.",
+            );
+          } else {
+            nextStatus = cleanedStatus;
+          }
+        }
+      }
+
+      if (hasOwn(req.body, "assignedTo")) {
+        const assignedAdmin = await resolveActiveAdmin(
+          req.body.assignedTo,
+          "assignedTo",
+          fieldErrors,
+          session,
+        );
+
+        nextAssignedTo = assignedAdmin?._id || null;
+      }
+
+      if (hasOwn(req.body, "scheduledAt")) {
+        const value = req.body.scheduledAt;
+
+        if (value === null || value === "") {
+          nextScheduledAt = null;
+        } else {
+          const parsedScheduledAt = parseStrictIsoTimestamp(value);
+
+          if (!parsedScheduledAt) {
+            addFieldError(
+              fieldErrors,
+              "scheduledAt",
+              "Scheduled time must be a valid ISO timestamp with Z or a UTC offset.",
+            );
+          } else {
+            nextScheduledAt = parsedScheduledAt;
+          }
+        }
+      }
+
+      if (hasOwn(req.body, "adminNote")) {
+        if (typeof req.body.adminNote !== "string") {
+          addFieldError(fieldErrors, "adminNote", "Admin note must be a string.");
+        } else {
+          nextAdminNote = req.body.adminNote.trim();
+
+          if (nextAdminNote.length > 5000) {
+            addFieldError(
+              fieldErrors,
+              "adminNote",
+              "Admin note cannot exceed 5000 characters.",
+            );
+          }
+        }
+      }
+
+      if (hasOwn(req.body, "cancellationReason")) {
+        if (typeof req.body.cancellationReason !== "string") {
+          addFieldError(
+            fieldErrors,
+            "cancellationReason",
+            "Cancellation reason must be a string.",
+          );
+        } else {
+          nextCancellationReason = req.body.cancellationReason.trim();
+
+          if (nextCancellationReason.length > 2000) {
+            addFieldError(
+              fieldErrors,
+              "cancellationReason",
+              "Cancellation reason cannot exceed 2000 characters.",
+            );
+          }
+        }
+      }
+
+      if (nextStatus === "requested" && nextScheduledAt) {
+        addFieldError(
+          fieldErrors,
+          "scheduledAt",
+          "A requested Appointment cannot have a confirmed schedule.",
+        );
+      }
+
+      if (
+        ["confirmed", "completed", "no-show"].includes(nextStatus) &&
+        !nextScheduledAt
+      ) {
+        addFieldError(
+          fieldErrors,
+          "scheduledAt",
+          `Scheduled time is required when status is ${nextStatus}.`,
+        );
+      }
+
+      if (nextStatus === "declined" && nextScheduledAt) {
+        addFieldError(
+          fieldErrors,
+          "scheduledAt",
+          "A declined Appointment cannot have a scheduled time.",
+        );
+      }
+
+      if (["cancelled", "declined"].includes(nextStatus)) {
+        if (!nextCancellationReason) {
+          addFieldError(
+            fieldErrors,
+            "cancellationReason",
+            `A reason is required when status is ${nextStatus}.`,
+          );
+        }
+      } else {
+        nextCancellationReason = "";
+      }
+
+      const scheduledAtWasExplicitlyChanged = hasOwn(req.body, "scheduledAt");
+
+      const transitionedToConfirmed =
+        hasOwn(req.body, "status") &&
+        nextStatus === "confirmed" &&
+        appointment.status !== "confirmed";
+
+      if (
+        nextStatus === "confirmed" &&
+        nextScheduledAt &&
+        nextScheduledAt.getTime() < Date.now() &&
+        (scheduledAtWasExplicitlyChanged || transitionedToConfirmed)
+      ) {
+        addFieldError(
+          fieldErrors,
+          "scheduledAt",
+          "A confirmed Appointment cannot be scheduled in the past.",
+        );
+      }
+
+      if (hasFieldErrors(fieldErrors)) {
+        outcome = {
+          type: "validation",
+        };
+
+        return;
+      }
+
+      const statusChanged = nextStatus !== appointment.status;
+
+      appointment.status = nextStatus;
+      appointment.assignedTo = nextAssignedTo;
+      appointment.scheduledAt = nextScheduledAt;
+      appointment.adminNote = nextAdminNote;
+      appointment.cancellationReason = nextCancellationReason;
+
+      if (statusChanged) {
+        appointment.statusUpdatedAt = new Date();
+        appointment.statusUpdatedBy = req.admin._id;
+      }
+
+      await appointment.save({
+        session,
+      });
+
+      const auditChangeSet =
+        buildAppointmentAuditChangeSet({
+          previousStatus,
+          nextStatus,
+          previousAssignedTo,
+          nextAssignedTo,
+          previousScheduledAt,
+          nextScheduledAt,
+        });
+
+      await createAuditLog({
+        actor: req.admin,
+        category: "workflow",
+        action: auditChangeSet.action,
+        outcome: "success",
+        resource: {
+          type: "appointment",
+          id: appointment._id,
+          label: "Consultation appointment",
+        },
+        changedFields:
+          auditChangeSet.changedFields,
+        changes:
+          auditChangeSet.changes,
+        request: req,
+        session,
+      });
+
+      updatedAppointmentId = appointment._id;
+
+      outcome = {
+        type: "updated",
+      };
     });
 
-    if (Object.keys(req.body).length === 0) {
-      addFieldError(
-        fieldErrors,
-        "body",
-        "At least one editable field is required.",
-      );
-    }
-
-    const appointment = await Appointment.findById(req.params.id);
-
-    if (!appointment) {
+    if (outcome?.type === "not-found") {
       return res.status(404).json({
         success: false,
         message: "Appointment was not found.",
       });
     }
 
-    let nextStatus = appointment.status;
-    let nextAssignedTo = appointment.assignedTo;
-    let nextScheduledAt = appointment.scheduledAt;
-    let nextAdminNote = appointment.adminNote || "";
-    let nextCancellationReason = appointment.cancellationReason || "";
-
-    if (hasOwn(req.body, "status")) {
-      if (typeof req.body.status !== "string") {
-        addFieldError(fieldErrors, "status", "Status must be a string.");
-      } else {
-        const cleanedStatus = req.body.status.trim().toLowerCase();
-
-        if (!APPOINTMENT_STATUSES.includes(cleanedStatus)) {
-          addFieldError(
-            fieldErrors,
-            "status",
-            "Please select a valid Appointment status.",
-          );
-        } else {
-          nextStatus = cleanedStatus;
-        }
-      }
-    }
-
-    if (hasOwn(req.body, "assignedTo")) {
-      const assignedAdmin = await resolveActiveAdmin(
-        req.body.assignedTo,
-        "assignedTo",
-        fieldErrors,
-      );
-
-      nextAssignedTo = assignedAdmin?._id || null;
-    }
-
-    if (hasOwn(req.body, "scheduledAt")) {
-      const value = req.body.scheduledAt;
-
-      if (value === null || value === "") {
-        nextScheduledAt = null;
-      } else {
-        const parsedScheduledAt = parseStrictIsoTimestamp(value);
-
-        if (!parsedScheduledAt) {
-          addFieldError(
-            fieldErrors,
-            "scheduledAt",
-            "Scheduled time must be a valid ISO timestamp with Z or a UTC offset.",
-          );
-        } else {
-          nextScheduledAt = parsedScheduledAt;
-        }
-      }
-    }
-
-    if (hasOwn(req.body, "adminNote")) {
-      if (typeof req.body.adminNote !== "string") {
-        addFieldError(fieldErrors, "adminNote", "Admin note must be a string.");
-      } else {
-        nextAdminNote = req.body.adminNote.trim();
-
-        if (nextAdminNote.length > 5000) {
-          addFieldError(
-            fieldErrors,
-            "adminNote",
-            "Admin note cannot exceed 5000 characters.",
-          );
-        }
-      }
-    }
-
-    if (hasOwn(req.body, "cancellationReason")) {
-      if (typeof req.body.cancellationReason !== "string") {
-        addFieldError(
-          fieldErrors,
-          "cancellationReason",
-          "Cancellation reason must be a string.",
-        );
-      } else {
-        nextCancellationReason = req.body.cancellationReason.trim();
-
-        if (nextCancellationReason.length > 2000) {
-          addFieldError(
-            fieldErrors,
-            "cancellationReason",
-            "Cancellation reason cannot exceed 2000 characters.",
-          );
-        }
-      }
-    }
-
-    if (nextStatus === "requested" && nextScheduledAt) {
-      addFieldError(
-        fieldErrors,
-        "scheduledAt",
-        "A requested Appointment cannot have a confirmed schedule.",
-      );
-    }
-
-    if (
-      ["confirmed", "completed", "no-show"].includes(nextStatus) &&
-      !nextScheduledAt
-    ) {
-      addFieldError(
-        fieldErrors,
-        "scheduledAt",
-        `Scheduled time is required when status is ${nextStatus}.`,
-      );
-    }
-
-    if (nextStatus === "declined" && nextScheduledAt) {
-      addFieldError(
-        fieldErrors,
-        "scheduledAt",
-        "A declined Appointment cannot have a scheduled time.",
-      );
-    }
-
-    if (["cancelled", "declined"].includes(nextStatus)) {
-      if (!nextCancellationReason) {
-        addFieldError(
-          fieldErrors,
-          "cancellationReason",
-          `A reason is required when status is ${nextStatus}.`,
-        );
-      }
-    } else {
-      nextCancellationReason = "";
-    }
-
-    const scheduledAtWasExplicitlyChanged = hasOwn(req.body, "scheduledAt");
-
-    const transitionedToConfirmed =
-      hasOwn(req.body, "status") &&
-      nextStatus === "confirmed" &&
-      appointment.status !== "confirmed";
-
-    if (
-      nextStatus === "confirmed" &&
-      nextScheduledAt &&
-      nextScheduledAt.getTime() < Date.now() &&
-      (scheduledAtWasExplicitlyChanged || transitionedToConfirmed)
-    ) {
-      addFieldError(
-        fieldErrors,
-        "scheduledAt",
-        "A confirmed Appointment cannot be scheduled in the past.",
-      );
-    }
-
-    if (hasFieldErrors(fieldErrors)) {
+    if (outcome?.type === "validation") {
       return res.status(400).json({
         success: false,
         message: "Please correct the highlighted fields.",
@@ -900,23 +1096,8 @@ async function updateAdminAppointment(req, res, next) {
       });
     }
 
-    const statusChanged = nextStatus !== appointment.status;
-
-    appointment.status = nextStatus;
-    appointment.assignedTo = nextAssignedTo;
-    appointment.scheduledAt = nextScheduledAt;
-    appointment.adminNote = nextAdminNote;
-    appointment.cancellationReason = nextCancellationReason;
-
-    if (statusChanged) {
-      appointment.statusUpdatedAt = new Date();
-      appointment.statusUpdatedBy = req.admin._id;
-    }
-
-    await appointment.save();
-
     const updatedAppointment = await populateAppointmentDetail(
-      Appointment.findById(appointment._id),
+      Appointment.findById(updatedAppointmentId),
     ).lean();
 
     return res.json({
@@ -925,17 +1106,19 @@ async function updateAdminAppointment(req, res, next) {
       data: updatedAppointment,
     });
   } catch (error) {
-    const fieldErrors = buildMongooseFieldErrors(error);
+    const mongooseFieldErrors = buildMongooseFieldErrors(error);
 
-    if (hasFieldErrors(fieldErrors)) {
+    if (hasFieldErrors(mongooseFieldErrors)) {
       return res.status(400).json({
         success: false,
         message: "Please correct the highlighted fields.",
-        fieldErrors,
+        fieldErrors: mongooseFieldErrors,
       });
     }
 
     return next(error);
+  } finally {
+    await session.endSession();
   }
 }
 
@@ -984,9 +1167,32 @@ async function deleteAdminAppointment(req, res, next) {
         return;
       }
 
-      await Appointment.deleteOne({
-        _id: appointment._id,
-      }).session(session);
+      const deleteResult =
+        await Appointment.deleteOne({
+          _id: appointment._id,
+        }).session(session);
+
+      if (deleteResult.deletedCount !== 1) {
+        outcome = {
+          type: "not-found",
+        };
+
+        return;
+      }
+
+      await createAuditLog({
+        actor: req.admin,
+        category: "workflow",
+        action: "delete",
+        outcome: "success",
+        resource: {
+          type: "appointment",
+          id: appointment._id,
+          label: "Consultation appointment",
+        },
+        request: req,
+        session,
+      });
 
       outcome = {
         type: "deleted",
@@ -1239,6 +1445,26 @@ async function convertAppointmentToLead(req, res, next) {
       const lead = new Lead(leadPayload);
 
       await lead.save({
+        session,
+      });
+
+      await createAuditLog({
+        actor: req.admin,
+        category: "workflow",
+        action: "convert",
+        outcome: "success",
+        resource: {
+          type: "appointment",
+          id: appointment._id,
+          label: "Consultation appointment",
+        },
+        metadata: {
+          sourceResourceId:
+            appointment._id,
+          createdLeadId:
+            lead._id,
+        },
+        request: req,
         session,
       });
 

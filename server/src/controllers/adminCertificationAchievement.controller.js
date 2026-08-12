@@ -6,6 +6,7 @@ import CertificationAchievement, {
 } from "../models/CertificationAchievement.js";
 import Education from "../models/Education.js";
 import Experience from "../models/Experience.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const ALLOWED_EDITABLE_FIELDS = new Set([
   "type",
@@ -525,17 +526,23 @@ function buildPayload(requestBody) {
   return payload;
 }
 
-async function validateRelations(payload) {
+async function validateRelations(payload, session = null) {
   const relationChecks = [];
 
   if (
     hasOwnProperty(payload, "relatedEducation") &&
     payload.relatedEducation
   ) {
+    let query = Education.exists({
+      _id: payload.relatedEducation,
+    });
+
+    if (session) {
+      query = query.session(session);
+    }
+
     relationChecks.push(
-      Education.exists({
-        _id: payload.relatedEducation,
-      }).then((exists) => {
+      query.then((exists) => {
         if (!exists) {
           throw createHttpError("Related Education record not found.", 404, {
             relatedEducation: "Please select an existing Education record.",
@@ -549,10 +556,16 @@ async function validateRelations(payload) {
     hasOwnProperty(payload, "relatedExperience") &&
     payload.relatedExperience
   ) {
+    let query = Experience.exists({
+      _id: payload.relatedExperience,
+    });
+
+    if (session) {
+      query = query.session(session);
+    }
+
     relationChecks.push(
-      Experience.exists({
-        _id: payload.relatedExperience,
-      }).then((exists) => {
+      query.then((exists) => {
         if (!exists) {
           throw createHttpError("Related Experience record not found.", 404, {
             relatedExperience: "Please select an existing Experience record.",
@@ -563,6 +576,47 @@ async function validateRelations(payload) {
   }
 
   await Promise.all(relationChecks);
+}
+
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
 }
 
 function parseQueryText(query, fieldName, { maxLength = 200 } = {}) {
@@ -866,12 +920,38 @@ async function createAdminCertificationAchievement(req, res, next) {
       recordData.slug = createDefaultSlug(recordData);
     }
 
-    await validateRelations(recordData);
-
     recordData.createdBy = req.admin._id;
     recordData.updatedBy = req.admin._id;
 
-    const record = await CertificationAchievement.create(recordData);
+    const record = await mongoose.connection.transaction(
+      async (session) => {
+        await validateRelations(recordData, session);
+
+        const [createdRecord] = await CertificationAchievement.create(
+          [recordData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "certification-achievement",
+            id: createdRecord._id,
+            label: createdRecord.title,
+            slug: createdRecord.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return createdRecord;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -898,33 +978,75 @@ async function updateAdminCertificationAchievement(req, res, next) {
       );
     }
 
-    const record = await CertificationAchievement.findById(req.params.id);
-
-    if (!record) {
-      throw createHttpError("Certification/Achievement not found.", 404);
-    }
-
     const recordData = buildPayload(requestBody);
 
-    if (hasOwnProperty(recordData, "slug") && !recordData.slug) {
-      recordData.slug = createDefaultSlug({
-        ...record.toObject(),
-        ...recordData,
-      });
-    }
+    const record = await mongoose.connection.transaction(
+      async (session) => {
+        const existingRecord = await CertificationAchievement.findById(
+          req.params.id,
+        ).session(session);
 
-    if (hasOwnProperty(recordData, "slug") && !recordData.slug) {
-      throw createHttpError("Slug cannot be empty.", 400, {
-        slug: "Slug cannot be empty.",
-      });
-    }
+        if (!existingRecord) {
+          throw createHttpError("Certification/Achievement not found.", 404);
+        }
 
-    await validateRelations(recordData);
+        if (hasOwnProperty(recordData, "slug") && !recordData.slug) {
+          recordData.slug = createDefaultSlug({
+            ...existingRecord.toObject(),
+            ...recordData,
+          });
+        }
 
-    record.set(recordData);
-    record.updatedBy = req.admin._id;
+        if (hasOwnProperty(recordData, "slug") && !recordData.slug) {
+          throw createHttpError("Slug cannot be empty.", 400, {
+            slug: "Slug cannot be empty.",
+          });
+        }
 
-    await record.save();
+        await validateRelations(recordData, session);
+
+        const previous = {
+          isVisible: existingRecord.isVisible,
+          isFeatured: existingRecord.isFeatured,
+          order: existingRecord.order,
+        };
+
+        existingRecord.set(recordData);
+        existingRecord.updatedBy = req.admin._id;
+
+        await existingRecord.save({
+          session,
+        });
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          previous,
+          {
+            isVisible: existingRecord.isVisible,
+            isFeatured: existingRecord.isFeatured,
+            order: existingRecord.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "certification-achievement",
+            id: existingRecord._id,
+            label: existingRecord.title,
+            slug: existingRecord.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return existingRecord;
+      },
+    );
 
     return res.status(200).json({
       success: true,
@@ -940,13 +1062,48 @@ async function deleteAdminCertificationAchievement(req, res, next) {
   try {
     validateRecordId(req.params.id);
 
-    const deletedRecord = await CertificationAchievement.findByIdAndDelete(
-      req.params.id,
-    );
+    const deletedRecord = await mongoose.connection.transaction(
+      async (session) => {
+        const record = await CertificationAchievement.findById(req.params.id)
+          .select("_id title type slug")
+          .session(session)
+          .lean();
 
-    if (!deletedRecord) {
-      throw createHttpError("Certification/Achievement not found.", 404);
-    }
+        if (!record) {
+          throw createHttpError("Certification/Achievement not found.", 404);
+        }
+
+        const deleteResult = await CertificationAchievement.deleteOne(
+          {
+            _id: record._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Certification/Achievement not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "certification-achievement",
+            id: record._id,
+            label: record.title,
+            slug: record.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return record;
+      },
+    );
 
     return res.status(200).json({
       success: true,

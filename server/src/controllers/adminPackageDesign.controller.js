@@ -12,6 +12,7 @@ import {
   acquirePackageDesignParentGuards,
   runPackageDesignParentTransaction,
 } from "../services/packageDesignParentGuard.service.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const ALLOWED_EDITABLE_FIELDS = new Set([
   "servicePackage",
@@ -857,6 +858,97 @@ function buildPayload(
   return payload;
 }
 
+function valuesMatch(first, second) {
+  if (first === null || first === undefined) {
+    return second === null || second === undefined;
+  }
+
+  if (second === null || second === undefined) {
+    return false;
+  }
+
+  if (
+    typeof first === "object" &&
+    first?._bsontype === "ObjectId"
+  ) {
+    return String(first) === String(second);
+  }
+
+  if (
+    typeof second === "object" &&
+    second?._bsontype === "ObjectId"
+  ) {
+    return String(first) === String(second);
+  }
+
+  return first === second;
+}
+
+function buildContentAuditChangeSet({
+  previous,
+  current,
+  relationshipField = null,
+  relationshipAuditField = null,
+}) {
+  const changedFields = [];
+  const changes = {};
+
+  const safeFields = [
+    "isVisible",
+    "isFeatured",
+    "order",
+  ];
+
+  for (const fieldName of safeFields) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      !valuesMatch(previous[fieldName], current[fieldName])
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  if (
+    relationshipField &&
+    relationshipAuditField &&
+    Object.prototype.hasOwnProperty.call(previous, relationshipField) &&
+    Object.prototype.hasOwnProperty.call(current, relationshipField) &&
+    !valuesMatch(
+      previous[relationshipField],
+      current[relationshipField],
+    )
+  ) {
+    changedFields.push(relationshipAuditField);
+    changes[relationshipAuditField] = {
+      from: previous[relationshipField] || null,
+      to: current[relationshipField] || null,
+    };
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function validateRecordId(
   value,
 ) {
@@ -1537,6 +1629,21 @@ async function createAdminPackageDesign(
               },
             );
 
+          await createAuditLog({
+            actor: req.admin,
+            category: "content",
+            action: "create",
+            outcome: "success",
+            resource: {
+              type: "package-design",
+              id: createdRecord._id,
+              label: createdRecord.name,
+              slug: createdRecord.slug,
+            },
+            request: req,
+            session,
+          });
+
           return createdRecord;
         },
       );
@@ -1686,6 +1793,17 @@ async function updateAdminPackageDesign(
             );
           }
 
+          const previous = {
+            servicePackage:
+              existingRecord.servicePackage,
+            isVisible:
+              existingRecord.isVisible,
+            isFeatured:
+              existingRecord.isFeatured,
+            order:
+              existingRecord.order,
+          };
+
           const finalIsDefault =
             hasOwnProperty(
               recordData,
@@ -1734,6 +1852,44 @@ async function updateAdminPackageDesign(
             },
           );
 
+          const auditChangeSet =
+            buildContentAuditChangeSet({
+              previous,
+              current: {
+                servicePackage:
+                  existingRecord.servicePackage,
+                isVisible:
+                  existingRecord.isVisible,
+                isFeatured:
+                  existingRecord.isFeatured,
+                order:
+                  existingRecord.order,
+              },
+              relationshipField:
+                "servicePackage",
+              relationshipAuditField:
+                "servicePackageId",
+            });
+
+          await createAuditLog({
+            actor: req.admin,
+            category: "content",
+            action: auditChangeSet.action,
+            outcome: "success",
+            resource: {
+              type: "package-design",
+              id: existingRecord._id,
+              label: existingRecord.name,
+              slug: existingRecord.slug,
+            },
+            changedFields:
+              auditChangeSet.changedFields,
+            changes:
+              auditChangeSet.changes,
+            request: req,
+            session,
+          });
+
           return existingRecord;
         },
       );
@@ -1764,16 +1920,65 @@ async function deleteAdminPackageDesign(
     );
 
     const deletedRecord =
-      await PackageDesign.findByIdAndDelete(
-        req.params.id,
-      );
+      await runPackageDesignParentTransaction(
+        async (session) => {
+          const record =
+            await PackageDesign.findById(
+              req.params.id,
+            )
+              .select(
+                "_id name slug servicePackage",
+              )
+              .session(
+                session,
+              );
 
-    if (!deletedRecord) {
-      throw createHttpError(
-        "Package Design not found.",
-        404,
+          if (!record) {
+            throw createHttpError(
+              "Package Design not found.",
+              404,
+            );
+          }
+
+          const deleteResult =
+            await PackageDesign.deleteOne(
+              {
+                _id:
+                  record._id,
+              },
+              {
+                session,
+              },
+            );
+
+          if (
+            deleteResult.deletedCount !==
+            1
+          ) {
+            throw createHttpError(
+              "Package Design not found.",
+              404,
+            );
+          }
+
+          await createAuditLog({
+            actor: req.admin,
+            category: "content",
+            action: "delete",
+            outcome: "success",
+            resource: {
+              type: "package-design",
+              id: record._id,
+              label: record.name,
+              slug: record.slug,
+            },
+            request: req,
+            session,
+          });
+
+          return record;
+        },
       );
-    }
 
     return res.status(200).json({
       success: true,

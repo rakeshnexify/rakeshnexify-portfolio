@@ -1,4 +1,5 @@
 import AdminUser from "../models/AdminUser.js";
+import { createAuditLogBestEffort } from "../services/auditLog.service.js";
 import { createAdminAccessToken } from "../utils/adminToken.js";
 
 const INVALID_LOGIN_MESSAGE = "Invalid admin email or password.";
@@ -55,6 +56,42 @@ function getRemainingLockSeconds(lockUntil) {
   );
 }
 
+async function recordAuthenticationAudit({
+  req,
+  adminUser = null,
+  actorType,
+  category = "authentication",
+  action,
+  outcome,
+}) {
+  const resource = {
+    type: "admin-auth",
+    label: "Admin authentication",
+  };
+
+  if (adminUser?._id) {
+    resource.id = adminUser._id;
+  }
+
+  await createAuditLogBestEffort({
+    actor:
+      adminUser
+        ? {
+            _id: adminUser._id,
+            name: adminUser.name,
+            email: adminUser.email,
+            role: adminUser.role,
+          }
+        : null,
+    actorType,
+    category,
+    action,
+    outcome,
+    resource,
+    request: req,
+  });
+}
+
 function sendLockedResponse(res, lockUntil) {
   const retryAfterSeconds = getRemainingLockSeconds(lockUntil);
 
@@ -86,6 +123,17 @@ async function loginAdmin(req, res, next) {
     );
 
     if (!adminUser || !adminUser.isActive) {
+      await recordAuthenticationAudit({
+        req,
+        adminUser: adminUser || null,
+        actorType:
+          adminUser
+            ? "admin"
+            : "anonymous",
+        action: "login-failed",
+        outcome: "failure",
+      });
+
       return res.status(401).json({
         success: false,
         message: INVALID_LOGIN_MESSAGE,
@@ -93,12 +141,29 @@ async function loginAdmin(req, res, next) {
     }
 
     if (adminUser.lockUntil && adminUser.lockUntil <= new Date()) {
-      adminUser.failedLoginAttempts = 0;
-      adminUser.lockUntil = null;
+      const expiredLockCutoff = new Date();
 
-      await adminUser.save({
-        validateBeforeSave: false,
-      });
+      const expiredLockResetResult =
+        await AdminUser.updateOne(
+          {
+            _id: adminUser._id,
+            lockUntil: {
+              $type: "date",
+              $lte: expiredLockCutoff,
+            },
+          },
+          {
+            $set: {
+              failedLoginAttempts: 0,
+              lockUntil: null,
+            },
+          },
+        );
+
+      if (expiredLockResetResult.modifiedCount === 1) {
+        adminUser.failedLoginAttempts = 0;
+        adminUser.lockUntil = null;
+      }
     }
 
     if (adminUser.isAccountLocked()) {
@@ -108,9 +173,34 @@ async function loginAdmin(req, res, next) {
     const passwordMatches = await adminUser.comparePassword(password);
 
     if (!passwordMatches) {
-      await adminUser.registerFailedLogin();
+      const failedLoginResult =
+        await adminUser.registerFailedLogin();
 
-      if (adminUser.isAccountLocked()) {
+      await recordAuthenticationAudit({
+        req,
+        adminUser,
+        actorType: "admin",
+        action: "login-failed",
+        outcome: "failure",
+      });
+
+      if (
+        failedLoginResult?.lockedNow
+      ) {
+        await recordAuthenticationAudit({
+          req,
+          adminUser,
+          actorType: "admin",
+          category: "security",
+          action: "account-lock",
+          outcome: "success",
+        });
+      }
+
+      if (
+        failedLoginResult?.isLocked ||
+        adminUser.isAccountLocked()
+      ) {
         return sendLockedResponse(res, adminUser.lockUntil);
       }
 
@@ -121,6 +211,14 @@ async function loginAdmin(req, res, next) {
     }
 
     await adminUser.registerSuccessfulLogin();
+
+    await recordAuthenticationAudit({
+      req,
+      adminUser,
+      actorType: "admin",
+      action: "login-success",
+      outcome: "success",
+    });
 
     const accessToken = createAdminAccessToken(adminUser);
 

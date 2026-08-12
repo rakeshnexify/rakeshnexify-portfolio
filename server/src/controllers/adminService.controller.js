@@ -6,6 +6,7 @@ import {
   acquireServicePackageParentGuards,
   runServicePackageParentTransaction,
 } from "../services/servicePackageParentGuard.service.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableStringFields = [
   "title",
@@ -139,6 +140,97 @@ function buildServicePayload(requestBody = {}) {
   }
 
   return payload;
+}
+
+function valuesMatch(first, second) {
+  if (first === null || first === undefined) {
+    return second === null || second === undefined;
+  }
+
+  if (second === null || second === undefined) {
+    return false;
+  }
+
+  if (
+    typeof first === "object" &&
+    first?._bsontype === "ObjectId"
+  ) {
+    return String(first) === String(second);
+  }
+
+  if (
+    typeof second === "object" &&
+    second?._bsontype === "ObjectId"
+  ) {
+    return String(first) === String(second);
+  }
+
+  return first === second;
+}
+
+function buildContentAuditChangeSet({
+  previous,
+  current,
+  relationshipField = null,
+  relationshipAuditField = null,
+}) {
+  const changedFields = [];
+  const changes = {};
+
+  const safeFields = [
+    "isVisible",
+    "isFeatured",
+    "order",
+  ];
+
+  for (const fieldName of safeFields) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      !valuesMatch(previous[fieldName], current[fieldName])
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  if (
+    relationshipField &&
+    relationshipAuditField &&
+    Object.prototype.hasOwnProperty.call(previous, relationshipField) &&
+    Object.prototype.hasOwnProperty.call(current, relationshipField) &&
+    !valuesMatch(
+      previous[relationshipField],
+      current[relationshipField],
+    )
+  ) {
+    changedFields.push(relationshipAuditField);
+    changes[relationshipAuditField] = {
+      from: previous[relationshipField] || null,
+      to: current[relationshipField] || null,
+    };
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
 }
 
 function parseBooleanQuery(value, fieldName) {
@@ -288,7 +380,33 @@ async function createAdminService(req, res, next) {
     serviceData.createdBy = req.admin._id;
     serviceData.updatedBy = req.admin._id;
 
-    const service = await Service.create(serviceData);
+    const service = await mongoose.connection.transaction(
+      async (session) => {
+        const [createdService] = await Service.create(
+          [serviceData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "service",
+            id: createdService._id,
+            label: createdService.title,
+            slug: createdService.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return createdService;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -315,20 +433,56 @@ async function updateAdminService(req, res, next) {
 
     serviceData.updatedBy = req.admin._id;
 
-    const updatedService = await Service.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: serviceData,
-      },
-      {
-        new: true,
-        runValidators: true,
+    const updatedService = await mongoose.connection.transaction(
+      async (session) => {
+        const service = await Service.findById(req.params.id)
+          .session(session);
+
+        if (!service) {
+          throw createHttpError("Service not found.", 404);
+        }
+
+        const previous = {
+          isVisible: service.isVisible,
+          isFeatured: service.isFeatured,
+          order: service.order,
+        };
+
+        service.set(serviceData);
+
+        await service.save({
+          session,
+        });
+
+        const auditChangeSet = buildContentAuditChangeSet({
+          previous,
+          current: {
+            isVisible: service.isVisible,
+            isFeatured: service.isFeatured,
+            order: service.order,
+          },
+        });
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "service",
+            id: service._id,
+            label: service.title,
+            slug: service.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return service;
       },
     );
-
-    if (!updatedService) {
-      throw createHttpError("Service not found.", 404);
-    }
 
     return res.status(200).json({
       success: true,
@@ -356,7 +510,7 @@ async function deleteAdminService(req, res, next) {
         }
 
         const service = await Service.findById(req.params.id)
-          .select("_id title")
+          .select("_id title slug")
           .session(session)
           .lean();
 
@@ -389,6 +543,21 @@ async function deleteAdminService(req, res, next) {
         if (deleteResult.deletedCount !== 1) {
           throw createHttpError("Service not found.", 404);
         }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "service",
+            id: service._id,
+            label: service.title,
+            slug: service.slug,
+          },
+          request: req,
+          session,
+        });
 
         return service;
       },

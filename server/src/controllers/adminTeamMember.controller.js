@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import TeamMember from "../models/TeamMember.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableStringFields = [
   "name",
@@ -278,6 +279,54 @@ function buildTeamMemberPayload(requestBody = {}) {
   return payload;
 }
 
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "status",
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  } else if (
+    Object.prototype.hasOwnProperty.call(previous, "status") &&
+    Object.prototype.hasOwnProperty.call(current, "status") &&
+    previous.status !== current.status
+  ) {
+    action = "status-change";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function parseBooleanQuery(value, fieldName) {
   if (value === undefined) {
     return undefined;
@@ -490,7 +539,33 @@ async function createAdminTeamMember(req, res, next) {
     teamMemberData.createdBy = req.admin._id;
     teamMemberData.updatedBy = req.admin._id;
 
-    const teamMember = await TeamMember.create(teamMemberData);
+    const teamMember = await mongoose.connection.transaction(
+      async (session) => {
+        const [createdTeamMember] = await TeamMember.create(
+          [teamMemberData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "team-member",
+            id: createdTeamMember._id,
+            label: createdTeamMember.name,
+            slug: createdTeamMember.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return createdTeamMember;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -525,20 +600,58 @@ async function updateAdminTeamMember(req, res, next) {
 
     teamMemberData.updatedBy = req.admin._id;
 
-    const updatedTeamMember = await TeamMember.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: teamMemberData,
-      },
-      {
-        new: true,
-        runValidators: true,
+    const updatedTeamMember = await mongoose.connection.transaction(
+      async (session) => {
+        const teamMember = await TeamMember.findById(req.params.id)
+          .session(session);
+
+        if (!teamMember) {
+          throw createHttpError("Team member not found.", 404);
+        }
+
+        const previous = {
+          status: teamMember.status,
+          isVisible: teamMember.isVisible,
+          isFeatured: teamMember.isFeatured,
+          order: teamMember.order,
+        };
+
+        teamMember.set(teamMemberData);
+
+        await teamMember.save({
+          session,
+        });
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          previous,
+          {
+            status: teamMember.status,
+            isVisible: teamMember.isVisible,
+            isFeatured: teamMember.isFeatured,
+            order: teamMember.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "team-member",
+            id: teamMember._id,
+            label: teamMember.name,
+            slug: teamMember.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return teamMember;
       },
     );
-
-    if (!updatedTeamMember) {
-      throw createHttpError("Team member not found.", 404);
-    }
 
     return res.status(200).json({
       success: true,
@@ -554,11 +667,48 @@ async function deleteAdminTeamMember(req, res, next) {
   try {
     validateTeamMemberId(req.params.id);
 
-    const deletedTeamMember = await TeamMember.findByIdAndDelete(req.params.id);
+    const deletedTeamMember = await mongoose.connection.transaction(
+      async (session) => {
+        const teamMember = await TeamMember.findById(req.params.id)
+          .select("_id name slug")
+          .session(session)
+          .lean();
 
-    if (!deletedTeamMember) {
-      throw createHttpError("Team member not found.", 404);
-    }
+        if (!teamMember) {
+          throw createHttpError("Team member not found.", 404);
+        }
+
+        const deleteResult = await TeamMember.deleteOne(
+          {
+            _id: teamMember._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Team member not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "team-member",
+            id: teamMember._id,
+            label: teamMember.name,
+            slug: teamMember.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return teamMember;
+      },
+    );
 
     return res.status(200).json({
       success: true,

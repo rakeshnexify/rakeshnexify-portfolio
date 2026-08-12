@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import ContactMessage, {
   contactMessageStatuses,
 } from "../models/ContactMessage.js";
+import Lead from "../models/Lead.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 function createHttpError(message, statusCode = 400, fieldErrors = {}) {
   const error = new Error(message);
@@ -366,7 +368,6 @@ async function updateAdminContactMessage(req, res, next) {
         : {};
 
     const hasStatus = hasOwnProperty(requestBody, "status");
-
     const hasAdminNote = hasOwnProperty(requestBody, "adminNote");
 
     if (!hasStatus && !hasAdminNote) {
@@ -376,31 +377,70 @@ async function updateAdminContactMessage(req, res, next) {
       );
     }
 
-    const message = await ContactMessage.findById(req.params.id);
+    const session = await mongoose.startSession();
 
-    if (!message) {
-      throw createHttpError("Contact message not found.", 404);
+    try {
+      let updatedMessage = null;
+
+      await session.withTransaction(async () => {
+        const message = await ContactMessage.findById(req.params.id)
+          .session(session);
+
+        if (!message) {
+          throw createHttpError("Contact message not found.", 404);
+        }
+
+        const previousStatus = message.status;
+
+        if (hasStatus) {
+          const nextStatus = cleanStatus(requestBody.status);
+          applyStatusMetadata(message, nextStatus, req.admin._id);
+        }
+
+        if (hasAdminNote) {
+          message.adminNote = cleanAdminNote(requestBody.adminNote);
+        }
+
+        await message.save({
+          session,
+        });
+
+        const statusChanged = previousStatus !== message.status;
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "workflow",
+          action: statusChanged ? "status-change" : "update",
+          outcome: "success",
+          resource: {
+            type: "contact-message",
+            id: message._id,
+            label: "Contact message",
+          },
+          changedFields: statusChanged ? ["status"] : [],
+          changes: statusChanged
+            ? {
+                status: {
+                  from: previousStatus,
+                  to: message.status,
+                },
+              }
+            : {},
+          request: req,
+          session,
+        });
+
+        updatedMessage = message.toObject();
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Contact message updated successfully.",
+        data: updatedMessage,
+      });
+    } finally {
+      await session.endSession();
     }
-
-    if (hasStatus) {
-      const nextStatus = cleanStatus(requestBody.status);
-
-      applyStatusMetadata(message, nextStatus, req.admin._id);
-    }
-
-    if (hasAdminNote) {
-      message.adminNote = cleanAdminNote(requestBody.adminNote);
-    }
-
-    await message.save();
-
-    return res.status(200).json({
-      success: true,
-
-      message: "Contact message updated successfully.",
-
-      data: message,
-    });
   } catch (error) {
     return sendContactMessageError(error, res, next);
   }
@@ -410,29 +450,77 @@ async function deleteAdminContactMessage(req, res, next) {
   try {
     validateMessageId(req.params.id);
 
-    const deletedMessage = await ContactMessage.findByIdAndDelete(
-      req.params.id,
-    );
+    const session = await mongoose.startSession();
 
-    if (!deletedMessage) {
-      throw createHttpError("Contact message not found.", 404);
+    try {
+      let deletedMessageSnapshot = null;
+
+      await session.withTransaction(async () => {
+        const message = await ContactMessage.findById(req.params.id)
+          .select("_id name email subject")
+          .session(session)
+          .lean();
+
+        if (!message) {
+          throw createHttpError("Contact message not found.", 404);
+        }
+
+        const linkedLead = await Lead.findOne({
+          sourceContactMessage: message._id,
+        })
+          .select("_id")
+          .session(session)
+          .lean();
+
+        if (linkedLead) {
+          throw createHttpError(
+            "This contact message cannot be deleted because it has already been converted to a Lead.",
+            409,
+            {
+              contactMessage:
+                "Remove or resolve the linked Lead before deleting this contact message.",
+            },
+          );
+        }
+
+        const deleteResult = await ContactMessage.deleteOne({
+          _id: message._id,
+        }).session(session);
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Contact message not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "workflow",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "contact-message",
+            id: message._id,
+            label: "Contact message",
+          },
+          request: req,
+          session,
+        });
+
+        deletedMessageSnapshot = message;
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Contact message permanently deleted.",
+        data: {
+          id: deletedMessageSnapshot._id,
+          name: deletedMessageSnapshot.name,
+          email: deletedMessageSnapshot.email,
+          subject: deletedMessageSnapshot.subject,
+        },
+      });
+    } finally {
+      await session.endSession();
     }
-
-    return res.status(200).json({
-      success: true,
-
-      message: "Contact message permanently deleted.",
-
-      data: {
-        id: deletedMessage._id,
-
-        name: deletedMessage.name,
-
-        email: deletedMessage.email,
-
-        subject: deletedMessage.subject,
-      },
-    });
   } catch (error) {
     return sendContactMessageError(error, res, next);
   }

@@ -4,6 +4,7 @@ import Education, {
   EDUCATION_TYPES,
   createEducationIdentityKey,
 } from "../models/Education.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableStringFields = [
   "institutionName",
@@ -228,6 +229,47 @@ function buildEducationPayload(requestBody = {}) {
   return payload;
 }
 
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function parseBooleanQuery(value, fieldName) {
   if (value === undefined) {
     return undefined;
@@ -264,6 +306,7 @@ function hasCompleteIdentityFields(educationData) {
 async function ensureUniqueEducationIdentity(
   educationData,
   excludedEducationId = null,
+  session = null,
 ) {
   if (!hasCompleteIdentityFields(educationData)) {
     return;
@@ -279,9 +322,13 @@ async function ensureUniqueEducationIdentity(
     };
   }
 
-  const existingEducation = await Education.findOne(filter)
-    .select("_id")
-    .lean();
+  let query = Education.findOne(filter).select("_id");
+
+  if (session) {
+    query = query.session(session);
+  }
+
+  const existingEducation = await query.lean();
 
   if (existingEducation) {
     throw createHttpError(
@@ -489,12 +536,42 @@ async function createAdminEducation(req, res, next) {
       educationData.slug = createDefaultEducationSlug(educationData);
     }
 
-    await ensureUniqueEducationIdentity(educationData);
-
     educationData.createdBy = req.admin._id;
     educationData.updatedBy = req.admin._id;
 
-    const education = await Education.create(educationData);
+    const education = await mongoose.connection.transaction(
+      async (session) => {
+        await ensureUniqueEducationIdentity(
+          educationData,
+          null,
+          session,
+        );
+
+        const [createdEducation] = await Education.create(
+          [educationData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "education",
+            id: createdEducation._id,
+            label: createdEducation.institutionName,
+            slug: createdEducation.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return createdEducation;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -519,32 +596,77 @@ async function updateAdminEducation(req, res, next) {
       );
     }
 
-    const education = await Education.findById(req.params.id);
+    const education = await mongoose.connection.transaction(
+      async (session) => {
+        const record = await Education.findById(req.params.id)
+          .session(session);
 
-    if (!education) {
-      throw createHttpError("Education record not found.", 404);
-    }
+        if (!record) {
+          throw createHttpError("Education record not found.", 404);
+        }
 
-    if (hasOwnProperty(educationData, "slug") && !educationData.slug) {
-      educationData.slug = createDefaultEducationSlug({
-        ...education.toObject(),
-        ...educationData,
-      });
-    }
+        if (hasOwnProperty(educationData, "slug") && !educationData.slug) {
+          educationData.slug = createDefaultEducationSlug({
+            ...record.toObject(),
+            ...educationData,
+          });
+        }
 
-    if (hasOwnProperty(educationData, "slug") && !educationData.slug) {
-      throw createHttpError("Education slug cannot be empty.", 400, {
-        slug: "Education slug cannot be empty.",
-      });
-    }
+        if (hasOwnProperty(educationData, "slug") && !educationData.slug) {
+          throw createHttpError("Education slug cannot be empty.", 400, {
+            slug: "Education slug cannot be empty.",
+          });
+        }
 
-    education.set(educationData);
+        const previous = {
+          isVisible: record.isVisible,
+          isFeatured: record.isFeatured,
+          order: record.order,
+        };
 
-    await ensureUniqueEducationIdentity(education, education._id);
+        record.set(educationData);
 
-    education.updatedBy = req.admin._id;
+        await ensureUniqueEducationIdentity(
+          record,
+          record._id,
+          session,
+        );
 
-    await education.save();
+        record.updatedBy = req.admin._id;
+
+        await record.save({
+          session,
+        });
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          previous,
+          {
+            isVisible: record.isVisible,
+            isFeatured: record.isFeatured,
+            order: record.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "education",
+            id: record._id,
+            label: record.institutionName,
+            slug: record.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return record;
+      },
+    );
 
     return res.status(200).json({
       success: true,
@@ -560,11 +682,48 @@ async function deleteAdminEducation(req, res, next) {
   try {
     validateEducationId(req.params.id);
 
-    const deletedEducation = await Education.findByIdAndDelete(req.params.id);
+    const deletedEducation = await mongoose.connection.transaction(
+      async (session) => {
+        const record = await Education.findById(req.params.id)
+          .select("_id institutionName degree slug")
+          .session(session)
+          .lean();
 
-    if (!deletedEducation) {
-      throw createHttpError("Education record not found.", 404);
-    }
+        if (!record) {
+          throw createHttpError("Education record not found.", 404);
+        }
+
+        const deleteResult = await Education.deleteOne(
+          {
+            _id: record._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Education record not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "education",
+            id: record._id,
+            label: record.institutionName,
+            slug: record.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return record;
+      },
+    );
 
     return res.status(200).json({
       success: true,

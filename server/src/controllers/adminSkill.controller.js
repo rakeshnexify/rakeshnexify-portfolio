@@ -4,6 +4,7 @@ import Skill, {
   normalizeSkillNameKey,
   proficiencyLevels,
 } from "../models/Skill.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableStringFields = [
   "name",
@@ -168,6 +169,54 @@ function buildSkillPayload(requestBody = {}) {
   return payload;
 }
 
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "status",
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  } else if (
+    Object.prototype.hasOwnProperty.call(previous, "status") &&
+    Object.prototype.hasOwnProperty.call(current, "status") &&
+    previous.status !== current.status
+  ) {
+    action = "status-change";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function parseBooleanQuery(value, fieldName) {
   if (value === undefined) {
     return undefined;
@@ -186,7 +235,11 @@ function validateSkillId(skillId) {
   }
 }
 
-async function ensureUniqueSkillName(name, excludedSkillId = null) {
+async function ensureUniqueSkillName(
+  name,
+  excludedSkillId = null,
+  session = null,
+) {
   if (!name) {
     return;
   }
@@ -201,7 +254,13 @@ async function ensureUniqueSkillName(name, excludedSkillId = null) {
     };
   }
 
-  const existingSkill = await Skill.findOne(filter).select("_id").lean();
+  let query = Skill.findOne(filter).select("_id");
+
+  if (session) {
+    query = query.session(session);
+  }
+
+  const existingSkill = await query.lean();
 
   if (existingSkill) {
     throw createHttpError("A Skill with the same name already exists.", 409, {
@@ -381,12 +440,42 @@ async function createAdminSkill(req, res, next) {
       skillData.slug = createSlug(skillData.name);
     }
 
-    await ensureUniqueSkillName(skillData.name);
-
     skillData.createdBy = req.admin._id;
     skillData.updatedBy = req.admin._id;
 
-    const skill = await Skill.create(skillData);
+    const skill = await mongoose.connection.transaction(
+      async (session) => {
+        await ensureUniqueSkillName(
+          skillData.name,
+          null,
+          session,
+        );
+
+        const [createdSkill] = await Skill.create(
+          [skillData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "skill",
+            id: createdSkill._id,
+            label: createdSkill.name,
+            slug: createdSkill.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return createdSkill;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -425,26 +514,66 @@ async function updateAdminSkill(req, res, next) {
       );
     }
 
-    if (skillData.name) {
-      await ensureUniqueSkillName(skillData.name, req.params.id);
-    }
-
     skillData.updatedBy = req.admin._id;
 
-    const updatedSkill = await Skill.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: skillData,
-      },
-      {
-        new: true,
-        runValidators: true,
+    const updatedSkill = await mongoose.connection.transaction(
+      async (session) => {
+        const skill = await Skill.findById(req.params.id)
+          .session(session);
+
+        if (!skill) {
+          throw createHttpError("Skill not found.", 404);
+        }
+
+        if (skillData.name) {
+          await ensureUniqueSkillName(
+            skillData.name,
+            req.params.id,
+            session,
+          );
+        }
+
+        const previous = {
+          isVisible: skill.isVisible,
+          isFeatured: skill.isFeatured,
+          order: skill.order,
+        };
+
+        skill.set(skillData);
+
+        await skill.save({
+          session,
+        });
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          previous,
+          {
+            isVisible: skill.isVisible,
+            isFeatured: skill.isFeatured,
+            order: skill.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "skill",
+            id: skill._id,
+            label: skill.name,
+            slug: skill.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return skill;
       },
     );
-
-    if (!updatedSkill) {
-      throw createHttpError("Skill not found.", 404);
-    }
 
     return res.status(200).json({
       success: true,
@@ -460,11 +589,48 @@ async function deleteAdminSkill(req, res, next) {
   try {
     validateSkillId(req.params.id);
 
-    const deletedSkill = await Skill.findByIdAndDelete(req.params.id);
+    const deletedSkill = await mongoose.connection.transaction(
+      async (session) => {
+        const skill = await Skill.findById(req.params.id)
+          .select("_id name slug")
+          .session(session)
+          .lean();
 
-    if (!deletedSkill) {
-      throw createHttpError("Skill not found.", 404);
-    }
+        if (!skill) {
+          throw createHttpError("Skill not found.", 404);
+        }
+
+        const deleteResult = await Skill.deleteOne(
+          {
+            _id: skill._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Skill not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "skill",
+            id: skill._id,
+            label: skill.name,
+            slug: skill.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return skill;
+      },
+    );
 
     return res.status(200).json({
       success: true,

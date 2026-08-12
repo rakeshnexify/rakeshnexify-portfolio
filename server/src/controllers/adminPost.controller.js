@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 import Post, { POST_TYPES } from "../models/Post.js";
 import Project from "../models/Project.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableSingleLineStringFields = [
   "title",
@@ -372,6 +373,47 @@ function createPostUpdateSet(postData) {
   return updateSet;
 }
 
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function parseBooleanQuery(value, fieldName) {
   if (value === undefined || value === "") {
     return undefined;
@@ -428,18 +470,25 @@ function validatePostId(postId) {
   }
 }
 
-async function validateRelatedProjects(projectIds = []) {
+async function validateRelatedProjects(
+  projectIds = [],
+  session = null,
+) {
   if (projectIds.length === 0) {
     return;
   }
 
-  const existingProjects = await Project.find({
+  let query = Project.find({
     _id: {
       $in: projectIds,
     },
-  })
-    .select("_id")
-    .lean();
+  }).select("_id");
+
+  if (session) {
+    query = query.session(session);
+  }
+
+  const existingProjects = await query.lean();
 
   if (existingProjects.length !== projectIds.length) {
     throw createHttpError(
@@ -627,12 +676,41 @@ async function createAdminPost(req, res, next) {
       postData.slug = createSlug(postData.title);
     }
 
-    await validateRelatedProjects(postData.relatedProjects || []);
-
     postData.createdBy = req.admin._id;
     postData.updatedBy = req.admin._id;
 
-    const post = await Post.create(postData);
+    const post = await mongoose.connection.transaction(
+      async (session) => {
+        await validateRelatedProjects(
+          postData.relatedProjects || [],
+          session,
+        );
+
+        const [createdPost] = await Post.create(
+          [postData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "post",
+            id: createdPost._id,
+            label: createdPost.title,
+            slug: createdPost.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return createdPost;
+      },
+    );
 
     await populateRelatedProjects(post);
 
@@ -661,10 +739,6 @@ async function updateAdminPost(req, res, next) {
       postData.slug = createSlug(postData.title);
     }
 
-    if (hasOwnProperty(postData, "relatedProjects")) {
-      await validateRelatedProjects(postData.relatedProjects);
-    }
-
     const updateSet = createPostUpdateSet(postData);
 
     if (Object.keys(updateSet).length === 0) {
@@ -676,20 +750,73 @@ async function updateAdminPost(req, res, next) {
 
     updateSet.updatedBy = req.admin._id;
 
-    const post = await Post.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: updateSet,
-      },
-      {
-        new: true,
-        runValidators: true,
+    const post = await mongoose.connection.transaction(
+      async (session) => {
+        const existingPost = await Post.findById(req.params.id)
+          .select("_id isVisible isFeatured order")
+          .session(session)
+          .lean();
+
+        if (!existingPost) {
+          throw createHttpError("Post not found.", 404);
+        }
+
+        if (hasOwnProperty(postData, "relatedProjects")) {
+          await validateRelatedProjects(
+            postData.relatedProjects,
+            session,
+          );
+        }
+
+        const updatedPost = await Post.findByIdAndUpdate(
+          req.params.id,
+          {
+            $set: updateSet,
+          },
+          {
+            new: true,
+            runValidators: true,
+            session,
+          },
+        );
+
+        if (!updatedPost) {
+          throw createHttpError("Post not found.", 404);
+        }
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          {
+            isVisible: existingPost.isVisible,
+            isFeatured: existingPost.isFeatured,
+            order: existingPost.order,
+          },
+          {
+            isVisible: updatedPost.isVisible,
+            isFeatured: updatedPost.isFeatured,
+            order: updatedPost.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "post",
+            id: updatedPost._id,
+            label: updatedPost.title,
+            slug: updatedPost.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return updatedPost;
       },
     );
-
-    if (!post) {
-      throw createHttpError("Post not found.", 404);
-    }
 
     await populateRelatedProjects(post);
 
@@ -707,11 +834,48 @@ async function deleteAdminPost(req, res, next) {
   try {
     validatePostId(req.params.id);
 
-    const post = await Post.findByIdAndDelete(req.params.id);
+    const post = await mongoose.connection.transaction(
+      async (session) => {
+        const existingPost = await Post.findById(req.params.id)
+          .select("_id title slug type")
+          .session(session)
+          .lean();
 
-    if (!post) {
-      throw createHttpError("Post not found.", 404);
-    }
+        if (!existingPost) {
+          throw createHttpError("Post not found.", 404);
+        }
+
+        const deleteResult = await Post.deleteOne(
+          {
+            _id: existingPost._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Post not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "post",
+            id: existingPost._id,
+            label: existingPost.title,
+            slug: existingPost.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return existingPost;
+      },
+    );
 
     return res.status(200).json({
       success: true,

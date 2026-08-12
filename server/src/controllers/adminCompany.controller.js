@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import Company from "../models/Company.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableStringFields = [
   "name",
@@ -307,6 +308,54 @@ function buildCompanyPayload(requestBody = {}) {
   return payload;
 }
 
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "status",
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  } else if (
+    Object.prototype.hasOwnProperty.call(previous, "status") &&
+    Object.prototype.hasOwnProperty.call(current, "status") &&
+    previous.status !== current.status
+  ) {
+    action = "status-change";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function parseBooleanQuery(value, fieldName) {
   if (value === undefined) {
     return undefined;
@@ -525,10 +574,35 @@ async function createAdminCompany(req, res, next) {
     }
 
     companyData.createdBy = req.admin._id;
-
     companyData.updatedBy = req.admin._id;
 
-    const company = await Company.create(companyData);
+    const company = await mongoose.connection.transaction(
+      async (session) => {
+        const [createdCompany] = await Company.create(
+          [companyData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "company",
+            id: createdCompany._id,
+            label: createdCompany.name,
+            slug: createdCompany.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return createdCompany;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -565,20 +639,58 @@ async function updateAdminCompany(req, res, next) {
 
     companyData.updatedBy = req.admin._id;
 
-    const updatedCompany = await Company.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: companyData,
-      },
-      {
-        new: true,
-        runValidators: true,
+    const updatedCompany = await mongoose.connection.transaction(
+      async (session) => {
+        const company = await Company.findById(req.params.id)
+          .session(session);
+
+        if (!company) {
+          throw createHttpError("Company not found.", 404);
+        }
+
+        const previous = {
+          status: company.status,
+          isVisible: company.isVisible,
+          isFeatured: company.isFeatured,
+          order: company.order,
+        };
+
+        company.set(companyData);
+
+        await company.save({
+          session,
+        });
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          previous,
+          {
+            status: company.status,
+            isVisible: company.isVisible,
+            isFeatured: company.isFeatured,
+            order: company.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "company",
+            id: company._id,
+            label: company.name,
+            slug: company.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return company;
       },
     );
-
-    if (!updatedCompany) {
-      throw createHttpError("Company not found.", 404);
-    }
 
     return res.status(200).json({
       success: true,
@@ -596,11 +708,48 @@ async function deleteAdminCompany(req, res, next) {
   try {
     validateCompanyId(req.params.id);
 
-    const deletedCompany = await Company.findByIdAndDelete(req.params.id);
+    const deletedCompany = await mongoose.connection.transaction(
+      async (session) => {
+        const company = await Company.findById(req.params.id)
+          .select("_id name slug")
+          .session(session)
+          .lean();
 
-    if (!deletedCompany) {
-      throw createHttpError("Company not found.", 404);
-    }
+        if (!company) {
+          throw createHttpError("Company not found.", 404);
+        }
+
+        const deleteResult = await Company.deleteOne(
+          {
+            _id: company._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Company not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "company",
+            id: company._id,
+            label: company.name,
+            slug: company.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return company;
+      },
+    );
 
     return res.status(200).json({
       success: true,

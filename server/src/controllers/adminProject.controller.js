@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import Project from "../models/Project.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableStringFields = [
   "title",
@@ -408,6 +409,62 @@ function buildProjectUpdateSet(projectData) {
   return updateSet;
 }
 
+function valuesMatch(first, second) {
+  if (first === null || first === undefined) {
+    return second === null || second === undefined;
+  }
+
+  if (second === null || second === undefined) {
+    return false;
+  }
+
+  return first === second;
+}
+
+function buildProjectAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "status",
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (!valuesMatch(previous[fieldName], current[fieldName])) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  const caseStudyPublishedChanged =
+    previous.caseStudyIsPublished !==
+    current.caseStudyIsPublished;
+
+  let action = "update";
+
+  if (previous.isVisible !== current.isVisible) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  } else if (caseStudyPublishedChanged) {
+    action = current.caseStudyIsPublished
+      ? "publish"
+      : "unpublish";
+  } else if (previous.status !== current.status) {
+    action = "status-change";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function parseBooleanQuery(value, fieldName) {
   if (value === undefined) {
     return undefined;
@@ -648,10 +705,35 @@ async function createAdminProject(req, res, next) {
     }
 
     projectData.createdBy = req.admin._id;
-
     projectData.updatedBy = req.admin._id;
 
-    const project = await Project.create(projectData);
+    const project = await mongoose.connection.transaction(
+      async (session) => {
+        const [createdProject] = await Project.create(
+          [projectData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "project",
+            id: createdProject._id,
+            label: createdProject.title,
+            slug: createdProject.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return createdProject;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -688,20 +770,74 @@ async function updateAdminProject(req, res, next) {
 
     const updateSet = buildProjectUpdateSet(projectData);
 
-    const updatedProject = await Project.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: updateSet,
-      },
-      {
-        new: true,
-        runValidators: true,
+    const updatedProject = await mongoose.connection.transaction(
+      async (session) => {
+        const existingProject = await Project.findById(req.params.id)
+          .select(
+            "_id title slug status isVisible isFeatured order caseStudy.isPublished",
+          )
+          .session(session)
+          .lean();
+
+        if (!existingProject) {
+          throw createHttpError("Project not found.", 404);
+        }
+
+        const project = await Project.findByIdAndUpdate(
+          req.params.id,
+          {
+            $set: updateSet,
+          },
+          {
+            new: true,
+            runValidators: true,
+            session,
+          },
+        );
+
+        if (!project) {
+          throw createHttpError("Project not found.", 404);
+        }
+
+        const auditChangeSet = buildProjectAuditChangeSet(
+          {
+            status: existingProject.status,
+            isVisible: existingProject.isVisible,
+            isFeatured: existingProject.isFeatured,
+            order: existingProject.order,
+            caseStudyIsPublished:
+              Boolean(existingProject.caseStudy?.isPublished),
+          },
+          {
+            status: project.status,
+            isVisible: project.isVisible,
+            isFeatured: project.isFeatured,
+            order: project.order,
+            caseStudyIsPublished:
+              Boolean(project.caseStudy?.isPublished),
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "project",
+            id: project._id,
+            label: project.title,
+            slug: project.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return project;
       },
     );
-
-    if (!updatedProject) {
-      throw createHttpError("Project not found.", 404);
-    }
 
     return res.status(200).json({
       success: true,
@@ -717,11 +853,48 @@ async function deleteAdminProject(req, res, next) {
   try {
     validateProjectId(req.params.id);
 
-    const deletedProject = await Project.findByIdAndDelete(req.params.id);
+    const deletedProject = await mongoose.connection.transaction(
+      async (session) => {
+        const project = await Project.findById(req.params.id)
+          .select("_id title slug")
+          .session(session)
+          .lean();
 
-    if (!deletedProject) {
-      throw createHttpError("Project not found.", 404);
-    }
+        if (!project) {
+          throw createHttpError("Project not found.", 404);
+        }
+
+        const deleteResult = await Project.deleteOne(
+          {
+            _id: project._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Project not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "project",
+            id: project._id,
+            label: project.title,
+            slug: project.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return project;
+      },
+    );
 
     return res.status(200).json({
       success: true,

@@ -7,6 +7,7 @@ import Experience, {
   createExperienceIdentityKey,
   normalizeExperienceStringArray,
 } from "../models/Experience.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableStringFields = [
   "organizationName",
@@ -311,6 +312,47 @@ function buildExperiencePayload(requestBody = {}) {
   return payload;
 }
 
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function parseBooleanQuery(value, fieldName) {
   if (value === undefined) {
     return undefined;
@@ -346,6 +388,7 @@ function hasCompleteIdentityFields(experienceData) {
 async function ensureUniqueExperienceIdentity(
   experienceData,
   excludedExperienceId = null,
+  session = null,
 ) {
   if (!hasCompleteIdentityFields(experienceData)) {
     return;
@@ -361,9 +404,13 @@ async function ensureUniqueExperienceIdentity(
     };
   }
 
-  const existingExperience = await Experience.findOne(filter)
-    .select("_id")
-    .lean();
+  let query = Experience.findOne(filter).select("_id");
+
+  if (session) {
+    query = query.session(session);
+  }
+
+  const existingExperience = await query.lean();
 
   if (existingExperience) {
     throw createHttpError(
@@ -580,12 +627,42 @@ async function createAdminExperience(req, res, next) {
       experienceData.slug = createDefaultExperienceSlug(experienceData);
     }
 
-    await ensureUniqueExperienceIdentity(experienceData);
-
     experienceData.createdBy = req.admin._id;
     experienceData.updatedBy = req.admin._id;
 
-    const experience = await Experience.create(experienceData);
+    const experience = await mongoose.connection.transaction(
+      async (session) => {
+        await ensureUniqueExperienceIdentity(
+          experienceData,
+          null,
+          session,
+        );
+
+        const [createdExperience] = await Experience.create(
+          [experienceData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "experience",
+            id: createdExperience._id,
+            label: createdExperience.organizationName,
+            slug: createdExperience.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return createdExperience;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -610,32 +687,77 @@ async function updateAdminExperience(req, res, next) {
       );
     }
 
-    const experience = await Experience.findById(req.params.id);
+    const experience = await mongoose.connection.transaction(
+      async (session) => {
+        const record = await Experience.findById(req.params.id)
+          .session(session);
 
-    if (!experience) {
-      throw createHttpError("Experience record not found.", 404);
-    }
+        if (!record) {
+          throw createHttpError("Experience record not found.", 404);
+        }
 
-    if (hasOwnProperty(experienceData, "slug") && !experienceData.slug) {
-      experienceData.slug = createDefaultExperienceSlug({
-        ...experience.toObject(),
-        ...experienceData,
-      });
-    }
+        if (hasOwnProperty(experienceData, "slug") && !experienceData.slug) {
+          experienceData.slug = createDefaultExperienceSlug({
+            ...record.toObject(),
+            ...experienceData,
+          });
+        }
 
-    if (hasOwnProperty(experienceData, "slug") && !experienceData.slug) {
-      throw createHttpError("Experience slug cannot be empty.", 400, {
-        slug: "Experience slug cannot be empty.",
-      });
-    }
+        if (hasOwnProperty(experienceData, "slug") && !experienceData.slug) {
+          throw createHttpError("Experience slug cannot be empty.", 400, {
+            slug: "Experience slug cannot be empty.",
+          });
+        }
 
-    experience.set(experienceData);
+        const previous = {
+          isVisible: record.isVisible,
+          isFeatured: record.isFeatured,
+          order: record.order,
+        };
 
-    await ensureUniqueExperienceIdentity(experience, experience._id);
+        record.set(experienceData);
 
-    experience.updatedBy = req.admin._id;
+        await ensureUniqueExperienceIdentity(
+          record,
+          record._id,
+          session,
+        );
 
-    await experience.save();
+        record.updatedBy = req.admin._id;
+
+        await record.save({
+          session,
+        });
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          previous,
+          {
+            isVisible: record.isVisible,
+            isFeatured: record.isFeatured,
+            order: record.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "experience",
+            id: record._id,
+            label: record.organizationName,
+            slug: record.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return record;
+      },
+    );
 
     return res.status(200).json({
       success: true,
@@ -651,11 +773,48 @@ async function deleteAdminExperience(req, res, next) {
   try {
     validateExperienceId(req.params.id);
 
-    const deletedExperience = await Experience.findByIdAndDelete(req.params.id);
+    const deletedExperience = await mongoose.connection.transaction(
+      async (session) => {
+        const record = await Experience.findById(req.params.id)
+          .select("_id organizationName jobTitle slug")
+          .session(session)
+          .lean();
 
-    if (!deletedExperience) {
-      throw createHttpError("Experience record not found.", 404);
-    }
+        if (!record) {
+          throw createHttpError("Experience record not found.", 404);
+        }
+
+        const deleteResult = await Experience.deleteOne(
+          {
+            _id: record._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Experience record not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "experience",
+            id: record._id,
+            label: record.organizationName,
+            slug: record.slug,
+          },
+          request: req,
+          session,
+        });
+
+        return record;
+      },
+    );
 
     return res.status(200).json({
       success: true,

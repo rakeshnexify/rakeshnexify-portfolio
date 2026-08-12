@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import ServiceOrder, {
   serviceOrderStatuses,
 } from "../models/ServiceOrder.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const ALLOWED_LIST_QUERY_FIELDS = new Set([
   "search",
@@ -374,42 +375,84 @@ async function updateAdminServiceOrder(req, res, next) {
       );
     }
 
-    const order = await ServiceOrder.findById(req.params.id);
+    const session = await mongoose.startSession();
 
-    if (!order) {
-      throw createHttpError("Service Order not found.", 404);
-    }
+    try {
+      let updatedOrderId = null;
 
-    if (Object.prototype.hasOwnProperty.call(requestBody, "status")) {
-      order.status = cleanStatus(requestBody.status, {
-        required: true,
+      await session.withTransaction(async () => {
+        const order = await ServiceOrder.findById(req.params.id)
+          .session(session);
+
+        if (!order) {
+          throw createHttpError("Service Order not found.", 404);
+        }
+
+        const previousStatus = order.status;
+
+        if (Object.prototype.hasOwnProperty.call(requestBody, "status")) {
+          order.status = cleanStatus(requestBody.status, {
+            required: true,
+          });
+        }
+
+        if (Object.prototype.hasOwnProperty.call(requestBody, "adminNotes")) {
+          order.adminNotes = cleanString(requestBody.adminNotes, {
+            fieldName: "adminNotes",
+            fieldLabel: "Admin notes",
+            maxLength: 5000,
+          });
+        }
+
+        order.updatedBy = req.admin._id;
+
+        await order.save({
+          session,
+        });
+
+        const statusChanged = previousStatus !== order.status;
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "workflow",
+          action: statusChanged ? "status-change" : "update",
+          outcome: "success",
+          resource: {
+            type: "service-order",
+            id: order._id,
+            label: `Service order ${order.orderNumber}`,
+          },
+          changedFields: statusChanged ? ["status"] : [],
+          changes: statusChanged
+            ? {
+                status: {
+                  from: previousStatus,
+                  to: order.status,
+                },
+              }
+            : {},
+          request: req,
+          session,
+        });
+
+        updatedOrderId = order._id;
       });
-    }
 
-    if (Object.prototype.hasOwnProperty.call(requestBody, "adminNotes")) {
-      order.adminNotes = cleanString(requestBody.adminNotes, {
-        fieldName: "adminNotes",
-        fieldLabel: "Admin notes",
-        maxLength: 5000,
+      const updatedOrder = await ServiceOrder.findById(updatedOrderId)
+        .populate({
+          path: "updatedBy",
+          select: "_id name email role",
+        })
+        .lean();
+
+      return res.status(200).json({
+        success: true,
+        message: "Service Order updated successfully.",
+        data: updatedOrder,
       });
+    } finally {
+      await session.endSession();
     }
-
-    order.updatedBy = req.admin._id;
-
-    await order.save();
-
-    const updatedOrder = await ServiceOrder.findById(order._id)
-      .populate({
-        path: "updatedBy",
-        select: "_id name email role",
-      })
-      .lean();
-
-    return res.status(200).json({
-      success: true,
-      message: "Service Order updated successfully.",
-      data: updatedOrder,
-    });
   } catch (error) {
     return sendServiceOrderError(error, res, next);
   }
@@ -419,21 +462,58 @@ async function deleteAdminServiceOrder(req, res, next) {
   try {
     validateOrderId(req.params.id);
 
-    const deletedOrder = await ServiceOrder.findByIdAndDelete(req.params.id);
+    const session = await mongoose.startSession();
 
-    if (!deletedOrder) {
-      throw createHttpError("Service Order not found.", 404);
+    try {
+      let deletedOrderSnapshot = null;
+
+      await session.withTransaction(async () => {
+        const order = await ServiceOrder.findById(req.params.id)
+          .select("_id orderNumber customerName")
+          .session(session)
+          .lean();
+
+        if (!order) {
+          throw createHttpError("Service Order not found.", 404);
+        }
+
+        const deleteResult = await ServiceOrder.deleteOne({
+          _id: order._id,
+        }).session(session);
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Service Order not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "workflow",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "service-order",
+            id: order._id,
+            label: `Service order ${order.orderNumber}`,
+          },
+          request: req,
+          session,
+        });
+
+        deletedOrderSnapshot = order;
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Service Order permanently deleted.",
+        data: {
+          id: deletedOrderSnapshot._id,
+          orderNumber: deletedOrderSnapshot.orderNumber,
+          customerName: deletedOrderSnapshot.customerName,
+        },
+      });
+    } finally {
+      await session.endSession();
     }
-
-    return res.status(200).json({
-      success: true,
-      message: "Service Order permanently deleted.",
-      data: {
-        id: deletedOrder._id,
-        orderNumber: deletedOrder.orderNumber,
-        customerName: deletedOrder.customerName,
-      },
-    });
   } catch (error) {
     return sendServiceOrderError(error, res, next);
   }

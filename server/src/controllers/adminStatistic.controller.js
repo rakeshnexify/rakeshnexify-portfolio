@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import Statistic from "../models/Statistic.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableStringFields = [
   "key",
@@ -91,6 +92,54 @@ function buildStatisticPayload(requestBody = {}) {
   }
 
   return payload;
+}
+
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "status",
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  } else if (
+    Object.prototype.hasOwnProperty.call(previous, "status") &&
+    Object.prototype.hasOwnProperty.call(current, "status") &&
+    previous.status !== current.status
+  ) {
+    action = "status-change";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
 }
 
 function parseBooleanQuery(value, fieldName) {
@@ -267,7 +316,33 @@ async function createAdminStatistic(req, res, next) {
     statisticData.createdBy = req.admin._id;
     statisticData.updatedBy = req.admin._id;
 
-    const statistic = await Statistic.create(statisticData);
+    const statistic = await mongoose.connection.transaction(
+      async (session) => {
+        const [createdStatistic] = await Statistic.create(
+          [statisticData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "statistic",
+            id: createdStatistic._id,
+            label: createdStatistic.label,
+            slug: createdStatistic.key,
+          },
+          request: req,
+          session,
+        });
+
+        return createdStatistic;
+      },
+    );
 
     return res.status(201).json({
       success: true,
@@ -296,20 +371,56 @@ async function updateAdminStatistic(req, res, next) {
 
     statisticData.updatedBy = req.admin._id;
 
-    const updatedStatistic = await Statistic.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: statisticData,
-      },
-      {
-        new: true,
-        runValidators: true,
+    const updatedStatistic = await mongoose.connection.transaction(
+      async (session) => {
+        const existingStatistic = await Statistic.findById(req.params.id)
+          .session(session);
+
+        if (!existingStatistic) {
+          throw createHttpError("Statistic not found.", 404);
+        }
+
+        const previous = {
+          isVisible: existingStatistic.isVisible,
+          isFeatured: existingStatistic.isFeatured,
+          order: existingStatistic.order,
+        };
+
+        existingStatistic.set(statisticData);
+
+        await existingStatistic.save({
+          session,
+        });
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          previous,
+          {
+            isVisible: existingStatistic.isVisible,
+            isFeatured: existingStatistic.isFeatured,
+            order: existingStatistic.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "statistic",
+            id: existingStatistic._id,
+            label: existingStatistic.label,
+            slug: existingStatistic.key,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return existingStatistic;
       },
     );
-
-    if (!updatedStatistic) {
-      throw createHttpError("Statistic not found.", 404);
-    }
 
     return res.status(200).json({
       success: true,
@@ -327,11 +438,48 @@ async function deleteAdminStatistic(req, res, next) {
   try {
     validateStatisticId(req.params.id);
 
-    const deletedStatistic = await Statistic.findByIdAndDelete(req.params.id);
+    const deletedStatistic = await mongoose.connection.transaction(
+      async (session) => {
+        const statistic = await Statistic.findById(req.params.id)
+          .select("_id key label")
+          .session(session)
+          .lean();
 
-    if (!deletedStatistic) {
-      throw createHttpError("Statistic not found.", 404);
-    }
+        if (!statistic) {
+          throw createHttpError("Statistic not found.", 404);
+        }
+
+        const deleteResult = await Statistic.deleteOne(
+          {
+            _id: statistic._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Statistic not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "statistic",
+            id: statistic._id,
+            label: statistic.label,
+            slug: statistic.key,
+          },
+          request: req,
+          session,
+        });
+
+        return statistic;
+      },
+    );
 
     return res.status(200).json({
       success: true,

@@ -1,5 +1,6 @@
 import SiteSettings from "../models/SiteSettings.js";
 import { mergeHomepageSections } from "../config/homepageSections.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const MAIN_SITE_KEY = "main";
 
@@ -702,7 +703,18 @@ function buildSiteSettingsPayload(requestBody) {
   return payload;
 }
 
-async function getOrCreateMainSettings() {
+async function getOrCreateMainSettings(session = null) {
+  const options = {
+    new: true,
+    upsert: true,
+    setDefaultsOnInsert: true,
+    runValidators: true,
+  };
+
+  if (session) {
+    options.session = session;
+  }
+
   return SiteSettings.findOneAndUpdate(
     {
       siteKey: MAIN_SITE_KEY,
@@ -712,12 +724,7 @@ async function getOrCreateMainSettings() {
         siteKey: MAIN_SITE_KEY,
       },
     },
-    {
-      new: true,
-      upsert: true,
-      setDefaultsOnInsert: true,
-      runValidators: true,
-    },
+    options,
   );
 }
 
@@ -828,13 +835,48 @@ async function updateAdminSiteSettings(req, res, next) {
       );
     }
 
-    const settings = await getOrCreateMainSettings();
+    const settings = await SiteSettings.db.transaction(
+      async (session) => {
+        const currentSettings = await getOrCreateMainSettings(session);
 
-    settings.set(updateData);
+        const previousIsPublished =
+          Boolean(currentSettings.isPublished);
 
-    settings.updatedBy = req.admin._id;
+        currentSettings.set(updateData);
+        currentSettings.updatedBy = req.admin._id;
 
-    await settings.save();
+        await currentSettings.save({
+          session,
+        });
+
+        let action = "update";
+
+        if (
+          previousIsPublished !==
+          Boolean(currentSettings.isPublished)
+        ) {
+          action = currentSettings.isPublished
+            ? "publish"
+            : "unpublish";
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "configuration",
+          action,
+          outcome: "success",
+          resource: {
+            type: "site-settings",
+            id: currentSettings._id,
+            label: "Main site settings",
+          },
+          request: req,
+          session,
+        });
+
+        return currentSettings;
+      },
+    );
 
     return res.status(200).json({
       success: true,

@@ -13,6 +13,10 @@ import {
 } from "../services/mediaStorage.service.js";
 
 import { getMediaUsageSummary } from "../services/mediaReference.service.js";
+import {
+  createAuditLog,
+  createAuditLogBestEffort,
+} from "../services/auditLog.service.js";
 
 import { validateMediaFile } from "../utils/mediaFileValidation.js";
 
@@ -897,41 +901,45 @@ async function createAdminMedia(request, response, next) {
 
     storedAsset = await uploadMediaAsset({
       filePath: request.file.path,
-
       validatedFile,
     });
 
     const media = await Media.create({
       ...storedAsset,
-
       originalName: validatedFile.originalName,
-
       title: metadata.title,
-
       altText: metadata.altText,
-
       isDecorative: metadata.isDecorative,
-
       caption: metadata.caption,
-
       description: metadata.description,
-
       folder: metadata.folder,
-
       tags: metadata.tags,
-
       uploadedBy: request.admin._id,
-
       updatedBy: request.admin._id,
     });
 
     databaseRecordCreated = true;
 
+    await createAuditLogBestEffort({
+      actor: request.admin,
+      category: "media",
+      action: "upload",
+      outcome: "success",
+      resource: {
+        type: "media",
+        id: media._id,
+        label: "Media asset",
+      },
+      metadata: {
+        mediaType: media.mediaType,
+        provider: media.provider,
+      },
+      request,
+    });
+
     return response.status(201).json({
       success: true,
-
       message: "Media uploaded successfully.",
-
       data: media,
     });
   } catch (error) {
@@ -958,12 +966,6 @@ async function updateAdminMedia(request, response, next) {
 
     validateMediaId(request.params.id);
 
-    const media = await Media.findById(request.params.id);
-
-    if (!media) {
-      throw createHttpError("Media record not found.", 404);
-    }
-
     const payload = buildMediaUpdatePayload(request.body);
 
     if (Object.keys(payload).length === 0) {
@@ -973,23 +975,51 @@ async function updateAdminMedia(request, response, next) {
       );
     }
 
-    for (const fieldName of EDITABLE_MEDIA_FIELDS) {
-      if (hasOwnProperty(payload, fieldName)) {
-        media[fieldName] = payload[fieldName];
+    let updatedMediaId = null;
+
+    await mongoose.connection.transaction(async (session) => {
+      const media = await Media.findById(request.params.id)
+        .session(session);
+
+      if (!media) {
+        throw createHttpError("Media record not found.", 404);
       }
-    }
 
-    media.updatedBy = request.admin._id;
+      for (const fieldName of EDITABLE_MEDIA_FIELDS) {
+        if (hasOwnProperty(payload, fieldName)) {
+          media[fieldName] = payload[fieldName];
+        }
+      }
 
-    await media.save();
+      media.updatedBy = request.admin._id;
 
-    await media.populate(createAdminPopulation());
+      await media.save({
+        session,
+      });
+
+      await createAuditLog({
+        actor: request.admin,
+        category: "media",
+        action: "update",
+        outcome: "success",
+        resource: {
+          type: "media",
+          id: media._id,
+          label: "Media asset",
+        },
+        request,
+        session,
+      });
+
+      updatedMediaId = media._id;
+    });
+
+    const media = await Media.findById(updatedMediaId)
+      .populate(createAdminPopulation());
 
     return response.status(200).json({
       success: true,
-
       message: "Media metadata updated successfully.",
-
       data: media,
     });
   } catch (error) {
@@ -1025,26 +1055,41 @@ async function deleteAdminMedia(request, response, next) {
 
     await destroyCloudinaryAsset({
       providerPublicId: media.providerPublicId,
-
       providerResourceType: media.providerResourceType,
     });
 
-    await Media.deleteOne({
+    const deleteResult = await Media.deleteOne({
       _id: media._id,
+    });
+
+    if (deleteResult.deletedCount !== 1) {
+      throw createHttpError("Media record not found.", 404);
+    }
+
+    await createAuditLogBestEffort({
+      actor: request.admin,
+      category: "media",
+      action: "delete",
+      outcome: "success",
+      resource: {
+        type: "media",
+        id: media._id,
+        label: "Media asset",
+      },
+      metadata: {
+        mediaType: media.mediaType,
+        provider: media.provider,
+      },
+      request,
     });
 
     return response.status(200).json({
       success: true,
-
       message: "Media permanently deleted.",
-
       data: {
         id: media._id,
-
         title: media.title,
-
         originalName: media.originalName,
-
         mediaType: media.mediaType,
       },
     });

@@ -160,6 +160,14 @@ const dashboardModules = [
     status: "Management ready",
     path: "/admin/contact-messages",
   },
+  {
+    title: "Admin Activity / Audit Log",
+    description:
+      "Review immutable authentication, security, content, workflow, configuration and Media activity across the Admin system.",
+    status: "Super Admin only",
+    path: "/admin/audit-logs",
+    roles: ["super-admin"],
+  },
 ];
 
 function formatRole(role = "") {
@@ -204,6 +212,12 @@ function AdminDashboardPage() {
   const location = useLocation();
   const { admin, accessToken, logout } = useAdminAuth();
   const [analyticsRange, setAnalyticsRange] = useState("30d");
+
+  const visibleDashboardModules = dashboardModules.filter(
+    (module) =>
+      !Array.isArray(module.roles) ||
+      module.roles.includes(admin?.role),
+  );
 
   function handleLogout() {
     logout();
@@ -438,7 +452,7 @@ function AdminDashboardPage() {
           </div>
 
           <div className="mt-5 grid min-w-0 gap-6 [&>*]:min-w-0 md:grid-cols-2">
-          {dashboardModules.map((module) => (
+          {visibleDashboardModules.map((module) => (
             <article
               key={module.title}
               className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-brand-200 hover:shadow-lg"

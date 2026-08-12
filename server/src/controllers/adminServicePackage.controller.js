@@ -16,6 +16,7 @@ import {
   acquireServicePackageParentGuards,
   runServicePackageParentTransaction,
 } from "../services/servicePackageParentGuard.service.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const ALLOWED_EDITABLE_FIELDS = new Set([
   "service",
@@ -641,6 +642,97 @@ function buildPayload(requestBody) {
   return payload;
 }
 
+function valuesMatch(first, second) {
+  if (first === null || first === undefined) {
+    return second === null || second === undefined;
+  }
+
+  if (second === null || second === undefined) {
+    return false;
+  }
+
+  if (
+    typeof first === "object" &&
+    first?._bsontype === "ObjectId"
+  ) {
+    return String(first) === String(second);
+  }
+
+  if (
+    typeof second === "object" &&
+    second?._bsontype === "ObjectId"
+  ) {
+    return String(first) === String(second);
+  }
+
+  return first === second;
+}
+
+function buildContentAuditChangeSet({
+  previous,
+  current,
+  relationshipField = null,
+  relationshipAuditField = null,
+}) {
+  const changedFields = [];
+  const changes = {};
+
+  const safeFields = [
+    "isVisible",
+    "isFeatured",
+    "order",
+  ];
+
+  for (const fieldName of safeFields) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      !valuesMatch(previous[fieldName], current[fieldName])
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  if (
+    relationshipField &&
+    relationshipAuditField &&
+    Object.prototype.hasOwnProperty.call(previous, relationshipField) &&
+    Object.prototype.hasOwnProperty.call(current, relationshipField) &&
+    !valuesMatch(
+      previous[relationshipField],
+      current[relationshipField],
+    )
+  ) {
+    changedFields.push(relationshipAuditField);
+    changes[relationshipAuditField] = {
+      from: previous[relationshipField] || null,
+      to: current[relationshipField] || null,
+    };
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function validateRecordId(value) {
   if (!mongoose.isValidObjectId(value)) {
     throw createHttpError("Invalid Service Package ID.", 400, {
@@ -964,6 +1056,21 @@ async function createAdminServicePackage(req, res, next) {
           { session },
         );
 
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "service-package",
+            id: createdRecord._id,
+            label: createdRecord.name,
+            slug: createdRecord.slug,
+          },
+          request: req,
+          session,
+        });
+
         return createdRecord;
       },
     );
@@ -1041,10 +1148,46 @@ async function updateAdminServicePackage(req, res, next) {
           );
         }
 
+        const previous = {
+          service: existingRecord.service,
+          isVisible: existingRecord.isVisible,
+          isFeatured: existingRecord.isFeatured,
+          order: existingRecord.order,
+        };
+
         existingRecord.set(recordData);
         existingRecord.updatedBy = req.admin._id;
 
         await existingRecord.save({ session });
+
+        const auditChangeSet = buildContentAuditChangeSet({
+          previous,
+          current: {
+            service: existingRecord.service,
+            isVisible: existingRecord.isVisible,
+            isFeatured: existingRecord.isFeatured,
+            order: existingRecord.order,
+          },
+          relationshipField: "service",
+          relationshipAuditField: "serviceId",
+        });
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "service-package",
+            id: existingRecord._id,
+            label: existingRecord.name,
+            slug: existingRecord.slug,
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
 
         return existingRecord;
       },
@@ -1102,6 +1245,21 @@ async function deleteAdminServicePackage(req, res, next) {
         if (!record) {
           throw createHttpError("Service Package not found.", 404);
         }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "service-package",
+            id: record._id,
+            label: record.name,
+            slug: record.slug,
+          },
+          request: req,
+          session,
+        });
 
         return record;
       },

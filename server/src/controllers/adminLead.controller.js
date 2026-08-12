@@ -7,6 +7,7 @@ import Lead, {
   leadStatuses,
 } from "../models/Lead.js";
 import Service from "../models/Service.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const ACTIVE_LEAD_STATUSES = [
   "new",
@@ -896,7 +897,7 @@ function buildStatusCounts(aggregationResults) {
   return counts;
 }
 
-async function resolveAssignedAdmin(value) {
+async function resolveAssignedAdmin(value, session = null) {
   if (value === undefined) {
     return undefined;
   }
@@ -911,12 +912,16 @@ async function resolveAssignedAdmin(value) {
     "assigned Admin ID",
   );
 
-  const adminUser = await AdminUser.findOne({
+  let adminQuery = AdminUser.findOne({
     _id: adminId,
     isActive: true,
-  })
-    .select("_id")
-    .lean();
+  }).select("_id");
+
+  if (session) {
+    adminQuery = adminQuery.session(session);
+  }
+
+  const adminUser = await adminQuery.lean();
 
   if (!adminUser) {
     throw createHttpError("Assigned Admin is unavailable.", 400, {
@@ -927,7 +932,7 @@ async function resolveAssignedAdmin(value) {
   return adminUser._id;
 }
 
-async function resolveService(value) {
+async function resolveService(value, session = null) {
   if (value === undefined) {
     return undefined;
   }
@@ -938,9 +943,14 @@ async function resolveService(value) {
 
   const serviceId = validateObjectId(value, "service", "service ID");
 
-  const service = await Service.findById(serviceId)
-    .select("_id slug title")
-    .lean();
+  let serviceQuery = Service.findById(serviceId)
+    .select("_id slug title");
+
+  if (session) {
+    serviceQuery = serviceQuery.session(session);
+  }
+
+  const service = await serviceQuery.lean();
 
   if (!service) {
     throw createHttpError("Selected Service was not found.", 400, {
@@ -949,6 +959,53 @@ async function resolveService(value) {
   }
 
   return service;
+}
+
+function objectIdValuesMatch(first, second) {
+  const firstValue = first ? String(first) : "";
+  const secondValue = second ? String(second) : "";
+
+  return firstValue === secondValue;
+}
+
+function buildLeadAuditChangeSet({
+  previousStatus,
+  nextStatus,
+  previousAssignedTo,
+  nextAssignedTo,
+}) {
+  const changedFields = [];
+  const changes = {};
+
+  if (previousStatus !== nextStatus) {
+    changedFields.push("status");
+    changes.status = {
+      from: previousStatus,
+      to: nextStatus,
+    };
+  }
+
+  if (!objectIdValuesMatch(previousAssignedTo, nextAssignedTo)) {
+    changedFields.push("assignedTo");
+    changes.assignedTo = {
+      from: previousAssignedTo || null,
+      to: nextAssignedTo || null,
+    };
+  }
+
+  let action = "update";
+
+  if (changedFields.includes("status")) {
+    action = "status-change";
+  } else if (changedFields.includes("assignedTo")) {
+    action = "assignment-change";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
 }
 
 function applyStatusMetadata(lead, nextStatus, adminId) {
@@ -1307,31 +1364,16 @@ async function getAdminLeadById(req, res, next) {
 }
 
 async function createAdminLead(req, res, next) {
+  const session = await mongoose.startSession();
+
   try {
     const requestBody = requireObjectBody(req);
 
     assertAllowedFields(requestBody, ALLOWED_CREATE_FIELDS);
 
-    const fields = buildCommonLeadFields(requestBody, {
+    const commonFields = buildCommonLeadFields(requestBody, {
       isCreate: true,
     });
-
-    const assignedTo = await resolveAssignedAdmin(requestBody.assignedTo);
-
-    const service = await resolveService(requestBody.service);
-
-    if (assignedTo !== undefined) {
-      fields.assignedTo = assignedTo;
-    }
-
-    if (service !== undefined) {
-      fields.service = service?._id || null;
-
-      if (service) {
-        fields.serviceSlug = service.slug;
-        fields.serviceTitle = service.title;
-      }
-    }
 
     const nextStatus =
       requestBody.status === undefined
@@ -1342,26 +1384,75 @@ async function createAdminLead(req, res, next) {
       ? cleanLostReasonForStatus(requestBody.lostReason, nextStatus)
       : "";
 
-    const lead = new Lead({
-      ...fields,
-      status: "new",
-      lostReason,
-      createdBy: req.admin._id,
-      updatedBy: req.admin._id,
+    let createdLeadId = null;
+
+    await session.withTransaction(async () => {
+      const fields = {
+        ...commonFields,
+      };
+
+      const assignedTo = await resolveAssignedAdmin(
+        requestBody.assignedTo,
+        session,
+      );
+
+      const service = await resolveService(
+        requestBody.service,
+        session,
+      );
+
+      if (assignedTo !== undefined) {
+        fields.assignedTo = assignedTo;
+      }
+
+      if (service !== undefined) {
+        fields.service = service?._id || null;
+
+        if (service) {
+          fields.serviceSlug = service.slug;
+          fields.serviceTitle = service.title;
+        }
+      }
+
+      const lead = new Lead({
+        ...fields,
+        status: "new",
+        lostReason,
+        createdBy: req.admin._id,
+        updatedBy: req.admin._id,
+      });
+
+      if (nextStatus !== "new") {
+        applyStatusMetadata(lead, nextStatus, req.admin._id);
+
+        if (nextStatus === "lost") {
+          lead.lostReason = lostReason;
+        }
+      }
+
+      await lead.save({
+        session,
+      });
+
+      await createAuditLog({
+        actor: req.admin,
+        category: "workflow",
+        action: "create",
+        outcome: "success",
+        resource: {
+          type: "lead",
+          id: lead._id,
+          label: "CRM lead",
+        },
+        request: req,
+        session,
+      });
+
+      createdLeadId = lead._id;
     });
 
-    if (nextStatus !== "new") {
-      applyStatusMetadata(lead, nextStatus, req.admin._id);
-
-      if (nextStatus === "lost") {
-        lead.lostReason = lostReason;
-      }
-    }
-
-    await lead.save();
-
     const savedLead = await populateLeadDetailQuery(
-      Lead.findById(lead._id),
+      Lead.findById(createdLeadId),
     ).lean();
 
     return res.status(201).json({
@@ -1371,10 +1462,14 @@ async function createAdminLead(req, res, next) {
     });
   } catch (error) {
     return sendLeadError(error, res, next);
+  } finally {
+    await session.endSession();
   }
 }
 
 async function updateAdminLead(req, res, next) {
+  const session = await mongoose.startSession();
+
   try {
     validateLeadId(req.params.id);
 
@@ -1386,74 +1481,115 @@ async function updateAdminLead(req, res, next) {
       throw createHttpError("At least one lead field is required.", 400);
     }
 
-    const lead = await Lead.findById(req.params.id);
+    let updatedLeadId = null;
 
-    if (!lead) {
-      throw createHttpError("Lead not found.", 404);
-    }
+    await session.withTransaction(async () => {
+      const lead = await Lead.findById(req.params.id)
+        .session(session);
 
-    const nextStatus = hasOwnProperty(requestBody, "status")
-      ? cleanStatus(requestBody.status)
-      : lead.status;
+      if (!lead) {
+        throw createHttpError("Lead not found.", 404);
+      }
 
-    const nextLostReason = hasOwnProperty(requestBody, "lostReason")
-      ? cleanLostReasonForStatus(requestBody.lostReason, nextStatus)
-      : undefined;
+      const previousStatus = lead.status;
+      const previousAssignedTo = lead.assignedTo;
 
-    const previousServiceId = lead.service ? String(lead.service) : "";
-    const previousServiceSlug = lead.serviceSlug;
-    const previousServiceTitle = lead.serviceTitle;
+      const nextStatus = hasOwnProperty(requestBody, "status")
+        ? cleanStatus(requestBody.status)
+        : lead.status;
 
-    const fields = buildCommonLeadFields(requestBody);
+      const nextLostReason = hasOwnProperty(requestBody, "lostReason")
+        ? cleanLostReasonForStatus(requestBody.lostReason, nextStatus)
+        : undefined;
 
-    Object.entries(fields).forEach(([fieldName, fieldValue]) => {
-      lead[fieldName] = fieldValue;
+      const previousServiceId = lead.service ? String(lead.service) : "";
+      const previousServiceSlug = lead.serviceSlug;
+      const previousServiceTitle = lead.serviceTitle;
+
+      const fields = buildCommonLeadFields(requestBody);
+
+      Object.entries(fields).forEach(([fieldName, fieldValue]) => {
+        lead[fieldName] = fieldValue;
+      });
+
+      if (hasOwnProperty(requestBody, "assignedTo")) {
+        lead.assignedTo = await resolveAssignedAdmin(
+          requestBody.assignedTo,
+          session,
+        );
+      }
+
+      if (hasOwnProperty(requestBody, "service")) {
+        const service = await resolveService(
+          requestBody.service,
+          session,
+        );
+
+        const nextServiceId = service?._id ? String(service._id) : "";
+
+        const serviceRelationshipChanged =
+          previousServiceId !== nextServiceId;
+
+        lead.service = service?._id || null;
+
+        if (serviceRelationshipChanged && service) {
+          lead.serviceSlug = service.slug;
+          lead.serviceTitle = service.title;
+        }
+
+        if (serviceRelationshipChanged && !service) {
+          lead.serviceSlug = previousServiceSlug;
+          lead.serviceTitle = previousServiceTitle;
+        }
+
+        if (!serviceRelationshipChanged) {
+          lead.serviceSlug = previousServiceSlug;
+          lead.serviceTitle = previousServiceTitle;
+        }
+      }
+
+      if (hasOwnProperty(requestBody, "status")) {
+        applyStatusMetadata(lead, nextStatus, req.admin._id);
+      }
+
+      if (nextLostReason !== undefined) {
+        lead.lostReason = nextLostReason;
+      }
+
+      lead.updatedBy = req.admin._id;
+
+      await lead.save({
+        session,
+      });
+
+      const auditChangeSet = buildLeadAuditChangeSet({
+        previousStatus,
+        nextStatus: lead.status,
+        previousAssignedTo,
+        nextAssignedTo: lead.assignedTo,
+      });
+
+      await createAuditLog({
+        actor: req.admin,
+        category: "workflow",
+        action: auditChangeSet.action,
+        outcome: "success",
+        resource: {
+          type: "lead",
+          id: lead._id,
+          label: "CRM lead",
+        },
+        changedFields: auditChangeSet.changedFields,
+        changes: auditChangeSet.changes,
+        request: req,
+        session,
+      });
+
+      updatedLeadId = lead._id;
     });
 
-    if (hasOwnProperty(requestBody, "assignedTo")) {
-      lead.assignedTo = await resolveAssignedAdmin(requestBody.assignedTo);
-    }
-
-    if (hasOwnProperty(requestBody, "service")) {
-      const service = await resolveService(requestBody.service);
-
-      const nextServiceId = service?._id ? String(service._id) : "";
-
-      const serviceRelationshipChanged =
-        previousServiceId !== nextServiceId;
-
-      lead.service = service?._id || null;
-
-      if (serviceRelationshipChanged && service) {
-        lead.serviceSlug = service.slug;
-        lead.serviceTitle = service.title;
-      }
-
-      if (serviceRelationshipChanged && !service) {
-        lead.serviceSlug = previousServiceSlug;
-        lead.serviceTitle = previousServiceTitle;
-      }
-
-      if (!serviceRelationshipChanged) {
-        lead.serviceSlug = previousServiceSlug;
-        lead.serviceTitle = previousServiceTitle;
-      }
-    }
-
-    if (hasOwnProperty(requestBody, "status")) {
-      applyStatusMetadata(lead, nextStatus, req.admin._id);
-    }
-
-    if (nextLostReason !== undefined) {
-      lead.lostReason = nextLostReason;
-    }
-
-    lead.updatedBy = req.admin._id;
-
-    await lead.save();
-
     const updatedLead = await populateLeadDetailQuery(
-      Lead.findById(lead._id),
+      Lead.findById(updatedLeadId),
     ).lean();
 
     return res.status(200).json({
@@ -1463,10 +1599,14 @@ async function updateAdminLead(req, res, next) {
     });
   } catch (error) {
     return sendLeadError(error, res, next);
+  } finally {
+    await session.endSession();
   }
 }
 
 async function addAdminLeadNote(req, res, next) {
+  const session = await mongoose.startSession();
+
   try {
     validateLeadId(req.params.id);
 
@@ -1482,23 +1622,51 @@ async function addAdminLeadNote(req, res, next) {
       maxLength: 3000,
     });
 
-    const lead = await Lead.findById(req.params.id);
+    let updatedLeadId = null;
 
-    if (!lead) {
-      throw createHttpError("Lead not found.", 404);
-    }
+    await session.withTransaction(async () => {
+      const lead = await Lead.findById(req.params.id)
+        .session(session);
 
-    lead.notes.push({
-      text,
-      createdBy: req.admin._id,
+      if (!lead) {
+        throw createHttpError("Lead not found.", 404);
+      }
+
+      lead.notes.push({
+        text,
+        createdBy: req.admin._id,
+      });
+
+      const addedNote = lead.notes[lead.notes.length - 1];
+
+      lead.updatedBy = req.admin._id;
+
+      await lead.save({
+        session,
+      });
+
+      await createAuditLog({
+        actor: req.admin,
+        category: "workflow",
+        action: "note-added",
+        outcome: "success",
+        resource: {
+          type: "lead",
+          id: lead._id,
+          label: "CRM lead",
+        },
+        metadata: {
+          noteId: addedNote._id,
+        },
+        request: req,
+        session,
+      });
+
+      updatedLeadId = lead._id;
     });
 
-    lead.updatedBy = req.admin._id;
-
-    await lead.save();
-
     const updatedLead = await populateLeadDetailQuery(
-      Lead.findById(lead._id),
+      Lead.findById(updatedLeadId),
     ).lean();
 
     return res.status(201).json({
@@ -1508,35 +1676,74 @@ async function addAdminLeadNote(req, res, next) {
     });
   } catch (error) {
     return sendLeadError(error, res, next);
+  } finally {
+    await session.endSession();
   }
 }
 
 async function deleteAdminLead(req, res, next) {
+  const session = await mongoose.startSession();
+
   try {
     validateLeadId(req.params.id);
 
-    const deletedLead = await Lead.findByIdAndDelete(req.params.id);
+    let deletedLeadSnapshot = null;
 
-    if (!deletedLead) {
-      throw createHttpError("Lead not found.", 404);
-    }
+    await session.withTransaction(async () => {
+      const lead = await Lead.findById(req.params.id)
+        .select("_id name email subject")
+        .session(session)
+        .lean();
+
+      if (!lead) {
+        throw createHttpError("Lead not found.", 404);
+      }
+
+      const deleteResult = await Lead.deleteOne({
+        _id: lead._id,
+      }).session(session);
+
+      if (deleteResult.deletedCount !== 1) {
+        throw createHttpError("Lead not found.", 404);
+      }
+
+      await createAuditLog({
+        actor: req.admin,
+        category: "workflow",
+        action: "delete",
+        outcome: "success",
+        resource: {
+          type: "lead",
+          id: lead._id,
+          label: "CRM lead",
+        },
+        request: req,
+        session,
+      });
+
+      deletedLeadSnapshot = lead;
+    });
 
     return res.status(200).json({
       success: true,
       message: "Lead permanently deleted.",
       data: {
-        id: deletedLead._id,
-        name: deletedLead.name,
-        email: deletedLead.email,
-        subject: deletedLead.subject,
+        id: deletedLeadSnapshot._id,
+        name: deletedLeadSnapshot.name,
+        email: deletedLeadSnapshot.email,
+        subject: deletedLeadSnapshot.subject,
       },
     });
   } catch (error) {
     return sendLeadError(error, res, next);
+  } finally {
+    await session.endSession();
   }
 }
 
 async function convertContactMessageToLead(req, res, next) {
+  const session = await mongoose.startSession();
+
   try {
     validateObjectId(req.params.id, "id", "contact message ID");
 
@@ -1556,83 +1763,138 @@ async function convertContactMessageToLead(req, res, next) {
 
     assertAllowedFields(requestBody, allowedConversionFields);
 
-    const message = await ContactMessage.findById(req.params.id).lean();
+    let createdLeadId = null;
 
-    if (!message) {
-      throw createHttpError("Contact message not found.", 404);
-    }
+    await session.withTransaction(async () => {
+      const message = await ContactMessage.findById(req.params.id)
+        .session(session)
+        .lean();
 
-    const existingLead = await Lead.findOne({
-      sourceContactMessage: message._id,
-    })
-      .select("_id")
-      .lean();
+      if (!message) {
+        throw createHttpError("Contact message not found.", 404);
+      }
 
-    if (existingLead) {
-      throw createHttpError(
-        "This contact message has already been converted to a lead.",
-        409,
+      const existingLead = await Lead.findOne({
+        sourceContactMessage: message._id,
+      })
+        .select("_id")
+        .session(session)
+        .lean();
+
+      if (existingLead) {
+        throw createHttpError(
+          "This contact message has already been converted to a lead.",
+          409,
+          {
+            sourceContactMessage:
+              "This contact message has already been converted to a lead.",
+          },
+        );
+      }
+
+      const assignedTo = hasOwnProperty(requestBody, "assignedTo")
+        ? await resolveAssignedAdmin(requestBody.assignedTo, session)
+        : null;
+
+      let serviceQuery = message.service
+        ? Service.findOne({
+            slug: message.service,
+          }).select("_id slug title")
+        : null;
+
+      if (serviceQuery) {
+        serviceQuery = serviceQuery.session(session);
+      }
+
+      const service = serviceQuery
+        ? await serviceQuery.lean()
+        : null;
+
+      const lead = new Lead({
+        name: message.name,
+        email: message.email,
+        phone: message.phone || "",
+        company: hasOwnProperty(requestBody, "company")
+          ? cleanString(requestBody.company, {
+              fieldName: "company",
+              fieldLabel: "Company name",
+              maxLength: 160,
+            })
+          : "",
+        source: message.source || "portfolio-website",
+        sourceContactMessage: message._id,
+        service: service?._id || null,
+        serviceSlug: message.service || service?.slug || "",
+        serviceTitle: message.serviceTitle || service?.title || "",
+        subject: message.subject,
+        requirementSummary: message.message || "",
+        status: "new",
+        priority: hasOwnProperty(requestBody, "priority")
+          ? cleanPriority(requestBody.priority)
+          : "medium",
+        estimatedValue: hasOwnProperty(requestBody, "estimatedValue")
+          ? cleanNullableMoney(requestBody.estimatedValue)
+          : null,
+        currency: hasOwnProperty(requestBody, "currency")
+          ? cleanCurrency(requestBody.currency)
+          : "USD",
+        assignedTo,
+        nextFollowUpAt: hasOwnProperty(requestBody, "nextFollowUpAt")
+          ? cleanNullableDate(
+              requestBody.nextFollowUpAt,
+              "nextFollowUpAt",
+              "Next follow-up date",
+            )
+          : null,
+        createdBy: req.admin._id,
+        updatedBy: req.admin._id,
+      });
+
+      const messageTouchResult = await ContactMessage.updateOne(
         {
-          sourceContactMessage:
-            "This contact message has already been converted to a lead.",
+          _id: message._id,
+        },
+        {
+          $set: {
+            updatedAt: new Date(),
+          },
+        },
+        {
+          session,
         },
       );
-    }
 
-    const assignedTo = hasOwnProperty(requestBody, "assignedTo")
-      ? await resolveAssignedAdmin(requestBody.assignedTo)
-      : null;
+      if (messageTouchResult.matchedCount !== 1) {
+        throw createHttpError("Contact message not found.", 404);
+      }
 
-    const service = message.service
-      ? await Service.findOne({
-          slug: message.service,
-        })
-          .select("_id slug title")
-          .lean()
-      : null;
+      await lead.save({
+        session,
+      });
 
-    const lead = await Lead.create({
-      name: message.name,
-      email: message.email,
-      phone: message.phone || "",
-      company: hasOwnProperty(requestBody, "company")
-        ? cleanString(requestBody.company, {
-            fieldName: "company",
-            fieldLabel: "Company name",
-            maxLength: 160,
-          })
-        : "",
-      source: message.source || "portfolio-website",
-      sourceContactMessage: message._id,
-      service: service?._id || null,
-      serviceSlug: message.service || service?.slug || "",
-      serviceTitle: message.serviceTitle || service?.title || "",
-      subject: message.subject,
-      requirementSummary: message.message || "",
-      status: "new",
-      priority: hasOwnProperty(requestBody, "priority")
-        ? cleanPriority(requestBody.priority)
-        : "medium",
-      estimatedValue: hasOwnProperty(requestBody, "estimatedValue")
-        ? cleanNullableMoney(requestBody.estimatedValue)
-        : null,
-      currency: hasOwnProperty(requestBody, "currency")
-        ? cleanCurrency(requestBody.currency)
-        : "USD",
-      assignedTo,
-      nextFollowUpAt: hasOwnProperty(requestBody, "nextFollowUpAt")
-        ? cleanNullableDate(
-            requestBody.nextFollowUpAt,
-            "nextFollowUpAt",
-            "Next follow-up date",
-          )
-        : null,
-      createdBy: req.admin._id,
-      updatedBy: req.admin._id,
+      await createAuditLog({
+        actor: req.admin,
+        category: "workflow",
+        action: "convert",
+        outcome: "success",
+        resource: {
+          type: "contact-message",
+          id: message._id,
+          label: "Contact message",
+        },
+        metadata: {
+          sourceResourceId: message._id,
+          createdLeadId: lead._id,
+        },
+        request: req,
+        session,
+      });
+
+      createdLeadId = lead._id;
     });
 
     const savedLead = await populateLeadDetailQuery(
-      Lead.findById(lead._id),
+      Lead.findById(createdLeadId),
     ).lean();
 
     return res.status(201).json({
@@ -1642,6 +1904,8 @@ async function convertContactMessageToLead(req, res, next) {
     });
   } catch (error) {
     return sendLeadError(error, res, next);
+  } finally {
+    await session.endSession();
   }
 }
 

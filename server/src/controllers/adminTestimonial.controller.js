@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 import Project from "../models/Project.js";
 import Testimonial from "../models/Testimonial.js";
+import { createAuditLog } from "../services/auditLog.service.js";
 
 const editableStringFields = [
   "clientName",
@@ -212,6 +213,47 @@ function buildTestimonialPayload(requestBody = {}) {
   return payload;
 }
 
+function buildStandardContentAuditChangeSet(previous, current) {
+  const changedFields = [];
+  const changes = {};
+
+  for (const fieldName of [
+    "isVisible",
+    "isFeatured",
+    "order",
+  ]) {
+    if (
+      Object.prototype.hasOwnProperty.call(previous, fieldName) &&
+      Object.prototype.hasOwnProperty.call(current, fieldName) &&
+      previous[fieldName] !== current[fieldName]
+    ) {
+      changedFields.push(fieldName);
+      changes[fieldName] = {
+        from: previous[fieldName],
+        to: current[fieldName],
+      };
+    }
+  }
+
+  let action = "update";
+
+  if (
+    Object.prototype.hasOwnProperty.call(previous, "isVisible") &&
+    Object.prototype.hasOwnProperty.call(current, "isVisible") &&
+    previous.isVisible !== current.isVisible
+  ) {
+    action = current.isVisible
+      ? "publish"
+      : "unpublish";
+  }
+
+  return {
+    action,
+    changedFields,
+    changes,
+  };
+}
+
 function parseBooleanQuery(value, fieldName) {
   if (value === undefined) {
     return undefined;
@@ -238,14 +280,23 @@ function validateTestimonialId(testimonialId) {
   }
 }
 
-async function validateRelatedProject(projectId) {
+async function validateRelatedProject(
+  projectId,
+  session = null,
+) {
   if (!projectId) {
     return;
   }
 
-  const projectExists = await Project.exists({
+  let query = Project.exists({
     _id: projectId,
   });
+
+  if (session) {
+    query = query.session(session);
+  }
+
+  const projectExists = await query;
 
   if (!projectExists) {
     throw createHttpError("Related Project was not found.", 400, {
@@ -408,12 +459,40 @@ async function createAdminTestimonial(req, res, next) {
 
     const testimonialData = buildTestimonialPayload(req.body);
 
-    await validateRelatedProject(testimonialData.relatedProject);
-
     testimonialData.createdBy = req.admin._id;
     testimonialData.updatedBy = req.admin._id;
 
-    const testimonial = await Testimonial.create(testimonialData);
+    const testimonial = await mongoose.connection.transaction(
+      async (session) => {
+        await validateRelatedProject(
+          testimonialData.relatedProject,
+          session,
+        );
+
+        const [createdTestimonial] = await Testimonial.create(
+          [testimonialData],
+          {
+            session,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "create",
+          outcome: "success",
+          resource: {
+            type: "testimonial",
+            id: createdTestimonial._id,
+            label: "Testimonial",
+          },
+          request: req,
+          session,
+        });
+
+        return createdTestimonial;
+      },
+    );
 
     await populateRelatedProject(testimonial);
 
@@ -441,26 +520,64 @@ async function updateAdminTestimonial(req, res, next) {
       );
     }
 
-    if (hasOwnProperty(testimonialData, "relatedProject")) {
-      await validateRelatedProject(testimonialData.relatedProject);
-    }
-
     testimonialData.updatedBy = req.admin._id;
 
-    const testimonial = await Testimonial.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: testimonialData,
-      },
-      {
-        new: true,
-        runValidators: true,
+    const testimonial = await mongoose.connection.transaction(
+      async (session) => {
+        const testimonial = await Testimonial.findById(req.params.id)
+          .session(session);
+
+        if (!testimonial) {
+          throw createHttpError("Testimonial record not found.", 404);
+        }
+
+        if (hasOwnProperty(testimonialData, "relatedProject")) {
+          await validateRelatedProject(
+            testimonialData.relatedProject,
+            session,
+          );
+        }
+
+        const previous = {
+          isVisible: testimonial.isVisible,
+          isFeatured: testimonial.isFeatured,
+          order: testimonial.order,
+        };
+
+        testimonial.set(testimonialData);
+
+        await testimonial.save({
+          session,
+        });
+
+        const auditChangeSet = buildStandardContentAuditChangeSet(
+          previous,
+          {
+            isVisible: testimonial.isVisible,
+            isFeatured: testimonial.isFeatured,
+            order: testimonial.order,
+          },
+        );
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: auditChangeSet.action,
+          outcome: "success",
+          resource: {
+            type: "testimonial",
+            id: testimonial._id,
+            label: "Testimonial",
+          },
+          changedFields: auditChangeSet.changedFields,
+          changes: auditChangeSet.changes,
+          request: req,
+          session,
+        });
+
+        return testimonial;
       },
     );
-
-    if (!testimonial) {
-      throw createHttpError("Testimonial record not found.", 404);
-    }
 
     await populateRelatedProject(testimonial);
 
@@ -478,18 +595,54 @@ async function deleteAdminTestimonial(req, res, next) {
   try {
     validateTestimonialId(req.params.id);
 
-    const testimonial = await Testimonial.findByIdAndDelete(req.params.id);
+    const deletedTestimonial = await mongoose.connection.transaction(
+      async (session) => {
+        const testimonial = await Testimonial.findById(req.params.id)
+          .select("_id clientName")
+          .session(session)
+          .lean();
 
-    if (!testimonial) {
-      throw createHttpError("Testimonial record not found.", 404);
-    }
+        if (!testimonial) {
+          throw createHttpError("Testimonial record not found.", 404);
+        }
+
+        const deleteResult = await Testimonial.deleteOne(
+          {
+            _id: testimonial._id,
+          },
+          {
+            session,
+          },
+        );
+
+        if (deleteResult.deletedCount !== 1) {
+          throw createHttpError("Testimonial record not found.", 404);
+        }
+
+        await createAuditLog({
+          actor: req.admin,
+          category: "content",
+          action: "delete",
+          outcome: "success",
+          resource: {
+            type: "testimonial",
+            id: testimonial._id,
+            label: "Testimonial",
+          },
+          request: req,
+          session,
+        });
+
+        return testimonial;
+      },
+    );
 
     return res.status(200).json({
       success: true,
       message: "Testimonial permanently deleted.",
       data: {
-        id: testimonial._id,
-        clientName: testimonial.clientName,
+        id: deletedTestimonial._id,
+        clientName: deletedTestimonial.clientName,
       },
     });
   } catch (error) {

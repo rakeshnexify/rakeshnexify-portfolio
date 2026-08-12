@@ -25,6 +25,8 @@ import TestimonialsPage from "../pages/TestimonialsPage";
 import TeamPage from "../pages/TeamPage";
 import TeamMemberDetailsPage from "../pages/TeamMemberDetailsPage";
 
+import AdminAuditLogDetailPage from "../pages/admin/AdminAuditLogDetailPage";
+import AdminAuditLogsPage from "../pages/admin/AdminAuditLogsPage";
 import AdminAppointmentDetailPage from "../pages/admin/AdminAppointmentDetailPage";
 import AdminAppointmentsPage from "../pages/admin/AdminAppointmentsPage";
 import AdminCertificationAchievementEditorPage from "../pages/admin/AdminCertificationAchievementEditorPage";
@@ -395,6 +397,16 @@ function AppRoutes() {
 
         <Route element={<ProtectedAdminRoute />}>
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+
+          <Route
+            path="/admin/audit-logs"
+            element={<AdminAuditLogsPage />}
+          />
+
+          <Route
+            path="/admin/audit-logs/:id"
+            element={<AdminAuditLogDetailPage />}
+          />
 
           <Route
             path="/admin/site-settings"
