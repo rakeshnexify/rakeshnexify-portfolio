@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import MediaDetailsPanel from "../../components/admin/media/MediaDetailsPanel";
 import MediaPreview from "../../components/admin/media/MediaPreview";
@@ -247,14 +247,7 @@ function AdminMediaPage() {
   return (
     <main className="min-h-screen bg-slate-50 py-10">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Link
-          to="/admin/dashboard"
-          className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-600 transition hover:text-brand-700"
-        >
-          ← Back to Admin Dashboard
-        </Link>
-
-        <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
             Media Management
           </p>

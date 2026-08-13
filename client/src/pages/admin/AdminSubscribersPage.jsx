@@ -4,7 +4,6 @@ import {
   useState,
 } from "react";
 import {
-  Link,
   useLocation,
   useNavigate,
 } from "react-router";
@@ -68,17 +67,6 @@ function formatDateTime(value) {
       timeStyle: "short",
     },
   ).format(date);
-}
-
-function formatRole(role = "") {
-  return String(role)
-    .split("-")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1),
-    )
-    .join(" ");
 }
 
 function SubscriberStatusBadge({
@@ -365,14 +353,7 @@ function AdminSubscribersPage() {
       <div className="mx-auto w-full max-w-7xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <Link
-              to="/admin"
-              className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-700 hover:text-brand-800"
-            >
-              ← Admin Dashboard
-            </Link>
-
-            <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
               Newsletter management
             </p>
 
@@ -538,13 +519,6 @@ function AdminSubscribersPage() {
               </p>
             </div>
 
-            <p className="text-sm font-semibold text-slate-500">
-              Signed in as{" "}
-              {admin?.name ||
-                admin?.email ||
-                "Admin"}{" "}
-              · {formatRole(admin?.role)}
-            </p>
           </div>
 
           <div

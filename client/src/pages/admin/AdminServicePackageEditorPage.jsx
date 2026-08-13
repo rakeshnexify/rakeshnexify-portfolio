@@ -18,7 +18,7 @@ function AdminServicePackageEditorPage({ mode = "create" }) {
   const navigate = useNavigate();
   const { id: servicePackageId } = useParams();
 
-  const { accessToken, admin, logout } = useAdminAuth();
+  const { accessToken, logout } = useAdminAuth();
 
   const isEditMode = mode === "edit";
 
@@ -179,14 +179,6 @@ function AdminServicePackageEditorPage({ mode = "create" }) {
     }
   }
 
-  function handleLogout() {
-    logout();
-
-    navigate("/admin/login", {
-      replace: true,
-    });
-  }
-
   if (isLoading) {
     return (
       <main className="grid min-h-screen place-items-center bg-slate-100 px-4">
@@ -228,43 +220,6 @@ function AdminServicePackageEditorPage({ mode = "create" }) {
 
   return (
     <main className="min-h-screen bg-slate-100">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
-          <Link
-            to="/admin/dashboard"
-            className="flex min-w-0 items-center gap-3"
-          >
-            <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-600 font-extrabold text-white">
-              RN
-            </div>
-
-            <div className="min-w-0">
-              <p className="truncate font-extrabold text-slate-950">
-                RakeshNexify
-              </p>
-
-              <p className="truncate text-xs font-medium text-slate-500">
-                Service Package Editor
-              </p>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-3">
-            <span className="hidden text-sm font-semibold text-slate-500 md:inline">
-              {admin?.name}
-            </span>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           to="/admin/service-packages"

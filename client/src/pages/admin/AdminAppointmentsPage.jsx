@@ -171,7 +171,6 @@ function getAssignedAdminLabel(appointment) {
 
 function AdminAppointmentsPage() {
   const {
-    admin,
     accessToken,
     logout,
   } = useAdminAuth();
@@ -391,14 +390,7 @@ function AdminAppointmentsPage() {
       <div className="mx-auto w-full max-w-7xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <Link
-              to="/admin"
-              className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-700 hover:text-brand-800"
-            >
-              ← Admin Dashboard
-            </Link>
-
-            <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
               Consultation management
             </p>
 
@@ -674,12 +666,6 @@ function AdminAppointmentsPage() {
               </p>
             </div>
 
-            <p className="text-sm font-semibold text-slate-500">
-              Signed in as{" "}
-              {admin?.name ||
-                admin?.email ||
-                "Admin"}
-            </p>
           </div>
 
           {error ? (

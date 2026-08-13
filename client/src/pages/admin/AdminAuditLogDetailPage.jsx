@@ -234,14 +234,7 @@ function AdminAuditLogDetailPage() {
     return (
       <main className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-4xl">
-          <Link
-            to="/admin"
-            className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-700 hover:text-brand-800"
-          >
-            ← Admin Dashboard
-          </Link>
-
-          <section className="mt-6 rounded-3xl border border-amber-200 bg-white p-7 shadow-sm sm:p-10">
+          <section className="rounded-3xl border border-amber-200 bg-white p-7 shadow-sm sm:p-10">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-700">
               Restricted module
             </p>
@@ -258,12 +251,6 @@ function AdminAuditLogDetailPage() {
               role only.
             </p>
 
-            <Link
-              to="/admin/dashboard"
-              className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-5 py-2 text-sm font-bold text-white transition hover:bg-brand-700"
-            >
-              Return to Dashboard
-            </Link>
           </section>
         </div>
       </main>
@@ -758,12 +745,6 @@ function AdminAuditLogDetailPage() {
                 ← Back to Audit Logs
               </Link>
 
-              <Link
-                to="/admin/dashboard"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-bold text-slate-700 transition hover:border-slate-400"
-              >
-                Admin Dashboard
-              </Link>
             </div>
           </div>
         ) : null}

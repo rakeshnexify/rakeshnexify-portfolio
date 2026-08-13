@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router";
 
+import AdminLayout from "../components/admin/layout/AdminLayout";
 import PageSeo from "../components/seo/PageSeo";
 import BlogPage from "../pages/BlogPage";
 import CertificationAchievementsPage from "../pages/CertificationAchievementsPage";
@@ -396,222 +397,224 @@ function AppRoutes() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
 
         <Route element={<ProtectedAdminRoute />}>
-          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
 
-          <Route
-            path="/admin/audit-logs"
-            element={<AdminAuditLogsPage />}
-          />
+            <Route
+              path="/admin/audit-logs"
+              element={<AdminAuditLogsPage />}
+            />
 
-          <Route
-            path="/admin/audit-logs/:id"
-            element={<AdminAuditLogDetailPage />}
-          />
+            <Route
+              path="/admin/audit-logs/:id"
+              element={<AdminAuditLogDetailPage />}
+            />
 
-          <Route
-            path="/admin/site-settings"
-            element={<AdminSiteSettingsPage />}
-          />
+            <Route
+              path="/admin/site-settings"
+              element={<AdminSiteSettingsPage />}
+            />
 
-          <Route
-            path="/admin/site-settings/:pageKey"
-            element={<AdminSiteSettingsEditorPage />}
-          />
+            <Route
+              path="/admin/site-settings/:pageKey"
+              element={<AdminSiteSettingsEditorPage />}
+            />
 
-          <Route
-            path="/admin/appointments"
-            element={<AdminAppointmentsPage />}
-          />
+            <Route
+              path="/admin/appointments"
+              element={<AdminAppointmentsPage />}
+            />
 
-          <Route
-            path="/admin/appointments/:id"
-            element={<AdminAppointmentDetailPage />}
-          />
+            <Route
+              path="/admin/appointments/:id"
+              element={<AdminAppointmentDetailPage />}
+            />
 
-          <Route
-            path="/admin/subscribers"
-            element={<AdminSubscribersPage />}
-          />
+            <Route
+              path="/admin/subscribers"
+              element={<AdminSubscribersPage />}
+            />
 
-          <Route
-            path="/admin/contact-messages"
-            element={<AdminContactMessagesPage />}
-          />
+            <Route
+              path="/admin/contact-messages"
+              element={<AdminContactMessagesPage />}
+            />
 
-          <Route path="/admin/leads" element={<AdminLeadsPage />} />
-          <Route
-            path="/admin/leads/new"
-            element={<AdminLeadEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/leads/:id/edit"
-            element={<AdminLeadEditorPage mode="edit" />}
-          />
+            <Route path="/admin/leads" element={<AdminLeadsPage />} />
+            <Route
+              path="/admin/leads/new"
+              element={<AdminLeadEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/leads/:id/edit"
+              element={<AdminLeadEditorPage mode="edit" />}
+            />
 
-          <Route
-            path="/admin/achievements"
-            element={<AdminCertificationAchievementsPage />}
-          />
-          <Route
-            path="/admin/achievements/new"
-            element={
-              <AdminCertificationAchievementEditorPage mode="create" />
-            }
-          />
-          <Route
-            path="/admin/achievements/:id/edit"
-            element={<AdminCertificationAchievementEditorPage mode="edit" />}
-          />
+            <Route
+              path="/admin/achievements"
+              element={<AdminCertificationAchievementsPage />}
+            />
+            <Route
+              path="/admin/achievements/new"
+              element={
+                <AdminCertificationAchievementEditorPage mode="create" />
+              }
+            />
+            <Route
+              path="/admin/achievements/:id/edit"
+              element={<AdminCertificationAchievementEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/faqs" element={<AdminFaqsPage />} />
-          <Route
-            path="/admin/faqs/new"
-            element={<AdminFaqEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/faqs/:id/edit"
-            element={<AdminFaqEditorPage mode="edit" />}
-          />
+            <Route path="/admin/faqs" element={<AdminFaqsPage />} />
+            <Route
+              path="/admin/faqs/new"
+              element={<AdminFaqEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/faqs/:id/edit"
+              element={<AdminFaqEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/services" element={<AdminServicesPage />} />
-          <Route
-            path="/admin/services/new"
-            element={<AdminServiceEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/services/:id/edit"
-            element={<AdminServiceEditorPage mode="edit" />}
-          />
+            <Route path="/admin/services" element={<AdminServicesPage />} />
+            <Route
+              path="/admin/services/new"
+              element={<AdminServiceEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/services/:id/edit"
+              element={<AdminServiceEditorPage mode="edit" />}
+            />
 
-          <Route
-            path="/admin/service-packages"
-            element={<AdminServicePackagesPage />}
-          />
-          <Route
-            path="/admin/service-packages/new"
-            element={<AdminServicePackageEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/service-packages/:id/edit"
-            element={<AdminServicePackageEditorPage mode="edit" />}
-          />
+            <Route
+              path="/admin/service-packages"
+              element={<AdminServicePackagesPage />}
+            />
+            <Route
+              path="/admin/service-packages/new"
+              element={<AdminServicePackageEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/service-packages/:id/edit"
+              element={<AdminServicePackageEditorPage mode="edit" />}
+            />
 
-          <Route
-            path="/admin/service-orders"
-            element={<AdminServiceOrdersPage />}
-          />
-          <Route
-            path="/admin/service-orders/:id"
-            element={<AdminServiceOrderDetailPage />}
-          />
+            <Route
+              path="/admin/service-orders"
+              element={<AdminServiceOrdersPage />}
+            />
+            <Route
+              path="/admin/service-orders/:id"
+              element={<AdminServiceOrderDetailPage />}
+            />
 
-          <Route
-            path="/admin/package-designs"
-            element={<AdminPackageDesignsPage />}
-          />
-          <Route
-            path="/admin/package-designs/new"
-            element={<AdminPackageDesignEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/package-designs/:id/edit"
-            element={<AdminPackageDesignEditorPage mode="edit" />}
-          />
+            <Route
+              path="/admin/package-designs"
+              element={<AdminPackageDesignsPage />}
+            />
+            <Route
+              path="/admin/package-designs/new"
+              element={<AdminPackageDesignEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/package-designs/:id/edit"
+              element={<AdminPackageDesignEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/statistics" element={<AdminStatisticsPage />} />
-          <Route
-            path="/admin/statistics/new"
-            element={<AdminStatisticEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/statistics/:id/edit"
-            element={<AdminStatisticEditorPage mode="edit" />}
-          />
+            <Route path="/admin/statistics" element={<AdminStatisticsPage />} />
+            <Route
+              path="/admin/statistics/new"
+              element={<AdminStatisticEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/statistics/:id/edit"
+              element={<AdminStatisticEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/skills" element={<AdminSkillsPage />} />
-          <Route
-            path="/admin/skills/new"
-            element={<AdminSkillEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/skills/:id/edit"
-            element={<AdminSkillEditorPage mode="edit" />}
-          />
+            <Route path="/admin/skills" element={<AdminSkillsPage />} />
+            <Route
+              path="/admin/skills/new"
+              element={<AdminSkillEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/skills/:id/edit"
+              element={<AdminSkillEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/education" element={<AdminEducationPage />} />
-          <Route
-            path="/admin/education/new"
-            element={<AdminEducationEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/education/:id/edit"
-            element={<AdminEducationEditorPage mode="edit" />}
-          />
+            <Route path="/admin/education" element={<AdminEducationPage />} />
+            <Route
+              path="/admin/education/new"
+              element={<AdminEducationEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/education/:id/edit"
+              element={<AdminEducationEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/experience" element={<AdminExperiencePage />} />
-          <Route
-            path="/admin/experience/new"
-            element={<AdminExperienceEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/experience/:id/edit"
-            element={<AdminExperienceEditorPage mode="edit" />}
-          />
+            <Route path="/admin/experience" element={<AdminExperiencePage />} />
+            <Route
+              path="/admin/experience/new"
+              element={<AdminExperienceEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/experience/:id/edit"
+              element={<AdminExperienceEditorPage mode="edit" />}
+            />
 
-          <Route
-            path="/admin/testimonials"
-            element={<AdminTestimonialsPage />}
-          />
-          <Route
-            path="/admin/testimonials/new"
-            element={<AdminTestimonialEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/testimonials/:id/edit"
-            element={<AdminTestimonialEditorPage mode="edit" />}
-          />
+            <Route
+              path="/admin/testimonials"
+              element={<AdminTestimonialsPage />}
+            />
+            <Route
+              path="/admin/testimonials/new"
+              element={<AdminTestimonialEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/testimonials/:id/edit"
+              element={<AdminTestimonialEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/team" element={<AdminTeamMembersPage />} />
-          <Route
-            path="/admin/team/new"
-            element={<AdminTeamMemberEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/team/:id/edit"
-            element={<AdminTeamMemberEditorPage mode="edit" />}
-          />
+            <Route path="/admin/team" element={<AdminTeamMembersPage />} />
+            <Route
+              path="/admin/team/new"
+              element={<AdminTeamMemberEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/team/:id/edit"
+              element={<AdminTeamMemberEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/posts" element={<AdminPostsPage />} />
-          <Route
-            path="/admin/posts/new"
-            element={<AdminPostEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/posts/:id/edit"
-            element={<AdminPostEditorPage mode="edit" />}
-          />
+            <Route path="/admin/posts" element={<AdminPostsPage />} />
+            <Route
+              path="/admin/posts/new"
+              element={<AdminPostEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/posts/:id/edit"
+              element={<AdminPostEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/projects" element={<AdminProjectsPage />} />
-          <Route
-            path="/admin/projects/new"
-            element={<AdminProjectEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/projects/:id/edit"
-            element={<AdminProjectEditorPage mode="edit" />}
-          />
+            <Route path="/admin/projects" element={<AdminProjectsPage />} />
+            <Route
+              path="/admin/projects/new"
+              element={<AdminProjectEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/projects/:id/edit"
+              element={<AdminProjectEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/companies" element={<AdminCompaniesPage />} />
-          <Route
-            path="/admin/companies/new"
-            element={<AdminCompanyEditorPage mode="create" />}
-          />
-          <Route
-            path="/admin/companies/:id/edit"
-            element={<AdminCompanyEditorPage mode="edit" />}
-          />
+            <Route path="/admin/companies" element={<AdminCompaniesPage />} />
+            <Route
+              path="/admin/companies/new"
+              element={<AdminCompanyEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/companies/:id/edit"
+              element={<AdminCompanyEditorPage mode="edit" />}
+            />
 
-          <Route path="/admin/media" element={<AdminMediaPage />} />
+            <Route path="/admin/media" element={<AdminMediaPage />} />
+          </Route>
         </Route>
 
         <Route

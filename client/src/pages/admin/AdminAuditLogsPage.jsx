@@ -353,14 +353,7 @@ function AdminAuditLogsPage() {
     return (
       <main className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-4xl">
-          <Link
-            to="/admin"
-            className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-700 hover:text-brand-800"
-          >
-            ← Admin Dashboard
-          </Link>
-
-          <section className="mt-6 rounded-3xl border border-amber-200 bg-white p-7 shadow-sm sm:p-10">
+          <section className="rounded-3xl border border-amber-200 bg-white p-7 shadow-sm sm:p-10">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-700">
               Restricted module
             </p>
@@ -377,12 +370,6 @@ function AdminAuditLogsPage() {
               role only.
             </p>
 
-            <Link
-              to="/admin/dashboard"
-              className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-5 py-2 text-sm font-bold text-white transition hover:bg-brand-700"
-            >
-              Return to Dashboard
-            </Link>
           </section>
         </div>
       </main>
@@ -394,14 +381,7 @@ function AdminAuditLogsPage() {
       <div className="mx-auto w-full max-w-7xl">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <Link
-              to="/admin"
-              className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-700 hover:text-brand-800"
-            >
-              ← Admin Dashboard
-            </Link>
-
-            <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
               Security & administration
             </p>
 

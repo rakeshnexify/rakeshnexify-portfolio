@@ -411,14 +411,6 @@ function AdminProjectsPage() {
     }
   }
 
-  function handleLogout() {
-    logout();
-
-    navigate("/admin/login", {
-      replace: true,
-    });
-  }
-
   async function handleDeleteProject(project) {
     if (!project?._id || actionProjectId) {
       return;
@@ -453,55 +445,10 @@ function AdminProjectsPage() {
 
   return (
     <main className="min-h-screen bg-slate-100">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
-          <Link
-            to="/admin/dashboard"
-            className="flex min-w-0 items-center gap-3"
-          >
-            <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-600 font-extrabold text-white">
-              RN
-            </div>
-
-            <div className="min-w-0">
-              <p className="truncate font-extrabold text-slate-950">
-                RakeshNexify
-              </p>
-
-              <p className="truncate text-xs font-medium text-slate-500">
-                Projects Management
-              </p>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-3">
-            <span className="hidden text-sm font-semibold text-slate-500 md:inline">
-              {admin?.name}
-            </span>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
-
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <Link
-              to="/admin/dashboard"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-brand-600"
-            >
-              <span aria-hidden="true">←</span>
-              Dashboard
-            </Link>
-
-            <p className="mt-6 text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
               Portfolio Management
             </p>
 

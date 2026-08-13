@@ -514,14 +514,7 @@ function AdminCertificationAchievementsPage() {
   return (
     <main className="min-h-screen bg-slate-50 py-10">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <Link
-          to="/admin/dashboard"
-          className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-600 transition hover:text-brand-700"
-        >
-          ← Back to Admin Dashboard
-        </Link>
-
-        <div className="mt-6 flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
               Credentials & Recognition
