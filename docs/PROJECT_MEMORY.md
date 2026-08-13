@@ -772,6 +772,107 @@ Explicitly deferred:
 - drip automation
 - A/B testing
 
+
+## Admin CMS Shell / Navigation
+
+Professional UI/UX phase milestone: the shared authenticated Admin shell, Admin sidebar navigation, and analytics-first Dashboard are implemented and committed.
+
+Latest implementation checkpoint:
+
+`6c8f95d Build professional admin shell and analytics dashboard`
+
+Frontend architecture:
+
+- `client/src/components/admin/layout/AdminLayout.jsx`
+- `client/src/components/admin/layout/AdminSidebar.jsx`
+- `client/src/components/admin/layout/AdminMobileDrawer.jsx`
+- `client/src/components/admin/layout/AdminNavigation.jsx`
+- `client/src/components/admin/layout/AdminTopbar.jsx`
+- `client/src/components/admin/layout/adminIcons.jsx`
+- `client/src/config/adminNavigation.js`
+- `client/src/hooks/useAdminSidebarState.js`
+
+Routing contract:
+
+`ProtectedAdminRoute -> AdminLayout -> Outlet -> Admin page`
+
+`/admin/login` remains outside the authenticated visual shell.
+
+`/admin` redirects to `/admin/dashboard`.
+
+The Admin operational navigation is code-owned and separate from public `SiteSettings.sections` navigation/publication management.
+
+Desktop sidebar behavior:
+
+- default compact icon rail
+- approximately 72px collapsed width
+- temporary hover/focus expansion without permanently consuming content width
+- persistent pinned expansion
+- pinned state stored in versioned localStorage key:
+  `rakeshnexify_admin_sidebar_pinned_v1`
+- collapsed items retain accessible labels/tooltips and visible focus treatment
+
+Mobile/tablet behavior:
+
+- off-canvas drawer instead of hover behavior
+- backdrop close
+- Escape close
+- focus trap
+- focus restoration
+- body-scroll lock/cleanup
+- drawer z-index remains below the reusable Media Picker layer
+
+Admin navigation hierarchy is centralized and role-aware.
+
+Primary groups:
+
+- Dashboard
+- Content
+- Services & Sales
+- CRM
+- Team
+- Site
+- System
+
+`Service Packages -> Package Designs` is the current intentional nested Admin navigation relationship.
+
+Admin Activity / Audit Log navigation is visible only to `super-admin`; backend RBAC remains authoritative.
+
+Admin page normalization contract:
+
+- shared shell owns Admin branding/account/logout/navigation chrome
+- individual Admin list/editor/detail pages must not reintroduce duplicate RN/RakeshNexify headers
+- individual pages must not duplicate Dashboard-back navigation that the sidebar already provides
+- contextual back-to-module/list navigation on editors/details remains valid
+- page-specific loading/error states and module logic remain local to the page
+- page-level `<main>` elements are allowed because `AdminLayout` uses a neutral Outlet wrapper
+
+Admin Dashboard contract:
+
+- `/admin/dashboard` is analytics-first
+- do not reintroduce a duplicate Management Modules card grid
+- module navigation belongs in the Admin sidebar
+- existing Analytics API/hook/range/refresh/retry/401 behavior remains Dashboard-owned
+- supported Analytics ranges remain `7d`, `30d`, `90d`, `all`
+- the shared Admin shell must not fetch Analytics
+
+Current UI/UX scope decision:
+
+- the Admin shell/navigation/dashboard milestone is complete
+- individual Admin module internal visual redesign remains a later UI/UX task
+- backend/public APIs were intentionally unchanged by this milestone
+
+Accessibility expectations for future Admin shell changes:
+
+- keyboard-reachable navigation
+- visible focus
+- correct `aria-current`, `aria-expanded`, `aria-pressed` where applicable
+- collapsed-navigation accessible names/tooltips
+- mobile dialog semantics
+- Escape handling
+- focus trap/restoration
+- body-scroll cleanup
+
 ## Admin Analytics Dashboard
 
 Admin Analytics extends the existing protected Admin Dashboard.
@@ -1589,6 +1690,10 @@ Prefer extending:
 - Case Studies reuses Project and must not duplicate Project identity/content ownership
 - Project detail routes may be shared across Projects and Case Studies only with record-aware publication and matching sitemap behavior
 - Project Case Study featured state remains independent from normal Project featured state
+- keep the shared authenticated Admin shell centralized through `AdminLayout`; protected pages should not recreate global Admin chrome
+- keep Admin operational navigation code-owned in `adminNavigation.js` and separate from public Site Settings navigation/publication
+- keep `/admin/dashboard` analytics-first; module discovery/navigation belongs in the Admin sidebar rather than a duplicate Dashboard management grid
+- preserve desktop collapsed/hover/pinned and mobile off-canvas behavior when extending the Admin shell
 - commit only verified work
 - never run `npm audit fix --force` without controlled review
 
@@ -1620,9 +1725,10 @@ All 27 planned major functional modules are complete.
 
 No additional major functional module remains in the current functional roadmap. Continue with the separate finishing phases below.
 
-## Future Separate Phases
+## Current / Future Separate Phases
 
-- Professional UI/UX
+- Professional UI/UX — active; shared Admin shell/sidebar + analytics Dashboard milestone complete
+- Professional UI/UX — remaining: individual Admin module internal polish and public-site visual polish
 - Email and Notifications
 - Final SEO/testing/performance/security
 - Production deployment

@@ -10,481 +10,236 @@ Repository: `D:\rakeshnexify-portfolio`
 
 Branch: `main`
 
-Latest verified pushed checkpoint before Module 27:
-
-`8367012 Add admin activity audit log`
-
-Current completed-but-not-yet-committed module:
-
-`Module 27 — Menu / Navigation Management`
-
-Major functional roadmap status after this module:
+Major functional roadmap:
 
 **27/27 planned major functional modules complete**
 
-Module 26 is already committed and pushed. Do not reopen it without a concrete failure.
+Latest functional-module checkpoint:
 
-## Module 27 Final Status
+`3f6db7a Add dynamic menu and navigation management`
 
-Architecture audit: PASS
+Latest Professional UI/UX checkpoint:
 
-Backend B1:
+`6c8f95d Build professional admin shell and analytics dashboard`
 
-- Site Settings schema/default contract: PASS
-- strict section validation: PASS
-- backward compatibility: PASS
-- Audit integration: PASS
-- transaction/RBAC preservation: PASS
-- Codex review:
-  - A findings: NONE
-  - B findings: NONE
-  - verdict: `BACKEND B1 READY FOR FRONTEND INTEGRATION`
+Verified Git state immediately after the Admin shell push:
 
-Frontend F1:
+- local `main` = `6c8f95d`
+- `origin/main` = `6c8f95d`
+- working tree clean
+- branch up to date with `origin/main`
 
-- client registry/default parity: PASS
-- Admin Site Settings form load/save contract: PASS
-- Footer visibility/order controls: PASS
-- strict backend-compatible payload typing: PASS
-- `posts` Footer-capability review fix: RESOLVED
-- Codex review:
-  - A findings: NONE
-  - B findings: NONE
-  - verdict: `FRONTEND F1 READY FOR NAVIGATION RENDERING INTEGRATION`
+The runtime/repository remains the source of truth if this handoff becomes stale.
 
-Frontend F2:
+## Active Project Phase
 
-- shared public navigation resolver: PASS
-- Navbar integration: PASS
-- Footer integration: PASS
-- PublicPageHeader integration: PASS
-- Contact legal-link safety fix: RESOLVED
-- Codex review:
-  - A findings: NONE
-  - B findings: NONE
-  - verdict: `F2 READY FOR RUNTIME VERIFICATION`
+`Professional UI/UX`
 
-Runtime/browser verification: PASS
+Completed milestone:
 
-Final complete Module 27 Codex review:
-
-- A findings: NONE
-- B findings: NONE
-- C findings: NONE
-- exact files requiring fix: NONE
-- verdict: `MODULE 27 READY FOR DOCUMENTATION AND FINAL STAGED REVIEW`
+`Admin Shell + Admin Dashboard + Admin Sidebar Navigation`
 
-Do not reopen Module 27 implementation unless final validation/staged review finds a concrete issue.
+This milestone is implementation-complete, runtime-verified, Codex-reviewed, committed, and pushed.
 
-## Locked Module 27 Architecture
+Do not reopen the Admin shell milestone unless a concrete regression is found.
 
-`SiteSettings.sections` remains the single public navigation/publication source of truth.
+## Completed Admin Shell Architecture
 
-There is intentionally no:
+Authenticated routing:
 
-- `Menu` model
-- `MenuItem` model
-- separate Menu API
-- arbitrary internal route editor
-- nested menu tree
-- custom external navigation system in this module
-- menu-driven sitemap
+`ProtectedAdminRoute -> AdminLayout -> Outlet -> protected Admin page`
 
-Canonical internal destinations remain code-owned.
+Login remains outside the shell:
 
-Admin controls the registered navigation contract through Site Settings.
+`/admin/login`
 
-Registered section fields:
-
-- `key`
-- `label`
-- `isVisible`
-- `isNavigationVisible`
-- `isFooterNavigationVisible`
-- `isPageVisible`
-- `order`
-- `navigationOrder`
-- `footerNavigationOrder`
+Admin root:
 
-Homepage, Navbar, Footer, and dedicated-page controls remain independent.
+`/admin -> /admin/dashboard`
 
-## Backend Contract
+New shared layout files:
 
-Modified backend files:
+- `client/src/components/admin/layout/AdminLayout.jsx`
+- `client/src/components/admin/layout/AdminSidebar.jsx`
+- `client/src/components/admin/layout/AdminMobileDrawer.jsx`
+- `client/src/components/admin/layout/AdminNavigation.jsx`
+- `client/src/components/admin/layout/AdminTopbar.jsx`
+- `client/src/components/admin/layout/adminIcons.jsx`
+- `client/src/config/adminNavigation.js`
+- `client/src/hooks/useAdminSidebarState.js`
 
-1. `server/src/models/SiteSettings.js`
-2. `server/src/config/homepageSections.js`
-3. `server/src/controllers/adminSiteSettings.controller.js`
-4. `server/src/constants/auditLog.constants.js`
+The Admin navigation is code-owned operational navigation. It is intentionally separate from public `SiteSettings.sections` navigation/publication management.
 
-No new backend file was required.
+## Desktop Sidebar Contract
 
-### Site Settings Section Contract
+Desktop defaults to a compact icon rail.
 
-New fields:
+Behavior:
 
-- `isFooterNavigationVisible`
-- `footerNavigationOrder`
-
-Canonical defaults preserve the pre-Module-27 Footer behavior.
-
-Default Footer-visible registered items:
+- collapsed width approximately 72px
+- hover/focus temporarily expands
+- pinned mode keeps it expanded
+- unpinned hover expansion overlays without requiring permanent content reflow
+- versioned persistent pinned state:
+  `rakeshnexify_admin_sidebar_pinned_v1`
 
-- hero
-- about
-- skills
-- services
-- projects
-- case-studies
-- education
-- experience
-- achievements
-- team
-- companies
-- clients-partners
-- testimonials
-- faq
-- contact
-- blog
-- news
+Sidebar includes:
 
-Default Footer-hidden:
+- centralized grouped Admin navigation
+- View Website
+- authenticated Admin account summary
+- Logout
+- pin/collapse control
 
-- statistics
-- posts
-- consultation
+No external icon dependency was added; the shell uses code-owned inline SVG icons.
 
-Legacy Site Settings records may omit the new fields. Canonical merging supplies safe defaults, so no migration is required.
+## Mobile Drawer Contract
 
-Admin `sections` validation now enforces:
-
-- array input
-- plain-object entries
-- canonical keys only
-- unique keys
-- strict property allowlist
-- actual string keys/labels
-- required non-empty labels
-- label max 100
-- control-character rejection
-- actual Boolean visibility values
-- bounded non-negative safe-integer order values
-- rejection of numeric strings, NaN, infinity, negatives, unknown keys, and unsupported navigation structures
-
-Existing Site Settings API, singleton behavior, RBAC, and publication semantics remain intact.
-
-## Audit Integration
-
-Meaningful Site Settings navigation changes reuse the existing Module 26 Audit system.
-
-Navigation-safe changed fields include:
-
-- `label`
-- `isVisible`
-- `isNavigationVisible`
-- `isFooterNavigationVisible`
-- `isPageVisible`
-- `order`
-- `navigationOrder`
-- `footerNavigationOrder`
-
-Audit must not store:
-
-- the complete `sections` array
-- the complete Site Settings object
-- navigation URLs
-- request body
-- arbitrary labels as values
-- private Site Settings content
-
-The Site Settings mutation and required Audit insert remain inside the same Mongoose transaction/session.
-
-Audit action semantics remain:
-
-- normal navigation/settings change -> `update`
-- `isPublished` false -> true -> `publish`
-- `isPublished` true -> false -> `unpublish`
-
-## Frontend F1 Contract
-
-Modified:
-
-- `client/src/config/homepageSections.js`
-- `client/src/utils/siteSettingsForm.js`
-- `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
-
-Client and server canonical registries match across all 20 registered keys and all section fields.
-
-Admin navigation UI independently controls:
-
-- homepage visibility
-- homepage order
-- Navbar visibility
-- Navbar order
-- Footer visibility
-- Footer order
-- dedicated-page visibility
-- public label
-
-Capability special cases:
-
-- `posts`: homepage only; no Navbar item, Footer item, or dedicated page
-- `statistics`: homepage + Navbar + Footer + dedicated page; Footer default hidden
-- `consultation`: dedicated page + optional Navbar/Footer; no homepage section; Navbar/Footer default hidden
-- `blog` / `news`: Navbar + Footer + dedicated page; no standalone homepage section
-- `hero` / `about` / `contact`: homepage-oriented destinations
-
-Number-input values are normalized to actual numbers before payload creation; visibility values remain actual Booleans.
-
-Homepage move buttons modify homepage order only. Navbar and Footer orders remain independent.
-
-## Shared Public Navigation Resolver
-
-New file:
-
-`client/src/utils/publicNavigation.js`
-
-This is the single client resolver for:
-
-- canonical destination
-- destination type
-- safe public label
-- publication availability
-- Navbar placement
-- Navbar order
-- Footer placement
-- Footer order
-- active-route behavior
-
-Consumers:
-
-- `client/src/components/layout/Navbar.jsx`
-- `client/src/components/layout/Footer.jsx`
-- `client/src/components/layout/PublicPageHeader.jsx`
-
-These consumers no longer own separate canonical navigation maps.
-
-Canonical destinations include:
-
-- Hero/Home -> homepage
-- About -> `/#about`
-- Contact -> `/#contact`
-- Statistics -> `/statistics`
-- Skills -> `/skills`
-- Services -> `/services`
-- Projects -> `/projects`
-- Case Studies -> `/case-studies`
-- Education -> `/education`
-- Experience -> `/experience`
-- Achievements -> `/achievements`
-- Team -> `/team`
-- Companies -> `/companies`
-- Clients & Partners -> `/clients-partners`
-- Testimonials -> `/testimonials`
-- FAQ -> `/faq`
-- Blog -> `/blog`
-- News -> `/news`
-- Consultation -> `/consultation`
-
-`posts` intentionally has no normal public navigation destination.
-
-Shared canonical detail ownership remains:
-
-- Project details -> `/projects/:slug`
-- Company details -> `/companies/:slug`
-
-Case Studies does not own `/case-studies/:slug`.
-
-Clients / Partners does not own `/clients-partners/:slug`.
-
-## Publication Rules
-
-Destination availability:
-
-- Hero/Home remains valid.
-- About and Contact require their homepage section to be visible.
-- Dedicated pages require `isPageVisible !== false`.
-
-Navbar additionally requires:
-
-`isNavigationVisible !== false`
-
-Footer additionally requires:
-
-`isFooterNavigationVisible !== false`
-
-Navbar and Footer placement/order are independent.
-
-`PublicPageVisibilityRoute` remains the authoritative client route guard for disabled dedicated pages and stays aligned with generated navigation.
-
-Sitemap remains route/publication-driven and was not changed by Module 27.
-
-## Navbar / PublicPageHeader
+Mobile/tablet uses an off-canvas drawer, not hover behavior.
 
 Preserved behavior:
 
-- Admin label changes
-- independent Navbar ordering
-- page-publication filtering
-- Home/About/Contact homepage navigation
-- desktop first-items + More overflow
-- mobile navigation
-- active state
-- project detail -> Projects active
-- company detail -> Companies active
-
-Accessibility preserved:
-
-- skip-to-content
-- semantic navigation
-- `aria-expanded`
-- `aria-controls`
+- hamburger opening
+- backdrop close
 - Escape close
+- route-click close
+- focus entry
+- focus trap
 - focus restoration
-- outside-click handling
-- mobile body-scroll cleanup
-- focus-visible behavior
+- body-scroll lock and cleanup
+- dialog semantics
 
-## Footer
+Drawer layer remains below Media Picker (`z-[100]`), so reusable Media modal behavior is preserved.
 
-Quick Links now use:
+## Admin Navigation Contract
 
-- `isFooterNavigationVisible`
-- `footerNavigationOrder`
+Central config:
 
-They do not use Navbar placement/order as their source.
+`client/src/config/adminNavigation.js`
 
-Permanent Footer behavior:
+Current primary hierarchy:
 
-- disabled dedicated destinations are not linked
-- hidden homepage anchors do not leave dead links
-- `posts` never appears
-- Statistics and Consultation can be enabled safely
-- Services content column depends on Services destination availability, not Services Quick Link placement
-- Contact-targeting project CTA is suppressed when Contact is unavailable
-- Contact-targeting legal links are suppressed when Contact is unavailable
-- generated Contact fallback is suppressed when Contact is unavailable
-- non-Contact legal links remain unaffected
-- external legal/platform URL safety remains intact
-- Newsletter, dynamic Services, platform groups, branding, headings, and responsive layout remain intact
+- Dashboard
+- Content
+  - Projects
+  - Blog & News
+  - Testimonials
+  - FAQ
+  - Media
+  - Skills
+  - Education
+  - Experience
+  - Certifications & Achievements
+- Services & Sales
+  - Services
+  - Service Packages
+    - Package Designs
+  - Service Orders
+  - Appointments / Consultations
+- CRM
+  - Leads / CRM
+  - Contact Messages
+  - Companies
+  - Newsletter / Subscribers
+- Team
+  - Team Members
+- Site
+  - Statistics
+  - Site Settings
+- System
+  - Admin Activity / Audit Log (`super-admin` only)
 
-## Provider / Fallback
+`Service Packages -> Package Designs` is the intentional nested relationship.
 
-No change was required to:
+Audit frontend visibility is role-aware, but backend RBAC remains authoritative.
 
-- `client/src/context/SiteSettingsProvider.jsx`
-- `client/src/context/siteSettingsContext.js`
-- `client/src/hooks/useSiteSettings.js`
-- `client/src/services/siteSettingsApi.js`
-- `client/src/utils/mergeSiteSettings.js`
-- `client/src/routes/PublicPageVisibilityRoute.jsx`
+## Admin Page Shell Normalization
 
-Navigation reuses the existing Site Settings request.
+Protected Admin pages were normalized to the shared shell.
 
-There is no request per navigation item and no duplicate navigation API.
+Removed from normalized pages where duplicated:
 
-If public Site Settings loading fails, the existing `siteData` fallback remains usable and does not expose Admin-only destinations.
+- RN / RakeshNexify page-level global header
+- duplicated account identity
+- duplicated Logout control
+- duplicated Dashboard-back navigation
 
-## Module 27 Implementation Scope
+Preserved:
 
-Implementation paths:
+- module-specific content
+- create/update/delete behavior
+- filters/search/pagination
+- role checks
+- 401 redirect/logout behavior
+- Media Picker integration
+- loading/error states
+- contextual return-to-list/module links on editors/details
 
-1. `server/src/models/SiteSettings.js`
-2. `server/src/config/homepageSections.js`
-3. `server/src/controllers/adminSiteSettings.controller.js`
-4. `server/src/constants/auditLog.constants.js`
-5. `client/src/config/homepageSections.js`
-6. `client/src/utils/siteSettingsForm.js`
-7. `client/src/components/admin/site-settings/SiteSettingsForm.jsx`
-8. `client/src/utils/publicNavigation.js` — new
-9. `client/src/components/layout/Navbar.jsx`
-10. `client/src/components/layout/Footer.jsx`
-11. `client/src/components/layout/PublicPageHeader.jsx`
+`AdminAppointmentDetailPage.jsx` and `AdminServiceOrderDetailPage.jsx` were already shell-clean and did not require replacement.
 
-Documentation closeout paths:
+`AdminLoginPage.jsx` is intentionally excluded because it is outside the authenticated shell.
 
-12. `docs/PROJECT_MEMORY.md`
-13. `docs/SESSION_HANDOFF.md`
+## Admin Dashboard Final Contract
 
-Expected Module 27 closeout scope:
+Route:
 
-- 11 implementation paths
-- 2 active documentation paths
-- 13 total intended paths
+`/admin/dashboard`
 
-Use live Git output as the source of truth before staging.
+The Dashboard is now analytics-first.
+
+Removed:
+
+- old duplicate RN header
+- duplicate View Portfolio / Logout page controls
+- oversized welcome/account block
+- duplicate Management Modules card grid
+
+Preserved:
+
+- `useAdminAnalytics`
+- `AdminAnalyticsOverview`
+- `7d`, `30d`, `90d`, `all`
+- Refresh
+- retry/error UI
+- stale-range protection through the existing Analytics hook/component contract
+- unauthorized logout/login redirect
+
+Do not reintroduce module navigation cards on the Dashboard. The sidebar is the operational navigation source.
 
 ## Runtime Verification
 
-Browser runtime verification completed successfully.
+Runtime/browser verification passed after normalization.
 
-Verified:
+Verified representative routes:
 
-- Services Navbar/Footer/public-page baseline
-- Navbar OFF + Footer ON independence
-- Footer OFF + Navbar ON independence
-- disabled Services page removes generated links and blocks direct route
-- Statistics Navbar/Footer/page behavior
-- Consultation enabled Navbar/Footer/page behavior
-- Consultation disabled dead-link protection
-- About anchor behavior
-- Contact destination safety
-- Contact legal-link safety
-- Navbar ordering
-- Footer ordering
-- mobile menu
-- desktop More menu
-- Escape behavior
-- Project detail active state
-- Company detail active state
-- `posts` capability restrictions
-- Site Settings Audit generation
+- `/admin/dashboard`
+- `/admin/projects`
+- `/admin/projects/new`
+- `/admin/services`
+- `/admin/service-packages`
+- `/admin/leads`
+- `/admin/site-settings`
+- `/admin/media`
 
-All reported runtime checks passed.
+Also verified:
 
-After runtime testing, temporary Admin values should be restored to the desired final production state before commit.
+- desktop collapsed sidebar
+- hover expansion
+- pinned expansion
+- mobile drawer
+- contextual editor navigation
+- no duplicate Admin shell headers on checked module pages
+- Analytics range controls
+- Analytics Refresh
+- Dashboard contains Analytics rather than Management Modules grid
 
-## Validation Evidence
+Result:
 
-Verified during Module 27 implementation:
+`PASS`
 
-`node --check server/src/models/SiteSettings.js`
+## Build / Validation Evidence
 
-PASS
-
-`node --check server/src/config/homepageSections.js`
-
-PASS
-
-`node --check server/src/controllers/adminSiteSettings.controller.js`
-
-PASS
-
-`node --check server/src/constants/auditLog.constants.js`
-
-PASS
-
-`node --check client/src/config/homepageSections.js`
-
-PASS during the frontend validation cycle.
-
-`node --check client/src/utils/siteSettingsForm.js`
-
-PASS during the frontend validation cycle.
-
-`node --check client/src/utils/publicNavigation.js`
-
-PASS
-
-Final post-documentation validation:
-
-`npm run check`
-
-PASS
-
-The check script completed its production build plus the configured syntax checks.
-
-Final production build:
+Final production build before commit:
 
 `npm run build`
 
@@ -492,131 +247,97 @@ PASS
 
 Vite:
 
-- 272 modules transformed
-- main JS approximately 1,753.94 kB
-- gzip approximately 362.36 kB
-- existing >500 kB chunk-size warning remains non-blocking
+- 280 modules transformed
+- main JS approximately 1,738.06 kB
+- gzip approximately 362.66 kB
+- existing >500 kB chunk warning remains non-blocking
 
 `git diff --check`:
 
 - no actual whitespace errors
 - CRLF -> LF warnings only
 
-Pre-staging Git scope verification:
+Focused ESLint after Codex fixes:
 
-- 12 tracked modified files
-- 1 new untracked file: `client/src/utils/publicNavigation.js`
-- 13 total intended Module 27 closeout paths
-- no unrelated file detected
+```text
+npx eslint src/pages/admin/AdminSubscribersPage.jsx src/components/admin/layout/AdminNavigation.jsx src/components/admin/layout/AdminMobileDrawer.jsx
+```
 
-Final staging verification:
+PASS:
 
-- exactly 13 intended Module 27 paths staged
-- no unrelated staged or unstaged files detected
-- `git diff --cached --check`: PASS
+- 0 errors
+- 0 warnings
+
+A repository-wide/client-wide lint invocation surfaced many pre-existing lint issues outside this milestone. Do not treat those as Admin shell regressions. They should be handled in a separate controlled lint-cleanup phase if desired.
 
 ## Codex Review History
 
-Backend B1 final:
+First final Admin shell review:
 
-- A: NONE
-- B: NONE
-- exact fix files: NONE
-- verdict: `BACKEND B1 READY FOR FRONTEND INTEGRATION`
+A. Blockers:
 
-Frontend F1 initial review found one B issue:
+`NONE`
 
-- `posts` was incorrectly shown as Footer-capable in Admin UI
+B. Non-blocking findings:
 
-That issue was fixed and re-reviewed:
+1. `AdminSubscribersPage.jsx`
+   - unused `Link` import
 
-- A: NONE
-- B: NONE
-- C: NONE
-- verdict: `FRONTEND F1 READY FOR NAVIGATION RENDERING INTEGRATION`
+2. `AdminNavigation.jsx`
+   - `react-hooks/set-state-in-effect` from active-parent synchronization
 
-Frontend F2 initial review found one B issue:
+3. `AdminMobileDrawer.jsx`
+   - cleanup read mutable `returnFocusRef.current`
 
-- Contact-targeting Admin legal links could survive while Contact was unavailable
+All three were fixed.
 
-That issue was fixed and re-reviewed:
+Focused final re-review:
 
-- A: NONE
-- B: NONE
-- C: NONE
-- verdict: `F2 READY FOR RUNTIME VERIFICATION`
+- `AdminSubscribersPage.jsx`: `RESOLVED`
+- `AdminNavigation.jsx`: `RESOLVED`
+- `AdminMobileDrawer.jsx`: `RESOLVED`
+- new regression introduced by fixes: `NONE`
+- final verdict: `READY TO COMMIT`
 
-Final complete Module 27 integration review:
+## Git Closeout
 
-- Git scope: PASS
-- architecture: PASS
-- backend contract: PASS
-- backward compatibility: PASS
-- Audit integration: PASS
-- Admin UI: PASS
-- shared resolver: PASS
-- publication rules: PASS
-- canonical routes: PASS
-- Navbar: PASS
-- Navbar accessibility: PASS
-- PublicPageHeader: PASS
-- detail active state: PASS
-- Footer: PASS
-- Footer Contact safety: PASS
-- provider/fallback: PASS
-- public-page guard: PASS
-- SEO/sitemap: PASS
-- security: PASS
-- performance: PASS
-- runtime evidence: PASS
-- build evidence: PASS
-- A findings: NONE
-- B findings: NONE
-- C findings: NONE
-- exact files requiring fix: NONE
-- verdict: `MODULE 27 READY FOR DOCUMENTATION AND FINAL STAGED REVIEW`
+Staged milestone scope:
 
-First final staged-diff Codex review:
+- 49 files
+- 1,829 insertions
+- 1,995 deletions
 
-- staged scope: PASS
-- staged diff check: PASS
-- architecture/backend/Audit/Admin UI/resolver/Navbar/PublicPageHeader/Footer/publication/SEO/accessibility/regression: PASS
-- A findings: NONE
-- implementation B findings: NONE
-- documentation finding: one B issue in `docs/SESSION_HANDOFF.md`
-- issue: the handoff still said the final post-documentation `npm run check` had not been recorded and should run before staging, even though final validation had already passed and all 13 intended files were staged
-- exact file requiring correction: `docs/SESSION_HANDOFF.md`
-- verdict before this correction: `FIX REQUIRED BEFORE COMMIT`
+`git diff --cached --check`:
 
-The documentation-only stale-state issue was corrected. No implementation file required reopening.
+`PASS`
 
-## Open Issues / Deferred
+Commit:
 
-No confirmed Module 27 functional, publication, security, Audit-privacy, accessibility, or runtime blocker remains.
+`6c8f95d Build professional admin shell and analytics dashboard`
 
-Module 27 deferred:
+Push:
 
-- custom/external navigation items
-- arbitrary internal destinations
-- nested menus/dropdowns
-- drag-and-drop ordering
-- separate desktop/mobile placement
-- configurable featured/CTA menu styling
-- menu-driven sitemap generation
-- cross-runtime generation of shared server/client registry defaults
+`main -> origin/main`
 
-Known non-blocking project-wide items:
+Final verification:
+
+- `HEAD -> main` = `6c8f95d`
+- `origin/main` = `6c8f95d`
+- working tree clean
+
+## Known Non-Blocking Project-Wide Items
 
 - client production bundle remains above Vite's recommended chunk-size threshold
-- CRLF -> LF warnings exist on several tracked files
+- CRLF -> LF warnings exist on tracked files
 - limited automated test coverage
-- Media reference-detail display capped at 25
-- narrow Media reference-check/delete TOCTOU window
-- older controllers are not uniformly as strict as newer modules
+- repository-wide ESLint currently reports older unrelated issues
 - README remains materially stale
 - production `TRUST_PROXY_HOPS` must match deployment topology
+- Media reference-detail display remains capped at 25
+- narrow Media reference-check/delete TOCTOU window remains
+- older controllers are not uniformly as strict as newer modules
 - Audit frontend/backend enum registries remain duplicated
-- Audit direct collection / `bulkWrite` bypass remains a low-level limitation
+- Audit direct collection / `bulkWrite` bypass remains a documented low-level limitation
 
 Do not run:
 
@@ -624,45 +345,44 @@ Do not run:
 
 ## Immediate Next Action
 
-Module 27 implementation, runtime verification, documentation, and staged-diff review are complete.
+Documentation closeout for the Admin shell milestone is the only current uncommitted task.
 
-Current closeout status:
+After replacing these two active docs:
 
-- implementation: complete
-- runtime verification: PASS
-- `npm run check`: PASS
-- `npm run build`: PASS
-- Vite: 272 modules transformed
-- intended closeout scope: 13 files
-- implementation A findings: NONE
-- implementation B findings: NONE
-- documentation stale-state finding: resolved
-- no implementation file requires reopening
+- `docs/PROJECT_MEMORY.md`
+- `docs/SESSION_HANDOFF.md`
 
-Next action:
+verify:
 
-1. Commit Module 27 with:
+- `git diff --check`
+- `git status --short`
 
-`Add dynamic menu and navigation management`
+Then commit/push the documentation closeout separately.
 
-2. Push `main`.
+Recommended documentation commit message:
 
-3. Verify:
+`Document professional admin shell milestone`
 
-- `git status -sb`
-- `git log -1 --oneline`
-- local `main` and `origin/main` synchronized
-- working tree clean
+## Next UI/UX Work
 
-## Next Project Phase
+After documentation closeout, continue the separate Professional UI/UX phase.
 
-After Module 27 is committed and pushed, all 27 planned major functional modules are complete.
+Recommended next scope:
 
-Next phase:
+`Individual Admin Module Internal UI Polish`
 
-`Professional UI/UX`
+Important:
 
-Then:
+- do not redesign every module at once
+- preserve the new shared Admin shell
+- do not recreate module navigation inside Dashboard/pages
+- keep one major UI/UX scope active at a time
+- use larger practical batches for low-risk visual normalization
+- use smaller verified steps for high-risk forms, routing, auth, permissions, Media Picker, or transactional workflows
+
+After Admin internal page polish, continue with public-site visual polish.
+
+Remaining later phases:
 
 - Email and Notifications
 - Final SEO/testing/performance/security
