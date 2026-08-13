@@ -2,385 +2,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import siteData from "../../data/siteData";
-import { mergeHomepageSections } from "../../config/homepageSections";
 import useSiteSettings from "../../hooks/useSiteSettings";
+import { getNavbarNavigationItems } from "../../utils/publicNavigation";
 import Button from "../ui/Button";
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
-const defaultNavigationSections = [
-  {
-    key: "hero",
-    label: "Home",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 1,
-    navigationOrder: 1,
-  },
-  {
-    key: "about",
-    label: "About",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 2,
-    navigationOrder: 2,
-  },
-  {
-    key: "statistics",
-    label: "Statistics",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 3,
-    navigationOrder: 3,
-  },
-  {
-    key: "skills",
-    label: "Skills",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 4,
-    navigationOrder: 4,
-  },
-  {
-    key: "services",
-    label: "Services",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 5,
-    navigationOrder: 5,
-  },
-  {
-    key: "projects",
-    label: "Projects",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 6,
-    navigationOrder: 6,
-  },
-  {
-    key: "case-studies",
-    label: "Case Studies",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 7,
-    navigationOrder: 7,
-  },
-  {
-    key: "education",
-    label: "Education",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 8,
-    navigationOrder: 8,
-  },
-  {
-    key: "experience",
-    label: "Experience",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 9,
-    navigationOrder: 9,
-  },
-  {
-    key: "achievements",
-    label: "Achievements",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 10,
-    navigationOrder: 10,
-  },
-  {
-    key: "team",
-    label: "Team",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 11,
-    navigationOrder: 11,
-  },
-  {
-    key: "companies",
-    label: "Companies",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 12,
-    navigationOrder: 12,
-  },
-  {
-    key: "clients-partners",
-    label: "Clients & Partners",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 13,
-    navigationOrder: 13,
-  },
-  {
-    key: "testimonials",
-    label: "Testimonials",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 15,
-    navigationOrder: 14,
-  },
-  {
-    key: "faq",
-    label: "FAQ",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 16,
-    navigationOrder: 15,
-  },
-  {
-    key: "contact",
-    label: "Contact",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 17,
-    navigationOrder: 16,
-  },
-  {
-    key: "blog",
-    label: "Blog",
-    isVisible: false,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 18,
-    navigationOrder: 17,
-  },
-  {
-    key: "news",
-    label: "News",
-    isVisible: false,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 19,
-    navigationOrder: 18,
-  },
-];
-
-const sectionDestinations = {
-  hero: {
-    type: "section",
-    target: "home",
-  },
-  about: {
-    type: "section",
-    target: "about",
-  },
-  statistics: {
-    type: "page",
-    target: "/statistics",
-  },
-  skills: {
-    type: "page",
-    target: "/skills",
-  },
-  services: {
-    type: "page",
-    target: "/services",
-  },
-  projects: {
-    type: "page",
-    target: "/projects",
-  },
-  "case-studies": {
-    type: "page",
-    target: "/case-studies",
-  },
-  education: {
-    type: "page",
-    target: "/education",
-  },
-  experience: {
-    type: "page",
-    target: "/experience",
-  },
-  achievements: {
-    type: "page",
-    target: "/achievements",
-  },
-  team: {
-    type: "page",
-    target: "/team",
-  },
-  companies: {
-    type: "page",
-    target: "/companies",
-  },
-  "clients-partners": {
-    type: "page",
-    target: "/clients-partners",
-  },
-  testimonials: {
-    type: "page",
-    target: "/testimonials",
-  },
-  faq: {
-    type: "page",
-    target: "/faq",
-  },
-  blog: {
-    type: "page",
-    target: "/blog",
-  },
-  news: {
-    type: "page",
-    target: "/news",
-  },
-  contact: {
-    type: "section",
-    target: "contact",
-  },
-};
-
-const supportedNavigationSections = new Set(
-  defaultNavigationSections.map((section) => section.key),
-);
-
-const defaultSectionByKey = Object.fromEntries(
-  defaultNavigationSections.map((section) => [section.key, section]),
-);
-
-function normaliseSectionKey(value) {
-  const key = String(value || "")
-    .trim()
-    .toLowerCase();
-
-  return key === "home" ? "hero" : key;
-}
-
-function getSafeSectionLabel(sectionKey, value) {
-  const label = String(value || "").trim();
-
-  if (sectionKey === "hero" && label.toLowerCase() === "hero") {
-    return "Home";
-  }
-
-  return label || defaultSectionByKey[sectionKey]?.label || sectionKey;
-}
-
-function createVisibleSections(settingsSections, allowDefaultFallback = true) {
-  const sourceSections = mergeHomepageSections(settingsSections);
-
-  const sectionsByKey = new Map();
-
-  sourceSections.forEach((section, index) => {
-    const key = normaliseSectionKey(section?.key);
-
-    if (!key || !supportedNavigationSections.has(key)) {
-      return;
-    }
-
-    const destination = sectionDestinations[key];
-
-    if (!destination) {
-      return;
-    }
-
-    const numericHomepageOrder = Number(section?.order);
-
-    const fallbackHomepageOrder = defaultSectionByKey[key]?.order ?? index + 1;
-
-    const homepageOrder = Number.isFinite(numericHomepageOrder)
-      ? numericHomepageOrder
-      : fallbackHomepageOrder;
-
-    const numericNavigationOrder = Number(section?.navigationOrder);
-
-    const fallbackNavigationOrder =
-      defaultSectionByKey[key]?.navigationOrder ?? homepageOrder;
-
-    const navigationOrder = Number.isFinite(numericNavigationOrder)
-      ? numericNavigationOrder
-      : fallbackNavigationOrder;
-
-    const isHomepageVisible = section?.isVisible !== false;
-
-    const isNavigationVisible = section?.isNavigationVisible !== false;
-
-    const isPageVisible = section?.isPageVisible !== false;
-
-    /*
-     * Hero/Home Navbar item homepage Hero
-     * hidden hone par bhi available reh sakta hai.
-     *
-     * About aur Contact jaise anchor items
-     * homepage section hidden hone par Navbar
-     * se bhi remove honge, taaki broken link na bane.
-     *
-     * Dedicated page items tabhi Navbar mein
-     * dikhenge jab public page enabled ho.
-     */
-    const isDestinationAvailable =
-      key === "hero" ||
-      (destination.type === "page" ? isPageVisible : isHomepageVisible);
-
-    sectionsByKey.set(key, {
-      key,
-
-      label: getSafeSectionLabel(key, section?.label),
-
-      isHomepageVisible,
-
-      isNavigationVisible,
-
-      isPageVisible,
-
-      homepageOrder,
-
-      navigationOrder,
-
-      isDestinationAvailable,
-    });
-  });
-
-  if (sectionsByKey.size === 0 && allowDefaultFallback) {
-    return createVisibleSections(defaultNavigationSections, false);
-  }
-
-  return [...sectionsByKey.values()]
-    .filter(
-      (section) =>
-        section.isNavigationVisible !== false &&
-        section.isDestinationAvailable !== false,
-    )
-    .sort((firstSection, secondSection) => {
-      const orderDifference =
-        firstSection.navigationOrder - secondSection.navigationOrder;
-
-      if (orderDifference !== 0) {
-        return orderDifference;
-      }
-
-      return (
-        (defaultSectionByKey[firstSection.key]?.navigationOrder || 0) -
-        (defaultSectionByKey[secondSection.key]?.navigationOrder || 0)
-      );
-    });
-}
-
 function NavbarLink({ section, isActive, isMobile = false, onNavigate }) {
-  const destination = sectionDestinations[section.key];
-
-  if (!destination) {
-    return null;
-  }
-
   const baseClasses = isMobile
     ? "min-w-0 break-words rounded-xl px-4 py-3 text-sm font-semibold transition"
     : "max-w-24 truncate border-b-2 py-2 text-sm font-semibold transition-colors xl:max-w-28";
@@ -393,10 +21,10 @@ function NavbarLink({ section, isActive, isMobile = false, onNavigate }) {
       ? "border-brand-600 text-brand-600"
       : "border-transparent text-slate-600 hover:text-brand-600";
 
-  if (destination.type === "page") {
+  if (section.type === "page") {
     return (
       <Link
-        to={destination.target}
+        to={section.href}
         onClick={onNavigate}
         className={`${baseClasses} ${stateClasses}`}
         title={section.label}
@@ -408,12 +36,12 @@ function NavbarLink({ section, isActive, isMobile = false, onNavigate }) {
 
   return (
     <a
-      href={`#${destination.target}`}
+      href={`#${section.targetId}`}
       aria-current={isActive ? "location" : undefined}
       onClick={(event) => {
         event.preventDefault();
 
-        onNavigate(destination.target, section.key);
+        onNavigate(section.targetId, section.key);
       }}
       className={`${baseClasses} ${stateClasses}`}
       title={section.label}
@@ -427,17 +55,12 @@ function Navbar() {
   const { settings } = useSiteSettings();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-
   const [activeSectionKey, setActiveSectionKey] = useState("hero");
 
   const mobileMenuRef = useRef(null);
-
   const mobileMenuButtonRef = useRef(null);
-
   const moreMenuRef = useRef(null);
-
   const moreMenuButtonRef = useRef(null);
 
   const brandName =
@@ -445,7 +68,7 @@ function Navbar() {
     "RakeshNexify";
 
   const visibleSections = useMemo(
-    () => createVisibleSections(settings?.sections),
+    () => getNavbarNavigationItems(settings?.sections),
     [settings?.sections],
   );
 
@@ -459,7 +82,6 @@ function Navbar() {
   );
 
   const desktopNavigationSections = navigationSections.slice(0, 4);
-
   const overflowNavigationSections = navigationSections.slice(4);
 
   const isOverflowSectionActive = overflowNavigationSections.some(
@@ -472,16 +94,6 @@ function Navbar() {
 
   function closeMoreMenu() {
     setIsMoreMenuOpen(false);
-  }
-
-  function navigateFromMoreMenu(section) {
-    const destination = sectionDestinations[section.key];
-
-    closeMoreMenu();
-
-    if (destination?.type === "section") {
-      goToHomepageSection(destination.target, section.key);
-    }
   }
 
   function goToHomepageSection(sectionId, sectionKey) {
@@ -507,6 +119,14 @@ function Navbar() {
 
     setActiveSectionKey(sectionKey);
     closeMobileMenu();
+  }
+
+  function navigateFromMoreMenu(section) {
+    closeMoreMenu();
+
+    if (section.type === "section") {
+      goToHomepageSection(section.targetId, section.key);
+    }
   }
 
   useEffect(() => {
@@ -543,12 +163,10 @@ function Navbar() {
     }
 
     document.addEventListener("keydown", handleEscapeKey);
-
     window.addEventListener("resize", handleWindowResize);
 
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
-
       window.removeEventListener("resize", handleWindowResize);
     };
   }, [isMenuOpen, isMoreMenuOpen]);
@@ -570,12 +188,10 @@ function Navbar() {
     }
 
     document.body.style.overflow = "hidden";
-
     document.addEventListener("pointerdown", handleOutsideClick);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-
       document.removeEventListener("pointerdown", handleOutsideClick);
     };
   }, [isMenuOpen]);
@@ -602,20 +218,12 @@ function Navbar() {
     let animationFrameId = 0;
 
     const sectionElements = visibleSections
-      .map((section) => {
-        const destination = sectionDestinations[section.key];
-
-        if (destination?.type !== "section") {
-          return null;
-        }
-
-        return {
-          key: section.key,
-
-          element: document.getElementById(destination.target),
-        };
-      })
-      .filter((section) => section?.element);
+      .filter((section) => section.type === "section")
+      .map((section) => ({
+        key: section.key,
+        element: document.getElementById(section.targetId),
+      }))
+      .filter((section) => section.element);
 
     function updateActiveSection() {
       if (sectionElements.length === 0) {
@@ -623,7 +231,6 @@ function Navbar() {
       }
 
       const navigationOffset = Math.min(160, window.innerHeight * 0.3);
-
       let nextActiveSection = sectionElements[0].key;
 
       sectionElements.forEach((section) => {
@@ -665,7 +272,6 @@ function Navbar() {
     window.addEventListener("scroll", scheduleUpdate, {
       passive: true,
     });
-
     window.addEventListener("resize", scheduleUpdate);
 
     return () => {
@@ -674,7 +280,6 @@ function Navbar() {
       }
 
       window.removeEventListener("scroll", scheduleUpdate);
-
       window.removeEventListener("resize", scheduleUpdate);
     };
   }, [visibleSections]);
@@ -696,7 +301,6 @@ function Navbar() {
               aria-label={`Go to ${brandName} homepage`}
               onClick={(event) => {
                 event.preventDefault();
-
                 goToHomepageSection("home", "hero");
               }}
               className="inline-flex min-w-0 max-w-full shrink-0"
@@ -715,7 +319,7 @@ function Navbar() {
                     section={section}
                     isActive={activeSectionKey === section.key}
                     onNavigate={
-                      sectionDestinations[section.key]?.type === "page"
+                      section.type === "page"
                         ? closeMobileMenu
                         : goToHomepageSection
                     }
@@ -770,7 +374,7 @@ function Navbar() {
                               isActive={activeSectionKey === section.key}
                               isMobile
                               onNavigate={
-                                sectionDestinations[section.key]?.type === "page"
+                                section.type === "page"
                                   ? closeMoreMenu
                                   : () => navigateFromMoreMenu(section)
                               }
@@ -788,7 +392,12 @@ function Navbar() {
               <div className="hidden shrink-0 lg:block">
                 <Button
                   size="small"
-                  onClick={() => goToHomepageSection("contact", "contact")}
+                  onClick={() =>
+                    goToHomepageSection(
+                      contactSection.targetId,
+                      contactSection.key,
+                    )
+                  }
                   className={
                     activeSectionKey === "contact"
                       ? "ring-4 ring-brand-500/15"
@@ -863,7 +472,7 @@ function Navbar() {
                             isActive={activeSectionKey === section.key}
                             isMobile
                             onNavigate={
-                              sectionDestinations[section.key]?.type === "page"
+                              section.type === "page"
                                 ? closeMobileMenu
                                 : goToHomepageSection
                             }
@@ -874,7 +483,10 @@ function Navbar() {
                           <Button
                             className="mt-3 w-full max-w-full"
                             onClick={() =>
-                              goToHomepageSection("contact", "contact")
+                              goToHomepageSection(
+                                contactSection.targetId,
+                                contactSection.key,
+                              )
                             }
                           >
                             {contactSection.label}

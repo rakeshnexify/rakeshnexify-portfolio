@@ -117,25 +117,139 @@ Registry controls:
 
 - `isVisible`
 - `isNavigationVisible`
+- `isFooterNavigationVisible`
 - `isPageVisible`
 - `order`
 - `navigationOrder`
+- `footerNavigationOrder`
 - `label`
 
 `PublicPageVisibilityRoute` blocks disabled dedicated pages. It also supports an OR-style `sectionKeys` contract for intentionally shared canonical detail routes. Existing single-section guards retain their normal behavior.
 
-Navbar, PublicPageHeader, Footer, homepage registry, route guards, and sitemap must stay aligned.
+Navbar, PublicPageHeader, Footer, homepage registry, route guards, and sitemap must stay aligned. Public navigation resolution is centralized client-side through `client/src/utils/publicNavigation.js`; canonical registered destinations remain code-owned while placement/labels/orders remain Admin-controlled.
 
 Special cases:
 
-- `posts`: combined homepage Articles & News
+- `posts`: combined homepage Articles & News; homepage-only and has no normal Navbar/Footer/dedicated-page destination
 - `blog` / `news`: dedicated experiences
 - `faq`: independent homepage/Navbar/public-page publication
 - `clients-partners`: presentation layer over Company; independent collection publication while reusing canonical Company details
 - `case-studies`: publication/presentation layer over Project; independent collection publication while reusing canonical Project details
-- `consultation`: dedicated transactional page only; no homepage section or required Navbar item; page visibility remains Admin-controlled
+- `consultation`: dedicated transactional page only; no homepage section; Navbar/Footer placement is optional and defaults hidden; page visibility remains Admin-controlled
 - Hero/About/Contact: anchor-oriented
 - Media/Contact Messages: Admin-only
+
+## Menu / Navigation Management
+
+Module 27 uses the existing `SiteSettings.sections` registry as the single navigation/publication source of truth. There is no separate `Menu`, `MenuItem`, `MenuGroup`, or menu-tree collection/API.
+
+Registered section contract:
+
+- `key`
+- `label`
+- `isVisible`
+- `isNavigationVisible`
+- `isFooterNavigationVisible`
+- `isPageVisible`
+- `order`
+- `navigationOrder`
+- `footerNavigationOrder`
+
+Permanent rules:
+
+- homepage, Navbar, Footer, and dedicated-page controls are independent
+- canonical internal destinations are code-owned and are not freely editable Admin paths
+- old Site Settings records remain compatible through canonical registry merging; no migration is required
+- unknown registry keys and unsupported section properties are rejected by Admin validation
+- section visibility fields require actual Booleans
+- section order fields require bounded non-negative safe integers
+- meaningful navigation changes are included in the existing transaction-coupled Site Settings Audit event using safe changed-field names only
+- Audit never stores the full sections array, request body, URLs, or private Site Settings data
+- sitemap remains publication/route-driven, not menu-driven
+
+Shared client resolver:
+
+`client/src/utils/publicNavigation.js`
+
+It is the single client authority used by:
+
+- `Navbar.jsx`
+- `Footer.jsx`
+- `PublicPageHeader.jsx`
+
+The resolver owns:
+
+- canonical destination/type
+- safe public label fallback
+- destination publication availability
+- Navbar placement/order
+- Footer placement/order
+- active-route behavior
+
+Publication rules:
+
+- Hero/Home remains a valid homepage destination
+- About/Contact anchors require their homepage section to be visible
+- dedicated destinations require `isPageVisible !== false`
+- Navbar additionally requires `isNavigationVisible !== false`
+- Footer additionally requires `isFooterNavigationVisible !== false`
+
+Canonical destination examples:
+
+- `statistics` -> `/statistics`
+- `skills` -> `/skills`
+- `services` -> `/services`
+- `projects` -> `/projects`
+- `case-studies` -> `/case-studies`
+- `companies` -> `/companies`
+- `clients-partners` -> `/clients-partners`
+- `blog` -> `/blog`
+- `news` -> `/news`
+- `consultation` -> `/consultation`
+
+Shared canonical detail ownership remains unchanged:
+
+- Project details -> `/projects/:slug`
+- Company details -> `/companies/:slug`
+
+Case Studies does not own `/case-studies/:slug`; Clients / Partners does not own `/clients-partners/:slug`.
+
+Special capabilities:
+
+- `posts`: homepage-only; no Navbar, Footer, or dedicated-page destination
+- `statistics`: homepage + Navbar + Footer + dedicated page; Footer defaults hidden
+- `consultation`: dedicated page + optional Navbar/Footer; both placements default hidden
+- `blog` / `news`: Navbar + Footer + dedicated pages; no standalone homepage section
+- `hero` / `about` / `contact`: homepage-oriented destinations
+
+Footer safety:
+
+- Quick Links use `isFooterNavigationVisible` + `footerNavigationOrder`
+- Footer Services content availability is not coupled to the Services Quick Link placement
+- Contact-targeting project CTA, legal links, and generated Contact fallback are suppressed when the Contact destination is unavailable
+- non-Contact legal/platform links preserve existing URL safety
+
+Accessibility preserved:
+
+- semantic navigation
+- skip-to-content
+- mobile/desktop menu `aria-expanded` / `aria-controls`
+- Escape close
+- focus restoration
+- outside-click cleanup
+- mobile body-scroll cleanup
+- visible keyboard focus
+
+Intentionally deferred:
+
+- arbitrary custom internal destinations
+- custom/external navigation items
+- nested menus/dropdowns
+- drag-and-drop ordering
+- separate desktop/mobile placement
+- configurable featured/CTA menu styling
+- menu-driven sitemap generation
+- cross-runtime generation of shared server/client registry defaults
 
 ## SEO / Sitemap
 
@@ -826,8 +940,8 @@ Intentionally deferred from this module:
 - payment/revenue analytics
 - caching
 - chart-library dependency
-- Audit Log
-- Menu / Navigation Management
+- Audit Log (implemented later as Module 26)
+- Menu / Navigation Management (implemented later as Module 27)
 
 
 ## Admin Activity / Audit Log
@@ -1168,7 +1282,7 @@ RBAC:
 
 FAQ Site Settings content: eyebrow, heading, description, CTA label, CTA URL.
 
-Independent publication controls: homepage, Navbar, dedicated page, homepage order, navigation order, label.
+Independent publication controls: homepage, Navbar, Footer, dedicated page, homepage order, Navbar order, Footer order, label.
 
 If `/faq` public page is disabled:
 
@@ -1219,7 +1333,7 @@ Permanent rules:
 - dedicated page supports All / Clients / Partners filters
 - registry key is `clients-partners`
 - Site Settings content field is `clientsPartnersSection`
-- homepage, Navbar, and dedicated-page publication controls remain independent
+- homepage, Navbar, Footer, and dedicated-page publication controls remain independent
 - disabling Clients / Partners public page does not globally hide Company records from the Companies module
 - homepage CTA to `/clients-partners` must hide if that page is publication-disabled
 
@@ -1324,7 +1438,7 @@ Default homepage placement:
 
 `Projects -> Case Studies -> Education`
 
-Homepage, Navbar, and dedicated-page publication controls remain independent.
+Homepage, Navbar, Footer, and dedicated-page publication controls remain independent.
 
 Homepage CTA behavior is target-aware:
 
@@ -1361,9 +1475,13 @@ Project `clientName` remains plain text; Case Studies does not introduce a new P
 
 ## Completed Module Inventory
 
+Major functional roadmap status: **27/27 planned modules complete**.
+
+
 | Module | Public | Admin | Public Route / Notes |
 | --- | --- | --- | --- |
 | Site Settings | `/api/site-settings` | `/api/admin/site-settings` | Shared settings/publication |
+| Menu / Navigation Management | reuses `/api/site-settings` | reuses `/api/admin/site-settings` | Registry-based Navbar/Footer/publication management; no separate Menu API |
 | Services | `/api/services` | `/api/admin/services` | `/services` |
 | Service Packages | `/api/service-packages` | `/api/admin/service-packages` | Services pricing layer |
 | Package Designs | `/api/package-designs` | `/api/admin/package-designs` | Services design layer |
@@ -1396,6 +1514,7 @@ Prefer extending:
 
 - Admin auth/RBAC
 - Site Settings/publication registry
+- shared `publicNavigation.js` resolver for canonical public navigation destinations, placement, ordering, publication, and active state
 - `PublicPageVisibilityRoute`, including explicit shared-route `sectionKeys`
 - `PageSeo`
 - dynamic sitemap
@@ -1423,7 +1542,11 @@ Prefer extending:
 - keep Express app separate from startup
 - manage reasonable content dynamically through Admin
 - preserve JWT/RBAC/security middleware
-- keep homepage/Navbar/public-page controls independent
+- keep homepage/Navbar/Footer/public-page controls independent
+- keep `SiteSettings.sections` as the navigation/publication source of truth; do not introduce a second Menu domain without a concrete requirement
+- keep canonical registered internal destinations code-owned; Admin controls labels, placement, ordering, and publication rather than arbitrary route strings
+- keep Navbar and Footer placement/order independent
+- keep public navigation resolution centralized through `publicNavigation.js`
 - keep routing/SEO/sitemap aligned with publication state
 - Blog and News share one `Post`
 - Media binaries stay outside MongoDB
@@ -1475,6 +1598,7 @@ Prefer extending:
 - Media deletion has a narrow reference-check/provider-delete TOCTOU window
 - older controllers are not uniformly as strict as newer modules
 - navigation is registry-based, not arbitrary hierarchical navigation
+- server/client canonical registry defaults are duplicated and must remain coordinated until a cross-runtime generation strategy is justified
 - `Company.relationship` is single-valued
 - Project `clientName` is plain text; no formal Project-to-Company relation exists
 - `TRUST_PROXY_HOPS` depends on deployment topology
@@ -1492,15 +1616,9 @@ Do not recreate a large historical documentation matrix after every module.
 
 ## Remaining Roadmap
 
-1. Menu / Navigation Management
+All 27 planned major functional modules are complete.
 
-Overlap rules:
-
-- Appointment/Consultation is distinct from Contact Messages and Service Orders
-- Newsletter Subscriber remains distinct from Contact Messages, Leads, Appointments, Service Orders, and Admin Users
-- Admin Analytics extends the existing dashboard rather than duplicating management modules
-- Admin Audit Log is complete and remains distinct from normal model audit fields and Analytics
-- Menu/Navigation must account for the existing Site Settings registry and existing publication/navigation controls
+No additional major functional module remains in the current functional roadmap. Continue with the separate finishing phases below.
 
 ## Future Separate Phases
 

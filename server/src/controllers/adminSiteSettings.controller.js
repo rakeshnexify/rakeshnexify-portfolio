@@ -1,11 +1,42 @@
 import SiteSettings from "../models/SiteSettings.js";
-import { mergeHomepageSections } from "../config/homepageSections.js";
+import {
+  homepageSectionDefinitions,
+  mergeHomepageSections,
+} from "../config/homepageSections.js";
 import { createAuditLog } from "../services/auditLog.service.js";
 
 const MAIN_SITE_KEY = "main";
 
 const MAX_PLATFORMS_PER_GROUP = 25;
 const MAX_LEGAL_LINKS = 20;
+const MAX_SECTION_ORDER = 10000;
+
+const sectionAllowedFields = new Set([
+  "key",
+  "label",
+  "isVisible",
+  "isNavigationVisible",
+  "isFooterNavigationVisible",
+  "isPageVisible",
+  "order",
+  "navigationOrder",
+  "footerNavigationOrder",
+]);
+
+const navigationAuditFields = [
+  "label",
+  "isVisible",
+  "isNavigationVisible",
+  "isFooterNavigationVisible",
+  "isPageVisible",
+  "order",
+  "navigationOrder",
+  "footerNavigationOrder",
+];
+
+const homepageSectionDefinitionByKey = new Map(
+  homepageSectionDefinitions.map((section) => [section.key, section]),
+);
 
 const platformGroupFields = [
   "socialPlatforms",
@@ -167,6 +198,37 @@ function cleanOrder(value, fieldName) {
   }
 
   return numericOrder;
+}
+
+function cleanStrictBoolean(value, fieldName) {
+  if (typeof value !== "boolean") {
+    throw createHttpError(`${fieldName} must be a Boolean.`, 400, {
+      [fieldName]: `${fieldName} must be true or false.`,
+    });
+  }
+
+  return value;
+}
+
+function cleanSectionOrder(value, fieldName) {
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    !Number.isSafeInteger(value) ||
+    value < 0 ||
+    value > MAX_SECTION_ORDER
+  ) {
+    throw createHttpError(
+      `${fieldName} must be a whole number between 0 and ${MAX_SECTION_ORDER}.`,
+      400,
+      {
+        [fieldName]:
+          `Use a whole number between 0 and ${MAX_SECTION_ORDER}.`,
+      },
+    );
+  }
+
+  return value;
 }
 
 function containsControlCharacters(value) {
@@ -418,8 +480,41 @@ function cleanSections(value) {
 
     const section = ensureObject(sectionValue, fieldPrefix);
 
-    const key = cleanString(section.key).toLowerCase();
-    const label = cleanString(section.label);
+    const unknownFields = Object.keys(section).filter(
+      (fieldName) => !sectionAllowedFields.has(fieldName),
+    );
+
+    if (unknownFields.length > 0) {
+      const firstUnknownField = unknownFields[0];
+
+      throw createHttpError(
+        `Unsupported section field "${firstUnknownField}".`,
+        400,
+        {
+          [`${fieldPrefix}.${firstUnknownField}`]:
+            "This section field is not supported.",
+        },
+      );
+    }
+
+    if (typeof section.key !== "string") {
+      throw createHttpError("Every section requires a text key.", 400, {
+        [`${fieldPrefix}.key`]: "Section key must be a text value.",
+      });
+    }
+
+    if (containsControlCharacters(section.key)) {
+      throw createHttpError(
+        "Section keys cannot contain control characters.",
+        400,
+        {
+          [`${fieldPrefix}.key`]:
+            "Remove line breaks and control characters from this key.",
+        },
+      );
+    }
+
+    const key = section.key.trim().toLowerCase();
 
     if (!key) {
       throw createHttpError("Every section requires a key.", 400, {
@@ -427,13 +522,15 @@ function cleanSections(value) {
       });
     }
 
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key)) {
+    const definition = homepageSectionDefinitionByKey.get(key);
+
+    if (!definition) {
       throw createHttpError(
-        "Section keys can contain lowercase letters, numbers and hyphens only.",
+        `The section key "${key}" is not registered.`,
         400,
         {
           [`${fieldPrefix}.key`]:
-            "Use lowercase letters, numbers and hyphens only.",
+            "Select one of the registered Site Settings sections.",
         },
       );
     }
@@ -446,19 +543,41 @@ function cleanSections(value) {
 
     usedKeys.add(key);
 
+    if (typeof section.label !== "string") {
+      throw createHttpError("Every section requires a text label.", 400, {
+        [`${fieldPrefix}.label`]: "Section label must be a text value.",
+      });
+    }
+
+    if (containsControlCharacters(section.label)) {
+      throw createHttpError(
+        "Section labels cannot contain control characters.",
+        400,
+        {
+          [`${fieldPrefix}.label`]:
+            "Remove line breaks and control characters from this label.",
+        },
+      );
+    }
+
+    const label = section.label.trim();
+
     if (!label) {
       throw createHttpError("Every section requires a label.", 400, {
         [`${fieldPrefix}.label`]: "Section label is required.",
       });
     }
 
-    const sectionOrder = hasOwnProperty(section, "order")
-      ? cleanOrder(section.order, `${fieldPrefix}.order`)
-      : index + 1;
-
-    const navigationOrder = hasOwnProperty(section, "navigationOrder")
-      ? cleanOrder(section.navigationOrder, `${fieldPrefix}.navigationOrder`)
-      : sectionOrder;
+    if (label.length > 100) {
+      throw createHttpError(
+        "Section labels cannot exceed 100 characters.",
+        400,
+        {
+          [`${fieldPrefix}.label`]:
+            "Section label cannot exceed 100 characters.",
+        },
+      );
+    }
 
     return {
       key,
@@ -468,31 +587,101 @@ function cleanSections(value) {
        * Homepage section visibility.
        */
       isVisible: hasOwnProperty(section, "isVisible")
-        ? cleanBoolean(section.isVisible, `${fieldPrefix}.isVisible`)
-        : true,
+        ? cleanStrictBoolean(section.isVisible, `${fieldPrefix}.isVisible`)
+        : definition.isVisible,
 
       /*
        * Desktop aur mobile Navbar visibility.
        */
       isNavigationVisible: hasOwnProperty(section, "isNavigationVisible")
-        ? cleanBoolean(
+        ? cleanStrictBoolean(
             section.isNavigationVisible,
             `${fieldPrefix}.isNavigationVisible`,
           )
-        : true,
+        : definition.isNavigationVisible,
+
+      /*
+       * Footer quick-link visibility.
+       */
+      isFooterNavigationVisible: hasOwnProperty(
+        section,
+        "isFooterNavigationVisible",
+      )
+        ? cleanStrictBoolean(
+            section.isFooterNavigationVisible,
+            `${fieldPrefix}.isFooterNavigationVisible`,
+          )
+        : definition.isFooterNavigationVisible,
 
       /*
        * Dedicated public page accessibility.
        */
       isPageVisible: hasOwnProperty(section, "isPageVisible")
-        ? cleanBoolean(section.isPageVisible, `${fieldPrefix}.isPageVisible`)
-        : true,
+        ? cleanStrictBoolean(
+            section.isPageVisible,
+            `${fieldPrefix}.isPageVisible`,
+          )
+        : definition.isPageVisible,
 
-      order: sectionOrder,
+      /*
+       * Homepage section order.
+       */
+      order: hasOwnProperty(section, "order")
+        ? cleanSectionOrder(section.order, `${fieldPrefix}.order`)
+        : definition.order,
 
-      navigationOrder,
+      /*
+       * Navbar menu order.
+       */
+      navigationOrder: hasOwnProperty(section, "navigationOrder")
+        ? cleanSectionOrder(
+            section.navigationOrder,
+            `${fieldPrefix}.navigationOrder`,
+          )
+        : definition.navigationOrder,
+
+      /*
+       * Footer quick-links order.
+       */
+      footerNavigationOrder: hasOwnProperty(
+        section,
+        "footerNavigationOrder",
+      )
+        ? cleanSectionOrder(
+            section.footerNavigationOrder,
+            `${fieldPrefix}.footerNavigationOrder`,
+          )
+        : definition.footerNavigationOrder,
     };
   });
+}
+
+function getNavigationChangedFields(previousValue, nextValue) {
+  const previousSections = mergeHomepageSections(previousValue);
+  const nextSections = mergeHomepageSections(nextValue);
+
+  const previousByKey = new Map(
+    previousSections.map((section) => [section.key, section]),
+  );
+
+  const nextByKey = new Map(
+    nextSections.map((section) => [section.key, section]),
+  );
+
+  const changedFields = new Set();
+
+  homepageSectionDefinitions.forEach((definition) => {
+    const previousSection = previousByKey.get(definition.key);
+    const nextSection = nextByKey.get(definition.key);
+
+    navigationAuditFields.forEach((fieldName) => {
+      if (previousSection?.[fieldName] !== nextSection?.[fieldName]) {
+        changedFields.add(fieldName);
+      }
+    });
+  });
+
+  return [...changedFields];
 }
 
 function cleanPlatforms(value, fieldName) {
@@ -645,6 +834,20 @@ function appendFooterPayload(payload, footerValue) {
 
 function buildSiteSettingsPayload(requestBody) {
   const body = ensureObject(requestBody, "siteSettings");
+
+  if (
+    hasOwnProperty(body, "navigation") ||
+    hasOwnProperty(body, "customLinks")
+  ) {
+    throw createHttpError(
+      "Custom navigation links are not supported in this release.",
+      400,
+      {
+        navigation:
+          "Manage only registered Site Settings sections in this release.",
+      },
+    );
+  }
 
   const payload = {};
 
@@ -835,12 +1038,18 @@ async function updateAdminSiteSettings(req, res, next) {
       );
     }
 
+    const hasSectionsUpdate = hasOwnProperty(updateData, "sections");
+
     const settings = await SiteSettings.db.transaction(
       async (session) => {
         const currentSettings = await getOrCreateMainSettings(session);
 
         const previousIsPublished =
           Boolean(currentSettings.isPublished);
+
+        const previousSections = hasSectionsUpdate
+          ? mergeHomepageSections(currentSettings.sections)
+          : [];
 
         currentSettings.set(updateData);
         currentSettings.updatedBy = req.admin._id;
@@ -860,6 +1069,13 @@ async function updateAdminSiteSettings(req, res, next) {
             : "unpublish";
         }
 
+        const changedFields = hasSectionsUpdate
+          ? getNavigationChangedFields(
+              previousSections,
+              currentSettings.sections,
+            )
+          : [];
+
         await createAuditLog({
           actor: req.admin,
           category: "configuration",
@@ -870,6 +1086,7 @@ async function updateAdminSiteSettings(req, res, next) {
             id: currentSettings._id,
             label: "Main site settings",
           },
+          changedFields,
           request: req,
           session,
         });

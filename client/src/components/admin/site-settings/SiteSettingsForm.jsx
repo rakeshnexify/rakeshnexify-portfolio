@@ -23,6 +23,8 @@ const MAX_PLATFORMS_PER_GROUP = 25;
 
 const MAX_LEGAL_LINKS = 20;
 
+const MAX_SECTION_ORDER = 10000;
+
 const platformGroupFields = [
   "socialPlatforms",
   "developerPlatforms",
@@ -92,6 +94,12 @@ const navigationSectionKeys = new Set([
   "blog",
   "news",
 ]);
+
+const footerNavigationSectionKeys = new Set(
+  defaultFormValues.sections
+    .filter((section) => section.key !== "posts")
+    .map((section) => section.key),
+);
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -518,6 +526,20 @@ function removeErrorGroup(errors, fieldPrefix) {
   );
 }
 
+function isValidSectionOrder(value) {
+  if (typeof value === "string" && !value.trim()) {
+    return false;
+  }
+
+  const numericValue = Number(value);
+
+  return (
+    Number.isSafeInteger(numericValue) &&
+    numericValue >= 0 &&
+    numericValue <= MAX_SECTION_ORDER
+  );
+}
+
 function validateSiteSettingsForm(formValues) {
   const errors = {};
 
@@ -566,9 +588,11 @@ function validateSiteSettingsForm(formValues) {
 
     const label = String(section?.label || "").trim();
 
-    const order = Number(section?.order);
+    const order = section?.order;
 
-    const navigationOrder = Number(section?.navigationOrder);
+    const navigationOrder = section?.navigationOrder;
+
+    const footerNavigationOrder = section?.footerNavigationOrder;
 
     if (!key) {
       errors[`sections.${index}.key`] = "Section key is required.";
@@ -584,16 +608,24 @@ function validateSiteSettingsForm(formValues) {
 
     if (!label) {
       errors[`sections.${index}.label`] = "Section label is required.";
+    } else if (containsControlCharacters(label)) {
+      errors[`sections.${index}.label`] =
+        "Section label cannot contain line breaks or control characters.";
     }
 
-    if (!Number.isFinite(order) || order < 0) {
+    if (!isValidSectionOrder(order)) {
       errors[`sections.${index}.order`] =
-        "Homepage order must be a non-negative number.";
+        `Homepage order must be a whole number from 0 to ${MAX_SECTION_ORDER}.`;
     }
 
-    if (!Number.isFinite(navigationOrder) || navigationOrder < 0) {
+    if (!isValidSectionOrder(navigationOrder)) {
       errors[`sections.${index}.navigationOrder`] =
-        "Navbar order must be a non-negative number.";
+        `Navbar order must be a whole number from 0 to ${MAX_SECTION_ORDER}.`;
+    }
+
+    if (!isValidSectionOrder(footerNavigationOrder)) {
+      errors[`sections.${index}.footerNavigationOrder`] =
+        `Footer order must be a whole number from 0 to ${MAX_SECTION_ORDER}.`;
     }
   });
 
@@ -1996,8 +2028,8 @@ function SiteSettingsForm({
 
       <SettingsCard
         isVisible={isPanelActive("navigation")}
-        title="Sections, Navbar & Public Pages"
-        description="Control homepage sections, navbar menu items and dedicated public pages independently."
+        title="Sections, Navbar, Footer & Public Pages"
+        description="Control homepage sections, Navbar items, Footer Quick Links and dedicated public pages independently."
       >
         <FieldError message={getFieldError("sections")} />
 
@@ -2005,6 +2037,9 @@ function SiteSettingsForm({
           {formValues.sections.map((section, index) => {
             const hasHomepageSection = homepageSectionKeys.has(section.key);
             const hasNavigationItem = navigationSectionKeys.has(section.key);
+            const hasFooterNavigationItem = footerNavigationSectionKeys.has(
+              section.key,
+            );
             const hasDedicatedPage = dedicatedPageSectionKeys.has(section.key);
             const homepagePosition = homepageSectionIndexes.indexOf(index);
 
@@ -2047,7 +2082,7 @@ function SiteSettingsForm({
                   </span>
                 </div>
 
-                <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_9rem_9rem]">
+                <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_8rem_8rem_8rem]">
                   <TextInput
                     id={`settings-section-key-${index}`}
                     name={`sections.${index}.key`}
@@ -2064,9 +2099,7 @@ function SiteSettingsForm({
                       htmlFor={`settings-section-label-${index}`}
                       className="text-sm font-semibold text-slate-700"
                     >
-                      {hasNavigationItem
-                        ? "Navbar menu label"
-                        : "Section label"}
+                      Navigation label
                     </label>
 
                     <input
@@ -2101,6 +2134,7 @@ function SiteSettingsForm({
                           id={`settings-section-order-${index}`}
                           type="number"
                           min="0"
+                          max={MAX_SECTION_ORDER}
                           step="1"
                           value={section.order}
                           onChange={(event) =>
@@ -2147,6 +2181,7 @@ function SiteSettingsForm({
                           id={`settings-navigation-order-${index}`}
                           type="number"
                           min="0"
+                          max={MAX_SECTION_ORDER}
                           step="1"
                           value={section.navigationOrder}
                           onChange={(event) =>
@@ -2180,9 +2215,58 @@ function SiteSettingsForm({
                       </>
                     )}
                   </div>
+
+                  <div>
+                    {hasFooterNavigationItem ? (
+                      <>
+                        <label
+                          htmlFor={`settings-footer-navigation-order-${index}`}
+                          className="text-sm font-semibold text-slate-700"
+                        >
+                          Footer order
+                        </label>
+
+                        <input
+                          id={`settings-footer-navigation-order-${index}`}
+                          type="number"
+                          min="0"
+                          max={MAX_SECTION_ORDER}
+                          step="1"
+                          value={section.footerNavigationOrder}
+                          onChange={(event) =>
+                            handleSectionChange(
+                              index,
+                              "footerNavigationOrder",
+                              event.target.value,
+                            )
+                          }
+                          disabled={isSubmitting}
+                          className={inputClasses}
+                        />
+
+                        <FieldError
+                          message={getFieldError(
+                            `sections.${index}.footerNavigationOrder`,
+                          )}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-slate-700">
+                          Footer order
+                        </p>
+
+                        <div
+                          className={`${inputClasses} flex items-center text-slate-500`}
+                        >
+                          Not applicable
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {hasHomepageSection ? (
                     <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
                       <input
@@ -2266,6 +2350,48 @@ function SiteSettingsForm({
                     </div>
                   )}
 
+                  {hasFooterNavigationItem ? (
+                    <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={section.isFooterNavigationVisible !== false}
+                        onChange={(event) =>
+                          handleSectionChange(
+                            index,
+                            "isFooterNavigationVisible",
+                            event.target.checked,
+                          )
+                        }
+                        disabled={isSubmitting}
+                        className="size-4 shrink-0 accent-brand-600"
+                      />
+
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-slate-800">
+                          Show in footer
+                        </span>
+
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          Display this item in Footer Quick Links when its
+                          public destination is available.
+                        </span>
+                      </span>
+                    </label>
+                  ) : (
+                    <div className="flex min-h-16 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-4 py-3">
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-slate-600">
+                          No footer item
+                        </span>
+
+                        <span className="mt-1 block text-xs leading-5 text-slate-500">
+                          This registry item has no Footer Quick Link
+                          destination.
+                        </span>
+                      </span>
+                    </div>
+                  )}
+
                   {hasDedicatedPage ? (
                     <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
                       <input
@@ -2311,7 +2437,7 @@ function SiteSettingsForm({
                 <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs leading-5 text-slate-500">
                     {hasHomepageSection
-                      ? "Move buttons change only the order of real homepage sections. Navbar order remains independent."
+                      ? "Move buttons change only real homepage section order. Navbar and Footer orders remain independent."
                       : "This page-only item does not participate in homepage ordering."}
                   </p>
 

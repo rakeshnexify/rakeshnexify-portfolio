@@ -456,6 +456,18 @@ const sectionSchema = new mongoose.Schema(
     },
 
     /*
+     * Footer quick links mein
+     * menu item visible hoga ya nahi.
+     *
+     * Is field ka generic schema default
+     * intentionally nahi hai. Purane records
+     * canonical registry default inherit karenge.
+     */
+    isFooterNavigationVisible: {
+      type: Boolean,
+    },
+
+    /*
      * Dedicated public page accessible
      * hogi ya nahi.
      *
@@ -484,6 +496,18 @@ const sectionSchema = new mongoose.Schema(
       type: Number,
       min: [0, "Navigation order cannot be negative."],
       default: 0,
+    },
+
+    /*
+     * Footer quick links ka independent order.
+     *
+     * Generic default intentionally omit kiya gaya
+     * hai taaki purane records canonical registry
+     * ka per-section Footer order inherit kar saken.
+     */
+    footerNavigationOrder: {
+      type: Number,
+      min: [0, "Footer navigation order cannot be negative."],
     },
   },
   {

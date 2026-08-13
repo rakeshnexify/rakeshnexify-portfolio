@@ -3,335 +3,12 @@ import { Link, useLocation } from "react-router";
 
 import siteData from "../../data/siteData";
 import useSiteSettings from "../../hooks/useSiteSettings";
+import {
+  getNavbarNavigationItems,
+  isPublicNavigationItemActive,
+} from "../../utils/publicNavigation";
 import Logo from "../ui/Logo";
 import Container from "./Container";
-
-const defaultNavigationItems = [
-  {
-    key: "hero",
-    label: "Home",
-    href: "/",
-    type: "section",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 1,
-    navigationOrder: 1,
-  },
-  {
-    key: "about",
-    label: "About",
-    href: "/#about",
-    type: "section",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 2,
-    navigationOrder: 2,
-  },
-  {
-    key: "statistics",
-    label: "Statistics",
-    href: "/statistics",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 3,
-    navigationOrder: 3,
-  },
-  {
-    key: "skills",
-    label: "Skills",
-    href: "/skills",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 4,
-    navigationOrder: 4,
-  },
-  {
-    key: "services",
-    label: "Services",
-    href: "/services",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 5,
-    navigationOrder: 5,
-  },
-  {
-    key: "projects",
-    label: "Projects",
-    href: "/projects",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 6,
-    navigationOrder: 6,
-  },
-  {
-    key: "case-studies",
-    label: "Case Studies",
-    href: "/case-studies",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 7,
-    navigationOrder: 7,
-  },
-  {
-    key: "education",
-    label: "Education",
-    href: "/education",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 8,
-    navigationOrder: 8,
-  },
-  {
-    key: "experience",
-    label: "Experience",
-    href: "/experience",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 9,
-    navigationOrder: 9,
-  },
-  {
-    key: "achievements",
-    label: "Achievements",
-    href: "/achievements",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 10,
-    navigationOrder: 10,
-  },
-  {
-    key: "team",
-    label: "Team",
-    href: "/team",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 11,
-    navigationOrder: 11,
-  },
-  {
-    key: "companies",
-    label: "Companies",
-    href: "/companies",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 12,
-    navigationOrder: 12,
-  },
-  {
-    key: "clients-partners",
-    label: "Clients & Partners",
-    href: "/clients-partners",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 13,
-    navigationOrder: 13,
-  },
-  {
-    key: "testimonials",
-    label: "Testimonials",
-    href: "/testimonials",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 15,
-    navigationOrder: 14,
-  },
-  {
-    key: "faq",
-    label: "FAQ",
-    href: "/faq",
-    type: "page",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 16,
-    navigationOrder: 15,
-  },
-  {
-    key: "contact",
-    label: "Contact",
-    href: "/#contact",
-    type: "section",
-    isVisible: true,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 17,
-    navigationOrder: 16,
-  },
-  {
-    key: "blog",
-    label: "Blog",
-    href: "/blog",
-    type: "page",
-    isVisible: false,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 18,
-    navigationOrder: 17,
-  },
-  {
-    key: "news",
-    label: "News",
-    href: "/news",
-    type: "page",
-    isVisible: false,
-    isNavigationVisible: true,
-    isPageVisible: true,
-    order: 19,
-    navigationOrder: 18,
-  },
-];
-
-const defaultItemByKey = Object.fromEntries(
-  defaultNavigationItems.map((item) => [item.key, item]),
-);
-
-function normaliseSectionKey(value) {
-  const key = String(value || "")
-    .trim()
-    .toLowerCase();
-
-  return key === "home" ? "hero" : key;
-}
-
-function getSafeLabel(key, value) {
-  const label = String(value || "").trim();
-
-  if (key === "hero" && label.toLowerCase() === "hero") {
-    return "Home";
-  }
-
-  return label || defaultItemByKey[key]?.label || key;
-}
-
-function createNavigationItems(settingsSections) {
-  const settingsByKey = new Map();
-
-  if (Array.isArray(settingsSections)) {
-    settingsSections.forEach((section) => {
-      const key = normaliseSectionKey(section?.key);
-
-      if (!defaultItemByKey[key]) {
-        return;
-      }
-
-      settingsByKey.set(key, section);
-    });
-  }
-
-  return defaultNavigationItems
-    .map((defaultItem) => {
-      const settingsItem = settingsByKey.get(defaultItem.key);
-
-      const homepageOrder = Number(settingsItem?.order);
-
-      const normalizedHomepageOrder = Number.isFinite(homepageOrder)
-        ? homepageOrder
-        : defaultItem.order;
-
-      const navigationOrder = Number(settingsItem?.navigationOrder);
-
-      const normalizedNavigationOrder = Number.isFinite(navigationOrder)
-        ? navigationOrder
-        : normalizedHomepageOrder;
-
-      const isHomepageVisible = settingsItem?.isVisible !== false;
-
-      const isNavigationVisible = settingsItem?.isNavigationVisible !== false;
-
-      const isPageVisible = settingsItem?.isPageVisible !== false;
-
-      /*
-       * Home always remains a valid destination.
-       *
-       * About and Contact require their homepage
-       * sections to remain visible.
-       *
-       * Dedicated page items require their
-       * public pages to remain enabled.
-       */
-      const isDestinationAvailable =
-        defaultItem.key === "hero" ||
-        (defaultItem.type === "page" ? isPageVisible : isHomepageVisible);
-
-      return {
-        ...defaultItem,
-
-        label: getSafeLabel(defaultItem.key, settingsItem?.label),
-
-        isHomepageVisible,
-
-        isNavigationVisible,
-
-        isPageVisible,
-
-        isDestinationAvailable,
-
-        order: normalizedHomepageOrder,
-
-        navigationOrder: normalizedNavigationOrder,
-      };
-    })
-    .filter(
-      (item) =>
-        item.isNavigationVisible !== false &&
-        item.isDestinationAvailable !== false,
-    )
-    .sort((firstItem, secondItem) => {
-      const orderDifference =
-        firstItem.navigationOrder - secondItem.navigationOrder;
-
-      if (orderDifference !== 0) {
-        return orderDifference;
-      }
-
-      return (
-        defaultItemByKey[firstItem.key].navigationOrder -
-        defaultItemByKey[secondItem.key].navigationOrder
-      );
-    });
-}
-
-function isNavigationItemActive(item, pathname, hash) {
-  if (item.key === "hero") {
-    return pathname === "/" && (!hash || hash === "#home");
-  }
-
-  if (item.key === "about") {
-    return pathname === "/" && hash === "#about";
-  }
-
-  if (item.key === "contact") {
-    return pathname === "/" && hash === "#contact";
-  }
-
-  return pathname === item.href || pathname.startsWith(`${item.href}/`);
-}
 
 function PublicNavigationLink({
   item,
@@ -366,19 +43,14 @@ function PublicNavigationLink({
 
 function PublicPageHeader() {
   const { pathname, hash } = useLocation();
-
   const { settings } = useSiteSettings();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
 
   const mobileMenuRef = useRef(null);
-
   const mobileMenuButtonRef = useRef(null);
-
   const moreMenuRef = useRef(null);
-
   const moreMenuButtonRef = useRef(null);
 
   const brandName =
@@ -386,7 +58,7 @@ function PublicPageHeader() {
     "RakeshNexify";
 
   const navigationItems = useMemo(
-    () => createNavigationItems(settings?.sections),
+    () => getNavbarNavigationItems(settings?.sections),
     [settings?.sections],
   );
 
@@ -397,11 +69,10 @@ function PublicPageHeader() {
   const contactItem = navigationItems.find((item) => item.key === "contact");
 
   const desktopNavigationItems = standardNavigationItems.slice(0, 4);
-
   const overflowNavigationItems = standardNavigationItems.slice(4);
 
   const isOverflowItemActive = overflowNavigationItems.some((item) =>
-    isNavigationItemActive(item, pathname, hash),
+    isPublicNavigationItemActive(item, pathname, hash),
   );
 
   function closeMobileMenu() {
@@ -450,12 +121,10 @@ function PublicPageHeader() {
     }
 
     document.addEventListener("keydown", handleEscapeKey);
-
     window.addEventListener("resize", handleWindowResize);
 
     return () => {
       document.removeEventListener("keydown", handleEscapeKey);
-
       window.removeEventListener("resize", handleWindowResize);
     };
   }, [isMenuOpen, isMoreMenuOpen]);
@@ -477,12 +146,10 @@ function PublicPageHeader() {
     }
 
     document.body.style.overflow = "hidden";
-
     document.addEventListener("pointerdown", handleOutsideClick);
 
     return () => {
       document.body.style.overflow = previousOverflow;
-
       document.removeEventListener("pointerdown", handleOutsideClick);
     };
   }, [isMenuOpen]);
@@ -534,7 +201,11 @@ function PublicPageHeader() {
                   <PublicNavigationLink
                     key={item.key}
                     item={item}
-                    isActive={isNavigationItemActive(item, pathname, hash)}
+                    isActive={isPublicNavigationItemActive(
+                      item,
+                      pathname,
+                      hash,
+                    )}
                     onNavigate={closeMobileMenu}
                   />
                 ))}
@@ -584,7 +255,7 @@ function PublicPageHeader() {
                             <PublicNavigationLink
                               key={item.key}
                               item={item}
-                              isActive={isNavigationItemActive(
+                              isActive={isPublicNavigationItemActive(
                                 item,
                                 pathname,
                                 hash,
@@ -671,7 +342,7 @@ function PublicPageHeader() {
                           <PublicNavigationLink
                             key={item.key}
                             item={item}
-                            isActive={isNavigationItemActive(
+                            isActive={isPublicNavigationItemActive(
                               item,
                               pathname,
                               hash,

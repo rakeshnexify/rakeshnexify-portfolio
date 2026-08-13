@@ -1,159 +1,15 @@
 import { Link } from "react-router";
 
-import { mergeHomepageSections } from "../../config/homepageSections";
 import siteData from "../../data/siteData";
 import useServices from "../../hooks/useServices";
 import useSiteSettings from "../../hooks/useSiteSettings";
+import {
+  getFooterNavigationItems,
+  isPublicNavigationDestinationAvailable,
+} from "../../utils/publicNavigation";
 import NewsletterSignupForm from "../newsletter/NewsletterSignupForm";
 import Logo from "../ui/Logo";
 import Container from "./Container";
-
-const defaultNavigationSections = [
-  {
-    key: "hero",
-    label: "Home",
-    href: "/",
-    isVisible: true,
-    order: 1,
-  },
-  {
-    key: "about",
-    label: "About",
-    href: "/#about",
-    isVisible: true,
-    order: 2,
-  },
-  {
-    key: "skills",
-    label: "Skills",
-    href: "/skills",
-    isVisible: true,
-    order: 3,
-  },
-  {
-    key: "services",
-    label: "Services",
-    href: "/services",
-    isVisible: true,
-    order: 4,
-  },
-  {
-    key: "projects",
-    label: "Projects",
-    href: "/projects",
-    isVisible: true,
-    order: 6,
-  },
-  {
-    key: "case-studies",
-    label: "Case Studies",
-    href: "/case-studies",
-    isVisible: true,
-    order: 7,
-  },
-  {
-    key: "education",
-    label: "Education",
-    href: "/education",
-    isVisible: true,
-    order: 8,
-  },
-  {
-    key: "experience",
-    label: "Experience",
-    href: "/experience",
-    isVisible: true,
-    order: 9,
-  },
-  {
-    key: "achievements",
-    label: "Achievements",
-    href: "/achievements",
-    isVisible: true,
-    order: 10,
-  },
-  {
-    key: "team",
-    label: "Team",
-    href: "/team",
-    isVisible: true,
-    order: 11,
-  },
-  {
-    key: "companies",
-    label: "Companies",
-    href: "/companies",
-    isVisible: true,
-    order: 12,
-  },
-  {
-    key: "clients-partners",
-    label: "Clients & Partners",
-    href: "/clients-partners",
-    isVisible: true,
-    order: 13,
-  },
-  {
-    key: "testimonials",
-    label: "Testimonials",
-    href: "/testimonials",
-    isVisible: true,
-    order: 15,
-  },
-  {
-    key: "faq",
-    label: "FAQ",
-    href: "/faq",
-    isVisible: true,
-    order: 16,
-  },
-  {
-    key: "contact",
-    label: "Contact",
-    href: "/#contact",
-    isVisible: true,
-    order: 17,
-  },
-  {
-    key: "blog",
-    label: "Blog",
-    href: "/blog",
-    isVisible: true,
-    order: 18,
-  },
-  {
-    key: "news",
-    label: "News",
-    href: "/news",
-    isVisible: true,
-    order: 19,
-  },
-];
-
-const defaultSectionByKey = Object.fromEntries(
-  defaultNavigationSections.map((section) => [section.key, section]),
-);
-
-const dedicatedPageSectionKeys = new Set([
-  "skills",
-  "services",
-  "projects",
-  "case-studies",
-  "education",
-  "experience",
-  "achievements",
-  "team",
-  "companies",
-  "clients-partners",
-  "testimonials",
-  "faq",
-  "blog",
-  "news",
-]);
-
-const supportedFooterSections = new Set(
-  defaultNavigationSections.map((section) => section.key),
-);
 
 const defaultFooterContent = {
   introduction:
@@ -181,21 +37,11 @@ const defaultFooterContent = {
   copyrightText: "All rights reserved.",
 };
 
-function normaliseSectionKey(value) {
-  const key = String(value || "")
-    .trim()
-    .toLowerCase();
-
-  return key === "home" ? "hero" : key;
-}
-
 function sortByOrder(firstItem, secondItem) {
   const firstOrder = Number(firstItem?.order);
-
   const secondOrder = Number(secondItem?.order);
 
   const safeFirstOrder = Number.isFinite(firstOrder) ? firstOrder : 0;
-
   const safeSecondOrder = Number.isFinite(secondOrder) ? secondOrder : 0;
 
   return safeFirstOrder - safeSecondOrder;
@@ -258,87 +104,6 @@ function getSafeHttpUrl(value) {
   return "";
 }
 
-function getSafeSectionLabel(key, value) {
-  const label = String(value || "").trim();
-
-  if (key === "hero" && label.toLowerCase() === "hero") {
-    return "Home";
-  }
-
-  return label || defaultSectionByKey[key]?.label || key;
-}
-
-function createNavigationLinks(settingsSections) {
-  const sourceSections = mergeHomepageSections(settingsSections);
-
-  const sectionsByKey = new Map();
-
-  sourceSections.forEach((section, index) => {
-    const key = normaliseSectionKey(section?.key);
-
-    if (!key || !supportedFooterSections.has(key)) {
-      return;
-    }
-
-    const defaultSection = defaultSectionByKey[key];
-
-    const numericOrder = Number(section?.order);
-
-    const isHomepageVisible = section?.isVisible !== false;
-
-    const isPageVisible = section?.isPageVisible !== false;
-
-    const isDestinationAvailable =
-      key === "hero" ||
-      (dedicatedPageSectionKeys.has(key) ? isPageVisible : isHomepageVisible);
-
-    sectionsByKey.set(key, {
-      key,
-
-      label: getSafeSectionLabel(key, section?.label),
-
-      href: defaultSection.href,
-
-      isHomepageVisible,
-
-      isPageVisible,
-
-      /*
-       * Homepage-only links ko homepage visibility
-       * aur dedicated page links ko public-page
-       * accessibility control karegi.
-       */
-      isVisible: isDestinationAvailable,
-
-      order: Number.isFinite(numericOrder)
-        ? numericOrder
-        : (defaultSection.order ?? index + 1),
-    });
-  });
-
-  if (!sectionsByKey.has("hero")) {
-    sectionsByKey.set("hero", {
-      ...defaultSectionByKey.hero,
-      isVisible: true,
-    });
-  }
-
-  return [...sectionsByKey.values()]
-    .filter((section) => section.isVisible !== false)
-    .sort((firstSection, secondSection) => {
-      const orderDifference = sortByOrder(firstSection, secondSection);
-
-      if (orderDifference !== 0) {
-        return orderDifference;
-      }
-
-      return (
-        (defaultSectionByKey[firstSection.key]?.order || 0) -
-        (defaultSectionByKey[secondSection.key]?.order || 0)
-      );
-    });
-}
-
 function getVisiblePlatforms(settingsPlatforms, fallbackPlatforms = []) {
   const sourcePlatforms = Array.isArray(settingsPlatforms)
     ? settingsPlatforms
@@ -354,7 +119,6 @@ function getVisiblePlatforms(settingsPlatforms, fallbackPlatforms = []) {
     }
 
     const duplicateKey = name.toLowerCase();
-
     const numericOrder = Number(platform?.order);
 
     platformsByName.set(duplicateKey, {
@@ -406,7 +170,6 @@ function getLegalLinks(footer) {
 
   sourceLegalLinks.forEach((link, index) => {
     const label = String(link?.label || "").trim();
-
     const url = getSafePublicUrl(link?.url || link?.href);
 
     if (!link || link.isVisible === false || !label || !url) {
@@ -414,7 +177,6 @@ function getLegalLinks(footer) {
     }
 
     const numericOrder = Number(link?.order);
-
     const duplicateKey = `${label.toLowerCase()}|${url}`;
 
     legalLinksByKey.set(duplicateKey, {
@@ -544,9 +306,7 @@ function FooterLink({ href, children, className = "", ariaLabel }) {
 
 function PlatformLink({ platform }) {
   const name = String(platform?.name || "Platform").trim() || "Platform";
-
   const username = String(platform?.username || "").trim();
-
   const url = getSafeHttpUrl(platform?.url);
 
   const commonClasses =
@@ -582,17 +342,13 @@ function PlatformLink({ platform }) {
 
 function Footer() {
   const { settings } = useSiteSettings();
-
   const { services: loadedServices } = useServices();
 
   const currentYear = new Date().getFullYear();
 
   const brand = settings?.brand || siteData.brand || {};
-
   const owner = settings?.owner || siteData.owner || {};
-
   const contact = settings?.contact || siteData.contact || {};
-
   const footer = settings?.footer || {};
 
   const brandName =
@@ -619,8 +375,7 @@ function Footer() {
     defaultFooterContent.platformsHeading;
 
   const platformNote =
-    String(footer.platformNote || "").trim() ||
-    defaultFooterContent.platformNote;
+    String(footer.platformNote || "").trim() || defaultFooterContent.platformNote;
 
   const copyrightText =
     String(footer.copyrightText || "").trim() ||
@@ -641,25 +396,32 @@ function Footer() {
     defaultFooterContent.projectButton.url,
   );
 
-  const navigationLinks = createNavigationLinks(settings?.sections);
+  const navigationLinks = getFooterNavigationItems(settings?.sections);
 
-  const visibleSectionKeys = new Set(navigationLinks.map((link) => link.key));
+  const isServicesAvailable = isPublicNavigationDestinationAvailable(
+    settings?.sections,
+    "services",
+  );
 
-  const isServicesVisible = visibleSectionKeys.has("services");
-
-  const isContactVisible = visibleSectionKeys.has("contact");
+  const isContactAvailable = isPublicNavigationDestinationAvailable(
+    settings?.sections,
+    "contact",
+  );
 
   const services = getFooterServices(loadedServices);
+  const showServicesColumn = isServicesAvailable && services.length > 0;
 
-  const showServicesColumn = isServicesVisible && services.length > 0;
+  const legalLinks = getLegalLinks(footer).filter((link) => {
+    const targetsContact =
+      link.url === "/#contact" || link.url === "#contact";
 
-  const legalLinks = getLegalLinks(footer);
+    return !targetsContact || isContactAvailable;
+  });
 
   const platformGroups = [
     {
       key: "social",
       title: "Social",
-
       platforms: getVisiblePlatforms(
         settings?.socialPlatforms,
         siteData.socialPlatforms || [],
@@ -668,7 +430,6 @@ function Footer() {
     {
       key: "developer",
       title: "Developer",
-
       platforms: getVisiblePlatforms(
         settings?.developerPlatforms,
         siteData.developerPlatforms || [],
@@ -677,7 +438,6 @@ function Footer() {
     {
       key: "freelance",
       title: "Freelance",
-
       platforms: getVisiblePlatforms(
         settings?.freelancerPlatforms,
         siteData.freelancerPlatforms || [],
@@ -692,7 +452,7 @@ function Footer() {
 
   const showProjectButton =
     Boolean(projectButtonLabel && projectButtonUrl) &&
-    !(projectButtonTargetsContact && !isContactVisible);
+    !(projectButtonTargetsContact && !isContactAvailable);
 
   const hasContactLegalLink = legalLinks.some(
     (link) => link.url === "/#contact" || link.url === "#contact",
@@ -843,7 +603,7 @@ function Footer() {
               </FooterLink>
             ))}
 
-            {isContactVisible && !hasContactLegalLink && (
+            {isContactAvailable && !hasContactLegalLink && (
               <FooterLink
                 href="/#contact"
                 className="max-w-full break-words transition hover:text-white"

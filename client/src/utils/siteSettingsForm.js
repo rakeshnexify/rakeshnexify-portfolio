@@ -236,6 +236,10 @@ function normalizeSection(section, index) {
 
   const numericNavigationOrder = Number(section?.navigationOrder);
 
+  const numericFooterNavigationOrder = Number(
+    section?.footerNavigationOrder,
+  );
+
   return {
     key: cleanString(section?.key).toLowerCase(),
 
@@ -250,6 +254,11 @@ function normalizeSection(section, index) {
      * Desktop aur mobile Navbar visibility.
      */
     isNavigationVisible: section?.isNavigationVisible !== false,
+
+    /*
+     * Footer Quick Links visibility.
+     */
+    isFooterNavigationVisible: section?.isFooterNavigationVisible !== false,
 
     /*
      * Dedicated public page accessibility.
@@ -269,6 +278,17 @@ function normalizeSection(section, index) {
     navigationOrder:
       Number.isFinite(numericNavigationOrder) && numericNavigationOrder >= 0
         ? numericNavigationOrder
+        : normalizedOrder,
+
+    /*
+     * Footer Quick Links ka independent order.
+     * Client registry merge legacy records ke liye
+     * canonical Footer default supply karta hai.
+     */
+    footerNavigationOrder:
+      Number.isFinite(numericFooterNavigationOrder) &&
+      numericFooterNavigationOrder >= 0
+        ? numericFooterNavigationOrder
         : normalizedOrder,
   };
 }
@@ -740,6 +760,11 @@ function createSiteSettingsPayload(formValues = {}) {
       isNavigationVisible: section.isNavigationVisible,
 
       /*
+       * Footer Quick Links visibility.
+       */
+      isFooterNavigationVisible: section.isFooterNavigationVisible,
+
+      /*
        * Dedicated page accessibility.
        */
       isPageVisible: section.isPageVisible,
@@ -755,6 +780,12 @@ function createSiteSettingsPayload(formValues = {}) {
        * independently preserve hoga.
        */
       navigationOrder: section.navigationOrder,
+
+      /*
+       * Footer order Navbar aur homepage order
+       * se independently preserve hoga.
+       */
+      footerNavigationOrder: section.footerNavigationOrder,
     })),
 
     isPublished: values.isPublished,
