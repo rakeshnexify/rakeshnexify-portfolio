@@ -1,14 +1,5 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useParams,
-} from "react-router";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 
 import AppointmentStatusBadge from "../../components/admin/appointments/AppointmentStatusBadge";
 import AppointmentUpdateForm from "../../components/admin/appointments/AppointmentUpdateForm";
@@ -21,46 +12,26 @@ import {
   updateAdminAppointment,
 } from "../../services/adminAppointmentsApi";
 
-const UPDATE_ROLES = [
-  "super-admin",
-  "admin",
-  "editor",
-];
+const UPDATE_ROLES = ["super-admin", "admin", "editor"];
 
-const DELETE_ROLES = [
-  "super-admin",
-  "admin",
-];
+const DELETE_ROLES = ["super-admin", "admin"];
 
 function normalizeText(value) {
-  return typeof value === "string"
-    ? value.trim()
-    : "";
+  return typeof value === "string" ? value.trim() : "";
 }
 
 function normalizeFieldErrors(value) {
-  if (
-    !value ||
-    typeof value !== "object" ||
-    Array.isArray(value)
-  ) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
   }
 
-  return Object.entries(value).reduce(
-    (errors, [fieldName, message]) => {
-      if (
-        typeof message === "string" &&
-        message.trim()
-      ) {
-        errors[fieldName] =
-          message.trim();
-      }
+  return Object.entries(value).reduce((errors, [fieldName, message]) => {
+    if (typeof message === "string" && message.trim()) {
+      errors[fieldName] = message.trim();
+    }
 
-      return errors;
-    },
-    {},
-  );
+    return errors;
+  }, {});
 }
 
 function formatDateTime(value) {
@@ -85,9 +56,7 @@ function formatPreferredDate(value) {
     return "—";
   }
 
-  const match = String(value).match(
-    /^(\d{4})-(\d{2})-(\d{2})$/,
-  );
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
 
   if (!match) {
     return String(value);
@@ -123,40 +92,25 @@ function formatMeetingType(value) {
 }
 
 function getAdminLabel(value) {
-  if (
-    !value ||
-    typeof value !== "object"
-  ) {
+  if (!value || typeof value !== "object") {
     return "—";
   }
 
-  return (
-    normalizeText(value.name) ||
-    normalizeText(value.email) ||
-    "Admin"
-  );
+  return normalizeText(value.name) || normalizeText(value.email) || "Admin";
 }
 
 function getServiceTitle(appointment) {
   return (
-    normalizeText(
-      appointment?.serviceTitle,
-    ) ||
-    normalizeText(
-      appointment?.service?.title,
-    ) ||
+    normalizeText(appointment?.serviceTitle) ||
+    normalizeText(appointment?.service?.title) ||
     "Service not specified"
   );
 }
 
 function getPackageName(appointment) {
   return (
-    normalizeText(
-      appointment?.servicePackageName,
-    ) ||
-    normalizeText(
-      appointment?.servicePackage?.name,
-    ) ||
+    normalizeText(appointment?.servicePackageName) ||
+    normalizeText(appointment?.servicePackage?.name) ||
     "No package selected"
   );
 }
@@ -171,27 +125,21 @@ function getLeadId(lead) {
   }
 
   if (typeof lead === "object") {
-    return normalizeText(
-      lead._id || lead.id,
-    );
+    return normalizeText(lead._id || lead.id);
   }
 
   return "";
 }
 
-function DetailRow({
-  label,
-  value,
-  children,
-}) {
+function DetailRow({ label, value, children }) {
   return (
     <div className="border-b border-slate-100 py-3 last:border-b-0">
-      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
         {label}
       </p>
 
       {children || (
-        <p className="mt-1 break-words text-sm font-semibold text-slate-800">
+        <p className="mt-1.5 break-words text-sm font-semibold leading-6 text-slate-800">
           {value || "—"}
         </p>
       )}
@@ -202,145 +150,80 @@ function DetailRow({
 function AdminAppointmentDetailPage() {
   const { id = "" } = useParams();
 
-  const {
-    admin,
-    accessToken,
-    logout,
-  } = useAdminAuth();
+  const { admin, accessToken, logout } = useAdminAuth();
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [appointment, setAppointment] =
-    useState(null);
+  const [appointment, setAppointment] = useState(null);
+  const [linkedLead, setLinkedLead] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const [linkedLead, setLinkedLead] =
-    useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateFieldErrors, setUpdateFieldErrors] = useState({});
+  const [updateStatus, setUpdateStatus] = useState(null);
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [isConverting, setIsConverting] = useState(false);
+  const [conversionFieldErrors, setConversionFieldErrors] = useState({});
+  const [conversionStatus, setConversionStatus] = useState(null);
 
-  const [loadError, setLoadError] =
-    useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
-  const [refreshKey, setRefreshKey] =
-    useState(0);
+  const role = normalizeText(admin?.role).toLowerCase();
 
-  const [
-    isUpdating,
-    setIsUpdating,
-  ] = useState(false);
-
-  const [
-    updateFieldErrors,
-    setUpdateFieldErrors,
-  ] = useState({});
-
-  const [
-    updateStatus,
-    setUpdateStatus,
-  ] = useState(null);
-
-  const [
-    isConverting,
-    setIsConverting,
-  ] = useState(false);
-
-  const [
-    conversionFieldErrors,
-    setConversionFieldErrors,
-  ] = useState({});
-
-  const [
-    conversionStatus,
-    setConversionStatus,
-  ] = useState(null);
-
-  const [
-    isDeleting,
-    setIsDeleting,
-  ] = useState(false);
-
-  const [
-    deleteError,
-    setDeleteError,
-  ] = useState("");
-
-  const role = normalizeText(
-    admin?.role,
-  ).toLowerCase();
-
-  const canUpdate =
-    UPDATE_ROLES.includes(role);
-
+  const canUpdate = UPDATE_ROLES.includes(role);
   const canConvert = canUpdate;
+  const canDelete = DELETE_ROLES.includes(role);
 
-  const canDelete =
-    DELETE_ROLES.includes(role);
+  const handleUnauthorized = useCallback(() => {
+    logout();
 
-  const handleUnauthorized = useCallback(
-    () => {
-      logout();
-
-      navigate("/admin/login", {
-        replace: true,
-        state: {
-          from: {
-            pathname:
-              location.pathname,
-          },
+    navigate("/admin/login", {
+      replace: true,
+      state: {
+        from: {
+          pathname: location.pathname,
         },
-      });
-    },
-    [
-      location.pathname,
-      logout,
-      navigate,
-    ],
-  );
+      },
+    });
+  }, [location.pathname, logout, navigate]);
 
   useEffect(() => {
     if (!accessToken || !id) {
       return undefined;
     }
 
-    const controller =
-      new AbortController();
+    const controller = new AbortController();
 
     async function loadAppointment() {
       try {
         setIsLoading(true);
         setLoadError("");
 
-        const result =
-          await fetchAdminAppointmentById(
-            accessToken,
-            id,
-            {
-              signal:
-                controller.signal,
-            },
-          );
+        const result = await fetchAdminAppointmentById(
+          accessToken,
+          id,
+          {
+            signal: controller.signal,
+          },
+        );
 
         if (controller.signal.aborted) {
           return;
         }
 
         setAppointment(result);
-        setLinkedLead(
-          result?.linkedLead || null,
-        );
+        setLinkedLead(result?.linkedLead || null);
       } catch (error) {
-        if (
-          controller.signal.aborted ||
-          error?.name === "AbortError"
-        ) {
+        if (controller.signal.aborted || error?.name === "AbortError") {
           return;
         }
 
         if (error?.status === 401) {
           handleUnauthorized();
-
           return;
         }
 
@@ -364,19 +247,10 @@ function AdminAppointmentDetailPage() {
     return () => {
       controller.abort();
     };
-  }, [
-    accessToken,
-    handleUnauthorized,
-    id,
-    refreshKey,
-  ]);
+  }, [accessToken, handleUnauthorized, id, refreshKey]);
 
   async function handleUpdate(payload) {
-    if (
-      !canUpdate ||
-      !appointment ||
-      isUpdating
-    ) {
+    if (!canUpdate || !appointment || isUpdating) {
       return;
     }
 
@@ -385,19 +259,16 @@ function AdminAppointmentDetailPage() {
     setUpdateStatus(null);
 
     try {
-      const result =
-        await updateAdminAppointment(
-          accessToken,
-          appointment._id,
-          payload,
-        );
-
-      setAppointment(
-        (currentAppointment) => ({
-          ...currentAppointment,
-          ...result.appointment,
-        }),
+      const result = await updateAdminAppointment(
+        accessToken,
+        appointment._id,
+        payload,
       );
+
+      setAppointment((currentAppointment) => ({
+        ...currentAppointment,
+        ...result.appointment,
+      }));
 
       setUpdateStatus({
         type: "success",
@@ -406,15 +277,10 @@ function AdminAppointmentDetailPage() {
     } catch (error) {
       if (error?.status === 401) {
         handleUnauthorized();
-
         return;
       }
 
-      setUpdateFieldErrors(
-        normalizeFieldErrors(
-          error?.fieldErrors,
-        ),
-      );
+      setUpdateFieldErrors(normalizeFieldErrors(error?.fieldErrors));
 
       setUpdateStatus({
         type: "error",
@@ -443,12 +309,11 @@ function AdminAppointmentDetailPage() {
     setConversionStatus(null);
 
     try {
-      const result =
-        await convertAdminAppointmentToLead(
-          accessToken,
-          appointment._id,
-          payload,
-        );
+      const result = await convertAdminAppointmentToLead(
+        accessToken,
+        appointment._id,
+        payload,
+      );
 
       setLinkedLead(result.lead);
 
@@ -459,14 +324,11 @@ function AdminAppointmentDetailPage() {
     } catch (error) {
       if (error?.status === 401) {
         handleUnauthorized();
-
         return;
       }
 
       setConversionFieldErrors(
-        normalizeFieldErrors(
-          error?.fieldErrors,
-        ),
+        normalizeFieldErrors(error?.fieldErrors),
       );
 
       setConversionStatus({
@@ -478,10 +340,7 @@ function AdminAppointmentDetailPage() {
       });
 
       if (error?.status === 409) {
-        setRefreshKey(
-          (currentKey) =>
-            currentKey + 1,
-        );
+        setRefreshKey((currentKey) => currentKey + 1);
       }
     } finally {
       setIsConverting(false);
@@ -489,11 +348,7 @@ function AdminAppointmentDetailPage() {
   }
 
   async function handleDelete() {
-    if (
-      !canDelete ||
-      !appointment ||
-      isDeleting
-    ) {
+    if (!canDelete || !appointment || isDeleting) {
       return;
     }
 
@@ -520,7 +375,6 @@ function AdminAppointmentDetailPage() {
     } catch (error) {
       if (error?.status === 401) {
         handleUnauthorized();
-
         return;
       }
 
@@ -531,10 +385,7 @@ function AdminAppointmentDetailPage() {
       );
 
       if (error?.status === 409) {
-        setRefreshKey(
-          (currentKey) =>
-            currentKey + 1,
-        );
+        setRefreshKey((currentKey) => currentKey + 1);
       }
     } finally {
       setIsDeleting(false);
@@ -543,33 +394,53 @@ function AdminAppointmentDetailPage() {
 
   if (isLoading && !appointment) {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-10 sm:px-6 lg:px-8">
-        <div
-          role="status"
-          className="mx-auto max-w-4xl rounded-3xl border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500"
-        >
-          Loading consultation request...
-        </div>
+      <main className="min-h-screen bg-slate-100">
+        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div
+            role="status"
+            aria-live="polite"
+            className="space-y-4"
+          >
+            <span className="sr-only">
+              Loading consultation request...
+            </span>
+
+            <div className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.72fr)]">
+              <div className="space-y-4">
+                {[1, 2, 3].map((placeholder) => (
+                  <div
+                    key={placeholder}
+                    className="h-48 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
+                  />
+                ))}
+              </div>
+
+              <div className="h-80 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+            </div>
+          </div>
+        </section>
       </main>
     );
   }
 
   if (!appointment) {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <main className="min-h-screen bg-slate-100">
+        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
           <Link
             to="/admin/appointments"
-            className="inline-flex min-h-10 items-center text-sm font-bold text-brand-700"
+            className="inline-flex min-h-10 items-center text-sm font-bold text-brand-700 transition-colors hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
           >
             ← Consultation requests
           </Link>
 
           <div
             role="alert"
-            className="mt-5 rounded-3xl border border-red-200 bg-red-50 p-7 text-red-700"
+            className="mt-5 max-w-3xl rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700"
           >
-            <h1 className="text-xl font-black">
+            <h1 className="text-lg font-bold text-red-900">
               Unable to open Appointment
             </h1>
 
@@ -581,17 +452,14 @@ function AdminAppointmentDetailPage() {
             <button
               type="button"
               onClick={() =>
-                setRefreshKey(
-                  (currentKey) =>
-                    currentKey + 1,
-                )
+                setRefreshKey((currentKey) => currentKey + 1)
               }
-              className="mt-4 min-h-10 font-bold underline underline-offset-4"
+              className="mt-4 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
-              Try again
+              Try Again
             </button>
           </div>
-        </div>
+        </section>
       </main>
     );
   }
@@ -599,36 +467,30 @@ function AdminAppointmentDetailPage() {
   const leadId = getLeadId(linkedLead);
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+    <main className="min-h-screen bg-slate-100">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <Link
               to="/admin/appointments"
-              className="inline-flex min-h-10 items-center text-sm font-bold text-brand-700 hover:text-brand-800"
+              className="inline-flex min-h-10 items-center text-sm font-bold text-brand-700 transition-colors hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
               ← Consultation requests
             </Link>
 
-            <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
-              Appointment detail
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              Appointment Detail
             </p>
 
-            <h1 className="mt-2 break-words text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              {appointment.name ||
-                "Consultation request"}
+            <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              {appointment.name || "Consultation request"}
             </h1>
 
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <AppointmentStatusBadge
-                status={appointment.status}
-              />
+            <div className="mt-3 flex flex-wrap items-center gap-2.5">
+              <AppointmentStatusBadge status={appointment.status} />
 
-              <span className="text-sm font-semibold text-slate-500">
-                Submitted{" "}
-                {formatDateTime(
-                  appointment.createdAt,
-                )}
+              <span className="text-sm font-medium text-slate-500">
+                Submitted {formatDateTime(appointment.createdAt)}
               </span>
             </div>
           </div>
@@ -636,43 +498,38 @@ function AdminAppointmentDetailPage() {
           <button
             type="button"
             onClick={() =>
-              setRefreshKey(
-                (currentKey) =>
-                  currentKey + 1,
-              )
+              setRefreshKey((currentKey) => currentKey + 1)
             }
             disabled={isLoading}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
           >
-            {isLoading
-              ? "Refreshing..."
-              : "Refresh"}
+            {isLoading ? "Refreshing..." : "Refresh"}
           </button>
-        </div>
+        </header>
 
         {loadError ? (
           <div
             role="alert"
-            className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800"
+            className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800"
           >
             {loadError}
           </div>
         ) : null}
 
-        <div className="mt-8 grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.72fr)] xl:items-start">
-          <div className="min-w-0 space-y-6">
+        <div className="mt-6 grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.72fr)] xl:items-start">
+          <div className="min-w-0 space-y-5">
             <section
               aria-labelledby="appointment-requester-heading"
-              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
             >
               <h2
                 id="appointment-requester-heading"
-                className="text-xl font-black text-slate-950"
+                className="text-lg font-bold text-slate-950"
               >
                 Requester
               </h2>
 
-              <div className="mt-3">
+              <div className="mt-2">
                 <DetailRow
                   label="Name"
                   value={appointment.name}
@@ -682,12 +539,12 @@ function AdminAppointmentDetailPage() {
                   {appointment.email ? (
                     <a
                       href={`mailto:${appointment.email}`}
-                      className="mt-1 inline-block break-all text-sm font-bold text-brand-700 hover:text-brand-800"
+                      className="mt-1.5 inline-block break-all text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
                     >
                       {appointment.email}
                     </a>
                   ) : (
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <p className="mt-1.5 text-sm font-semibold text-slate-800">
                       —
                     </p>
                   )}
@@ -697,12 +554,12 @@ function AdminAppointmentDetailPage() {
                   {appointment.phone ? (
                     <a
                       href={`tel:${appointment.phone}`}
-                      className="mt-1 inline-block text-sm font-bold text-brand-700 hover:text-brand-800"
+                      className="mt-1.5 inline-block break-all text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
                     >
                       {appointment.phone}
                     </a>
                   ) : (
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <p className="mt-1.5 text-sm font-semibold text-slate-800">
                       —
                     </p>
                   )}
@@ -711,8 +568,7 @@ function AdminAppointmentDetailPage() {
                 <DetailRow
                   label="Company"
                   value={
-                    appointment.companyName ||
-                    "Not specified"
+                    appointment.companyName || "Not specified"
                   }
                 />
               </div>
@@ -720,32 +576,28 @@ function AdminAppointmentDetailPage() {
 
             <section
               aria-labelledby="appointment-context-heading"
-              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
             >
               <h2
                 id="appointment-context-heading"
-                className="text-xl font-black text-slate-950"
+                className="text-lg font-bold text-slate-950"
               >
-                Consultation context
+                Consultation Context
               </h2>
 
-              <div className="mt-3">
+              <div className="mt-2">
                 <DetailRow
                   label="Service"
-                  value={getServiceTitle(
-                    appointment,
-                  )}
+                  value={getServiceTitle(appointment)}
                 />
 
                 <DetailRow
                   label="Package"
-                  value={getPackageName(
-                    appointment,
-                  )}
+                  value={getPackageName(appointment)}
                 />
 
                 <DetailRow
-                  label="Meeting type"
+                  label="Meeting Type"
                   value={formatMeetingType(
                     appointment.meetingType,
                   )}
@@ -755,9 +607,7 @@ function AdminAppointmentDetailPage() {
                   label="Assigned Admin"
                   value={
                     appointment.assignedTo
-                      ? getAdminLabel(
-                          appointment.assignedTo,
-                        )
+                      ? getAdminLabel(appointment.assignedTo)
                       : "Unassigned"
                   }
                 />
@@ -766,34 +616,39 @@ function AdminAppointmentDetailPage() {
 
             <section
               aria-labelledby="appointment-preferred-heading"
-              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
             >
-              <h2
-                id="appointment-preferred-heading"
-                className="text-xl font-black text-slate-950"
-              >
-                Preferred consultation
-              </h2>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2
+                    id="appointment-preferred-heading"
+                    className="text-lg font-bold text-slate-950"
+                  >
+                    Consultation Schedule
+                  </h2>
 
-              <p className="mt-2 text-sm leading-6 text-amber-800">
-                This is the requester&apos;s
-                preferred schedule, not the
-                confirmed Appointment time.
-              </p>
+                  <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
+                    Requested date and time are preferences until a
+                    confirmed schedule is assigned.
+                  </p>
+                </div>
+
+                <span className="w-fit rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                  Request-based
+                </span>
+              </div>
 
               <div className="mt-3">
                 <DetailRow
-                  label="Preferred date"
+                  label="Preferred Date"
                   value={formatPreferredDate(
                     appointment.preferredDate,
                   )}
                 />
 
                 <DetailRow
-                  label="Preferred time"
-                  value={
-                    appointment.preferredTime
-                  }
+                  label="Preferred Time"
+                  value={appointment.preferredTime}
                 />
 
                 <DetailRow
@@ -802,7 +657,7 @@ function AdminAppointmentDetailPage() {
                 />
 
                 <DetailRow
-                  label="Confirmed schedule"
+                  label="Confirmed Schedule"
                   value={formatDateTime(
                     appointment.scheduledAt,
                   )}
@@ -812,29 +667,28 @@ function AdminAppointmentDetailPage() {
 
             <section
               aria-labelledby="appointment-project-heading"
-              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
             >
               <h2
                 id="appointment-project-heading"
-                className="text-xl font-black text-slate-950"
+                className="text-lg font-bold text-slate-950"
               >
-                Project details
+                Project Details
               </h2>
 
-              <div className="mt-5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                  Project summary
+              <div className="mt-4">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                  Project Summary
                 </p>
 
                 <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-slate-700">
-                  {appointment.projectSummary ||
-                    "—"}
+                  {appointment.projectSummary || "—"}
                 </p>
               </div>
 
-              <div className="mt-6">
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                  Additional message
+              <div className="mt-5 border-t border-slate-100 pt-5">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                  Additional Message
                 </p>
 
                 <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-7 text-slate-700">
@@ -846,39 +700,35 @@ function AdminAppointmentDetailPage() {
 
             <section
               aria-labelledby="appointment-audit-heading"
-              className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
             >
               <h2
                 id="appointment-audit-heading"
-                className="text-xl font-black text-slate-950"
+                className="text-lg font-bold text-slate-950"
               >
-                Audit
+                Record Activity
               </h2>
 
-              <div className="mt-3">
+              <div className="mt-2">
                 <DetailRow
                   label="Created"
-                  value={formatDateTime(
-                    appointment.createdAt,
-                  )}
+                  value={formatDateTime(appointment.createdAt)}
                 />
 
                 <DetailRow
-                  label="Last updated"
-                  value={formatDateTime(
-                    appointment.updatedAt,
-                  )}
+                  label="Last Updated"
+                  value={formatDateTime(appointment.updatedAt)}
                 />
 
                 <DetailRow
-                  label="Status updated"
+                  label="Status Updated"
                   value={formatDateTime(
                     appointment.statusUpdatedAt,
                   )}
                 />
 
                 <DetailRow
-                  label="Status updated by"
+                  label="Status Updated By"
                   value={
                     appointment.statusUpdatedBy
                       ? getAdminLabel(
@@ -891,15 +741,13 @@ function AdminAppointmentDetailPage() {
             </section>
           </div>
 
-          <div className="min-w-0 space-y-6">
+          <aside className="min-w-0 space-y-5">
             <AppointmentUpdateForm
               appointment={appointment}
               admin={admin}
               canUpdate={canUpdate}
               isSubmitting={isUpdating}
-              fieldErrors={
-                updateFieldErrors
-              }
+              fieldErrors={updateFieldErrors}
               formStatus={updateStatus}
               onSubmit={handleUpdate}
             />
@@ -907,55 +755,45 @@ function AdminAppointmentDetailPage() {
             {linkedLead ? (
               <section
                 aria-labelledby="appointment-linked-lead-heading"
-                className="rounded-3xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm sm:p-6"
+                className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm sm:p-5"
               >
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700">
-                  CRM conversion
+                  CRM Conversion
                 </p>
 
                 <h2
                   id="appointment-linked-lead-heading"
-                  className="mt-2 text-xl font-black text-emerald-950"
+                  className="mt-2 text-lg font-bold text-emerald-950"
                 >
                   Linked Lead
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-emerald-800">
-                  This Appointment has already
-                  been converted to a CRM Lead.
+                <p className="mt-1.5 text-sm leading-6 text-emerald-800">
+                  This Appointment has already been converted to a
+                  CRM Lead.
                 </p>
 
-                <dl className="mt-5 rounded-2xl border border-emerald-200 bg-white p-4">
+                <dl className="mt-4 rounded-xl border border-emerald-200 bg-white px-4">
                   <DetailRow
                     label="Lead"
                     value={
-                      linkedLead.name ||
-                      appointment.name
+                      linkedLead.name || appointment.name
                     }
                   />
 
                   <DetailRow
                     label="Subject"
-                    value={
-                      linkedLead.subject ||
-                      "—"
-                    }
+                    value={linkedLead.subject || "—"}
                   />
 
                   <DetailRow
                     label="Status"
-                    value={
-                      linkedLead.status ||
-                      "—"
-                    }
+                    value={linkedLead.status || "—"}
                   />
 
                   <DetailRow
                     label="Priority"
-                    value={
-                      linkedLead.priority ||
-                      "—"
-                    }
+                    value={linkedLead.priority || "—"}
                   />
 
                   <DetailRow
@@ -969,9 +807,9 @@ function AdminAppointmentDetailPage() {
                 {leadId ? (
                   <Link
                     to={`/admin/leads/${leadId}/edit`}
-                    className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 py-2 text-sm font-bold text-white transition hover:bg-emerald-800"
+                    className="mt-4 inline-flex min-h-10 items-center justify-center rounded-xl bg-emerald-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-2 motion-reduce:transition-none"
                   >
-                    Open linked Lead
+                    Open Linked Lead
                   </Link>
                 ) : null}
               </section>
@@ -981,12 +819,8 @@ function AdminAppointmentDetailPage() {
                 admin={admin}
                 canConvert={canConvert}
                 isSubmitting={isConverting}
-                fieldErrors={
-                  conversionFieldErrors
-                }
-                formStatus={
-                  conversionStatus
-                }
+                fieldErrors={conversionFieldErrors}
+                formStatus={conversionStatus}
                 onSubmit={handleConvert}
               />
             )}
@@ -994,32 +828,30 @@ function AdminAppointmentDetailPage() {
             {canDelete ? (
               <section
                 aria-labelledby="appointment-delete-heading"
-                className="rounded-3xl border border-red-200 bg-white p-5 shadow-sm sm:p-6"
+                className="rounded-2xl border border-red-200 bg-white p-4 shadow-sm sm:p-5"
               >
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-red-600">
-                  Destructive action
+                  Destructive Action
                 </p>
 
                 <h2
                   id="appointment-delete-heading"
-                  className="mt-2 text-xl font-black text-slate-950"
+                  className="mt-2 text-lg font-bold text-slate-950"
                 >
-                  Permanently delete
+                  Permanently Delete
                 </h2>
 
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  This permanently removes the
-                  Appointment. Converted
-                  Appointments are protected by
-                  the backend and cannot be
-                  deleted while their linked
-                  Lead exists.
+                <p className="mt-1.5 text-sm leading-6 text-slate-600">
+                  This permanently removes the Appointment.
+                  Converted Appointments are protected by the backend
+                  and cannot be deleted while their linked Lead
+                  exists.
                 </p>
 
                 {deleteError ? (
                   <p
                     role="alert"
-                    className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"
+                    className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
                   >
                     {deleteError}
                   </p>
@@ -1029,7 +861,7 @@ function AdminAppointmentDetailPage() {
                   type="button"
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-red-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-4 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
                 >
                   {isDeleting
                     ? "Deleting..."
@@ -1037,9 +869,9 @@ function AdminAppointmentDetailPage() {
                 </button>
               </section>
             ) : null}
-          </div>
+          </aside>
         </div>
-      </div>
+      </section>
     </main>
   );
 }
