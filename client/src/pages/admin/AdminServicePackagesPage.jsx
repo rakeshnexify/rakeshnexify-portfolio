@@ -17,6 +17,12 @@ const initialFilters = {
   featured: "all",
 };
 
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors duration-150 motion-reduce:transition-none focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.08em] text-slate-500";
+
 function createApiFilters(filters) {
   const apiFilters = {
     search: filters.search.trim(),
@@ -99,10 +105,17 @@ function formatBillingCycle(value) {
 function AdminServicePackagesPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
   const { accessToken, logout, admin } = useAdminAuth();
 
-  const [formFilters, setFormFilters] = useState(initialFilters);
-  const [appliedFilters, setAppliedFilters] = useState(initialFilters);
+  const [formFilters, setFormFilters] = useState({
+    ...initialFilters,
+  });
+
+  const [appliedFilters, setAppliedFilters] = useState({
+    ...initialFilters,
+  });
+
   const [servicePackages, setServicePackages] = useState([]);
   const [services, setServices] = useState([]);
   const [resultCount, setResultCount] = useState(0);
@@ -111,6 +124,7 @@ function AdminServicePackagesPage() {
   const [error, setError] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [actionPackageId, setActionPackageId] = useState("");
+
   const [successMessage, setSuccessMessage] = useState(
     location.state?.successMessage || "",
   );
@@ -236,7 +250,10 @@ function AdminServicePackagesPage() {
           return;
         }
 
-        console.error("Admin Service Packages loading failed:", requestError);
+        console.error(
+          "Admin Service Packages loading failed:",
+          requestError,
+        );
 
         setServicePackages([]);
         setResultCount(0);
@@ -275,21 +292,31 @@ function AdminServicePackagesPage() {
     setIsLoading(true);
     setError("");
     setSuccessMessage("");
-    setAppliedFilters(formFilters);
+
+    setAppliedFilters({
+      ...formFilters,
+    });
   }
 
   function handleClearFilters() {
     setIsLoading(true);
     setError("");
     setSuccessMessage("");
-    setFormFilters(initialFilters);
-    setAppliedFilters(initialFilters);
+
+    setFormFilters({
+      ...initialFilters,
+    });
+
+    setAppliedFilters({
+      ...initialFilters,
+    });
   }
 
   function handleRefresh() {
     setIsLoading(true);
     setError("");
     setSuccessMessage("");
+
     setRefreshKey((currentKey) => currentKey + 1);
   }
 
@@ -309,7 +336,10 @@ function AdminServicePackagesPage() {
       return;
     }
 
-    console.error("Admin Service Package action failed:", requestError);
+    console.error(
+      "Admin Service Package action failed:",
+      requestError,
+    );
 
     setError(
       requestError instanceof Error
@@ -426,395 +456,465 @@ function AdminServicePackagesPage() {
       return servicePackage.service.title || "Service";
     }
 
-    const service = servicesById.get(getRelationId(servicePackage?.service));
+    const service = servicesById.get(
+      getRelationId(servicePackage?.service),
+    );
 
     return service?.title || "Service";
   }
 
+  const canDeletePackages = ["super-admin", "admin"].includes(
+    admin?.role,
+  );
+
   return (
     <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-              Pricing Management
-            </p>
+      <section className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+              <span className="uppercase tracking-[0.14em] text-brand-700">
+                Catalog
+              </span>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+              <span aria-hidden="true" className="text-slate-300">
+                /
+              </span>
+
+              <span className="text-slate-500">
+                Pricing management
+              </span>
+            </div>
+
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
               Service Packages
             </h1>
 
-            <p className="mt-3 max-w-3xl leading-7 text-slate-600">
-              Manage Development and Management packages, pricing, billing,
-              comparison features, badges and public visibility for every
-              Service.
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Manage Development and Management packages, pricing,
+              billing, comparison features, badges and public visibility
+              for each Service.
             </p>
           </div>
 
           <Link
             to="/admin/service-packages/new"
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           >
-            Add New Package
+            Add Package
           </Link>
-        </div>
+        </header>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:grid-cols-[1fr_0.75fr_0.55fr_0.55fr_0.55fr_auto]"
+          className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div>
-            <label
-              htmlFor="service-package-search"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Search packages
-            </label>
+            <h2 className="text-base font-black text-slate-950">
+              Filters
+            </h2>
 
-            <input
-              id="service-package-search"
-              name="search"
-              type="search"
-              value={formFilters.search}
-              onChange={handleFilterChange}
-              placeholder="Name, slug or description"
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            />
+            <p className="mt-1 text-sm text-slate-500">
+              Narrow packages by Service, package group and public state.
+            </p>
           </div>
 
-          <div>
-            <label
-              htmlFor="service-package-service-filter"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Service
-            </label>
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <div className="md:col-span-2 xl:col-span-1">
+              <label
+                htmlFor="service-package-search"
+                className={labelClassName}
+              >
+                Search
+              </label>
 
-            <select
-              id="service-package-service-filter"
-              name="service"
-              value={formFilters.service}
-              onChange={handleFilterChange}
-              disabled={servicesLoading}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            >
-              <option value="">All Services</option>
+              <input
+                id="service-package-search"
+                name="search"
+                type="search"
+                value={formFilters.search}
+                onChange={handleFilterChange}
+                placeholder="Name, slug or description"
+                className={`${inputClassName} px-4 placeholder:text-slate-400`}
+              />
+            </div>
 
-              {services.map((service) => (
-                <option key={service._id} value={service._id}>
-                  {service.title}
+            <div>
+              <label
+                htmlFor="service-package-service-filter"
+                className={labelClassName}
+              >
+                Service
+              </label>
+
+              <select
+                id="service-package-service-filter"
+                name="service"
+                value={formFilters.service}
+                onChange={handleFilterChange}
+                disabled={servicesLoading}
+                className={inputClassName}
+              >
+                <option value="">
+                  {servicesLoading
+                    ? "Loading Services..."
+                    : "All Services"}
                 </option>
-              ))}
-            </select>
+
+                {services.map((service) => (
+                  <option key={service._id} value={service._id}>
+                    {service.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="service-package-group-filter"
+                className={labelClassName}
+              >
+                Group
+              </label>
+
+              <select
+                id="service-package-group-filter"
+                name="group"
+                value={formFilters.group}
+                onChange={handleFilterChange}
+                className={inputClassName}
+              >
+                <option value="">All groups</option>
+                <option value="development">Development</option>
+                <option value="management">Management</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="service-package-visibility-filter"
+                className={labelClassName}
+              >
+                Visibility
+              </label>
+
+              <select
+                id="service-package-visibility-filter"
+                name="visibility"
+                value={formFilters.visibility}
+                onChange={handleFilterChange}
+                className={inputClassName}
+              >
+                <option value="all">All packages</option>
+                <option value="visible">Visible</option>
+                <option value="hidden">Hidden</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="service-package-featured-filter"
+                className={labelClassName}
+              >
+                Featured
+              </label>
+
+              <select
+                id="service-package-featured-filter"
+                name="featured"
+                value={formFilters.featured}
+                onChange={handleFilterChange}
+                className={inputClassName}
+              >
+                <option value="all">All states</option>
+                <option value="featured">Featured</option>
+                <option value="standard">Standard</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="service-package-group-filter"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Group
-            </label>
-
-            <select
-              id="service-package-group-filter"
-              name="group"
-              value={formFilters.group}
-              onChange={handleFilterChange}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            >
-              <option value="">All groups</option>
-              <option value="development">Development</option>
-              <option value="management">Management</option>
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="service-package-visibility-filter"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Visibility
-            </label>
-
-            <select
-              id="service-package-visibility-filter"
-              name="visibility"
-              value={formFilters.visibility}
-              onChange={handleFilterChange}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            >
-              <option value="all">All</option>
-              <option value="visible">Visible</option>
-              <option value="hidden">Hidden</option>
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="service-package-featured-filter"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Type
-            </label>
-
-            <select
-              id="service-package-featured-filter"
-              name="featured"
-              value={formFilters.featured}
-              onChange={handleFilterChange}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            >
-              <option value="all">All</option>
-              <option value="featured">Featured</option>
-              <option value="standard">Standard</option>
-            </select>
-          </div>
-
-          <div className="flex items-end gap-2">
-            <button
-              type="submit"
-              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
-            >
-              Apply
-            </button>
-
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
               Clear
+            </button>
+
+            <button
+              type="submit"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
+            >
+              Apply Filters
             </button>
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm font-semibold text-slate-600">
-            {isLoading
-              ? "Loading Service Packages..."
-              : `${resultCount} package(s) found`}
-          </p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-slate-700">
+              {isLoading
+                ? "Loading Service Packages..."
+                : `${resultCount} package${
+                    resultCount === 1 ? "" : "s"
+                  }`}
+            </p>
+
+            {!isLoading ? (
+              <p className="mt-0.5 text-xs text-slate-500">
+                Matching the currently applied filters.
+              </p>
+            ) : null}
+          </div>
 
           <button
             type="button"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Refresh
+            {isLoading ? "Refreshing..." : "Refresh"}
           </button>
         </div>
 
-        {successMessage && (
-          <div
-            role="status"
-            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-sm font-medium leading-6 text-emerald-700"
-          >
-            {successMessage}
-          </div>
-        )}
+        <div aria-live="polite">
+          {successMessage ? (
+            <div
+              role="status"
+              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3"
+            >
+              <p className="text-sm font-semibold leading-6 text-emerald-800">
+                {successMessage}
+              </p>
+            </div>
+          ) : null}
+        </div>
 
-        {error && (
+        {error ? (
           <div
             role="alert"
-            className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700"
+            className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"
           >
-            {error}
-          </div>
-        )}
+            <p className="text-sm font-semibold leading-6 text-red-700">
+              {error}
+            </p>
 
-        {isLoading && (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="mt-3 min-h-10 text-sm font-bold text-red-700 underline underline-offset-4"
+            >
+              Try again
+            </button>
+          </div>
+        ) : null}
+
+        {isLoading ? (
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-96 animate-pulse rounded-2xl border border-slate-200 bg-white"
+                className="h-[29rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && !error && servicePackages.length === 0 && (
-          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-10 text-center">
-            <p className="text-lg font-bold text-slate-950">
+        {!isLoading && !error && servicePackages.length === 0 ? (
+          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
+            <p className="text-base font-black text-slate-950">
               No Service Packages found
             </p>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Create a package or change the current filters.
+            <p className="mt-1.5 text-sm leading-6 text-slate-500">
+              Change the filters or create a new package.
             </p>
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && servicePackages.length > 0 && (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {servicePackages.map((servicePackage) => (
-              <article
-                key={servicePackage._id}
-                className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span
-                    className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
-                      servicePackage.group === "management"
-                        ? "bg-violet-100 text-violet-700"
-                        : "bg-sky-100 text-sky-700"
-                    }`}
-                  >
-                    {servicePackage.group === "management"
-                      ? "Management"
-                      : "Development"}
-                  </span>
+        {!isLoading && servicePackages.length > 0 ? (
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {servicePackages.map((servicePackage) => {
+              const isActionPending =
+                actionPackageId === servicePackage._id;
 
-                  <div className="flex flex-wrap gap-2">
-                    {servicePackage.isFeatured && (
-                      <span className="rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-700">
-                        Featured
+              const featureCount = Array.isArray(
+                servicePackage.features,
+              )
+                ? servicePackage.features.length
+                : 0;
+
+              return (
+                <article
+                  key={servicePackage._id}
+                  className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap gap-1.5">
+                      <span
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+                          servicePackage.group === "management"
+                            ? "bg-violet-50 text-violet-700"
+                            : "bg-sky-50 text-sky-700"
+                        }`}
+                      >
+                        {servicePackage.group === "management"
+                          ? "Management"
+                          : "Development"}
                       </span>
-                    )}
+
+                      {servicePackage.isFeatured ? (
+                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                          Featured
+                        </span>
+                      ) : null}
+                    </div>
 
                     <span
-                      className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
+                      className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
                         servicePackage.isVisible
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-slate-200 text-slate-600"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : "bg-slate-100 text-slate-600"
                       }`}
                     >
                       {servicePackage.isVisible ? "Visible" : "Hidden"}
                     </span>
                   </div>
-                </div>
 
-                <p className="mt-5 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                  {getServiceLabel(servicePackage)}
-                </p>
-
-                <h2 className="mt-2 break-words text-xl font-bold text-slate-950">
-                  {servicePackage.name}
-                </h2>
-
-                <p className="mt-1 break-all text-xs font-semibold text-brand-600">
-                  {servicePackage.slug}
-                </p>
-
-                <div className="mt-5 rounded-2xl bg-slate-950 p-4 text-white">
-                  <p className="text-2xl font-extrabold">
-                    {formatPrice(servicePackage)}
+                  <p className="mt-4 text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
+                    {getServiceLabel(servicePackage)}
                   </p>
 
-                  <p className="mt-1 text-xs font-semibold text-slate-400">
-                    {servicePackage.billingLabel ||
-                      formatBillingCycle(servicePackage.billingCycle)}
+                  <h2 className="mt-2 break-words text-lg font-black tracking-tight text-slate-950">
+                    {servicePackage.name}
+                  </h2>
+
+                  <p className="mt-1 break-all text-xs font-semibold text-brand-700">
+                    {servicePackage.slug}
                   </p>
-                </div>
 
-                <p className="mt-4 line-clamp-3 leading-7 text-slate-600">
-                  {servicePackage.shortDescription}
-                </p>
-
-                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="text-xs font-semibold text-slate-400">
-                      Features
+                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <p className="text-xl font-black tracking-tight text-slate-950">
+                      {formatPrice(servicePackage)}
                     </p>
-                    <p className="mt-1 font-bold text-slate-700">
-                      {Array.isArray(servicePackage.features)
-                        ? servicePackage.features.length
-                        : 0}
+
+                    <p className="mt-1 text-xs font-semibold text-slate-500">
+                      {servicePackage.billingLabel ||
+                        formatBillingCycle(
+                          servicePackage.billingCycle,
+                        )}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-slate-50 p-3">
-                    <p className="text-xs font-semibold text-slate-400">
-                      Display order
-                    </p>
-                    <p className="mt-1 font-bold text-slate-700">
-                      {servicePackage.order}
-                    </p>
-                  </div>
-                </div>
-
-                {servicePackage.badge && (
-                  <p className="mt-4 text-sm font-semibold text-amber-700">
-                    Badge: {servicePackage.badge}
+                  <p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-600">
+                    {servicePackage.shortDescription}
                   </p>
-                )}
 
-                <div className="mt-auto border-t border-slate-100 pt-5">
-                  <div className="grid grid-cols-2 gap-3">
-                    <Link
-                      to={`/admin/service-packages/${servicePackage._id}/edit`}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
-                    >
-                      Edit
-                    </Link>
+                  <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-slate-100 py-4">
+                    <div>
+                      <dt className={labelClassName}>Features</dt>
 
-                    <Link
-                      to={`/admin/package-designs?servicePackage=${servicePackage._id}`}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-center text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
-                    >
-                      Manage Designs
-                    </Link>
+                      <dd className="mt-1 text-sm font-bold text-slate-700">
+                        {featureCount}
+                      </dd>
+                    </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleToggleVisibility(servicePackage)}
-                      disabled={Boolean(actionPackageId)}
-                      className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                        servicePackage.isVisible
-                          ? "border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                          : "bg-emerald-600 text-white hover:bg-emerald-700"
-                      }`}
-                    >
-                      {actionPackageId === servicePackage._id
-                        ? "Updating..."
-                        : servicePackage.isVisible
-                          ? "Hide"
-                          : "Show"}
-                    </button>
+                    <div>
+                      <dt className={labelClassName}>Display order</dt>
 
-                    <button
-                      type="button"
-                      onClick={() => handleToggleFeatured(servicePackage)}
-                      disabled={Boolean(actionPackageId)}
-                      className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                        servicePackage.isFeatured
-                          ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                          : "bg-amber-500 text-white hover:bg-amber-600"
-                      }`}
-                    >
-                      {actionPackageId === servicePackage._id
-                        ? "Updating..."
-                        : servicePackage.isFeatured
-                          ? "Make Standard"
-                          : "Make Featured"}
-                    </button>
+                      <dd className="mt-1 text-sm font-bold text-slate-700">
+                        {servicePackage.order ?? 0}
+                      </dd>
+                    </div>
+                  </dl>
 
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(servicePackage)}
-                      disabled={
-                        Boolean(actionPackageId) ||
-                        !["super-admin", "admin"].includes(admin?.role)
-                      }
-                      title={
-                        ["super-admin", "admin"].includes(admin?.role)
-                          ? "Permanently delete package"
-                          : "Your role cannot permanently delete packages"
-                      }
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {actionPackageId === servicePackage._id
-                        ? "Deleting..."
-                        : "Delete"}
-                    </button>
+                  {servicePackage.badge ? (
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      <span className={labelClassName}>Badge</span>
+
+                      <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                        {servicePackage.badge}
+                      </span>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-auto pt-5">
+                    <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
+                      <Link
+                        to={`/admin/service-packages/${servicePackage._id}/edit`}
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-3 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                      >
+                        Edit
+                      </Link>
+
+                      <Link
+                        to={`/admin/package-designs?servicePackage=${servicePackage._id}`}
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-3 text-center text-sm font-bold text-brand-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                      >
+                        Manage Designs
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleToggleVisibility(servicePackage)
+                        }
+                        disabled={actionPackageId !== ""}
+                        className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
+                          servicePackage.isVisible
+                            ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                            : "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
+                        }`}
+                      >
+                        {isActionPending
+                          ? "Updating..."
+                          : servicePackage.isVisible
+                            ? "Hide"
+                            : "Show"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleToggleFeatured(servicePackage)
+                        }
+                        disabled={actionPackageId !== ""}
+                        className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
+                          servicePackage.isFeatured
+                            ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                            : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                        }`}
+                      >
+                        {isActionPending
+                          ? "Updating..."
+                          : servicePackage.isFeatured
+                            ? "Make Standard"
+                            : "Make Featured"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(servicePackage)}
+                        disabled={
+                          actionPackageId !== "" || !canDeletePackages
+                        }
+                        title={
+                          canDeletePackages
+                            ? "Permanently delete package"
+                            : "Your role cannot permanently delete packages"
+                        }
+                        className="col-span-2 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-3 text-sm font-bold text-red-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isActionPending ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
-        )}
+        ) : null}
       </section>
     </main>
   );
