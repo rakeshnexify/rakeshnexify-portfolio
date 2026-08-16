@@ -1,6 +1,4 @@
-import {
-  useCallback,
-} from "react";
+import { useCallback } from "react";
 import {
   Link,
   useLocation,
@@ -12,7 +10,7 @@ import useAdminAuditLog from "../../hooks/useAdminAuditLog";
 import useAdminAuth from "../../hooks/useAdminAuth";
 
 const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.08em] text-slate-500";
+  "text-xs font-bold uppercase tracking-[0.12em] text-slate-500";
 
 function normalizeText(value) {
   return typeof value === "string"
@@ -61,21 +59,15 @@ function formatAuditValue(value) {
     return "—";
   }
 
-  if (
-    typeof value === "boolean"
-  ) {
+  if (typeof value === "boolean") {
     return value ? "True" : "False";
   }
 
-  if (
-    typeof value === "number"
-  ) {
+  if (typeof value === "number") {
     return String(value);
   }
 
-  if (
-    typeof value === "string"
-  ) {
+  if (typeof value === "string") {
     return value;
   }
 
@@ -120,31 +112,40 @@ function getActionBadgeClass(action) {
 
 function getOutcomeBadgeClass(outcome) {
   if (outcome === "success") {
-    return "bg-emerald-100 text-emerald-800";
+    return "border-emerald-200 bg-emerald-50 text-emerald-700";
   }
 
   if (outcome === "failure") {
-    return "bg-red-100 text-red-800";
+    return "border-red-200 bg-red-50 text-red-700";
   }
 
   if (outcome === "denied") {
-    return "bg-amber-100 text-amber-800";
+    return "border-amber-200 bg-amber-50 text-amber-800";
   }
 
-  return "bg-slate-100 text-slate-700";
+  return "border-slate-200 bg-slate-50 text-slate-700";
 }
 
 function DetailCard({
   title,
+  description,
   children,
 }) {
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <h2 className="text-lg font-black text-slate-950">
-        {title}
-      </h2>
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <div>
+        <h2 className="text-lg font-bold text-slate-950">
+          {title}
+        </h2>
 
-      <div className="mt-5">
+        {description ? (
+          <p className="mt-1 text-sm leading-6 text-slate-500">
+            {description}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="mt-4">
         {children}
       </div>
     </section>
@@ -157,13 +158,13 @@ function DetailField({
   mono = false,
 }) {
   return (
-    <div className="min-w-0 rounded-2xl bg-slate-50 p-4">
+    <div className="min-w-0 border-b border-slate-100 py-3 first:pt-0 last:border-b-0 last:pb-0">
       <dt className={labelClassName}>
         {label}
       </dt>
 
       <dd
-        className={`mt-2 break-words text-sm font-semibold text-slate-900 ${
+        className={`mt-1.5 break-words text-sm font-semibold leading-6 text-slate-800 ${
           mono
             ? "font-mono text-xs"
             : ""
@@ -232,27 +233,24 @@ function AdminAuditLogDetailPage() {
 
   if (!isSuperAdmin) {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto w-full max-w-4xl">
-          <section className="rounded-3xl border border-amber-200 bg-white p-7 shadow-sm sm:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-700">
-              Restricted module
+      <main className="min-h-screen bg-slate-100">
+        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="max-w-3xl rounded-2xl border border-amber-200 bg-white p-5 shadow-sm sm:p-6">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-700">
+              Restricted Module
             </p>
 
-            <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
-              Audit Log details
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              Audit Log Details
             </h1>
 
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
-              Audit records contain
-              security and administrative
-              history. This module is
-              available to the Super Admin
-              role only.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Audit records contain security and administrative
+              history. This read-only module is available to the
+              Super Admin role only.
             </p>
-
-          </section>
-        </div>
+          </div>
+        </section>
       </main>
     );
   }
@@ -295,29 +293,28 @@ function AdminAuditLogDetailPage() {
       : {};
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-6xl">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+    <main className="min-h-screen bg-slate-100">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <Link
               to="/admin/audit-logs"
-              className="inline-flex min-h-10 items-center text-sm font-semibold text-brand-700 hover:text-brand-800"
+              className="inline-flex min-h-10 items-center text-sm font-bold text-brand-700 transition-colors hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
               ← Audit Logs
             </Link>
 
-            <p className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
-              Read-only event record
+            <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              Read-only Event Record
             </p>
 
-            <h1 className="mt-2 break-words text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Audit Log details
+            <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              Audit Log Details
             </h1>
 
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
-              Review the sanitized,
-              immutable record for this
-              administrative event.
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Review the sanitized, immutable event record captured
+              by the Admin audit system.
             </p>
           </div>
 
@@ -326,31 +323,44 @@ function AdminAuditLogDetailPage() {
               type="button"
               onClick={refresh}
               disabled={isLoading}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
             >
               {isLoading
                 ? "Refreshing..."
                 : "Refresh"}
             </button>
           ) : null}
-        </div>
+        </header>
 
         {isLoading &&
         !auditLog ? (
           <div
             role="status"
-            className="mt-8 rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm font-semibold text-slate-500"
+            aria-live="polite"
+            className="mt-6 space-y-4"
           >
-            Loading Audit Log...
+            <span className="sr-only">
+              Loading Audit Log...
+            </span>
+
+            <div className="h-40 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="h-56 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+
+              <div className="h-56 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+            </div>
+
+            <div className="h-48 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
           </div>
         ) : null}
 
         {error ? (
           <div
             role="alert"
-            className="mt-8 rounded-3xl border border-red-200 bg-red-50 p-6 text-sm leading-6 text-red-700"
+            className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700"
           >
-            <p className="font-black">
+            <p className="font-bold text-red-900">
               {isNotFound
                 ? "Audit Log record not found."
                 : isForbidden
@@ -362,10 +372,10 @@ function AdminAuditLogDetailPage() {
               {error.message}
             </p>
 
-            <div className="mt-5 flex flex-wrap gap-3">
+            <div className="mt-4 flex flex-wrap gap-3">
               <Link
                 to="/admin/audit-logs"
-                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-bold text-white"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
               >
                 Back to Audit Logs
               </Link>
@@ -375,9 +385,9 @@ function AdminAuditLogDetailPage() {
                 <button
                   type="button"
                   onClick={refresh}
-                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700"
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
                 >
-                  Try again
+                  Try Again
                 </button>
               ) : null}
             </div>
@@ -386,13 +396,16 @@ function AdminAuditLogDetailPage() {
 
         {auditLog &&
         !error ? (
-          <div className="mt-8 grid gap-6">
-            <section className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm sm:p-8">
+          <div className="mt-6 grid gap-5">
+            <section
+              aria-labelledby="audit-event-summary-heading"
+              className="rounded-2xl border border-slate-800 bg-slate-950 p-5 text-white shadow-sm sm:p-6"
+            >
               <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span
-                      className={`inline-flex min-h-8 items-center rounded-full border px-3 py-1 text-xs font-bold ${getActionBadgeClass(
+                      className={`inline-flex min-h-7 items-center rounded-lg border px-2.5 py-1 text-xs font-bold ${getActionBadgeClass(
                         auditLog.action,
                       )}`}
                     >
@@ -403,7 +416,7 @@ function AdminAuditLogDetailPage() {
                     </span>
 
                     <span
-                      className={`inline-flex min-h-8 items-center rounded-full px-3 py-1 text-xs font-bold ${getOutcomeBadgeClass(
+                      className={`inline-flex min-h-7 items-center rounded-lg border px-2.5 py-1 text-xs font-bold ${getOutcomeBadgeClass(
                         auditLog.outcome,
                       )}`}
                     >
@@ -414,7 +427,10 @@ function AdminAuditLogDetailPage() {
                     </span>
                   </div>
 
-                  <h2 className="mt-4 break-words text-2xl font-black sm:text-3xl">
+                  <h2
+                    id="audit-event-summary-heading"
+                    className="mt-4 break-words text-xl font-bold sm:text-2xl"
+                  >
                     {normalizeText(
                       auditLog.resourceLabel,
                     ) ||
@@ -427,7 +443,7 @@ function AdminAuditLogDetailPage() {
                       "Audit event"}
                   </h2>
 
-                  <p className="mt-3 text-sm leading-6 text-slate-400">
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
                     Recorded{" "}
                     {formatDateTime(
                       auditLog.createdAt,
@@ -435,23 +451,23 @@ function AdminAuditLogDetailPage() {
                   </p>
                 </div>
 
-                <div className="min-w-0 rounded-2xl border border-slate-700 bg-slate-900 p-4 lg:min-w-72">
-                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+                <div className="min-w-0 rounded-xl border border-slate-700 bg-slate-900 p-4 lg:min-w-72 lg:max-w-md">
+                  <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
                     Audit Log ID
                   </p>
 
-                  <p className="mt-2 break-all font-mono text-xs text-slate-200">
+                  <p className="mt-2 break-all font-mono text-xs leading-5 text-slate-200">
                     {auditLog._id}
                   </p>
                 </div>
               </div>
             </section>
 
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-5 lg:grid-cols-2">
               <DetailCard title="Actor">
-                <dl className="grid gap-4 sm:grid-cols-2">
+                <dl className="divide-y divide-slate-100">
                   <DetailField
-                    label="Actor type"
+                    label="Actor Type"
                     value={
                       formatLabel(
                         auditLog.actorType,
@@ -460,7 +476,7 @@ function AdminAuditLogDetailPage() {
                   />
 
                   <DetailField
-                    label="Role snapshot"
+                    label="Role Snapshot"
                     value={
                       formatLabel(
                         auditLog.actorRoleSnapshot,
@@ -469,7 +485,7 @@ function AdminAuditLogDetailPage() {
                   />
 
                   <DetailField
-                    label="Name snapshot"
+                    label="Name Snapshot"
                     value={
                       auditLog.actorNameSnapshot ||
                       "—"
@@ -477,28 +493,26 @@ function AdminAuditLogDetailPage() {
                   />
 
                   <DetailField
-                    label="Email snapshot"
+                    label="Email Snapshot"
                     value={
                       auditLog.actorEmailSnapshot ||
                       "—"
                     }
                   />
 
-                  <div className="sm:col-span-2">
-                    <DetailField
-                      label="Admin ID"
-                      value={
-                        auditLog.actorAdminId ||
-                        "—"
-                      }
-                      mono
-                    />
-                  </div>
+                  <DetailField
+                    label="Admin ID"
+                    value={
+                      auditLog.actorAdminId ||
+                      "—"
+                    }
+                    mono
+                  />
                 </dl>
               </DetailCard>
 
-              <DetailCard title="Event classification">
-                <dl className="grid gap-4 sm:grid-cols-2">
+              <DetailCard title="Event Classification">
+                <dl className="divide-y divide-slate-100">
                   <DetailField
                     label="Category"
                     value={
@@ -536,10 +550,13 @@ function AdminAuditLogDetailPage() {
               </DetailCard>
             </div>
 
-            <DetailCard title="Resource">
-              <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <DetailCard
+              title="Resource"
+              description="Resource identity captured at the time of the event."
+            >
+              <dl className="grid gap-x-5 sm:grid-cols-2 lg:grid-cols-4">
                 <DetailField
-                  label="Resource type"
+                  label="Resource Type"
                   value={
                     formatLabel(
                       auditLog.resourceType,
@@ -574,16 +591,18 @@ function AdminAuditLogDetailPage() {
               </dl>
             </DetailCard>
 
-            <DetailCard title="Changed fields">
+            <DetailCard
+              title="Changed Fields"
+              description="Only safe changed-field values included in the sanitized Audit record are shown here."
+            >
               {changedFields.length ===
               0 ? (
                 <p className="text-sm leading-6 text-slate-500">
-                  No safe changed-field
-                  values were recorded for
+                  No safe changed-field values were recorded for
                   this event.
                 </p>
               ) : (
-                <div className="grid gap-4">
+                <div className="divide-y divide-slate-100">
                   {changedFields.map(
                     (fieldName) => {
                       const changeValue =
@@ -614,7 +633,7 @@ function AdminAuditLogDetailPage() {
                           key={
                             fieldName
                           }
-                          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                          className="py-4 first:pt-0 last:pb-0"
                         >
                           <p className={labelClassName}>
                             {formatLabel(
@@ -623,31 +642,33 @@ function AdminAuditLogDetailPage() {
                           </p>
 
                           {hasFromTo ? (
-                            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                              <div className="rounded-xl bg-white p-3">
-                                <p className="text-xs font-bold text-slate-400">
+                            <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+                              <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+                                <dt className="text-xs font-bold uppercase tracking-[0.1em] text-slate-500">
                                   From
-                                </p>
-                                <p className="mt-1 break-words text-sm font-semibold text-slate-800">
+                                </dt>
+
+                                <dd className="mt-1.5 break-words text-sm font-semibold leading-6 text-slate-800">
                                   {formatAuditValue(
                                     changeValue.from,
                                   )}
-                                </p>
+                                </dd>
                               </div>
 
-                              <div className="rounded-xl bg-white p-3">
-                                <p className="text-xs font-bold text-slate-400">
+                              <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+                                <dt className="text-xs font-bold uppercase tracking-[0.1em] text-slate-500">
                                   To
-                                </p>
-                                <p className="mt-1 break-words text-sm font-semibold text-slate-800">
+                                </dt>
+
+                                <dd className="mt-1.5 break-words text-sm font-semibold leading-6 text-slate-800">
                                   {formatAuditValue(
                                     changeValue.to,
                                   )}
-                                </p>
+                                </dd>
                               </div>
-                            </div>
+                            </dl>
                           ) : (
-                            <p className="mt-2 break-words text-sm font-semibold text-slate-800">
+                            <p className="mt-2 break-words text-sm font-semibold leading-6 text-slate-800">
                               {formatAuditValue(
                                 changeValue,
                               )}
@@ -661,16 +682,18 @@ function AdminAuditLogDetailPage() {
               )}
             </DetailCard>
 
-            <DetailCard title="Safe metadata">
+            <DetailCard
+              title="Safe Metadata"
+              description="Only metadata already sanitized and allowlisted by the Audit API is rendered."
+            >
               {Object.keys(
                 metadata,
               ).length === 0 ? (
                 <p className="text-sm leading-6 text-slate-500">
-                  No additional safe
-                  metadata was recorded.
+                  No additional safe metadata was recorded.
                 </p>
               ) : (
-                <dl className="grid gap-4 sm:grid-cols-2">
+                <dl className="grid gap-x-5 sm:grid-cols-2">
                   {Object.entries(
                     metadata,
                   ).map(
@@ -695,10 +718,13 @@ function AdminAuditLogDetailPage() {
               )}
             </DetailCard>
 
-            <DetailCard title="Request context">
-              <dl className="grid gap-4 sm:grid-cols-2">
+            <DetailCard
+              title="Request Context"
+              description="Sanitized request context associated with the recorded event."
+            >
+              <dl className="grid gap-x-5 sm:grid-cols-2">
                 <DetailField
-                  label="HTTP method"
+                  label="HTTP Method"
                   value={
                     request.method ||
                     auditLog.httpMethod ||
@@ -707,7 +733,7 @@ function AdminAuditLogDetailPage() {
                 />
 
                 <DetailField
-                  label="Route path"
+                  label="Route Path"
                   value={
                     request.path ||
                     auditLog.routePath ||
@@ -717,7 +743,7 @@ function AdminAuditLogDetailPage() {
                 />
 
                 <DetailField
-                  label="IP address"
+                  label="IP Address"
                   value={
                     request.ip ||
                     auditLog.ip ||
@@ -727,7 +753,7 @@ function AdminAuditLogDetailPage() {
                 />
 
                 <DetailField
-                  label="User agent"
+                  label="User Agent"
                   value={
                     request.userAgent ||
                     auditLog.userAgent ||
@@ -737,18 +763,17 @@ function AdminAuditLogDetailPage() {
               </dl>
             </DetailCard>
 
-            <div className="flex flex-wrap gap-3">
+            <div>
               <Link
                 to="/admin/audit-logs"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-brand-700"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
               >
                 ← Back to Audit Logs
               </Link>
-
             </div>
           </div>
         ) : null}
-      </div>
+      </section>
     </main>
   );
 }

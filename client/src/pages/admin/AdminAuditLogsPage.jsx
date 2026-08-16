@@ -35,10 +35,10 @@ const DEFAULT_FILTERS = {
 };
 
 const inputClassName =
-  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:bg-slate-100 motion-reduce:transition-none";
 
 const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.08em] text-slate-500";
+  "text-xs font-bold uppercase tracking-[0.12em] text-slate-500";
 
 function normalizeText(value) {
   return typeof value === "string"
@@ -99,15 +99,11 @@ function createUtcEndOfDay(value) {
 }
 
 function getActorLabel(auditLog) {
-  if (
-    auditLog?.actorType === "anonymous"
-  ) {
+  if (auditLog?.actorType === "anonymous") {
     return "Anonymous";
   }
 
-  if (
-    auditLog?.actorType === "system"
-  ) {
+  if (auditLog?.actorType === "system") {
     return "System";
   }
 
@@ -165,43 +161,41 @@ function getActionBadgeClass(action) {
 
 function getOutcomeBadgeClass(outcome) {
   if (outcome === "success") {
-    return "bg-emerald-100 text-emerald-800";
+    return "border-emerald-200 bg-emerald-50 text-emerald-700";
   }
 
   if (outcome === "failure") {
-    return "bg-red-100 text-red-800";
+    return "border-red-200 bg-red-50 text-red-700";
   }
 
   if (outcome === "denied") {
-    return "bg-amber-100 text-amber-800";
+    return "border-amber-200 bg-amber-50 text-amber-800";
   }
 
-  return "bg-slate-100 text-slate-700";
+  return "border-slate-200 bg-slate-50 text-slate-700";
 }
 
-function AuditSummaryBadges({
-  auditLog,
-}) {
+function ActionBadge({ action }) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span
-        className={`inline-flex min-h-7 items-center rounded-full border px-3 py-1 text-xs font-bold ${getActionBadgeClass(
-          auditLog.action,
-        )}`}
-      >
-        {formatLabel(auditLog.action) ||
-          "Unknown action"}
-      </span>
+    <span
+      className={`inline-flex min-h-7 items-center rounded-lg border px-2.5 py-1 text-xs font-bold ${getActionBadgeClass(
+        action,
+      )}`}
+    >
+      {formatLabel(action) || "Unknown action"}
+    </span>
+  );
+}
 
-      <span
-        className={`inline-flex min-h-7 items-center rounded-full px-3 py-1 text-xs font-bold ${getOutcomeBadgeClass(
-          auditLog.outcome,
-        )}`}
-      >
-        {formatLabel(auditLog.outcome) ||
-          "Unknown outcome"}
-      </span>
-    </div>
+function OutcomeBadge({ outcome }) {
+  return (
+    <span
+      className={`inline-flex min-h-7 items-center rounded-lg border px-2.5 py-1 text-xs font-bold ${getOutcomeBadgeClass(
+        outcome,
+      )}`}
+    >
+      {formatLabel(outcome) || "Unknown outcome"}
+    </span>
   );
 }
 
@@ -215,8 +209,10 @@ function AdminAuditLogsPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [draftFilters, setDraftFilters] =
-    useState(DEFAULT_FILTERS);
+  const [
+    draftFilters,
+    setDraftFilters,
+  ] = useState(DEFAULT_FILTERS);
 
   const [
     appliedFilters,
@@ -281,7 +277,8 @@ function AdminAuditLogsPage() {
     onUnauthorized:
       handleUnauthorized,
     enabled: Boolean(
-      accessToken && isSuperAdmin,
+      accessToken &&
+        isSuperAdmin,
     ),
   });
 
@@ -351,51 +348,45 @@ function AdminAuditLogsPage() {
 
   if (!isSuperAdmin) {
     return (
-      <main className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mx-auto w-full max-w-4xl">
-          <section className="rounded-3xl border border-amber-200 bg-white p-7 shadow-sm sm:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-700">
-              Restricted module
+      <main className="min-h-screen bg-slate-100">
+        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="max-w-3xl rounded-2xl border border-amber-200 bg-white p-5 shadow-sm sm:p-6">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-700">
+              Restricted Module
             </p>
 
-            <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950">
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Admin Activity / Audit Log
             </h1>
 
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
-              Audit records contain
-              security and administrative
-              history. This module is
-              available to the Super Admin
-              role only.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Audit records contain security and administrative
+              history. This read-only module is available to the
+              Super Admin role only.
             </p>
-
-          </section>
-        </div>
+          </div>
+        </section>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+    <main className="min-h-screen bg-slate-100">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
-              Security & administration
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              Security & Administration
             </p>
 
-            <h1 className="mt-2 break-words text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+            <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Admin Activity / Audit Log
             </h1>
 
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
-              Review immutable Admin
-              activity, authentication,
-              workflow, content,
-              configuration and Media
-              events. Audit records are
-              read-only.
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Review immutable authentication, security, workflow,
+              content, configuration and Media events recorded by
+              the Admin audit system.
             </p>
           </div>
 
@@ -403,44 +394,44 @@ function AdminAuditLogsPage() {
             type="button"
             onClick={refresh}
             disabled={isLoading}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
           >
             {isLoading
               ? "Refreshing..."
               : "Refresh"}
           </button>
-        </div>
+        </header>
 
         <section
           aria-labelledby="audit-log-filters-heading"
-          className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2
                 id="audit-log-filters-heading"
-                className="text-lg font-black text-slate-950"
+                className="text-lg font-bold text-slate-950"
               >
                 Filter Audit Logs
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
-                Narrow records by actor,
-                classification, resource,
-                outcome or UTC date range.
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Narrow the read-only history by actor,
+                classification, resource, outcome or UTC date
+                range.
               </p>
             </div>
 
             {hasActiveFilters ? (
-              <p className="text-xs font-bold uppercase tracking-wide text-brand-700">
+              <span className="w-fit rounded-lg border border-brand-200 bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700">
                 Filters applied
-              </p>
+              </span>
             ) : null}
           </div>
 
           <form
             onSubmit={handleApplyFilters}
-            className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4"
           >
             <div className="md:col-span-2">
               <label
@@ -470,7 +461,7 @@ function AdminAuditLogsPage() {
                 htmlFor="audit-actor-role"
                 className={labelClassName}
               >
-                Actor role
+                Actor Role
               </label>
 
               <select
@@ -580,7 +571,7 @@ function AdminAuditLogsPage() {
                 htmlFor="audit-resource-type"
                 className={labelClassName}
               >
-                Resource type
+                Resource Type
               </label>
 
               <select
@@ -601,12 +592,8 @@ function AdminAuditLogsPage() {
                 {AUDIT_RESOURCE_TYPES.map(
                   (resourceType) => (
                     <option
-                      key={
-                        resourceType
-                      }
-                      value={
-                        resourceType
-                      }
+                      key={resourceType}
+                      value={resourceType}
                     >
                       {formatLabel(
                         resourceType,
@@ -706,7 +693,7 @@ function AdminAuditLogsPage() {
                 htmlFor="audit-date-from"
                 className={labelClassName}
               >
-                Date from
+                Date From
               </label>
 
               <input
@@ -728,7 +715,7 @@ function AdminAuditLogsPage() {
                 htmlFor="audit-date-to"
                 className={labelClassName}
               >
-                Date to
+                Date To
               </label>
 
               <input
@@ -748,9 +735,9 @@ function AdminAuditLogsPage() {
             <div className="flex flex-col gap-3 md:col-span-2 md:flex-row xl:col-span-4">
               <button
                 type="submit"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
               >
-                Apply filters
+                Apply Filters
               </button>
 
               <button
@@ -758,7 +745,7 @@ function AdminAuditLogsPage() {
                 onClick={
                   handleClearFilters
                 }
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-2 text-sm font-bold text-slate-700 transition hover:border-slate-400 hover:text-slate-950"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-slate-400 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
               >
                 Clear
               </button>
@@ -768,18 +755,21 @@ function AdminAuditLogsPage() {
 
         <section
           aria-labelledby="audit-log-results-heading"
-          className="mt-8"
+          className="mt-6"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2
                 id="audit-log-results-heading"
-                className="text-xl font-black text-slate-950"
+                className="text-lg font-bold text-slate-950"
               >
-                Activity records
+                Activity Records
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p
+                aria-live="polite"
+                className="mt-1 text-sm text-slate-500"
+              >
                 {isLoading
                   ? "Loading Audit Logs..."
                   : `${total} record${
@@ -790,17 +780,17 @@ function AdminAuditLogsPage() {
               </p>
             </div>
 
-            <p className="text-sm font-semibold text-slate-500">
+            <span className="w-fit rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-bold text-slate-600">
               Read-only · Super Admin
-            </p>
+            </span>
           </div>
 
           {error ? (
             <div
               role="alert"
-              className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700"
+              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
             >
-              <p className="font-bold">
+              <p className="font-bold text-red-900">
                 {isForbidden
                   ? "Audit Log access is restricted."
                   : "Unable to load Audit Logs."}
@@ -814,9 +804,9 @@ function AdminAuditLogsPage() {
                 <button
                   type="button"
                   onClick={refresh}
-                  className="mt-3 min-h-10 font-bold underline underline-offset-4"
+                  className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
                 >
-                  Try again
+                  Try Again
                 </button>
               ) : null}
             </div>
@@ -825,12 +815,12 @@ function AdminAuditLogsPage() {
           {!error &&
           !isLoading &&
           auditLogs.length === 0 ? (
-            <div className="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center">
-              <h3 className="text-lg font-black text-slate-900">
+            <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center">
+              <h3 className="text-base font-bold text-slate-900">
                 No Audit Logs found
               </h3>
 
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
+              <p className="mx-auto mt-1.5 max-w-xl text-sm leading-6 text-slate-500">
                 {hasActiveFilters
                   ? "Try clearing or changing the current filters."
                   : "Recorded Admin activity will appear here."}
@@ -842,40 +832,61 @@ function AdminAuditLogsPage() {
           auditLogs.length === 0 ? (
             <div
               role="status"
-              className="mt-5 rounded-3xl border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500"
+              aria-live="polite"
+              className="mt-4 space-y-3"
             >
-              Loading Audit Logs...
+              <span className="sr-only">
+                Loading Audit Logs...
+              </span>
+
+              {[1, 2, 3].map(
+                (placeholder) => (
+                  <div
+                    key={placeholder}
+                    className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
+                  />
+                ),
+              )}
             </div>
           ) : null}
 
           {auditLogs.length > 0 ? (
             <>
-              <div className="mt-5 grid gap-4 lg:hidden">
+              <div className="mt-4 grid gap-3 lg:hidden">
                 {auditLogs.map(
                   (auditLog) => (
                     <article
                       key={
                         auditLog._id
                       }
-                      className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+                      className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
                     >
-                      <AuditSummaryBadges
-                        auditLog={
-                          auditLog
-                        }
-                      />
+                      <div className="flex flex-wrap items-center gap-2">
+                        <ActionBadge
+                          action={
+                            auditLog.action
+                          }
+                        />
 
-                      <h3 className="mt-4 break-words text-lg font-black text-slate-950">
+                        <OutcomeBadge
+                          outcome={
+                            auditLog.outcome
+                          }
+                        />
+                      </div>
+
+                      <h3 className="mt-3 break-words text-base font-bold text-slate-950">
                         {getResourceLabel(
                           auditLog,
                         )}
                       </h3>
 
-                      <dl className="mt-4 grid gap-3 text-sm">
-                        <div>
+                      <dl className="mt-4 divide-y divide-slate-100 text-sm">
+                        <div className="py-2.5 first:pt-0">
                           <dt className={labelClassName}>
                             Resource
                           </dt>
+
                           <dd className="mt-1 break-words font-semibold text-slate-800">
                             {formatLabel(
                               auditLog.resourceType,
@@ -883,21 +894,31 @@ function AdminAuditLogsPage() {
                           </dd>
                         </div>
 
-                        <div>
+                        <div className="py-2.5">
                           <dt className={labelClassName}>
                             Actor
                           </dt>
+
                           <dd className="mt-1 break-words font-semibold text-slate-800">
                             {getActorLabel(
                               auditLog,
                             )}
                           </dd>
+
+                          {auditLog.actorRoleSnapshot ? (
+                            <dd className="mt-0.5 text-xs text-slate-500">
+                              {formatLabel(
+                                auditLog.actorRoleSnapshot,
+                              )}
+                            </dd>
+                          ) : null}
                         </div>
 
-                        <div>
+                        <div className="py-2.5">
                           <dt className={labelClassName}>
                             Category
                           </dt>
+
                           <dd className="mt-1 break-words font-semibold text-slate-800">
                             {formatLabel(
                               auditLog.category,
@@ -905,10 +926,11 @@ function AdminAuditLogsPage() {
                           </dd>
                         </div>
 
-                        <div>
+                        <div className="py-2.5 last:pb-0">
                           <dt className={labelClassName}>
                             Recorded
                           </dt>
+
                           <dd className="mt-1 break-words font-semibold text-slate-800">
                             {formatDateTime(
                               auditLog.createdAt,
@@ -919,42 +941,70 @@ function AdminAuditLogsPage() {
 
                       <Link
                         to={`/admin/audit-logs/${auditLog._id}`}
-                        className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-slate-950 px-4 py-2 text-sm font-bold text-white transition hover:bg-brand-700"
+                        className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
                       >
-                        View details
+                        View Details
                       </Link>
                     </article>
                   ),
                 )}
               </div>
 
-              <div className="mt-5 hidden overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm lg:block">
+              <div className="mt-4 hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:block">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-slate-200">
                     <thead className="bg-slate-50">
                       <tr>
-                        {[
-                          "Time",
-                          "Action",
-                          "Actor",
-                          "Resource",
-                          "Category",
-                          "Outcome",
-                          "",
-                        ].map(
-                          (heading) => (
-                            <th
-                              key={
-                                heading ||
-                                "actions"
-                              }
-                              scope="col"
-                              className="px-5 py-4 text-left text-xs font-black uppercase tracking-[0.08em] text-slate-500"
-                            >
-                              {heading}
-                            </th>
-                          ),
-                        )}
+                        <th
+                          scope="col"
+                          className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-500"
+                        >
+                          Time
+                        </th>
+
+                        <th
+                          scope="col"
+                          className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-500"
+                        >
+                          Action
+                        </th>
+
+                        <th
+                          scope="col"
+                          className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-500"
+                        >
+                          Actor
+                        </th>
+
+                        <th
+                          scope="col"
+                          className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-500"
+                        >
+                          Resource
+                        </th>
+
+                        <th
+                          scope="col"
+                          className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-500"
+                        >
+                          Category
+                        </th>
+
+                        <th
+                          scope="col"
+                          className="px-4 py-3 text-left text-xs font-bold uppercase tracking-[0.1em] text-slate-500"
+                        >
+                          Outcome
+                        </th>
+
+                        <th
+                          scope="col"
+                          className="px-4 py-3 text-right text-xs font-bold uppercase tracking-[0.1em] text-slate-500"
+                        >
+                          <span className="sr-only">
+                            Actions
+                          </span>
+                        </th>
                       </tr>
                     </thead>
 
@@ -967,29 +1017,29 @@ function AdminAuditLogsPage() {
                             }
                             className="align-top"
                           >
-                            <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-slate-700">
+                            <td className="whitespace-nowrap px-4 py-3.5 text-sm font-medium text-slate-600">
                               {formatDateTime(
                                 auditLog.createdAt,
                               )}
                             </td>
 
-                            <td className="px-5 py-4">
-                              <AuditSummaryBadges
-                                auditLog={
-                                  auditLog
+                            <td className="px-4 py-3.5">
+                              <ActionBadge
+                                action={
+                                  auditLog.action
                                 }
                               />
                             </td>
 
-                            <td className="max-w-52 px-5 py-4">
-                              <p className="break-words text-sm font-bold text-slate-900">
+                            <td className="max-w-56 px-4 py-3.5">
+                              <p className="break-words text-sm font-semibold text-slate-900">
                                 {getActorLabel(
                                   auditLog,
                                 )}
                               </p>
 
                               {auditLog.actorRoleSnapshot ? (
-                                <p className="mt-1 text-xs text-slate-500">
+                                <p className="mt-0.5 text-xs text-slate-500">
                                   {formatLabel(
                                     auditLog.actorRoleSnapshot,
                                   )}
@@ -997,42 +1047,38 @@ function AdminAuditLogsPage() {
                               ) : null}
                             </td>
 
-                            <td className="max-w-64 px-5 py-4">
-                              <p className="break-words text-sm font-bold text-slate-900">
+                            <td className="max-w-72 px-4 py-3.5">
+                              <p className="break-words text-sm font-semibold text-slate-900">
                                 {getResourceLabel(
                                   auditLog,
                                 )}
                               </p>
 
-                              <p className="mt-1 break-words text-xs text-slate-500">
+                              <p className="mt-0.5 break-words text-xs text-slate-500">
                                 {formatLabel(
                                   auditLog.resourceType,
                                 ) || "—"}
                               </p>
                             </td>
 
-                            <td className="px-5 py-4 text-sm font-semibold text-slate-700">
+                            <td className="px-4 py-3.5 text-sm font-medium text-slate-700">
                               {formatLabel(
                                 auditLog.category,
                               ) || "—"}
                             </td>
 
-                            <td className="px-5 py-4">
-                              <span
-                                className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${getOutcomeBadgeClass(
-                                  auditLog.outcome,
-                                )}`}
-                              >
-                                {formatLabel(
-                                  auditLog.outcome,
-                                ) || "—"}
-                              </span>
+                            <td className="px-4 py-3.5">
+                              <OutcomeBadge
+                                outcome={
+                                  auditLog.outcome
+                                }
+                              />
                             </td>
 
-                            <td className="px-5 py-4 text-right">
+                            <td className="px-4 py-3.5 text-right">
                               <Link
                                 to={`/admin/audit-logs/${auditLog._id}`}
-                                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition hover:border-brand-300 hover:text-brand-700"
+                                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-3.5 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
                               >
                                 Details
                               </Link>
@@ -1051,7 +1097,7 @@ function AdminAuditLogsPage() {
           safePages > 1 ? (
             <nav
               aria-label="Audit Log pagination"
-              className="mt-6 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="mt-5 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <p className="text-center text-sm font-semibold text-slate-600 sm:text-left">
                 Page {safePage} of{" "}
@@ -1077,7 +1123,7 @@ function AdminAuditLogsPage() {
                     isLoading ||
                     safePage <= 1
                   }
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                 >
                   Previous
                 </button>
@@ -1101,7 +1147,7 @@ function AdminAuditLogsPage() {
                     safePage >=
                       safePages
                   }
-                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                 >
                   Next
                 </button>
@@ -1109,7 +1155,7 @@ function AdminAuditLogsPage() {
             </nav>
           ) : null}
         </section>
-      </div>
+      </section>
     </main>
   );
 }
