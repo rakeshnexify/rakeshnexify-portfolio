@@ -793,6 +793,8 @@ Verified UI checkpoint history:
 - `89bd245 Polish admin contact messages interface`
 - `0da2474 Document admin contact messages UI milestone`
 - `5455e35 Polish admin detail interfaces`
+- `550d5fd Document admin detail interfaces UI milestone`
+- `8bda7a2 Polish admin audit interfaces`
 
 The shared shell milestone is complete. Individual Admin module internal polish is active and is being completed in small verified batches without changing backend/API/business behavior.
 
@@ -972,6 +974,11 @@ Batch 7 — commit `5455e35 Polish admin detail interfaces`
 - Appointment Detail
 - Service Order Detail
 
+Batch 8 — commit `8bda7a2 Polish admin audit interfaces`
+
+- Audit Logs
+- Audit Log Detail
+
 All completed batches were manually browser-verified, targeted ESLint-clean, production-build verified, whitespace-checked, Codex-reviewed, committed, and pushed to `main`.
 
 Batch 3 preserves the established list-page behavior, including filtered local collection updates for Skills, Education, and Experience, UTC month/year timeline formatting for Education/Experience, existing delete RBAC, and accessible reduced-motion-safe loading states.
@@ -984,11 +991,13 @@ Batch 6 preserves the operational Contact Messages workflow without forcing a si
 
 Batch 7 preserves behavior-sensitive detail workflows. Appointment Detail retains local merge after updates, explicit Appointment -> Lead conversion for all three Admin roles, linked-Lead rendering, current-path 401 redirect state, Admin+ deletion, and `409` backend-truth reconciliation for duplicate conversion or converted-Appointment delete conflicts. Preferred `YYYY-MM-DD` dates remain rendered without UTC date shifting. Service Order Detail retains immutable customer/project/commercial snapshots and the exact normal Admin update boundary of `status` + private `adminNotes`; snapshot price/billing/design values remain read-only and submission-derived, while permanent deletion remains Admin+ only.
 
+Batch 8 preserves the Audit domain's security and privacy boundaries while normalizing the two read-only Admin surfaces. Audit Logs remains frontend-gated to `super-admin`, keeps all existing filters with a fixed page limit of 20, preserves explicit UTC start/end-of-day filter conversion, and renders summary-only records without detail-only changes/metadata/request context. Audit Log Detail remains frontend-gated to `super-admin`, renders only the sanitized Audit response, uses `changedFields` as the authority for which change values become visible, preserves safe `from` / `to` rendering and sanitized metadata/request-context fallbacks, and performs no source-resource enrichment. On both pages, `401` logs out and redirects to `/admin/login` while preserving the current pathname, whereas `403` renders restricted access without logging out. No Audit create/update/delete controls exist.
+
 Current UI/UX scope:
 
 The shared Admin Shell + Sidebar + Analytics Dashboard refinement is complete.
 
-Twenty-one Admin module pages have completed internal visual normalization across the first seven verified batches.
+Twenty-three Admin module pages have completed internal visual normalization across the first eight verified batches.
 
 Individual Admin module internal polish remains active for the remaining Admin pages. Continue in safe batches and preserve the established shell and visual contract.
 
@@ -1851,7 +1860,7 @@ No additional major functional module remains in the current functional roadmap.
 
 - Professional UI/UX — active
 - Professional UI/UX — completed: shared Admin shell/sidebar + analytics Dashboard refinement
-- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations, Statistics, Skills, Education, Experience, Certifications / Achievements, Testimonials, FAQs, Team Members, Companies, Posts / Blog & News, Contact Messages, Appointment Detail, Service Order Detail
+- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations, Statistics, Skills, Education, Experience, Certifications / Achievements, Testimonials, FAQs, Team Members, Companies, Posts / Blog & News, Contact Messages, Appointment Detail, Service Order Detail, Audit Logs, Audit Log Detail
 - Professional UI/UX — remaining: remaining individual Admin module internal polish, then public-site visual polish
 - Email and Notifications
 - Final SEO/testing/performance/security

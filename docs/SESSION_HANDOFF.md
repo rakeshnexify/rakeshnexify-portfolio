@@ -16,16 +16,16 @@ Major functional roadmap:
 
 Latest pushed Professional UI/UX checkpoint:
 
-`5455e35 Polish admin detail interfaces`
+`8bda7a2 Polish admin audit interfaces`
 
 Full hash:
 
-`5455e359caadc08d4e34bc6f96e9904ab75a99c7`
+`8bda7a20f791c401831709913d73391b7645bb5f`
 
 Latest verified Git state before this documentation replacement:
 
-- local `main` = `5455e359caadc08d4e34bc6f96e9904ab75a99c7`
-- `origin/main` = `5455e359caadc08d4e34bc6f96e9904ab75a99c7`
+- local `main` = `8bda7a20f791c401831709913d73391b7645bb5f`
+- `origin/main` = `8bda7a20f791c401831709913d73391b7645bb5f`
 - working tree clean
 - branch up to date with `origin/main`
 
@@ -245,6 +245,33 @@ Pages:
 
 - `AdminAppointmentDetailPage.jsx`
 - `AdminServiceOrderDetailPage.jsx`
+
+Status:
+
+`COMPLETE / VERIFIED / PUSHED`
+
+Documentation closeout for Batch 7:
+
+`550d5fd Document admin detail interfaces UI milestone`
+
+Full hash:
+
+`550d5fd142587ff137b3f2f7976c510433bbceb6`
+
+### Admin Audit Interfaces polish — Batch 8
+
+Commit:
+
+`8bda7a2 Polish admin audit interfaces`
+
+Full hash:
+
+`8bda7a20f791c401831709913d73391b7645bb5f`
+
+Pages:
+
+- `AdminAuditLogsPage.jsx`
+- `AdminAuditLogDetailPage.jsx`
 
 Status:
 
@@ -941,6 +968,84 @@ Verified:
 - collapsed/pinned sidebar alignment
 - no horizontal overflow
 
+### Batch 8
+
+Audit Logs:
+
+`PASS`
+
+Verified:
+
+- Super-admin-only frontend access
+- non-Super-admin restricted screen without Audit data fetch
+- Search
+- Actor Role
+- Category
+- Action
+- Resource Type
+- Outcome
+- Actor Admin ID
+- Resource ID
+- Date From / Date To
+- Apply trims filters and resets page to 1
+- Clear restores all defaults and resets page to 1
+- UTC start/end-of-day date filter conversion
+- fixed page limit 20
+- Refresh
+- summary-only record count/list
+- action/outcome text badges
+- actor snapshot fallback semantics
+- resource label/slug/ID fallback semantics
+- Category / Recorded timestamp
+- Details route
+- Previous / Next pagination
+- empty/loading/error/retry states
+- 401 logout + login redirect preserving current pathname
+- 403 restricted error without logout
+- no create/edit/delete controls
+- mobile cards + desktop table
+- reduced-motion-safe loading skeleton
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
+Audit Log Detail:
+
+`PASS`
+
+Verified:
+
+- Super-admin-only frontend access
+- non-Super-admin restricted screen without detail fetch
+- Back to Audit Logs
+- Refresh
+- action/outcome badges
+- resource identity/title
+- recorded timestamp
+- Audit Log ID
+- Actor Type / Role / Name / Email / Admin ID snapshots
+- Category / Action / Outcome
+- Resource Type / Label / Slug / ID
+- `changedFields` remains authoritative for visible change entries
+- safe normal change values
+- safe `from` / `to` change rendering
+- empty changed-fields state
+- sanitized Safe Metadata rendering
+- empty metadata state
+- sanitized HTTP Method / Route Path / IP / User Agent context
+- nested request context plus legacy top-level fallbacks preserved
+- long IDs/paths/User-Agent/values wrap without page overflow
+- no source-resource enrichment
+- no create/edit/delete/mutation controls
+- 401 logout + login redirect preserving current detail pathname
+- 403 restricted error without logout
+- 404 not-found with Back link and no ordinary retry
+- ordinary read failure with Try Again
+- accessible reduced-motion-safe loading skeleton
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
 ## Important Batch 2 Review Remediations
 
 The first Codex review of Batch 2 found two issues.
@@ -1378,6 +1483,68 @@ Final Git verification after push:
 - working tree clean
 - branch up to date with `origin/main`
 
+### Batch 8
+
+Combined targeted ESLint for:
+
+- `AdminAuditLogsPage.jsx`
+- `AdminAuditLogDetailPage.jsx`
+
+Result:
+
+`PASS`
+
+Manual browser verification:
+
+`PASS`
+
+Production build:
+
+`npm run build`
+
+Result:
+
+`PASS`
+
+Observed Batch 8 Vite output:
+
+- Vite `8.1.5`
+- 280 modules transformed
+- `dist/index.html` `1.83 kB`, gzip `0.62 kB`
+- CSS `103.75 kB`, gzip `15.92 kB`
+- JS `1,781.01 kB`, gzip `370.98 kB`
+- build completed in `332ms`
+
+The existing greater-than-500-kB chunk warning remains non-blocking and is deferred to Performance Optimization.
+
+Git verification:
+
+- exactly two expected files modified/staged
+- `git diff --check` passed
+- `git diff --cached --check` passed
+- CRLF-to-LF warnings were informational
+- no unstaged or unrelated scope before commit
+
+Fresh Codex security/privacy review:
+
+- Critical / High: `NONE`
+- Medium: `NONE`
+- Low: `NONE`
+- Regression assessment: `SAFE`
+- Scope assessment: `CLEAN`
+- Final verdict: `READY TO COMMIT`
+
+Commit/push:
+
+`8bda7a2 Polish admin audit interfaces`
+
+Final Git verification after push:
+
+- `HEAD` = `8bda7a20f791c401831709913d73391b7645bb5f`
+- `origin/main` = `8bda7a20f791c401831709913d73391b7645bb5f`
+- working tree clean
+- branch up to date with `origin/main`
+
 ## Known Non-Blocking Project-Wide Items
 
 - client production bundle remains above Vite's recommended 500 kB chunk threshold
@@ -1398,15 +1565,16 @@ Continue:
 
 `Professional UI/UX -> Individual Admin Module Internal UI Polish`
 
-Do not reopen the completed shell/Dashboard or the seven completed module batches unless a concrete regression appears.
+Do not reopen the completed shell/Dashboard or the eight completed module batches unless a concrete regression appears.
 
 Next action:
 
-1. continue the remaining Admin internal surfaces in smaller behavior-aware batches before broad editor/auth/Media workflows
-2. recommended next implementation batch: `AdminAuditLogsPage.jsx` and `AdminAuditLogDetailPage.jsx` together as a super-admin-only, read-only Audit batch
-3. preserve Audit privacy/minimization, list-vs-detail data boundaries, 401 logout behavior, 403 non-logout behavior, and the complete absence of Audit mutation controls
-4. keep backend/API/RBAC/routes/business behavior unchanged
-5. use targeted ESLint + browser verification + production build + Git scope checks + fresh Codex review before each implementation commit
+1. continue the remaining Admin editor/special surfaces in small behavior-aware batches
+2. recommended next implementation batch: `AdminServiceEditorPage.jsx` and `AdminServicePackageEditorPage.jsx`
+3. audit create/edit route behavior, form initialization, validation/field errors, Media Picker usage, Service/Package ownership rules, pricing/billing semantics, visibility/featured controls, 401/403 behavior, and navigation before presentation changes
+4. keep `AdminPackageDesignEditorPage.jsx` for a following focused batch because its package ownership/default-design/media/demo behavior is more specialized
+5. keep backend/API/RBAC/routes/business behavior unchanged
+6. use targeted ESLint + browser verification + production build + Git scope checks + fresh Codex review before each implementation commit
 
 Avoid redesigning all remaining Admin modules simultaneously.
 
