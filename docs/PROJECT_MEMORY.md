@@ -785,6 +785,8 @@ Verified UI checkpoint history:
 - `23f54a1 Polish admin services and sales interfaces`
 - `3116818 Document admin services and sales UI milestone`
 - `80b412c Polish admin career content interfaces`
+- `c7a479e Document admin career content UI milestone`
+- `9e801a7 Polish admin supporting content interfaces`
 
 The shared shell milestone is complete. Individual Admin module internal polish is active and is being completed in small verified batches without changing backend/API/business behavior.
 
@@ -943,15 +945,24 @@ Batch 3 — commit `80b412c Polish admin career content interfaces`
 - Education
 - Experience
 
+Batch 4 — commit `9e801a7 Polish admin supporting content interfaces`
+
+- Certifications / Achievements
+- Testimonials
+- FAQs
+- Team Members
+
 All completed batches were manually browser-verified, targeted ESLint-clean, production-build verified, whitespace-checked, Codex-reviewed, committed, and pushed to `main`.
 
 Batch 3 preserves the established list-page behavior, including filtered local collection updates for Skills, Education, and Experience, UTC month/year timeline formatting for Education/Experience, existing delete RBAC, and accessible reduced-motion-safe loading states.
+
+Batch 4 preserves domain-specific list behavior rather than forcing one mutation pattern across modules: Certifications / Achievements and FAQs retain filtered local collection updates, while Testimonials and Team Members retain backend refresh after mutations. Achievement date-only rendering remains UTC-safe, Testimonial Project options remain independently loaded, FAQ pagination remains limit 20 with filter reset to page 1, and Team route-state/session-expiry handling remains intact.
 
 Current UI/UX scope:
 
 The shared Admin Shell + Sidebar + Analytics Dashboard refinement is complete.
 
-Twelve Admin module pages have completed internal visual normalization across the first three verified batches.
+Sixteen Admin module pages have completed internal visual normalization across the first four verified batches.
 
 Individual Admin module internal polish remains active for the remaining Admin pages. Continue in safe batches and preserve the established shell and visual contract.
 
@@ -1814,7 +1825,7 @@ No additional major functional module remains in the current functional roadmap.
 
 - Professional UI/UX — active
 - Professional UI/UX — completed: shared Admin shell/sidebar + analytics Dashboard refinement
-- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations, Statistics, Skills, Education, Experience
+- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations, Statistics, Skills, Education, Experience, Certifications / Achievements, Testimonials, FAQs, Team Members
 - Professional UI/UX — remaining: remaining individual Admin module internal polish, then public-site visual polish
 - Email and Notifications
 - Final SEO/testing/performance/security

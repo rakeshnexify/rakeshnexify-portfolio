@@ -16,16 +16,16 @@ Major functional roadmap:
 
 Latest pushed Professional UI/UX checkpoint:
 
-`80b412c Polish admin career content interfaces`
+`9e801a7 Polish admin supporting content interfaces`
 
 Full hash:
 
-`80b412c0f75172f23d4515c563201213c26cb7a9`
+`9e801a7ea2364fefc9908b8c91764a5f9ad5ce0d`
 
 Latest verified Git state before this documentation replacement:
 
-- local `main` = `80b412c`
-- `origin/main` = `80b412c`
+- local `main` = `9e801a7ea2364fefc9908b8c91764a5f9ad5ce0d`
+- `origin/main` = `9e801a7ea2364fefc9908b8c91764a5f9ad5ce0d`
 - working tree clean
 - branch up to date with `origin/main`
 
@@ -136,6 +136,35 @@ Pages:
 - `AdminSkillsPage.jsx`
 - `AdminEducationPage.jsx`
 - `AdminExperiencePage.jsx`
+
+Status:
+
+`COMPLETE / VERIFIED / PUSHED`
+
+Documentation closeout for Batch 3:
+
+`c7a479e Document admin career content UI milestone`
+
+Full hash:
+
+`c7a479eb934a2d73477645030cac11ba3e5f53e8`
+
+### Admin Content Lists B / Supporting Content polish — Batch 4
+
+Commit:
+
+`9e801a7 Polish admin supporting content interfaces`
+
+Full hash:
+
+`9e801a7ea2364fefc9908b8c91764a5f9ad5ce0d`
+
+Pages:
+
+- `AdminCertificationAchievementsPage.jsx`
+- `AdminTestimonialsPage.jsx`
+- `AdminFaqsPage.jsx`
+- `AdminTeamMembersPage.jsx`
 
 Status:
 
@@ -531,6 +560,124 @@ Verified:
 - delete permission
 - responsive layout
 
+### Batch 4
+
+Certifications / Achievements:
+
+`PASS`
+
+Verified:
+
+- Search
+- Type
+- Visibility
+- Display Type
+- Expiration
+- Apply/Clear
+- Refresh
+- Add Record
+- Edit
+- Hide/Show
+- visibility-filtered toggle removes mismatching record and decrements count
+- Make Featured/Make Standard
+- featured-filtered toggle removes mismatching record and decrements count
+- issue/expiration date rendering
+- No Expiration behavior
+- credential ID
+- image/PDF/external evidence handling
+- broken image fallback
+- evidence links
+- delete permission
+- success/error/loading/empty states
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
+Testimonials:
+
+`PASS`
+
+Verified:
+
+- Search
+- Rating 1–5
+- Visibility
+- Display Type
+- Related Project
+- Apply/Clear
+- Refresh
+- Add Testimonial
+- Edit
+- Hide/Show with server refresh
+- Make Featured/Make Standard with server refresh
+- Delete with server refresh
+- Related Project labels/options
+- profile image + initials fallback
+- client role/company
+- review text
+- accessible rating
+- display order/updated metadata
+- delete permission
+- success/error/loading/empty states
+- responsive layout
+
+FAQs:
+
+`PASS`
+
+Verified:
+
+- Search
+- dynamic Category
+- Visibility
+- Display Type
+- Apply/Clear
+- Refresh
+- Add FAQ
+- Edit
+- Hide/Show
+- visibility-filtered toggle removes mismatching FAQ and decrements total
+- Make Featured/Make Standard
+- featured-filtered toggle removes mismatching FAQ and decrements total
+- Delete with local removal and total decrement
+- question/answer/category/order
+- pagination Previous/Next
+- filter Apply/Clear resets page to 1
+- delete permission
+- success/error/loading/empty states
+- responsive layout
+
+Team Members:
+
+`PASS`
+
+Verified:
+
+- Search
+- Professional Role
+- Member Status
+- Availability
+- Public Visibility
+- Display Type
+- Apply/Clear
+- Refresh
+- Add Team Member
+- Edit
+- Hide/Show with server refresh
+- Make Featured/Make Standard with server refresh
+- Delete with server refresh
+- delete permission
+- status/availability badges
+- profile image + initials fallback
+- professional role/team position
+- introduction
+- first 5 skills + overflow count
+- display order/updated date
+- success/error/loading/empty states
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
 ## Important Batch 2 Review Remediations
 
 The first Codex review of Batch 2 found two issues.
@@ -719,6 +866,70 @@ Final Git verification after push:
 - working tree clean
 - branch up to date with `origin/main`
 
+### Batch 4
+
+Combined targeted ESLint for:
+
+- `AdminCertificationAchievementsPage.jsx`
+- `AdminTestimonialsPage.jsx`
+- `AdminFaqsPage.jsx`
+- `AdminTeamMembersPage.jsx`
+
+Result:
+
+`PASS`
+
+Manual browser verification:
+
+`PASS`
+
+Production build:
+
+`npm run build`
+
+Result:
+
+`PASS`
+
+Observed Batch 4 Vite output:
+
+- Vite `8.1.5`
+- 280 modules transformed
+- `dist/index.html` `1.83 kB`, gzip `0.63 kB`
+- CSS `103.13 kB`, gzip `15.82 kB`
+- JS `1,763.62 kB`, gzip `369.19 kB`
+- build completed in `310ms`
+
+The existing greater-than-500-kB chunk warning remains non-blocking and is deferred to Performance Optimization.
+
+Git verification:
+
+- exactly four expected files modified/staged
+- `git diff --check` passed
+- `git diff --cached --check` passed
+- CRLF-to-LF warnings were informational
+- no unstaged or unrelated scope before commit
+
+Fresh Codex review:
+
+- Critical / High: `NONE`
+- Medium: `NONE`
+- Low: `NONE`
+- Regression assessment: `SAFE`
+- Scope assessment: `CLEAN`
+- Final verdict: `READY TO COMMIT`
+
+Commit/push:
+
+`9e801a7 Polish admin supporting content interfaces`
+
+Final Git verification after push:
+
+- `HEAD` = `9e801a7ea2364fefc9908b8c91764a5f9ad5ce0d`
+- `origin/main` = `9e801a7ea2364fefc9908b8c91764a5f9ad5ce0d`
+- working tree clean
+- branch up to date with `origin/main`
+
 ## Known Non-Blocking Project-Wide Items
 
 - client production bundle remains above Vite's recommended 500 kB chunk threshold
@@ -739,15 +950,16 @@ Continue:
 
 `Professional UI/UX -> Individual Admin Module Internal UI Polish`
 
-Do not reopen the completed shell/Dashboard or the three completed module batches unless a concrete regression appears.
+Do not reopen the completed shell/Dashboard or the four completed module batches unless a concrete regression appears.
 
 Next action:
 
-1. continue remaining low-risk Admin list-page polish before editor/detail/auth/Media Picker workflows
-2. good next candidates include Certifications / Achievements, Testimonials, FAQ, and Team list pages
-3. keep Companies, Posts, Contact Messages, Audit, Appointment detail, and Service Order detail in smaller behavior-aware batches
-4. keep backend/API/RBAC/routes/business behavior unchanged
-5. use targeted ESLint + browser verification + production build + Git scope checks + Codex review before each commit
+1. continue the remaining Admin list/read surfaces in smaller behavior-aware batches before broad editor/auth/Media workflows
+2. recommended next list batch: `AdminCompaniesPage.jsx` and `AdminPostsPage.jsx`
+3. handle `AdminContactMessagesPage.jsx` separately or in a small operational batch because message workflow actions require extra behavior verification
+4. keep Audit list/detail, Appointment detail, and Service Order detail in focused read/detail batches
+5. keep backend/API/RBAC/routes/business behavior unchanged
+6. use targeted ESLint + browser verification + production build + Git scope checks + fresh Codex review before each implementation commit
 
 Avoid redesigning all remaining Admin modules simultaneously.
 
