@@ -29,11 +29,11 @@ const statusLabels = {
 };
 
 const statusClasses = {
-  planning: "bg-violet-100 text-violet-700",
-  "in-progress": "bg-amber-100 text-amber-700",
-  completed: "bg-emerald-100 text-emerald-700",
-  maintained: "bg-blue-100 text-blue-700",
-  archived: "bg-slate-200 text-slate-700",
+  planning: "bg-violet-50 text-violet-700",
+  "in-progress": "bg-amber-50 text-amber-700",
+  completed: "bg-emerald-50 text-emerald-700",
+  maintained: "bg-blue-50 text-blue-700",
+  archived: "bg-slate-100 text-slate-600",
 };
 
 const projectTypeLabels = {
@@ -43,6 +43,12 @@ const projectTypeLabels = {
   "open-source": "Open Source",
   practice: "Practice",
 };
+
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors duration-150 motion-reduce:transition-none focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.08em] text-slate-500";
 
 function createApiFilters(filters) {
   const apiFilters = {
@@ -107,7 +113,6 @@ function formatDate(value) {
 
 function AdminProjectsPage() {
   const navigate = useNavigate();
-
   const location = useLocation();
 
   const { accessToken, admin, logout } = useAdminAuth();
@@ -121,15 +126,10 @@ function AdminProjectsPage() {
   });
 
   const [projects, setProjects] = useState([]);
-
   const [resultCount, setResultCount] = useState(0);
-
   const [isLoading, setIsLoading] = useState(true);
-
   const [error, setError] = useState("");
-
   const [refreshKey, setRefreshKey] = useState(0);
-
   const [actionProjectId, setActionProjectId] = useState("");
 
   const [successMessage, setSuccessMessage] = useState(
@@ -166,9 +166,7 @@ function AdminProjectsPage() {
         });
 
         setProjects(response.projects);
-
         setResultCount(response.count);
-
         setError("");
       } catch (requestError) {
         if (requestError?.name === "AbortError") {
@@ -378,11 +376,7 @@ function AdminProjectsPage() {
   }
 
   async function handleToggleCaseStudyFeatured(project) {
-    if (
-      !project?._id ||
-      actionProjectId ||
-      !project.caseStudy?.isPublished
-    ) {
+    if (!project?._id || actionProjectId || !project.caseStudy?.isPublished) {
       return;
     }
 
@@ -393,7 +387,7 @@ function AdminProjectsPage() {
 
       const response = await updateAdminProject(accessToken, project._id, {
         caseStudy: {
-          isFeatured: !Boolean(project.caseStudy?.isFeatured),
+          isFeatured: !project.caseStudy?.isFeatured,
         },
       });
 
@@ -443,44 +437,61 @@ function AdminProjectsPage() {
     }
   }
 
+  const canDeleteProjects = ["super-admin", "admin"].includes(admin?.role);
+
   return (
     <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-              Portfolio Management
-            </p>
+      <section className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+              <span className="uppercase tracking-[0.14em] text-brand-700">
+                Content
+              </span>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+              <span aria-hidden="true" className="text-slate-300">
+                /
+              </span>
+
+              <span className="text-slate-500">Portfolio management</span>
+            </div>
+
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
               Projects
             </h1>
 
-            <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-              Search and review all public, hidden, featured and archived
-              portfolio projects stored in MongoDB.
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Manage portfolio Projects, public visibility, featured state and
+              Case Study publication from one operational view.
             </p>
           </div>
 
           <Link
             to="/admin/projects/new"
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           >
-            Add New Project
+            Add Project
           </Link>
-        </div>
+        </header>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div className="md:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="project-search"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Search projects
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-base font-black text-slate-950">Filters</h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Narrow Projects by content, workflow and Case Study state.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="md:col-span-2">
+              <label htmlFor="project-search" className={labelClassName}>
+                Search
               </label>
 
               <input
@@ -489,16 +500,13 @@ function AdminProjectsPage() {
                 type="search"
                 value={formFilters.search}
                 onChange={handleFilterChange}
-                placeholder="Search title, slug, category or technology"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                placeholder="Title, slug, category or technology"
+                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="project-category"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="project-category" className={labelClassName}>
                 Category
               </label>
 
@@ -509,15 +517,12 @@ function AdminProjectsPage() {
                 value={formFilters.category}
                 onChange={handleFilterChange}
                 placeholder="E-commerce"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="project-type"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="project-type" className={labelClassName}>
                 Project type
               </label>
 
@@ -526,27 +531,19 @@ function AdminProjectsPage() {
                 name="projectType"
                 value={formFilters.projectType}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All types</option>
-
                 <option value="personal">Personal</option>
-
                 <option value="client">Client</option>
-
                 <option value="company">Company</option>
-
                 <option value="open-source">Open Source</option>
-
                 <option value="practice">Practice</option>
               </select>
             </div>
 
             <div>
-              <label
-                htmlFor="project-status"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="project-status" className={labelClassName}>
                 Status
               </label>
 
@@ -555,27 +552,19 @@ function AdminProjectsPage() {
                 name="status"
                 value={formFilters.status}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All statuses</option>
-
                 <option value="planning">Planning</option>
-
                 <option value="in-progress">In Development</option>
-
                 <option value="completed">Completed</option>
-
                 <option value="maintained">Active Project</option>
-
                 <option value="archived">Archived</option>
               </select>
             </div>
 
             <div>
-              <label
-                htmlFor="project-visibility"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="project-visibility" className={labelClassName}>
                 Visibility
               </label>
 
@@ -584,22 +573,17 @@ function AdminProjectsPage() {
                 name="visibility"
                 value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
-                <option value="all">All projects</option>
-
+                <option value="all">All Projects</option>
                 <option value="visible">Visible</option>
-
                 <option value="hidden">Hidden</option>
               </select>
             </div>
 
             <div>
-              <label
-                htmlFor="project-featured"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Featured
+              <label htmlFor="project-featured" className={labelClassName}>
+                Project featured
               </label>
 
               <select
@@ -607,12 +591,10 @@ function AdminProjectsPage() {
                 name="featured"
                 value={formFilters.featured}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
-                <option value="all">All projects</option>
-
+                <option value="all">All states</option>
                 <option value="featured">Featured</option>
-
                 <option value="standard">Standard</option>
               </select>
             </div>
@@ -620,7 +602,7 @@ function AdminProjectsPage() {
             <div>
               <label
                 htmlFor="project-case-study-publication"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Case Study publication
               </label>
@@ -630,12 +612,10 @@ function AdminProjectsPage() {
                 name="caseStudyPublished"
                 value={formFilters.caseStudyPublished}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
-                <option value="all">All projects</option>
-
-                <option value="published">Published Case Studies</option>
-
+                <option value="all">All Projects</option>
+                <option value="published">Published</option>
                 <option value="not-published">Not published</option>
               </select>
             </div>
@@ -643,7 +623,7 @@ function AdminProjectsPage() {
             <div>
               <label
                 htmlFor="project-case-study-featured"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Case Study featured
               </label>
@@ -653,149 +633,161 @@ function AdminProjectsPage() {
                 name="caseStudyFeatured"
                 value={formFilters.caseStudyFeatured}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
-                <option value="all">All projects</option>
-
-                <option value="featured">Featured Case Studies</option>
-
+                <option value="all">All states</option>
+                <option value="featured">Featured</option>
                 <option value="standard">Standard / not featured</option>
               </select>
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
-              Clear Filters
+              Clear
             </button>
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
             >
               Apply Filters
             </button>
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm font-semibold text-slate-600">
-            {isLoading
-              ? "Loading projects..."
-              : `${resultCount} project(s) found`}
-          </p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-slate-700">
+              {isLoading
+                ? "Loading Projects..."
+                : `${resultCount} Project${resultCount === 1 ? "" : "s"}`}
+            </p>
+
+            {!isLoading ? (
+              <p className="mt-0.5 text-xs text-slate-500">
+                Matching the currently applied filters.
+              </p>
+            ) : null}
+          </div>
 
           <button
             type="button"
             onClick={handleRefresh}
-            disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isLoading || actionProjectId !== ""}
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Refresh
+            {isLoading ? "Refreshing..." : "Refresh"}
           </button>
         </div>
 
-        {successMessage && (
-          <div
-            role="status"
-            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5"
-          >
-            <p className="text-sm font-semibold leading-6 text-emerald-700">
-              {successMessage}
-            </p>
-          </div>
-        )}
+        <div aria-live="polite">
+          {successMessage ? (
+            <div
+              role="status"
+              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3"
+            >
+              <p className="text-sm font-semibold leading-6 text-emerald-800">
+                {successMessage}
+              </p>
+            </div>
+          ) : null}
+        </div>
 
-        {error && (
+        {error ? (
           <div
             role="alert"
-            className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5"
+            className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"
           >
-            <p className="text-sm font-semibold text-red-700">{error}</p>
+            <p className="text-sm font-semibold leading-6 text-red-700">
+              {error}
+            </p>
 
             <button
               type="button"
               onClick={handleRefresh}
-              className="mt-4 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-300 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+              className="mt-3 min-h-10 text-sm font-bold text-red-700 underline underline-offset-4"
             >
-              Try Again
+              Try again
             </button>
           </div>
-        )}
+        ) : null}
 
-        {isLoading && (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {isLoading ? (
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-96 animate-pulse rounded-3xl border border-slate-200 bg-white"
+                className="h-[32rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && !error && projects.length === 0 && (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-10 text-center">
-            <p className="text-lg font-bold text-slate-950">
-              No projects found
+        {!isLoading && !error && projects.length === 0 ? (
+          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
+            <p className="text-base font-black text-slate-950">
+              No Projects found
             </p>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Try changing or clearing the current filters.
+            <p className="mt-1.5 text-sm leading-6 text-slate-500">
+              Try changing the filters or add a new Project.
             </p>
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && projects.length > 0 && (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {!isLoading && projects.length > 0 ? (
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {projects.map((project) => {
               const technologies = Array.isArray(project.technologies)
                 ? project.technologies
                 : [];
 
+              const isActionPending = actionProjectId === project._id;
+
               return (
                 <article
                   key={project._id}
-                  className="flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+                  className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <div className="relative min-h-44 overflow-hidden bg-slate-950">
+                  <div className="relative h-36 overflow-hidden bg-slate-900">
                     {project.coverImageUrl ? (
                       <img
                         src={project.coverImageUrl}
                         alt={`${project.title} cover`}
                         loading="lazy"
-                        className="absolute inset-0 size-full object-cover opacity-60"
+                        className="absolute inset-0 size-full object-cover opacity-65"
                       />
                     ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-brand-600/40 via-slate-950 to-cyan-500/20" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-brand-600/35 via-slate-950 to-cyan-500/15" />
                     )}
 
-                    <div className="absolute inset-0 bg-slate-950/40" />
+                    <div className="absolute inset-0 bg-slate-950/35" />
 
-                    <div className="relative flex min-h-44 flex-col justify-between p-5">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
-                          {project.category || "Web Project"}
+                    <div className="relative flex h-full flex-col justify-between p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="rounded-lg border border-white/10 bg-slate-950/50 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                          {project.category || "Project"}
                         </span>
 
-                        <span className="rounded-full border border-white/10 bg-slate-950/60 px-3 py-1.5 text-xs font-bold text-white">
+                        <span className="rounded-lg border border-white/10 bg-slate-950/50 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm">
                           Order {project.order ?? 0}
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap gap-2">
-                        {project.isFeatured && (
-                          <span className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-bold text-white">
+                      <div className="flex flex-wrap gap-1.5">
+                        {project.isFeatured ? (
+                          <span className="rounded-lg bg-amber-400 px-2.5 py-1 text-xs font-bold text-slate-950">
                             Featured
                           </span>
-                        )}
+                        ) : null}
 
                         <span
-                          className={`rounded-full px-3 py-1.5 text-xs font-bold ${
+                          className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
                             project.isVisible
                               ? "bg-emerald-500 text-white"
                               : "bg-slate-600 text-white"
@@ -804,28 +796,21 @@ function AdminProjectsPage() {
                           {project.isVisible ? "Visible" : "Hidden"}
                         </span>
 
-                        {project.caseStudy?.isPublished && (
-                          <span className="rounded-full bg-cyan-500 px-3 py-1.5 text-xs font-bold text-slate-950">
+                        {project.caseStudy?.isPublished ? (
+                          <span className="rounded-lg bg-cyan-400 px-2.5 py-1 text-xs font-bold text-slate-950">
                             Case Study
                           </span>
-                        )}
-
-                        {project.caseStudy?.isPublished &&
-                          project.caseStudy?.isFeatured && (
-                            <span className="rounded-full bg-fuchsia-500 px-3 py-1.5 text-xs font-bold text-white">
-                              Featured Case Study
-                            </span>
-                          )}
+                        ) : null}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col p-6">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="flex flex-wrap gap-1.5">
                       <span
-                        className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
                           statusClasses[project.status] ||
-                          "bg-slate-200 text-slate-700"
+                          "bg-slate-100 text-slate-600"
                         }`}
                       >
                         {statusLabels[project.status] ||
@@ -833,28 +818,28 @@ function AdminProjectsPage() {
                           "Project"}
                       </span>
 
-                      <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                      <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
                         {projectTypeLabels[project.projectType] ||
                           project.projectType ||
                           "Project"}
                       </span>
                     </div>
 
-                    <h2 className="mt-5 text-xl font-bold tracking-tight text-slate-950">
+                    <h2 className="mt-4 break-words text-lg font-black tracking-tight text-slate-950">
                       {project.title}
                     </h2>
 
-                    <p className="mt-2 break-all text-xs font-semibold text-brand-600">
+                    <p className="mt-1.5 break-all text-xs font-semibold text-brand-700">
                       {project.slug}
                     </p>
 
-                    <p className="mt-4 line-clamp-3 leading-7 text-slate-600">
+                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
                       {project.shortDescription}
                     </p>
 
-                    {technologies.length > 0 && (
-                      <div className="mt-5 flex flex-wrap gap-2">
-                        {technologies.slice(0, 5).map((technology) => (
+                    {technologies.length > 0 ? (
+                      <div className="mt-4 flex flex-wrap gap-1.5">
+                        {technologies.slice(0, 4).map((technology) => (
                           <span
                             key={`${project._id}-${technology}`}
                             className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600"
@@ -862,140 +847,150 @@ function AdminProjectsPage() {
                             {technology}
                           </span>
                         ))}
-                      </div>
-                    )}
 
-                    <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        {technologies.length > 4 ? (
+                          <span className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
+                            +{technologies.length - 4} more
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
-                            Case Study
-                          </p>
+                          <p className={labelClassName}>Case Study</p>
 
-                          <p className="mt-1 text-sm font-semibold text-slate-700">
+                          <p className="mt-1 text-sm font-bold text-slate-700">
                             {project.caseStudy?.isPublished
-                              ? "Published"
+                              ? project.caseStudy?.isFeatured
+                                ? "Published · Featured"
+                                : "Published"
                               : "Not published"}
                           </p>
                         </div>
 
-                        <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600">
+                        <span className="rounded-lg bg-white px-2.5 py-1 text-xs font-bold text-slate-600">
                           Order {project.caseStudy?.order ?? 0}
                         </span>
                       </div>
                     </div>
 
-                    <div className="mt-auto border-t border-slate-100 pt-5">
-                      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
-                        <span>{technologies.length} Technologies</span>
+                    <div className="mt-auto pt-5">
+                      <div className="border-t border-slate-100 pt-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+                          <span>
+                            {technologies.length} technolog
+                            {technologies.length === 1 ? "y" : "ies"}
+                          </span>
 
-                        <span>Updated {formatDate(project.updatedAt)}</span>
-                      </div>
+                          <span>Updated {formatDate(project.updatedAt)}</span>
+                        </div>
 
-                      <div className="mt-4 grid grid-cols-2 gap-3">
-                        <Link
-                          to={`/admin/projects/${project._id}/edit`}
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
-                        >
-                          Edit
-                        </Link>
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                          <Link
+                            to={`/admin/projects/${project._id}/edit`}
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-3 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                          >
+                            Edit
+                          </Link>
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggleVisibility(project)}
-                          disabled={Boolean(actionProjectId)}
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                            project.isVisible
-                              ? "border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                              : "bg-emerald-600 text-white hover:bg-emerald-700"
-                          }`}
-                        >
-                          {actionProjectId === project._id
-                            ? "Updating..."
-                            : project.isVisible
-                              ? "Hide"
-                              : "Show"}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleVisibility(project)}
+                            disabled={actionProjectId !== ""}
+                            className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
+                              project.isVisible
+                                ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                                : "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
+                            }`}
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : project.isVisible
+                                ? "Hide"
+                                : "Show"}
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggleFeatured(project)}
-                          disabled={Boolean(actionProjectId)}
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                            project.isFeatured
-                              ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                              : "bg-amber-500 text-white hover:bg-amber-600"
-                          }`}
-                        >
-                          {actionProjectId === project._id
-                            ? "Updating..."
-                            : project.isFeatured
-                              ? "Make Standard"
-                              : "Make Featured"}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleFeatured(project)}
+                            disabled={actionProjectId !== ""}
+                            className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
+                              project.isFeatured
+                                ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                                : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                            }`}
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : project.isFeatured
+                                ? "Make Standard"
+                                : "Make Featured"}
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleToggleCaseStudyPublication(project)
-                          }
-                          disabled={Boolean(actionProjectId)}
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                            project.caseStudy?.isPublished
-                              ? "border border-cyan-300 bg-cyan-50 text-cyan-800 hover:bg-cyan-100"
-                              : "bg-cyan-600 text-white hover:bg-cyan-700"
-                          }`}
-                        >
-                          {actionProjectId === project._id
-                            ? "Updating..."
-                            : project.caseStudy?.isPublished
-                              ? "Unpublish Case Study"
-                              : "Publish Case Study"}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleToggleCaseStudyPublication(project)
+                            }
+                            disabled={actionProjectId !== ""}
+                            className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
+                              project.caseStudy?.isPublished
+                                ? "border-cyan-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-100"
+                                : "border-cyan-600 bg-cyan-600 text-white hover:bg-cyan-700"
+                            }`}
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : project.caseStudy?.isPublished
+                                ? "Unpublish Case Study"
+                                : "Publish Case Study"}
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggleCaseStudyFeatured(project)}
-                          disabled={
-                            Boolean(actionProjectId) ||
-                            !project.caseStudy?.isPublished
-                          }
-                          title={
-                            project.caseStudy?.isPublished
-                              ? "Toggle Case Study featured state"
-                              : "Publish this Project as a Case Study first"
-                          }
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                            project.caseStudy?.isFeatured
-                              ? "border border-fuchsia-300 bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100"
-                              : "bg-fuchsia-600 text-white hover:bg-fuchsia-700"
-                          }`}
-                        >
-                          {actionProjectId === project._id
-                            ? "Updating..."
-                            : project.caseStudy?.isFeatured
-                              ? "Unfeature Case Study"
-                              : "Feature Case Study"}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleToggleCaseStudyFeatured(project)
+                            }
+                            disabled={
+                              actionProjectId !== "" ||
+                              !project.caseStudy?.isPublished
+                            }
+                            title={
+                              project.caseStudy?.isPublished
+                                ? "Toggle Case Study featured state"
+                                : "Publish this Project as a Case Study first"
+                            }
+                            className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-50 ${
+                              project.caseStudy?.isFeatured
+                                ? "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100"
+                                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                            }`}
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : project.caseStudy?.isFeatured
+                                ? "Unfeature Case Study"
+                                : "Feature Case Study"}
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteProject(project)}
-                          disabled={
-                            Boolean(actionProjectId) ||
-                            !["super-admin", "admin"].includes(admin?.role)
-                          }
-                          title={
-                            ["super-admin", "admin"].includes(admin?.role)
-                              ? "Permanently delete project"
-                              : "Your role cannot permanently delete projects"
-                          }
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {actionProjectId === project._id
-                            ? "Deleting..."
-                            : "Delete"}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProject(project)}
+                            disabled={
+                              actionProjectId !== "" || !canDeleteProjects
+                            }
+                            title={
+                              canDeleteProjects
+                                ? "Permanently delete Project"
+                                : "Your role cannot permanently delete Projects"
+                            }
+                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-3 text-sm font-bold text-red-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {isActionPending ? "Working..." : "Delete"}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1003,7 +998,7 @@ function AdminProjectsPage() {
               );
             })}
           </div>
-        )}
+        ) : null}
       </section>
     </main>
   );

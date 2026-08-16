@@ -43,7 +43,7 @@ const statusClasses = {
   negotiation: "border-orange-200 bg-orange-50 text-orange-700",
   won: "border-emerald-200 bg-emerald-50 text-emerald-700",
   lost: "border-red-200 bg-red-50 text-red-700",
-  archived: "border-slate-300 bg-slate-100 text-slate-600",
+  archived: "border-slate-200 bg-slate-100 text-slate-600",
 };
 
 const priorityLabels = {
@@ -59,6 +59,12 @@ const priorityClasses = {
   high: "border-amber-200 bg-amber-50 text-amber-700",
   urgent: "border-red-200 bg-red-50 text-red-700",
 };
+
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors duration-150 motion-reduce:transition-none focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.08em] text-slate-500";
 
 function createApiFilters(filters) {
   return {
@@ -144,7 +150,6 @@ function AdminLeadsPage() {
   });
 
   const [actionKey, setActionKey] = useState("");
-
   const [actionError, setActionError] = useState("");
 
   const [successMessage, setSuccessMessage] = useState(
@@ -156,21 +161,18 @@ function AdminLeadsPage() {
     [appliedFilters],
   );
 
-  const handleUnauthorized = useCallback(
-    () => {
-      logout();
+  const handleUnauthorized = useCallback(() => {
+    logout();
 
-      navigate("/admin/login", {
-        replace: true,
-        state: {
-          from: {
-            pathname: "/admin/leads",
-          },
+    navigate("/admin/login", {
+      replace: true,
+      state: {
+        from: {
+          pathname: "/admin/leads",
         },
-      });
-    },
-    [logout, navigate],
-  );
+      },
+    });
+  }, [logout, navigate]);
 
   const {
     leads,
@@ -289,9 +291,13 @@ function AdminLeadsPage() {
       page: nextPage,
     }));
 
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     window.scrollTo({
       top: 0,
-      behavior: "smooth",
+      behavior: prefersReducedMotion ? "auto" : "smooth",
     });
   }
 
@@ -355,101 +361,176 @@ function AdminLeadsPage() {
 
   return (
     <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-              Opportunity Management
-            </p>
+      <section className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+              <span className="uppercase tracking-[0.14em] text-brand-700">
+                CRM
+              </span>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+              <span aria-hidden="true" className="text-slate-300">
+                /
+              </span>
+
+              <span className="text-slate-500">
+                Opportunity management
+              </span>
+            </div>
+
+            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
               Leads / CRM
             </h1>
 
-            <p className="mt-3 max-w-3xl leading-7 text-slate-600">
-              Track qualified enquiries, sales opportunities, follow-ups,
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Manage qualified enquiries, sales opportunities, follow-ups,
               priority, pipeline progress and estimated value.
             </p>
           </div>
 
           <Link
             to="/admin/leads/new"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           >
-            + Add Lead
+            Add Lead
           </Link>
-        </div>
+        </header>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          {leadStatuses.map((status) => (
+        <section
+          aria-labelledby="lead-status-overview-heading"
+          className="mt-5"
+        >
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2
+                id="lead-status-overview-heading"
+                className="text-base font-black text-slate-950"
+              >
+                Pipeline status
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Select a status to filter the Lead list immediately.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">
+            {leadStatuses.map((status) => {
+              const isSelected = appliedFilters.status === status;
+
+              return (
+                <button
+                  key={status}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => handleStatusCardClick(status)}
+                  className={`rounded-xl border p-3 text-left transition-colors duration-150 motion-reduce:transition-none ${
+                    statusClasses[status]
+                  } ${
+                    isSelected
+                      ? "ring-2 ring-brand-500 ring-offset-2"
+                      : "hover:border-slate-300"
+                  }`}
+                >
+                  <p className="text-[11px] font-bold uppercase tracking-[0.08em]">
+                    {statusLabels[status]}
+                  </p>
+
+                  <p className="mt-2 text-xl font-black">
+                    {statusCounts[status] || 0}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="lead-followup-overview-heading"
+          className="mt-4"
+        >
+          <h2
+            id="lead-followup-overview-heading"
+            className="sr-only"
+          >
+            Follow-up overview
+          </h2>
+
+          <div className="grid gap-2 sm:grid-cols-2">
             <button
-              key={status}
               type="button"
-              onClick={() => handleStatusCardClick(status)}
-              className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md ${
-                statusClasses[status]
-              } ${
-                appliedFilters.status === status
-                  ? "ring-2 ring-brand-500 ring-offset-2"
+              aria-pressed={appliedFilters.followUp === "overdue"}
+              onClick={() => handleFollowUpCardClick("overdue")}
+              className={`flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-left text-red-800 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-100 ${
+                appliedFilters.followUp === "overdue"
+                  ? "ring-2 ring-red-500 ring-offset-2"
                   : ""
               }`}
             >
-              <p className="text-xs font-bold uppercase tracking-wide">
-                {statusLabels[status]}
-              </p>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.08em]">
+                  Overdue follow-ups
+                </p>
 
-              <p className="mt-3 text-2xl font-black">
-                {statusCounts[status] || 0}
-              </p>
+                <p className="mt-1 text-xs text-red-700">
+                  Past scheduled follow-up time
+                </p>
+              </div>
+
+              <span className="text-2xl font-black">
+                {followUpCounts.overdue || 0}
+              </span>
             </button>
-          ))}
-        </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => handleFollowUpCardClick("overdue")}
-            className={`rounded-2xl border border-red-200 bg-red-50 p-5 text-left text-red-800 transition hover:-translate-y-0.5 hover:shadow-md ${
-              appliedFilters.followUp === "overdue"
-                ? "ring-2 ring-red-500 ring-offset-2"
-                : ""
-            }`}
-          >
-            <p className="text-sm font-bold">Overdue follow-ups</p>
+            <button
+              type="button"
+              aria-pressed={appliedFilters.followUp === "today"}
+              onClick={() => handleFollowUpCardClick("today")}
+              className={`flex items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-amber-800 transition-colors duration-150 motion-reduce:transition-none hover:bg-amber-100 ${
+                appliedFilters.followUp === "today"
+                  ? "ring-2 ring-amber-500 ring-offset-2"
+                  : ""
+              }`}
+            >
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.08em]">
+                  Follow-ups today
+                </p>
 
-            <p className="mt-3 text-3xl font-black">
-              {followUpCounts.overdue || 0}
-            </p>
-          </button>
+                <p className="mt-1 text-xs text-amber-700">
+                  Scheduled for the current day
+                </p>
+              </div>
 
-          <button
-            type="button"
-            onClick={() => handleFollowUpCardClick("today")}
-            className={`rounded-2xl border border-amber-200 bg-amber-50 p-5 text-left text-amber-800 transition hover:-translate-y-0.5 hover:shadow-md ${
-              appliedFilters.followUp === "today"
-                ? "ring-2 ring-amber-500 ring-offset-2"
-                : ""
-            }`}
-          >
-            <p className="text-sm font-bold">Follow-ups today</p>
-
-            <p className="mt-3 text-3xl font-black">
-              {followUpCounts.today || 0}
-            </p>
-          </button>
-        </div>
+              <span className="text-2xl font-black">
+                {followUpCounts.today || 0}
+              </span>
+            </button>
+          </div>
+        </section>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+          className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <h2 className="text-base font-black text-slate-950">
+              Filters
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Refine the CRM list by Lead attributes, ownership and follow-up.
+            </p>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             <div className="md:col-span-2">
               <label
                 htmlFor="lead-search-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Search Leads
+                Search
               </label>
 
               <input
@@ -459,14 +540,14 @@ function AdminLeadsPage() {
                 value={formFilters.search}
                 onChange={handleFilterChange}
                 placeholder="Name, email, phone, company, subject or requirement"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
             <div>
               <label
                 htmlFor="lead-status-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Status
               </label>
@@ -476,7 +557,7 @@ function AdminLeadsPage() {
                 name="status"
                 value={formFilters.status}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All statuses</option>
 
@@ -491,7 +572,7 @@ function AdminLeadsPage() {
             <div>
               <label
                 htmlFor="lead-priority-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Priority
               </label>
@@ -501,7 +582,7 @@ function AdminLeadsPage() {
                 name="priority"
                 value={formFilters.priority}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All priorities</option>
 
@@ -516,7 +597,7 @@ function AdminLeadsPage() {
             <div>
               <label
                 htmlFor="lead-followup-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Follow-up
               </label>
@@ -526,7 +607,7 @@ function AdminLeadsPage() {
                 name="followUp"
                 value={formFilters.followUp}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All follow-ups</option>
                 <option value="overdue">Overdue</option>
@@ -539,7 +620,7 @@ function AdminLeadsPage() {
             <div>
               <label
                 htmlFor="lead-source-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Source
               </label>
@@ -551,14 +632,14 @@ function AdminLeadsPage() {
                 value={formFilters.source}
                 onChange={handleFilterChange}
                 placeholder="manual"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
             <div>
               <label
                 htmlFor="lead-service-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Service
               </label>
@@ -570,14 +651,14 @@ function AdminLeadsPage() {
                 value={formFilters.service}
                 onChange={handleFilterChange}
                 placeholder="Frontend Development"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
             <div>
               <label
                 htmlFor="lead-assigned-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Assigned Admin ID
               </label>
@@ -589,14 +670,14 @@ function AdminLeadsPage() {
                 value={formFilters.assignedTo}
                 onChange={handleFilterChange}
                 placeholder="ObjectId"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
             <div>
               <label
                 htmlFor="lead-sort-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Sort
               </label>
@@ -606,7 +687,7 @@ function AdminLeadsPage() {
                 name="sort"
                 value={formFilters.sort}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="newest">Newest first</option>
                 <option value="oldest">Oldest first</option>
@@ -619,7 +700,7 @@ function AdminLeadsPage() {
             <div>
               <label
                 htmlFor="lead-limit-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Leads per page
               </label>
@@ -629,7 +710,7 @@ function AdminLeadsPage() {
                 name="limit"
                 value={formFilters.limit}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="10">10 Leads</option>
                 <option value="20">20 Leads</option>
@@ -639,129 +720,133 @@ function AdminLeadsPage() {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             >
-              Clear Filters
+              Clear
             </button>
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
             >
               Apply Filters
             </button>
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-slate-600">
-              {isLoading ? "Loading Leads..." : `${count} Lead(s) shown`}
+            <p className="text-sm font-bold text-slate-700">
+              {isLoading
+                ? "Loading Leads..."
+                : `${count} Lead${count === 1 ? "" : "s"} shown`}
             </p>
 
-            {!isLoading && (
-              <p className="mt-1 text-xs text-slate-400">
-                {total} matching result(s) · Page {page} of {totalPages}
+            {!isLoading ? (
+              <p className="mt-0.5 text-xs text-slate-500">
+                {total} matching result{total === 1 ? "" : "s"} · Page{" "}
+                {page} of {totalPages}
               </p>
-            )}
+            ) : null}
           </div>
 
           <button
             type="button"
             onClick={handleRefresh}
-            disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isLoading || actionKey !== ""}
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Refresh
+            {isLoading ? "Refreshing..." : "Refresh"}
           </button>
         </div>
 
-        {successMessage && (
-          <div
-            role="status"
-            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5"
-          >
-            <p className="text-sm font-semibold leading-6 text-emerald-700">
-              {successMessage}
-            </p>
-          </div>
-        )}
+        <div aria-live="polite">
+          {successMessage ? (
+            <div
+              role="status"
+              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3"
+            >
+              <p className="text-sm font-semibold leading-6 text-emerald-800">
+                {successMessage}
+              </p>
+            </div>
+          ) : null}
+        </div>
 
-        {(error || actionError) && (
+        {error || actionError ? (
           <div
             role="alert"
-            className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5"
+            className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"
           >
-            <p className="text-sm font-semibold text-red-700">
+            <p className="text-sm font-semibold leading-6 text-red-700">
               {actionError || error}
             </p>
 
             <button
               type="button"
               onClick={handleRefresh}
-              className="mt-4 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-300 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+              className="mt-3 min-h-10 text-sm font-bold text-red-700 underline underline-offset-4"
             >
-              Try Again
+              Try again
             </button>
           </div>
-        )}
+        ) : null}
 
-        {isLoading && (
-          <div className="mt-6 grid gap-5 xl:grid-cols-2">
+        {isLoading ? (
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">
             {[1, 2, 3, 4].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-72 animate-pulse rounded-3xl border border-slate-200 bg-white"
+                className="h-72 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && !error && leads.length === 0 && (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-10 text-center">
-            <p className="text-lg font-bold text-slate-950">
+        {!isLoading && !error && leads.length === 0 ? (
+          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
+            <p className="text-base font-black text-slate-950">
               No Leads found
             </p>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-1.5 text-sm leading-6 text-slate-500">
               Change the filters or create a new CRM Lead.
             </p>
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && leads.length > 0 && (
-          <div className="mt-6 grid gap-5 xl:grid-cols-2">
+        {!isLoading && leads.length > 0 ? (
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">
             {leads.map((lead) => {
-              const isDeleteAction =
-                actionKey === `delete-${lead._id}`;
+              const isDeleteAction = actionKey === `delete-${lead._id}`;
 
               return (
                 <article
                   key={lead._id}
-                  className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+                  className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex min-w-0 items-start gap-4">
-                      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand-50 font-black text-brand-700">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-sm font-black text-brand-700">
                         {createInitials(lead.name)}
                       </div>
 
                       <div className="min-w-0">
-                        <h2 className="break-words text-lg font-bold text-slate-950">
+                        <h2 className="break-words text-lg font-black tracking-tight text-slate-950">
                           {lead.name}
                         </h2>
 
-                        <p className="mt-1 break-words text-sm font-semibold text-brand-600">
+                        <p className="mt-1 break-words text-sm font-semibold text-brand-700">
                           {lead.subject}
                         </p>
 
-                        <div className="mt-3 flex flex-wrap gap-2">
+                        <div className="mt-2.5 flex flex-wrap gap-1.5">
                           <span
-                            className={`rounded-full border px-3 py-1 text-xs font-bold ${
+                            className={`rounded-lg border px-2.5 py-1 text-xs font-bold ${
                               statusClasses[lead.status] ||
                               "border-slate-200 bg-slate-100 text-slate-600"
                             }`}
@@ -772,7 +857,7 @@ function AdminLeadsPage() {
                           </span>
 
                           <span
-                            className={`rounded-full border px-3 py-1 text-xs font-bold ${
+                            className={`rounded-lg border px-2.5 py-1 text-xs font-bold ${
                               priorityClasses[lead.priority] ||
                               "border-slate-200 bg-slate-100 text-slate-600"
                             }`}
@@ -786,121 +871,128 @@ function AdminLeadsPage() {
                     </div>
 
                     <div className="shrink-0 sm:text-right">
-                      <p className="text-sm font-bold text-slate-800">
+                      <p className="text-sm font-black text-slate-900">
                         {formatMoney(
                           lead.estimatedValue,
                           lead.currency,
                         )}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-400">
-                        {lead.source || "manual"}
+                      <p className="mt-1 text-xs font-semibold text-slate-400">
+                        Source: {lead.source || "manual"}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Email
-                      </p>
+                  <dl className="mt-4 grid gap-x-5 gap-y-4 border-y border-slate-100 py-4 sm:grid-cols-2">
+                    <div className="min-w-0">
+                      <dt className={labelClassName}>Email</dt>
 
-                      <p className="mt-2 break-all text-sm font-semibold text-slate-700">
+                      <dd className="mt-1.5 break-all text-sm font-semibold text-slate-700">
                         {lead.email || "Not provided"}
-                      </p>
+                      </dd>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Phone
-                      </p>
+                    <div className="min-w-0">
+                      <dt className={labelClassName}>Phone</dt>
 
-                      <p className="mt-2 break-all text-sm font-semibold text-slate-700">
+                      <dd className="mt-1.5 break-all text-sm font-semibold text-slate-700">
                         {lead.phone || "Not provided"}
-                      </p>
+                      </dd>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Service
-                      </p>
+                    <div className="min-w-0">
+                      <dt className={labelClassName}>Service</dt>
 
-                      <p className="mt-2 break-words text-sm font-semibold text-slate-700">
+                      <dd className="mt-1.5 break-words text-sm font-semibold text-slate-700">
                         {lead.serviceTitle ||
                           lead.serviceSlug ||
                           "Not linked"}
-                      </p>
+                      </dd>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Assigned to
-                      </p>
+                    <div className="min-w-0">
+                      <dt className={labelClassName}>Assigned to</dt>
 
-                      <p className="mt-2 break-words text-sm font-semibold text-slate-700">
+                      <dd className="mt-1.5 break-words text-sm font-semibold text-slate-700">
                         {lead.assignedTo?.name ||
                           lead.assignedTo?.email ||
                           "Unassigned"}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 px-3.5 py-3">
+                    <div>
+                      <p className={labelClassName}>Next follow-up</p>
+
+                      <p className="mt-1 text-sm font-bold text-slate-700">
+                        {formatDateTime(lead.nextFollowUpAt)}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4">
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      Next follow-up
-                    </p>
+                  {lead.requirementSummary ? (
+                    <div className="mt-4">
+                      <p className={labelClassName}>Requirement summary</p>
 
-                    <p className="mt-2 text-sm font-semibold text-slate-700">
-                      {formatDateTime(lead.nextFollowUpAt)}
-                    </p>
-                  </div>
+                      <p className="mt-1.5 line-clamp-3 whitespace-pre-wrap break-words text-sm leading-6 text-slate-600">
+                        {lead.requirementSummary}
+                      </p>
+                    </div>
+                  ) : null}
 
-                  {lead.requirementSummary && (
-                    <p className="mt-5 line-clamp-3 whitespace-pre-wrap break-words text-sm leading-7 text-slate-600">
-                      {lead.requirementSummary}
-                    </p>
-                  )}
+                  <div className="mt-auto pt-5">
+                    <div className="flex flex-col gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+                      <Link
+                        to={`/admin/leads/${lead._id}/edit`}
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                      >
+                        View / Edit
+                      </Link>
 
-                  <div className="mt-6 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
-                    <Link
-                      to={`/admin/leads/${lead._id}/edit`}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-300 bg-brand-50 px-5 text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
-                    >
-                      View / Edit
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteLead(lead)}
-                      disabled={Boolean(actionKey) || !canDeleteLeads}
-                      title={
-                        canDeleteLeads
-                          ? "Permanently delete Lead"
-                          : "Your role cannot permanently delete Leads"
-                      }
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-300 bg-white px-5 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {isDeleteAction ? "Deleting..." : "Delete"}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteLead(lead)}
+                        disabled={actionKey !== "" || !canDeleteLeads}
+                        title={
+                          canDeleteLeads
+                            ? "Permanently delete Lead"
+                            : "Your role cannot permanently delete Leads"
+                        }
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-bold text-red-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isDeleteAction ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
                   </div>
                 </article>
               );
             })}
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && !error && totalPages > 1 && (
-          <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row">
-            <p className="text-sm font-semibold text-slate-600">
-              Page {page} of {totalPages}
-            </p>
+        {!isLoading && !error && totalPages > 1 ? (
+          <nav
+            aria-label="Lead pagination"
+            className="mt-5 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <p className="text-sm font-bold text-slate-700">
+                Page {page} of {totalPages}
+              </p>
 
-            <div className="flex items-center gap-3">
+              <p className="mt-0.5 text-xs text-slate-500">
+                {total} matching Lead{total === 1 ? "" : "s"}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 sm:flex">
               <button
                 type="button"
                 onClick={() => handlePageChange(page - 1)}
                 disabled={page <= 1}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
               </button>
@@ -909,13 +1001,13 @@ function AdminLeadsPage() {
                 type="button"
                 onClick={() => handlePageChange(page + 1)}
                 disabled={page >= totalPages}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
               </button>
             </div>
-          </div>
-        )}
+          </nav>
+        ) : null}
       </section>
     </main>
   );
