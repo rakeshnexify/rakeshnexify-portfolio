@@ -777,11 +777,11 @@ Explicitly deferred:
 
 Professional UI/UX phase uses one shared authenticated Admin shell with centralized operational navigation and an analytics-first Dashboard.
 
-Baseline committed checkpoint:
+Latest committed checkpoint:
 
-`6c8f95d Build professional admin shell and analytics dashboard`
+`351c425 Refine admin shell and analytics dashboard`
 
-The current 2026-08-16 refinement preserves that architecture while hardening accessibility, responsive behavior, reduced-motion handling, navigation identity, and Dashboard visual hierarchy.
+The 2026-08-16 refinement preserves the established Admin architecture while hardening accessibility, responsive behavior, reduced-motion handling, navigation identity, and Dashboard visual hierarchy. The refinement is verified, committed, and pushed to `main`.
 
 Frontend architecture:
 
@@ -896,9 +896,13 @@ The dark Admin navigation rail and light Admin content surfaces are intentional 
 
 Current UI/UX scope:
 
-The Admin Shell + Sidebar + Existing Analytics Dashboard foundation is complete at the implementation and runtime-verification level.
+The Admin Shell + Sidebar + Existing Analytics Dashboard refinement is complete, verified, committed, and pushed.
 
-Individual Admin module internal visual redesign remains a separate Professional UI/UX scope.
+Latest checkpoint:
+
+`351c425 Refine admin shell and analytics dashboard`
+
+Individual Admin module internal visual redesign remains the next separate Professional UI/UX scope.
 
 Backend APIs, authentication, RBAC, Analytics business logic, public navigation, and public-site behavior remain outside presentation-only shell refinements.
 
