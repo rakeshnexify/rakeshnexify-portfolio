@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-
 import { Link, useLocation, useNavigate } from "react-router";
 
 import useAdminAuth from "../../hooks/useAdminAuth";
-
 import {
   deleteAdminCompany,
   fetchAdminCompanies,
@@ -35,23 +33,23 @@ const statusLabels = {
 };
 
 const statusClasses = {
-  planned: "bg-amber-100 text-amber-700",
-
-  active: "bg-emerald-100 text-emerald-700",
-
-  inactive: "bg-slate-200 text-slate-700",
-
-  archived: "bg-red-100 text-red-700",
+  planned: "bg-amber-50 text-amber-700",
+  active: "bg-emerald-50 text-emerald-700",
+  inactive: "bg-slate-100 text-slate-700",
+  archived: "bg-red-50 text-red-700",
 };
+
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
 
 function createApiFilters(filters) {
   const apiFilters = {
     search: filters.search.trim(),
-
     industry: filters.industry.trim(),
-
     relationship: filters.relationship,
-
     status: filters.status,
   };
 
@@ -106,9 +104,7 @@ function createInitials(name) {
 
 function AdminCompaniesPage() {
   const navigate = useNavigate();
-
   const location = useLocation();
-
   const { accessToken, admin, logout } = useAdminAuth();
 
   const [formFilters, setFormFilters] = useState({
@@ -120,15 +116,10 @@ function AdminCompaniesPage() {
   });
 
   const [companies, setCompanies] = useState([]);
-
   const [resultCount, setResultCount] = useState(0);
-
   const [isLoading, setIsLoading] = useState(true);
-
   const [error, setError] = useState("");
-
   const [refreshKey, setRefreshKey] = useState(0);
-
   const [actionCompanyId, setActionCompanyId] = useState("");
 
   const [successMessage, setSuccessMessage] = useState(
@@ -159,18 +150,22 @@ function AdminCompaniesPage() {
     const controller = new AbortController();
 
     async function loadCompanies() {
+      setIsLoading(true);
+
       try {
         const response = await fetchAdminCompanies(accessToken, apiFilters, {
           signal: controller.signal,
         });
 
+        if (controller.signal.aborted) {
+          return;
+        }
+
         setCompanies(response.companies);
-
         setResultCount(response.count);
-
         setError("");
       } catch (requestError) {
-        if (requestError?.name === "AbortError") {
+        if (controller.signal.aborted || requestError?.name === "AbortError") {
           return;
         }
 
@@ -179,7 +174,6 @@ function AdminCompaniesPage() {
 
           navigate("/admin/login", {
             replace: true,
-
             state: {
               from: {
                 pathname: "/admin/companies",
@@ -193,7 +187,6 @@ function AdminCompaniesPage() {
         console.error("Admin companies loading failed:", requestError);
 
         setCompanies([]);
-
         setResultCount(0);
 
         setError(
@@ -264,7 +257,6 @@ function AdminCompaniesPage() {
 
       navigate("/admin/login", {
         replace: true,
-
         state: {
           from: {
             pathname: "/admin/companies",
@@ -291,7 +283,6 @@ function AdminCompaniesPage() {
 
     try {
       setActionCompanyId(company._id);
-
       setError("");
       setSuccessMessage("");
 
@@ -320,7 +311,6 @@ function AdminCompaniesPage() {
 
     try {
       setActionCompanyId(company._id);
-
       setError("");
       setSuccessMessage("");
 
@@ -357,7 +347,6 @@ function AdminCompaniesPage() {
 
     try {
       setActionCompanyId(company._id);
-
       setError("");
       setSuccessMessage("");
 
@@ -375,44 +364,43 @@ function AdminCompaniesPage() {
     }
   }
 
+  const canDeleteCompanies = ["super-admin", "admin"].includes(admin?.role);
+
   return (
     <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
               Business Management
             </p>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Companies
             </h1>
 
-            <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-              Search and manage all public, hidden, featured, active and
-              archived company profiles stored in MongoDB.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Manage company profiles, business relationships, operational
+              status, publication visibility and featured priority.
             </p>
           </div>
 
           <Link
             to="/admin/companies/new"
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
           >
-            Add New Company
+            Add Company
           </Link>
-        </div>
+        </header>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div className="md:col-span-2 xl:col-span-1">
-              <label
-                htmlFor="company-search"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Search companies
+            <div>
+              <label htmlFor="company-search" className={labelClassName}>
+                Search
               </label>
 
               <input
@@ -421,16 +409,13 @@ function AdminCompaniesPage() {
                 type="search"
                 value={formFilters.search}
                 onChange={handleFilterChange}
-                placeholder="Search name, slug, industry or service"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                placeholder="Name, slug, industry or service"
+                className={inputClassName}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="company-industry"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="company-industry" className={labelClassName}>
                 Industry
               </label>
 
@@ -441,15 +426,12 @@ function AdminCompaniesPage() {
                 value={formFilters.industry}
                 onChange={handleFilterChange}
                 placeholder="E-commerce and Online Retail"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="company-relationship"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="company-relationship" className={labelClassName}>
                 Relationship
               </label>
 
@@ -458,27 +440,19 @@ function AdminCompaniesPage() {
                 name="relationship"
                 value={formFilters.relationship}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All relationships</option>
-
                 <option value="owned">Owned Company</option>
-
                 <option value="managed">Managed Company</option>
-
                 <option value="partner">Business Partner</option>
-
                 <option value="client">Client Company</option>
-
                 <option value="other">Associated Company</option>
               </select>
             </div>
 
             <div>
-              <label
-                htmlFor="company-status"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="company-status" className={labelClassName}>
                 Status
               </label>
 
@@ -487,25 +461,18 @@ function AdminCompaniesPage() {
                 name="status"
                 value={formFilters.status}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All statuses</option>
-
                 <option value="planned">Planned</option>
-
                 <option value="active">Active</option>
-
                 <option value="inactive">Inactive</option>
-
                 <option value="archived">Archived</option>
               </select>
             </div>
 
             <div>
-              <label
-                htmlFor="company-visibility"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="company-visibility" className={labelClassName}>
                 Visibility
               </label>
 
@@ -514,22 +481,17 @@ function AdminCompaniesPage() {
                 name="visibility"
                 value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All companies</option>
-
                 <option value="visible">Visible</option>
-
                 <option value="hidden">Hidden</option>
               </select>
             </div>
 
             <div>
-              <label
-                htmlFor="company-featured"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Featured
+              <label htmlFor="company-featured" className={labelClassName}>
+                Display type
               </label>
 
               <select
@@ -537,105 +499,117 @@ function AdminCompaniesPage() {
                 name="featured"
                 value={formFilters.featured}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All companies</option>
-
                 <option value="featured">Featured</option>
-
                 <option value="standard">Standard</option>
               </select>
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
-              Clear Filters
+              Clear
             </button>
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
               Apply Filters
             </button>
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm font-semibold text-slate-600">
-            {isLoading
-              ? "Loading companies..."
-              : `${resultCount} company(s) found`}
-          </p>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-800">
+              {isLoading
+                ? "Loading companies..."
+                : `${resultCount} compan${resultCount === 1 ? "y" : "ies"}`}
+            </p>
+
+            {!isLoading && (
+              <p className="mt-1 text-xs text-slate-500">
+                Showing company profiles matching the applied filters.
+              </p>
+            )}
+          </div>
 
           <button
             type="button"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
           >
             Refresh
           </button>
         </div>
 
-        {successMessage && (
-          <div
-            role="status"
-            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5"
-          >
-            <p className="text-sm font-semibold leading-6 text-emerald-700">
-              {successMessage}
-            </p>
-          </div>
-        )}
-
-        {error && (
-          <div
-            role="alert"
-            className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5"
-          >
-            <p className="text-sm font-semibold text-red-700">{error}</p>
-
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className="mt-4 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-300 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+        <div aria-live="polite">
+          {successMessage && (
+            <div
+              role="status"
+              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
             >
-              Try Again
-            </button>
-          </div>
-        )}
+              {successMessage}
+            </div>
+          )}
+
+          {error && (
+            <div
+              role="alert"
+              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              <p className="font-medium leading-6">{error}</p>
+
+              <button
+                type="button"
+                onClick={handleRefresh}
+                className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+        </div>
 
         {isLoading && (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div
+            role="status"
+            aria-live="polite"
+            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+          >
+            <span className="sr-only">Loading companies...</span>
+
             {[1, 2, 3, 4, 5, 6].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-96 animate-pulse rounded-3xl border border-slate-200 bg-white"
+                className="h-[31rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
         )}
 
         {!isLoading && !error && companies.length === 0 && (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-10 text-center">
-            <p className="text-lg font-bold text-slate-950">
+          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+            <p className="text-base font-bold text-slate-950">
               No companies found
             </p>
 
             <p className="mt-2 text-sm text-slate-500">
-              Try changing or clearing the current filters.
+              Change the current filters or create the first Company.
             </p>
           </div>
         )}
 
         {!isLoading && companies.length > 0 && (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {companies.map((company) => {
               const businessAreas = Array.isArray(company.businessAreas)
                 ? company.businessAreas
@@ -649,59 +623,65 @@ function AdminCompaniesPage() {
                 company.relationship ||
                 "Company";
 
+              const isActionPending = actionCompanyId === company._id;
+
               return (
                 <article
                   key={company._id}
-                  className="flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+                  className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <div className="relative min-h-44 overflow-hidden bg-slate-950">
-                    {company.coverImageUrl ? (
+                  <div className="relative h-36 overflow-hidden bg-slate-950">
+                    <div className="absolute inset-0 bg-gradient-to-br from-brand-600/35 via-slate-950 to-cyan-500/20" />
+
+                    {company.coverImageUrl && (
                       <img
                         src={company.coverImageUrl}
                         alt={`${company.name} cover`}
                         loading="lazy"
+                        onError={(event) => {
+                          event.currentTarget.hidden = true;
+                        }}
                         className="absolute inset-0 size-full object-cover opacity-50"
                       />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-brand-600/40 via-slate-950 to-cyan-500/20" />
                     )}
 
-                    <div className="absolute inset-0 bg-slate-950/40" />
+                    <div className="absolute inset-0 bg-slate-950/35" />
 
-                    <div className="relative flex min-h-44 flex-col justify-between p-5">
+                    <div className="relative flex h-full flex-col justify-between p-4">
                       <div className="flex items-start justify-between gap-4">
-                        {company.logoUrl ? (
-                          <div className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/20 bg-white">
+                        <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/15 bg-white/10 text-sm font-bold text-white">
+                          <span>{createInitials(company.name)}</span>
+
+                          {company.logoUrl && (
                             <img
                               src={company.logoUrl}
                               alt={`${company.name} logo`}
                               loading="lazy"
-                              className="size-full object-contain p-1"
+                              onError={(event) => {
+                                event.currentTarget.hidden = true;
+                              }}
+                              className="absolute inset-0 size-full bg-white object-contain p-1"
                             />
-                          </div>
-                        ) : (
-                          <div className="grid size-14 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/10 text-lg font-black text-white">
-                            {createInitials(company.name)}
-                          </div>
-                        )}
+                          )}
+                        </div>
 
-                        <span className="rounded-full border border-white/10 bg-slate-950/60 px-3 py-1.5 text-xs font-bold text-white">
+                        <span className="rounded-lg border border-white/10 bg-slate-950/60 px-2.5 py-1 text-xs font-bold text-white">
                           Order {company.order ?? 0}
                         </span>
                       </div>
 
                       <div className="flex flex-wrap gap-2">
                         {company.isFeatured && (
-                          <span className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-bold text-white">
+                          <span className="rounded-lg bg-amber-300 px-2.5 py-1 text-xs font-bold text-slate-950">
                             Featured
                           </span>
                         )}
 
                         <span
-                          className={`rounded-full px-3 py-1.5 text-xs font-bold ${
+                          className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
                             company.isVisible
-                              ? "bg-emerald-500 text-white"
-                              : "bg-slate-600 text-white"
+                              ? "bg-emerald-400/90 text-slate-950"
+                              : "bg-slate-700 text-slate-100"
                           }`}
                         >
                           {company.isVisible ? "Visible" : "Hidden"}
@@ -710,126 +690,141 @@ function AdminCompaniesPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col p-6">
-                    <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-1 flex-col p-5">
+                    <div className="flex flex-wrap gap-2">
                       <span
-                        className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
                           statusClasses[company.status] ||
-                          "bg-slate-200 text-slate-700"
+                          "bg-slate-100 text-slate-700"
                         }`}
                       >
                         {statusLabel}
                       </span>
 
-                      <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                      <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
                         {relationshipLabel}
                       </span>
                     </div>
 
-                    <h2 className="mt-5 text-xl font-bold tracking-tight text-slate-950">
+                    <h2 className="mt-4 break-words text-lg font-bold text-slate-950">
                       {company.name}
                     </h2>
 
                     {company.legalName &&
                       company.legalName !== company.name && (
-                        <p className="mt-1 text-sm font-semibold text-slate-500">
+                        <p className="mt-1 break-words text-sm font-medium text-slate-500">
                           {company.legalName}
                         </p>
                       )}
 
-                    <p className="mt-2 break-all text-xs font-semibold text-brand-600">
+                    <p className="mt-1 break-all text-xs font-semibold text-brand-600">
                       {company.slug}
                     </p>
 
-                    <p className="mt-4 text-sm font-semibold text-slate-500">
+                    <p className="mt-4 text-sm font-semibold text-slate-700">
                       {company.industry || "Industry not specified"}
                     </p>
 
-                    <p className="mt-3 line-clamp-3 leading-7 text-slate-600">
-                      {company.shortDescription}
-                    </p>
-
-                    {businessAreas.length > 0 && (
-                      <div className="mt-5 flex flex-wrap gap-2">
-                        {businessAreas.slice(0, 5).map((area) => (
-                          <span
-                            key={`${company._id}-${area}`}
-                            className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600"
-                          >
-                            {area}
-                          </span>
-                        ))}
-                      </div>
+                    {company.shortDescription && (
+                      <p className="mt-2 line-clamp-3 break-words text-sm leading-6 text-slate-600">
+                        {company.shortDescription}
+                      </p>
                     )}
 
-                    <div className="mt-auto border-t border-slate-100 pt-5">
-                      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
-                        <span>{businessAreas.length} Business Areas</span>
+                    <div className="mt-5">
+                      <p className={labelClassName}>Business areas</p>
 
-                        <span>Updated {formatDate(company.updatedAt)}</span>
+                      {businessAreas.length > 0 ? (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {businessAreas.slice(0, 5).map((area) => (
+                            <span
+                              key={`${company._id}-${area}`}
+                              className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
+                            >
+                              {area}
+                            </span>
+                          ))}
+
+                          {businessAreas.length > 5 && (
+                            <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                              +{businessAreas.length - 5}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-sm text-slate-500">
+                          No business areas added
+                        </p>
+                      )}
+                    </div>
+
+                    <dl className="mt-5 divide-y divide-slate-100 border-y border-slate-100 text-sm">
+                      <div className="flex items-center justify-between gap-4 py-3">
+                        <dt className="text-slate-500">Business areas</dt>
+
+                        <dd className="font-semibold text-slate-800">
+                          {businessAreas.length}
+                        </dd>
                       </div>
 
-                      <div className="mt-4 grid grid-cols-2 gap-3">
-                        <Link
-                          to={`/admin/companies/${company._id}/edit`}
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
-                        >
-                          Edit
-                        </Link>
+                      <div className="flex items-center justify-between gap-4 py-3">
+                        <dt className="text-slate-500">Updated</dt>
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggleVisibility(company)}
-                          disabled={Boolean(actionCompanyId)}
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                            company.isVisible
-                              ? "border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                              : "bg-emerald-600 text-white hover:bg-emerald-700"
-                          }`}
-                        >
-                          {actionCompanyId === company._id
-                            ? "Updating..."
-                            : company.isVisible
-                              ? "Hide"
-                              : "Show"}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleToggleFeatured(company)}
-                          disabled={Boolean(actionCompanyId)}
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                            company.isFeatured
-                              ? "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                              : "bg-amber-500 text-white hover:bg-amber-600"
-                          }`}
-                        >
-                          {actionCompanyId === company._id
-                            ? "Updating..."
-                            : company.isFeatured
-                              ? "Make Standard"
-                              : "Make Featured"}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteCompany(company)}
-                          disabled={
-                            Boolean(actionCompanyId) ||
-                            !["super-admin", "admin"].includes(admin?.role)
-                          }
-                          title={
-                            ["super-admin", "admin"].includes(admin?.role)
-                              ? "Permanently delete company"
-                              : "Your role cannot permanently delete companies"
-                          }
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {actionCompanyId === company._id
-                            ? "Deleting..."
-                            : "Delete"}
-                        </button>
+                        <dd className="text-right font-semibold text-slate-700">
+                          {formatDate(company.updatedAt)}
+                        </dd>
                       </div>
+                    </dl>
+
+                    <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
+                      <Link
+                        to={`/admin/companies/${company._id}/edit`}
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+                      >
+                        Edit
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleVisibility(company)}
+                        disabled={actionCompanyId !== ""}
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                      >
+                        {isActionPending
+                          ? "Working..."
+                          : company.isVisible
+                            ? "Hide"
+                            : "Show"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeatured(company)}
+                        disabled={actionCompanyId !== ""}
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                      >
+                        {isActionPending
+                          ? "Working..."
+                          : company.isFeatured
+                            ? "Make Standard"
+                            : "Make Featured"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteCompany(company)}
+                        disabled={
+                          actionCompanyId !== "" || !canDeleteCompanies
+                        }
+                        title={
+                          canDeleteCompanies
+                            ? "Permanently delete company"
+                            : "Your role cannot permanently delete companies"
+                        }
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                      >
+                        {isActionPending ? "Working..." : "Delete"}
+                      </button>
                     </div>
                   </div>
                 </article>

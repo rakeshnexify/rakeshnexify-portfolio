@@ -17,6 +17,12 @@ const initialFilters = {
   featured: "all",
 };
 
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 motion-reduce:transition-none";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
+
 function createApiFilters(filters) {
   const apiFilters = {
     search: filters.search.trim(),
@@ -91,13 +97,9 @@ function AdminPostsPage() {
   );
 
   useEffect(() => {
-    const routeMessage = location.state?.successMessage || "";
-
-    if (!routeMessage) {
+    if (!location.state?.successMessage) {
       return;
     }
-
-    setSuccessMessage(routeMessage);
 
     navigate(location.pathname, {
       replace: true,
@@ -124,6 +126,10 @@ function AdminPostsPage() {
         const response = await fetchAdminPosts(accessToken, apiFilters, {
           signal: controller.signal,
         });
+
+        if (controller.signal.aborted) {
+          return;
+        }
 
         setPosts(response.posts);
         setResultCount(response.count);
@@ -345,43 +351,39 @@ function AdminPostsPage() {
   const canDeletePosts = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+    <main className="min-h-screen bg-slate-100">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-              Blog & News Management
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              Publishing
             </p>
 
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Manage Posts
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              Blog & News
             </h1>
 
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-              Manage Blog and News articles from one shared Post system,
-              including content, type, publishing metadata, SEO, related
-              Projects, display order, featured status and visibility.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Manage Blog and News Posts, publishing metadata, categories,
+              tags, related Projects and public display priority.
             </p>
           </div>
 
           <Link
             to="/admin/posts/new"
-            className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
           >
-            Add New Post
+            Add Post
           </Link>
-        </div>
+        </header>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div>
-              <label
-                htmlFor="post-search"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="post-search" className={labelClassName}>
                 Search
               </label>
 
@@ -391,16 +393,13 @@ function AdminPostsPage() {
                 type="search"
                 value={formFilters.search}
                 onChange={handleFilterChange}
-                placeholder="Title, slug, content, author..."
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                placeholder="Title, slug, content or author"
+                className={inputClassName}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="post-type-filter"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="post-type-filter" className={labelClassName}>
                 Type
               </label>
 
@@ -409,7 +408,7 @@ function AdminPostsPage() {
                 name="type"
                 value={formFilters.type}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">Blog & News</option>
                 <option value="blog">Blog only</option>
@@ -418,10 +417,7 @@ function AdminPostsPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="post-category-filter"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="post-category-filter" className={labelClassName}>
                 Category
               </label>
 
@@ -432,15 +428,12 @@ function AdminPostsPage() {
                 value={formFilters.category}
                 onChange={handleFilterChange}
                 placeholder="Exact category"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="post-tag-filter"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="post-tag-filter" className={labelClassName}>
                 Tag
               </label>
 
@@ -451,14 +444,14 @@ function AdminPostsPage() {
                 value={formFilters.tag}
                 onChange={handleFilterChange}
                 placeholder="Exact tag"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               />
             </div>
 
             <div>
               <label
                 htmlFor="post-visibility-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Visibility
               </label>
@@ -468,7 +461,7 @@ function AdminPostsPage() {
                 name="visibility"
                 value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All visibility</option>
                 <option value="visible">Visible</option>
@@ -479,9 +472,9 @@ function AdminPostsPage() {
             <div>
               <label
                 htmlFor="post-featured-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Featured
+                Display type
               </label>
 
               <select
@@ -489,7 +482,7 @@ function AdminPostsPage() {
                 name="featured"
                 value={formFilters.featured}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All records</option>
                 <option value="featured">Featured</option>
@@ -498,100 +491,122 @@ function AdminPostsPage() {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={isLoading || Boolean(actionPostId)}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Apply Filters
-            </button>
-
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleClearFilters}
               disabled={isLoading || Boolean(actionPostId)}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
             >
-              Clear Filters
+              Clear
             </button>
 
             <button
-              type="button"
-              onClick={handleRefresh}
+              type="submit"
               disabled={isLoading || Boolean(actionPostId)}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
             >
-              Refresh
+              Apply Filters
             </button>
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-slate-600">
-            {isLoading
-              ? "Loading Posts..."
-              : `${resultCount} Post${resultCount === 1 ? "" : "s"} found`}
-          </p>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-800">
+              {isLoading
+                ? "Loading Posts..."
+                : `${resultCount} Post${resultCount === 1 ? "" : "s"}`}
+            </p>
+
+            {!isLoading && (
+              <p className="mt-1 text-xs text-slate-500">
+                Showing Blog and News records matching the applied filters.
+              </p>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isLoading || Boolean(actionPostId)}
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+          >
+            Refresh
+          </button>
         </div>
 
-        {successMessage && (
+        <div aria-live="polite">
+          {successMessage && (
+            <div
+              role="status"
+              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
+            >
+              {successMessage}
+            </div>
+          )}
+
+          {error && (
+            <div
+              role="alert"
+              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
+            >
+              {error}
+            </div>
+          )}
+        </div>
+
+        {isLoading && (
           <div
             role="status"
-            className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
+            aria-live="polite"
+            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
           >
-            {successMessage}
+            <span className="sr-only">Loading Posts...</span>
+
+            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
+              <div
+                key={placeholder}
+                className="h-[31rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
+              />
+            ))}
           </div>
         )}
 
-        {error && (
-          <div
-            role="alert"
-            className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
-          >
-            {error}
-          </div>
-        )}
-
-        {isLoading ? (
-          <div className="mt-8 grid min-h-64 place-items-center rounded-3xl border border-slate-200 bg-white">
-            <div className="text-center">
-              <div className="mx-auto size-11 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600" />
-              <p className="mt-4 text-sm font-semibold text-slate-600">
-                Loading Posts...
-              </p>
-            </div>
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-            <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-2xl font-black text-brand-600">
+        {!isLoading && !error && posts.length === 0 && (
+          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-brand-50 text-lg font-bold text-brand-600">
               P
             </div>
 
-            <h2 className="mt-5 text-2xl font-bold text-slate-950">
+            <h2 className="mt-4 text-base font-bold text-slate-950">
               No Posts found
             </h2>
 
-            <p className="mx-auto mt-3 max-w-xl leading-7 text-slate-600">
-              Create your first Blog or News Post, or clear the current
-              filters.
+            <p className="mt-2 text-sm text-slate-500">
+              Change the filters or create the first Blog or News Post.
             </p>
           </div>
-        ) : (
-          <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        )}
+
+        {!isLoading && posts.length > 0 && (
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {posts.map((post) => {
               const isActionPending = actionPostId === post._id;
+
               const relatedProjectCount = Array.isArray(post.relatedProjects)
                 ? post.relatedProjects.length
                 : 0;
 
+              const tags = Array.isArray(post.tags) ? post.tags : [];
+
               return (
                 <article
                   key={post._id}
-                  className="flex min-w-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+                  className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <div className="relative aspect-[16/9] overflow-hidden bg-slate-900">
-                    <div className="grid size-full place-items-center text-4xl font-black text-white/80">
+                  <div className="relative aspect-[16/9] overflow-hidden bg-slate-950">
+                    <div className="grid size-full place-items-center text-3xl font-bold text-white/75">
                       {createPostInitial(post.type)}
                     </div>
 
@@ -602,34 +617,45 @@ function AdminPostsPage() {
                           post.featuredImageAlt ||
                           `${post.title} featured image`
                         }
-                        className="absolute inset-0 size-full object-cover"
+                        loading="lazy"
                         onError={(event) => {
                           event.currentTarget.hidden = true;
                         }}
+                        className="absolute inset-0 size-full object-cover"
                       />
                     )}
 
-                    <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+                    <div className="absolute inset-x-0 top-0 flex flex-wrap gap-2 p-4">
                       <span
-                        className={
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
                           post.type === "news"
-                            ? "rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800"
-                            : "rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-800"
-                        }
+                            ? "bg-sky-50 text-sky-800"
+                            : "bg-violet-50 text-violet-800"
+                        }`}
                       >
                         {formatPostType(post.type)}
                       </span>
 
                       {post.isFeatured && (
-                        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">
                           Featured
                         </span>
                       )}
+
+                      <span
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+                          post.isVisible
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {post.isVisible ? "Visible" : "Hidden"}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col p-6">
-                    <h2 className="break-words text-xl font-bold text-slate-950">
+                  <div className="flex flex-1 flex-col p-5">
+                    <h2 className="break-words text-lg font-bold leading-7 text-slate-950">
                       {post.title}
                     </h2>
 
@@ -637,20 +663,21 @@ function AdminPostsPage() {
                       /{post.slug}
                     </p>
 
-                    <p className="mt-4 line-clamp-4 break-words leading-7 text-slate-600">
-                      {post.excerpt}
-                    </p>
+                    {post.excerpt && (
+                      <p className="mt-4 line-clamp-4 break-words text-sm leading-6 text-slate-600">
+                        {post.excerpt}
+                      </p>
+                    )}
 
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {post.category && (
-                        <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                          {post.category}
-                        </span>
-                      )}
+                    {(post.category || tags.length > 0) && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {post.category && (
+                          <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                            {post.category}
+                          </span>
+                        )}
 
-                      {(Array.isArray(post.tags) ? post.tags : [])
-                        .slice(0, 3)
-                        .map((tag) => (
+                        {tags.slice(0, 3).map((tag) => (
                           <span
                             key={tag}
                             className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700"
@@ -658,74 +685,61 @@ function AdminPostsPage() {
                             #{tag}
                           </span>
                         ))}
-                    </div>
 
-                    <dl className="mt-6 grid gap-3 text-sm">
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Visibility
-                        </dt>
-                        <dd
-                          className={
-                            post.isVisible
-                              ? "font-semibold text-emerald-700"
-                              : "font-semibold text-slate-500"
-                          }
-                        >
-                          {post.isVisible ? "Visible" : "Hidden"}
-                        </dd>
+                        {tags.length > 3 && (
+                          <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                            +{tags.length - 3}
+                          </span>
+                        )}
                       </div>
+                    )}
 
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Author
-                        </dt>
-                        <dd className="max-w-[65%] break-words text-right font-semibold text-slate-700">
+                    <dl className="mt-5 divide-y divide-slate-100 border-y border-slate-100 text-sm">
+                      <div className="flex items-start justify-between gap-4 py-3">
+                        <dt className="text-slate-500">Author</dt>
+
+                        <dd className="max-w-[65%] break-words text-right font-semibold text-slate-800">
                           {post.authorName}
                         </dd>
                       </div>
 
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Published
-                        </dt>
-                        <dd className="font-semibold text-slate-700">
+                      <div className="flex items-start justify-between gap-4 py-3">
+                        <dt className="text-slate-500">Published</dt>
+
+                        <dd className="text-right font-semibold text-slate-700">
                           {formatDate(post.publishedAt)}
                         </dd>
                       </div>
 
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Reading
-                        </dt>
-                        <dd className="font-semibold text-slate-700">
+                      <div className="flex items-start justify-between gap-4 py-3">
+                        <dt className="text-slate-500">Reading time</dt>
+
+                        <dd className="font-semibold text-slate-800">
                           {post.readingTime ?? 1} min
                         </dd>
                       </div>
 
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Projects
-                        </dt>
-                        <dd className="font-semibold text-slate-700">
+                      <div className="flex items-start justify-between gap-4 py-3">
+                        <dt className="text-slate-500">Related Projects</dt>
+
+                        <dd className="font-semibold text-slate-800">
                           {relatedProjectCount}
                         </dd>
                       </div>
 
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Order
-                        </dt>
-                        <dd className="font-semibold text-slate-700">
+                      <div className="flex items-start justify-between gap-4 py-3">
+                        <dt className="text-slate-500">Display order</dt>
+
+                        <dd className="font-semibold text-slate-800">
                           {post.order ?? 0}
                         </dd>
                       </div>
                     </dl>
 
-                    <div className="mt-auto grid grid-cols-2 gap-3 pt-6">
+                    <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
                       <Link
                         to={`/admin/posts/${post._id}/edit`}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
                       >
                         Edit
                       </Link>
@@ -734,7 +748,7 @@ function AdminPostsPage() {
                         type="button"
                         onClick={() => handleToggleVisibility(post)}
                         disabled={isLoading || Boolean(actionPostId)}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                       >
                         {isActionPending
                           ? "Working..."
@@ -747,13 +761,13 @@ function AdminPostsPage() {
                         type="button"
                         onClick={() => handleToggleFeatured(post)}
                         disabled={isLoading || Boolean(actionPostId)}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                       >
                         {isActionPending
                           ? "Working..."
                           : post.isFeatured
-                            ? "Unfeature"
-                            : "Feature"}
+                            ? "Make Standard"
+                            : "Make Featured"}
                       </button>
 
                       <button
@@ -769,7 +783,7 @@ function AdminPostsPage() {
                             ? "Permanently delete Post"
                             : "Your role cannot permanently delete Posts"
                         }
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                       >
                         {isActionPending ? "Working..." : "Delete"}
                       </button>
@@ -780,7 +794,7 @@ function AdminPostsPage() {
             })}
           </div>
         )}
-      </div>
+      </section>
     </main>
   );
 }
