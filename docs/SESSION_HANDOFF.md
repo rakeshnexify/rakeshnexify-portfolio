@@ -16,16 +16,16 @@ Major functional roadmap:
 
 Latest pushed Professional UI/UX checkpoint:
 
-`8bda7a2 Polish admin audit interfaces`
+`74b9eeb Polish admin service editor interfaces`
 
 Full hash:
 
-`8bda7a20f791c401831709913d73391b7645bb5f`
+`74b9eeb2f5dd82a6fa01899347e2b6fc579a8cab`
 
 Latest verified Git state before this documentation replacement:
 
-- local `main` = `8bda7a20f791c401831709913d73391b7645bb5f`
-- `origin/main` = `8bda7a20f791c401831709913d73391b7645bb5f`
+- local `main` = `74b9eeb2f5dd82a6fa01899347e2b6fc579a8cab`
+- `origin/main` = `74b9eeb2f5dd82a6fa01899347e2b6fc579a8cab`
 - working tree clean
 - branch up to date with `origin/main`
 
@@ -272,6 +272,33 @@ Pages:
 
 - `AdminAuditLogsPage.jsx`
 - `AdminAuditLogDetailPage.jsx`
+
+Status:
+
+`COMPLETE / VERIFIED / PUSHED`
+
+Documentation closeout for Batch 8:
+
+`ce11883 Document admin audit UI milestone`
+
+Full hash:
+
+`ce118836bcbea574b14728f166eaed5d84edfb25`
+
+### Admin Service Editor Interfaces polish — Batch 9
+
+Commit:
+
+`74b9eeb Polish admin service editor interfaces`
+
+Full hash:
+
+`74b9eeb2f5dd82a6fa01899347e2b6fc579a8cab`
+
+Pages:
+
+- `AdminServiceEditorPage.jsx`
+- `AdminServicePackageEditorPage.jsx`
 
 Status:
 
@@ -1046,6 +1073,68 @@ Verified:
 - collapsed/pinned sidebar alignment
 - no horizontal overflow
 
+### Batch 9
+
+Service Editor:
+
+`PASS`
+
+Verified:
+
+- `/admin/services/new` create mode
+- `/admin/services/:id/edit` edit mode
+- create mode does not fetch an existing Service
+- edit mode uses abort-safe Service detail loading
+- existing Service values hydrate through `createServiceFormValues`
+- create values remain `defaultServiceFormValues`
+- record-aware `ServiceForm` remount key preserved
+- Back to Services Management
+- Service title heading in edit mode
+- existing Service fields and form behavior unchanged
+- Media Picker opens/selects normally
+- Media unauthorized handling logs out and preserves create/edit pathname
+- Create Service success -> `/admin/services`
+- Update Service success -> `/admin/services`
+- success message preserved in route state
+- only `401` submit errors are consumed by the wrapper
+- non-`401` submit errors rethrow to `ServiceForm`
+- normal validation/field errors remain form-owned
+- edit load failure renders local error state
+- accessible reduced-motion-safe loading skeleton
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
+Service Package Editor:
+
+`PASS`
+
+Verified:
+
+- `/admin/service-packages/new` create mode
+- `/admin/service-packages/:id/edit` edit mode
+- Services collection loads in both create and edit modes
+- edit mode loads Services + Package detail in parallel
+- create mode does not fetch Package detail
+- loaded Services collection is passed through without wrapper reshaping
+- existing Package values hydrate through `createServicePackageFormValues`
+- create values remain `defaultServicePackageFormValues`
+- record-aware `ServicePackageForm` remount key preserved
+- `servicesLoading={false}` wrapper behavior preserved
+- Back to Service Packages Management
+- selected Service relationship hydrates correctly
+- package pricing/billing/comparison/customer-fit/WhatsApp/publication/order behavior remains form-owned
+- Create Service Package success -> `/admin/service-packages`
+- Update Service Package success -> `/admin/service-packages`
+- success message preserved in route state
+- only `401` submit errors are consumed by the wrapper
+- non-`401` submit errors rethrow to `ServicePackageForm`
+- Services/package load failures render local editor error state
+- accessible reduced-motion-safe loading skeleton
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
 ## Important Batch 2 Review Remediations
 
 The first Codex review of Batch 2 found two issues.
@@ -1545,6 +1634,68 @@ Final Git verification after push:
 - working tree clean
 - branch up to date with `origin/main`
 
+### Batch 9
+
+Combined targeted ESLint for:
+
+- `AdminServiceEditorPage.jsx`
+- `AdminServicePackageEditorPage.jsx`
+
+Result:
+
+`PASS`
+
+Manual browser verification:
+
+`PASS`
+
+Production build:
+
+`npm run build`
+
+Result:
+
+`PASS`
+
+Observed Batch 9 Vite output:
+
+- Vite `8.1.5`
+- 280 modules transformed
+- `dist/index.html` `1.83 kB`, gzip `0.62 kB`
+- CSS `103.75 kB`, gzip `15.92 kB`
+- JS `1,782.58 kB`, gzip `370.89 kB`
+- build completed in `317ms`
+
+The existing greater-than-500-kB chunk warning remains non-blocking and is deferred to Performance Optimization.
+
+Git verification:
+
+- exactly two expected files modified/staged
+- `git diff --check` passed
+- `git diff --cached --check` passed
+- CRLF-to-LF warnings were informational
+- no unstaged or unrelated scope before commit
+
+Fresh Codex review:
+
+- Critical / High: `NONE`
+- Medium: `NONE`
+- Low: `NONE`
+- Regression assessment: `SAFE`
+- Scope assessment: `CLEAN`
+- Final verdict: `READY TO COMMIT`
+
+Commit/push:
+
+`74b9eeb Polish admin service editor interfaces`
+
+Final Git verification after push:
+
+- `HEAD` = `74b9eeb2f5dd82a6fa01899347e2b6fc579a8cab`
+- `origin/main` = `74b9eeb2f5dd82a6fa01899347e2b6fc579a8cab`
+- working tree clean
+- branch up to date with `origin/main`
+
 ## Known Non-Blocking Project-Wide Items
 
 - client production bundle remains above Vite's recommended 500 kB chunk threshold
@@ -1565,14 +1716,14 @@ Continue:
 
 `Professional UI/UX -> Individual Admin Module Internal UI Polish`
 
-Do not reopen the completed shell/Dashboard or the eight completed module batches unless a concrete regression appears.
+Do not reopen the completed shell/Dashboard or the nine completed module batches unless a concrete regression appears.
 
 Next action:
 
 1. continue the remaining Admin editor/special surfaces in small behavior-aware batches
-2. recommended next implementation batch: `AdminServiceEditorPage.jsx` and `AdminServicePackageEditorPage.jsx`
-3. audit create/edit route behavior, form initialization, validation/field errors, Media Picker usage, Service/Package ownership rules, pricing/billing semantics, visibility/featured controls, 401/403 behavior, and navigation before presentation changes
-4. keep `AdminPackageDesignEditorPage.jsx` for a following focused batch because its package ownership/default-design/media/demo behavior is more specialized
+2. recommended next implementation batch: `AdminPackageDesignEditorPage.jsx` as a focused specialized editor batch
+3. audit create/edit route behavior, Service Package ownership/preselection, package reassignment rules, default-design semantics, visibility/featured controls, thumbnail/screenshots Media Picker behavior, Live Demo URL behavior, form hydration, validation/field errors, 401 handling, and success navigation before presentation changes
+4. do not assume Package Design contracts from the list page; inspect the current editor wrapper/form source first
 5. keep backend/API/RBAC/routes/business behavior unchanged
 6. use targeted ESLint + browser verification + production build + Git scope checks + fresh Codex review before each implementation commit
 

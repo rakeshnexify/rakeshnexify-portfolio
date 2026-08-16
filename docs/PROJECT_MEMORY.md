@@ -795,6 +795,8 @@ Verified UI checkpoint history:
 - `5455e35 Polish admin detail interfaces`
 - `550d5fd Document admin detail interfaces UI milestone`
 - `8bda7a2 Polish admin audit interfaces`
+- `ce11883 Document admin audit UI milestone`
+- `74b9eeb Polish admin service editor interfaces`
 
 The shared shell milestone is complete. Individual Admin module internal polish is active and is being completed in small verified batches without changing backend/API/business behavior.
 
@@ -979,6 +981,11 @@ Batch 8 — commit `8bda7a2 Polish admin audit interfaces`
 - Audit Logs
 - Audit Log Detail
 
+Batch 9 — commit `74b9eeb Polish admin service editor interfaces`
+
+- Service Editor
+- Service Package Editor
+
 All completed batches were manually browser-verified, targeted ESLint-clean, production-build verified, whitespace-checked, Codex-reviewed, committed, and pushed to `main`.
 
 Batch 3 preserves the established list-page behavior, including filtered local collection updates for Skills, Education, and Experience, UTC month/year timeline formatting for Education/Experience, existing delete RBAC, and accessible reduced-motion-safe loading states.
@@ -993,11 +1000,13 @@ Batch 7 preserves behavior-sensitive detail workflows. Appointment Detail retain
 
 Batch 8 preserves the Audit domain's security and privacy boundaries while normalizing the two read-only Admin surfaces. Audit Logs remains frontend-gated to `super-admin`, keeps all existing filters with a fixed page limit of 20, preserves explicit UTC start/end-of-day filter conversion, and renders summary-only records without detail-only changes/metadata/request context. Audit Log Detail remains frontend-gated to `super-admin`, renders only the sanitized Audit response, uses `changedFields` as the authority for which change values become visible, preserves safe `from` / `to` rendering and sanitized metadata/request-context fallbacks, and performs no source-resource enrichment. On both pages, `401` logs out and redirects to `/admin/login` while preserving the current pathname, whereas `403` renders restricted access without logging out. No Audit create/update/delete controls exist.
 
+Batch 9 normalizes the Service and Service Package editor wrappers without moving business logic out of their existing form components. Service Editor keeps create mode free of detail fetching, edit mode uses abort-safe Service loading, form hydration remains `defaultServiceFormValues` versus `createServiceFormValues`, the form remount key remains record-aware, Media Picker unauthorized handling preserves the current create/edit pathname, and non-`401` submit errors are rethrown so `ServiceForm` continues owning normal validation and field/general error presentation. Service Package Editor continues loading Services in both create and edit modes, preserves parallel Services + Package loading in edit mode, keeps `defaultServicePackageFormValues` versus `createServicePackageFormValues`, passes the unmodified Services collection to `ServicePackageForm`, and likewise rethrows non-`401` submit errors. Both wrappers preserve their existing create/update API calls and success navigation destinations.
+
 Current UI/UX scope:
 
 The shared Admin Shell + Sidebar + Analytics Dashboard refinement is complete.
 
-Twenty-three Admin module pages have completed internal visual normalization across the first eight verified batches.
+Twenty-five Admin module pages have completed internal visual normalization across the first nine verified batches.
 
 Individual Admin module internal polish remains active for the remaining Admin pages. Continue in safe batches and preserve the established shell and visual contract.
 
@@ -1860,7 +1869,7 @@ No additional major functional module remains in the current functional roadmap.
 
 - Professional UI/UX — active
 - Professional UI/UX — completed: shared Admin shell/sidebar + analytics Dashboard refinement
-- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations, Statistics, Skills, Education, Experience, Certifications / Achievements, Testimonials, FAQs, Team Members, Companies, Posts / Blog & News, Contact Messages, Appointment Detail, Service Order Detail, Audit Logs, Audit Log Detail
+- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations, Statistics, Skills, Education, Experience, Certifications / Achievements, Testimonials, FAQs, Team Members, Companies, Posts / Blog & News, Contact Messages, Appointment Detail, Service Order Detail, Audit Logs, Audit Log Detail, Service Editor, Service Package Editor
 - Professional UI/UX — remaining: remaining individual Admin module internal polish, then public-site visual polish
 - Email and Notifications
 - Final SEO/testing/performance/security
