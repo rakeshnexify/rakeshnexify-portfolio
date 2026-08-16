@@ -16,16 +16,16 @@ Major functional roadmap:
 
 Latest pushed Professional UI/UX checkpoint:
 
-`5e48e33 Polish admin companies and posts interfaces`
+`89bd245 Polish admin contact messages interface`
 
 Full hash:
 
-`5e48e33ac796da057162a4d95108e9eb379b01cc`
+`89bd245a4434822d9a0581134f488df0f217eeed`
 
 Latest verified Git state before this documentation replacement:
 
-- local `main` = `5e48e33ac796da057162a4d95108e9eb379b01cc`
-- `origin/main` = `5e48e33ac796da057162a4d95108e9eb379b01cc`
+- local `main` = `89bd245a4434822d9a0581134f488df0f217eeed`
+- `origin/main` = `89bd245a4434822d9a0581134f488df0f217eeed`
 - working tree clean
 - branch up to date with `origin/main`
 
@@ -192,6 +192,32 @@ Pages:
 
 - `AdminCompaniesPage.jsx`
 - `AdminPostsPage.jsx`
+
+Status:
+
+`COMPLETE / VERIFIED / PUSHED`
+
+Documentation closeout for Batch 5:
+
+`5695156 Document admin companies and posts UI milestone`
+
+Full hash:
+
+`569515610ab98450b131aebe14caaa9518433e5b`
+
+### Admin Contact Messages polish — Batch 6
+
+Commit:
+
+`89bd245 Polish admin contact messages interface`
+
+Full hash:
+
+`89bd245a4434822d9a0581134f488df0f217eeed`
+
+Pages:
+
+- `AdminContactMessagesPage.jsx`
 
 Status:
 
@@ -776,6 +802,48 @@ Verified:
 - collapsed/pinned sidebar alignment
 - no horizontal overflow
 
+### Batch 6
+
+Contact Messages:
+
+`PASS`
+
+Verified:
+
+- New / Read / Replied / Archived summary cards
+- active summary card toggles its status filter off
+- Search
+- Status
+- Service
+- Source
+- Newest / Oldest sorting
+- 10 / 20 / 50 / 100 messages per page
+- Apply resets page to 1
+- Clear restores complete initial filters
+- Refresh
+- View Full Message / Show Less
+- email and phone links/fallbacks
+- status change with backend refresh
+- status timestamps
+- private Admin note editing
+- 3000-character Admin note limit/counter
+- Admin note save with local message/note-draft replacement
+- explicit Contact Message -> Lead confirmation
+- successful conversion navigates to `/admin/leads/:id/edit`
+- original Contact Message remains unchanged by the UI conversion flow
+- delete confirmation with backend refresh
+- conversion RBAC: super-admin/admin/editor
+- delete RBAC: super-admin/admin
+- Previous / Next pagination boundaries
+- pagination change collapses expanded message
+- loading/error/retry/success/empty states
+- aria-pressed status cards
+- aria-expanded/aria-controls message panel behavior
+- reduced-motion-aware pagination scroll and loading animation
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
 ## Important Batch 2 Review Remediations
 
 The first Codex review of Batch 2 found two issues.
@@ -1090,6 +1158,67 @@ Final Git verification after push:
 - working tree clean
 - branch up to date with `origin/main`
 
+### Batch 6
+
+Targeted ESLint for:
+
+- `AdminContactMessagesPage.jsx`
+
+Result:
+
+`PASS`
+
+Manual browser verification:
+
+`PASS`
+
+Production build:
+
+`npm run build`
+
+Result:
+
+`PASS`
+
+Observed Batch 6 Vite output:
+
+- Vite `8.1.5`
+- 280 modules transformed
+- `dist/index.html` `1.83 kB`, gzip `0.63 kB`
+- CSS `103.63 kB`, gzip `15.87 kB`
+- JS `1,767.13 kB`, gzip `369.70 kB`
+- build completed in `315ms`
+
+The existing greater-than-500-kB chunk warning remains non-blocking and is deferred to Performance Optimization.
+
+Git verification:
+
+- exactly one expected file modified/staged
+- `git diff --check` passed
+- `git diff --cached --check` passed
+- CRLF-to-LF warning was informational
+- no unstaged or unrelated scope before commit
+
+Fresh Codex review:
+
+- Critical / High: `NONE`
+- Medium: `NONE`
+- Low: `NONE`
+- Regression assessment: `SAFE`
+- Scope assessment: `CLEAN`
+- Final verdict: `READY TO COMMIT`
+
+Commit/push:
+
+`89bd245 Polish admin contact messages interface`
+
+Final Git verification after push:
+
+- `HEAD` = `89bd245a4434822d9a0581134f488df0f217eeed`
+- `origin/main` = `89bd245a4434822d9a0581134f488df0f217eeed`
+- working tree clean
+- branch up to date with `origin/main`
+
 ## Known Non-Blocking Project-Wide Items
 
 - client production bundle remains above Vite's recommended 500 kB chunk threshold
@@ -1110,16 +1239,15 @@ Continue:
 
 `Professional UI/UX -> Individual Admin Module Internal UI Polish`
 
-Do not reopen the completed shell/Dashboard or the five completed module batches unless a concrete regression appears.
+Do not reopen the completed shell/Dashboard or the six completed module batches unless a concrete regression appears.
 
 Next action:
 
 1. continue the remaining Admin operational/read surfaces in smaller behavior-aware batches before broad editor/auth/Media workflows
-2. recommended next implementation: `AdminContactMessagesPage.jsx` as a focused single-page operational batch because message workflow actions and Contact Message -> Lead conversion require extra behavior verification
-3. keep `AdminAppointmentDetailPage.jsx` and `AdminServiceOrderDetailPage.jsx` in a focused detail-page batch after their current behavior is audited
-4. keep `AdminAuditLogsPage.jsx` and `AdminAuditLogDetailPage.jsx` together in a separate super-admin-only read-only Audit batch
-5. keep backend/API/RBAC/routes/business behavior unchanged
-6. use targeted ESLint + browser verification + production build + Git scope checks + fresh Codex review before each implementation commit
+2. recommended next implementation batch: `AdminAppointmentDetailPage.jsx` and `AdminServiceOrderDetailPage.jsx`, after auditing their status/update/delete/detail behavior independently
+3. keep `AdminAuditLogsPage.jsx` and `AdminAuditLogDetailPage.jsx` together in a separate super-admin-only read-only Audit batch
+4. keep backend/API/RBAC/routes/business behavior unchanged
+5. use targeted ESLint + browser verification + production build + Git scope checks + fresh Codex review before each implementation commit
 
 Avoid redesigning all remaining Admin modules simultaneously.
 
