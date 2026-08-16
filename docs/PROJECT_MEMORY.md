@@ -783,6 +783,8 @@ Verified UI checkpoint history:
 - `1051ec8 Document admin UI refinement milestone`
 - `84334b8 Polish admin module interfaces`
 - `23f54a1 Polish admin services and sales interfaces`
+- `3116818 Document admin services and sales UI milestone`
+- `80b412c Polish admin career content interfaces`
 
 The shared shell milestone is complete. Individual Admin module internal polish is active and is being completed in small verified batches without changing backend/API/business behavior.
 
@@ -934,13 +936,22 @@ Batch 2 — commit `23f54a1 Polish admin services and sales interfaces`
 - Service Orders
 - Appointments / Consultations
 
-Both batches were manually browser-verified, targeted ESLint-clean, production-build verified, whitespace-checked, Codex-reviewed, committed, and pushed to `main`.
+Batch 3 — commit `80b412c Polish admin career content interfaces`
+
+- Statistics
+- Skills
+- Education
+- Experience
+
+All completed batches were manually browser-verified, targeted ESLint-clean, production-build verified, whitespace-checked, Codex-reviewed, committed, and pushed to `main`.
+
+Batch 3 preserves the established list-page behavior, including filtered local collection updates for Skills, Education, and Experience, UTC month/year timeline formatting for Education/Experience, existing delete RBAC, and accessible reduced-motion-safe loading states.
 
 Current UI/UX scope:
 
 The shared Admin Shell + Sidebar + Analytics Dashboard refinement is complete.
 
-Eight representative/operational Admin module pages have also completed internal visual normalization across the first two verified batches.
+Twelve Admin module pages have completed internal visual normalization across the first three verified batches.
 
 Individual Admin module internal polish remains active for the remaining Admin pages. Continue in safe batches and preserve the established shell and visual contract.
 
@@ -1803,7 +1814,7 @@ No additional major functional module remains in the current functional roadmap.
 
 - Professional UI/UX — active
 - Professional UI/UX — completed: shared Admin shell/sidebar + analytics Dashboard refinement
-- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations
+- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations, Statistics, Skills, Education, Experience
 - Professional UI/UX — remaining: remaining individual Admin module internal polish, then public-site visual polish
 - Email and Notifications
 - Final SEO/testing/performance/security

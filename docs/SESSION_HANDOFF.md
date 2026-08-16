@@ -16,16 +16,16 @@ Major functional roadmap:
 
 Latest pushed Professional UI/UX checkpoint:
 
-`23f54a1 Polish admin services and sales interfaces`
+`80b412c Polish admin career content interfaces`
 
 Full hash:
 
-`23f54a11511914428f68042af2a3f76274122080`
+`80b412c0f75172f23d4515c563201213c26cb7a9`
 
 Latest verified Git state before this documentation replacement:
 
-- local `main` = `23f54a1`
-- `origin/main` = `23f54a1`
+- local `main` = `80b412c`
+- `origin/main` = `80b412c`
 - working tree clean
 - branch up to date with `origin/main`
 
@@ -106,6 +106,36 @@ Pages:
 - `AdminPackageDesignsPage.jsx`
 - `AdminServiceOrdersPage.jsx`
 - `AdminAppointmentsPage.jsx`
+
+Status:
+
+`COMPLETE / VERIFIED / PUSHED`
+
+
+Documentation closeout for Batch 2:
+
+`3116818 Document admin services and sales UI milestone`
+
+Full hash:
+
+`31168181a205d6a8076e67998cccd4a297f8d8d6`
+
+### Admin Content Lists A / Career Content polish — Batch 3
+
+Commit:
+
+`80b412c Polish admin career content interfaces`
+
+Full hash:
+
+`80b412c0f75172f23d4515c563201213c26cb7a9`
+
+Pages:
+
+- `AdminStatisticsPage.jsx`
+- `AdminSkillsPage.jsx`
+- `AdminEducationPage.jsx`
+- `AdminExperiencePage.jsx`
 
 Status:
 
@@ -397,6 +427,110 @@ Verified:
 - pagination
 - responsive layout
 
+
+### Batch 3
+
+Statistics:
+
+`PASS`
+
+Verified:
+
+- Search
+- Visibility
+- Display Type
+- Apply/Clear
+- Refresh
+- Add Statistic
+- Edit
+- Hide/Show
+- Make Featured/Make Standard
+- delete permission
+- success/error/loading/empty states
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
+Skills:
+
+`PASS`
+
+Verified:
+
+- Search
+- Category
+- Proficiency
+- Visibility
+- Display Type
+- Apply/Clear
+- Refresh
+- Add Skill
+- Edit
+- Hide/Show
+- visibility-filtered toggle removes mismatching record and decrements count
+- Make Featured/Make Standard
+- featured-filtered toggle removes mismatching record and decrements count
+- delete permission
+- icon/fallback rendering
+- proficiency/category display
+- experience and updated metadata
+- responsive layout
+
+Education:
+
+`PASS`
+
+Verified:
+
+- Search
+- Education Type
+- Visibility
+- Display Type
+- Study Status
+- Apply/Clear
+- Refresh
+- Add Education
+- Edit
+- Hide/Show
+- visibility-filtered toggle removes mismatching record and decrements count
+- Make Featured/Make Standard
+- featured-filtered toggle removes mismatching record and decrements count
+- Current/Completed study filtering
+- UTC month/year study timeline
+- Present/current-study behavior
+- institution logo + initials fallback
+- grade/location display
+- delete permission
+- responsive layout
+
+Experience:
+
+`PASS`
+
+Verified:
+
+- Search
+- Employment Type
+- Visibility
+- Display Type
+- Work Status
+- Apply/Clear
+- Refresh
+- Add Experience
+- Edit
+- Hide/Show
+- visibility-filtered toggle removes mismatching record and decrements count
+- Make Featured/Make Standard
+- featured-filtered toggle removes mismatching record and decrements count
+- Current/Completed work filtering
+- UTC month/year work timeline
+- Present/current-position behavior
+- organization logo + initials fallback
+- location/work mode
+- skills chips + overflow count
+- delete permission
+- responsive layout
+
 ## Important Batch 2 Review Remediations
 
 The first Codex review of Batch 2 found two issues.
@@ -522,6 +656,69 @@ Final Git verification after push:
 - working tree clean
 - branch up to date with `origin/main`
 
+
+### Batch 3
+
+Combined targeted ESLint for:
+
+- `AdminStatisticsPage.jsx`
+- `AdminSkillsPage.jsx`
+- `AdminEducationPage.jsx`
+- `AdminExperiencePage.jsx`
+
+Result:
+
+`PASS`
+
+Manual browser verification:
+
+`PASS`
+
+Production build:
+
+`npm run build`
+
+Result:
+
+`PASS`
+
+Latest observed Batch 3 Vite output:
+
+- Vite `8.1.5`
+- 280 modules transformed
+- CSS approximately `103.72 kB`, gzip `15.86 kB`
+- JS approximately `1,759.58 kB`, gzip `368.69 kB`
+
+The existing greater-than-500-kB chunk warning remains non-blocking and is deferred to Performance Optimization.
+
+Git verification:
+
+- exactly four expected files modified/staged
+- `git diff --check` passed
+- `git diff --cached --check` passed
+- CRLF-to-LF warnings were informational
+- no unrelated scope
+
+Fresh Codex review:
+
+- Critical / High: `NONE`
+- Medium: `NONE`
+- Low: `NONE`
+- Regression assessment: `SAFE`
+- Scope assessment: `CLEAN`
+- Final verdict: `READY TO COMMIT`
+
+Commit/push:
+
+`80b412c Polish admin career content interfaces`
+
+Final Git verification after push:
+
+- `HEAD` = `80b412c0f75172f23d4515c563201213c26cb7a9`
+- `origin/main` = `80b412c0f75172f23d4515c563201213c26cb7a9`
+- working tree clean
+- branch up to date with `origin/main`
+
 ## Known Non-Blocking Project-Wide Items
 
 - client production bundle remains above Vite's recommended 500 kB chunk threshold
@@ -542,13 +739,13 @@ Continue:
 
 `Professional UI/UX -> Individual Admin Module Internal UI Polish`
 
-Do not reopen the completed shell/Dashboard or the two completed module batches unless a concrete regression appears.
+Do not reopen the completed shell/Dashboard or the three completed module batches unless a concrete regression appears.
 
 Next action:
 
-1. inspect the remaining Admin pages
-2. group them into safe presentation-only batches
-3. prefer low-risk list/read-only modules before higher-risk editor/detail/auth/Media Picker workflows
+1. continue remaining low-risk Admin list-page polish before editor/detail/auth/Media Picker workflows
+2. good next candidates include Certifications / Achievements, Testimonials, FAQ, and Team list pages
+3. keep Companies, Posts, Contact Messages, Audit, Appointment detail, and Service Order detail in smaller behavior-aware batches
 4. keep backend/API/RBAC/routes/business behavior unchanged
 5. use targeted ESLint + browser verification + production build + Git scope checks + Codex review before each commit
 
