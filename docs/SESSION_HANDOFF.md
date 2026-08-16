@@ -14,16 +14,22 @@ Major functional roadmap:
 
 **27/27 planned major functional modules complete**
 
-Latest Professional UI/UX checkpoint:
+Latest pushed Professional UI/UX checkpoint:
 
-`351c425 Refine admin shell and analytics dashboard`
+`23f54a1 Polish admin services and sales interfaces`
 
-Verified Git state after push:
+Full hash:
 
-- local `main` = `351c425`
-- `origin/main` = `351c425`
+`23f54a11511914428f68042af2a3f76274122080`
+
+Latest verified Git state before this documentation replacement:
+
+- local `main` = `23f54a1`
+- `origin/main` = `23f54a1`
 - working tree clean
 - branch up to date with `origin/main`
+
+After replacing these documentation files locally, expect the two docs to appear modified until the documentation checkpoint itself is committed.
 
 The runtime/repository remains the source of truth if this handoff becomes stale.
 
@@ -31,23 +37,79 @@ The runtime/repository remains the source of truth if this handoff becomes stale
 
 `Professional UI/UX`
 
-Completed milestone:
+Current scope:
 
-`Admin Shell + Dashboard + Sidebar final refinement`
+`Individual Admin Module Internal UI Polish`
+
+The shared Admin shell/sidebar and analytics Dashboard milestone is complete and should not be reopened without a concrete regression.
+
+Individual Admin page polish is active and is being completed in small verified batches.
+
+## Professional UI/UX Checkpoint History
+
+### Shared Admin shell + Dashboard
+
+Implementation commit:
+
+`351c425 Refine admin shell and analytics dashboard`
+
+Full hash:
+
+`351c425f3ef80c0f398ab09fc505d5bcc6c1d6e9`
+
+Documentation closeout:
+
+`1051ec8 Document admin UI refinement milestone`
+
+Full hash:
+
+`1051ec811c02f50fc56a0f79cc20e8a15e92acfd`
 
 Status:
 
 `COMPLETE`
 
-Implementation verified.
+### Admin module polish — Batch 1
 
-Codex reviewed.
+Commit:
 
-Committed.
+`84334b8 Polish admin module interfaces`
 
-Pushed.
+Full hash:
 
-Do not reopen this milestone unless a concrete regression is found.
+`84334b83406d76576263a443ab26bdb8c8385385`
+
+Pages:
+
+- `AdminServicesPage.jsx`
+- `AdminSubscribersPage.jsx`
+- `AdminProjectsPage.jsx`
+- `AdminLeadsPage.jsx`
+
+Status:
+
+`COMPLETE / VERIFIED / PUSHED`
+
+### Admin Services & Sales polish — Batch 2
+
+Commit:
+
+`23f54a1 Polish admin services and sales interfaces`
+
+Full hash:
+
+`23f54a11511914428f68042af2a3f76274122080`
+
+Pages:
+
+- `AdminServicePackagesPage.jsx`
+- `AdminPackageDesignsPage.jsx`
+- `AdminServiceOrdersPage.jsx`
+- `AdminAppointmentsPage.jsx`
+
+Status:
+
+`COMPLETE / VERIFIED / PUSHED`
 
 ## Current Admin Architecture
 
@@ -69,9 +131,8 @@ Desktop navigation:
 
 Mobile navigation:
 
-`client/src/components/admin/layout/AdminTopbar.jsx`
-
-`client/src/components/admin/layout/AdminMobileDrawer.jsx`
+- `client/src/components/admin/layout/AdminTopbar.jsx`
+- `client/src/components/admin/layout/AdminMobileDrawer.jsx`
 
 Shared recursive navigation renderer:
 
@@ -87,67 +148,38 @@ Pinned-state persistence:
 
 The Admin operational navigation remains code-owned and separate from public `SiteSettings.sections` navigation/publication management.
 
-## Current Sidebar Contract
+## Current Sidebar / Drawer Contract
 
-Desktop defaults to the compact approximately 72px icon rail.
+Desktop:
 
-Unpinned hover temporarily expands the sidebar.
+- default compact approximately 72px icon rail
+- unpinned hover temporarily expands
+- keyboard focus also expands
+- pinned expansion persists through `rakeshnexify_admin_sidebar_pinned_v1`
+- pinned mode offsets shared content
+- temporary expansion does not permanently push content
+- transitions respect reduced motion
+- collapsed items retain accessible names, tooltips, active states, and visible keyboard focus
 
-Keyboard focus within the sidebar also expands it.
+Mobile/tablet:
 
-Pinned expansion persists through:
+- off-canvas drawer
+- backdrop close
+- explicit close control
+- Escape close
+- focus entry/trap/restore
+- route-click close
+- body-scroll lock and cleanup
+- automatic deactivation on desktop breakpoint
+- breakpoint-driven close does not force focus onto a hidden trigger
 
-`rakeshnexify_admin_sidebar_pinned_v1`
+Desktop and mobile reuse the same centralized navigation config.
 
-Pinned mode offsets the shared Admin content area.
+Each mounted `AdminNavigation` instance uses unique IDs for group headings and nested `aria-controls`.
 
-Temporary hover/focus expansion does not permanently push content.
-
-Reduced-motion handling was added to shell/navigation transitions.
-
-Collapsed navigation retains accessible names, visual tooltips, active states, and visible keyboard focus.
-
-`Service Packages -> Package Designs` remains the intentional nested relationship.
-
-Role-aware navigation remains UX-only defense-in-depth; backend RBAC remains authoritative.
+`Service Packages -> Package Designs` remains the intentional nested Admin relationship.
 
 Audit Log remains `super-admin` only in navigation and server authorization.
-
-## Mobile Drawer Contract
-
-Verified behavior:
-
-- backdrop close
-- close-button operation
-- Escape close
-- focus enters the drawer
-- Tab focus remains trapped while open
-- normal close restores focus to the mobile navigation trigger
-- route selection closes the drawer
-- body scroll is locked while open and restored during cleanup
-- drawer automatically deactivates if the viewport crosses into the desktop breakpoint while open
-- breakpoint-driven close does not force focus onto a now-hidden mobile trigger
-- returning to mobile width does not reopen the drawer automatically
-
-Desktop and mobile navigation reuse the same centralized config.
-
-Each mounted Admin navigation instance now uses unique IDs for group headings and nested `aria-controls` targets.
-
-## Accessibility Refinements
-
-Reduced-motion-safe Tailwind transitions were added across the shared Admin shell.
-
-Global smooth scrolling now respects:
-
-`prefers-reduced-motion: reduce`
-
-Visible Website/Logout text is allowed to provide its normal accessible name rather than being overridden by mismatching `aria-label` text.
-
-Icon-only controls retain explicit accessible labels.
-
-Navigation group/submenu IDs are unique across simultaneously mounted desktop and mobile navigation instances.
-
-The mobile drawer desktop-breakpoint edge case is handled so hidden drawer logic cannot retain body-scroll lock or a document keyboard trap.
 
 ## Dashboard Contract
 
@@ -156,8 +188,6 @@ Route:
 `/admin/dashboard`
 
 The existing Analytics Dashboard remains the primary Dashboard content.
-
-Analytics was not rebuilt.
 
 Existing functionality preserved:
 
@@ -168,7 +198,7 @@ Existing functionality preserved:
 - `30d`
 - `90d`
 - `all`
-- Refresh/retry behavior
+- refresh/retry behavior
 - unauthorized logout/login redirect
 - stale-range protection
 - existing API/business calculations
@@ -176,84 +206,284 @@ Existing functionality preserved:
 
 The Dashboard remains free of a duplicate Management Modules navigation grid.
 
-## Dashboard Visual Refinement
+## Established Admin Internal Visual Contract
 
-`AdminDashboardPage.jsx` now uses a more compact professional CMS header and denser range/refresh controls.
+Use the completed pages as the presentation reference for remaining Admin modules.
 
-`AdminAnalyticsOverview.jsx` now uses a consistent compact section/card hierarchy for:
+Preferred patterns:
 
-- operational totals
-- Subscriber state
-- lifecycle statuses
-- conversions
-- commercial analytics
+- workspace around `max-w-[1440px]`
+- compact eyebrow/context line
+- `2xl`/`3xl` page title instead of oversized hero treatment
+- short description and right-aligned primary action where useful
+- filter surfaces usually `rounded-2xl`, compact `p-4`/`p-5`
+- approximately 44px controls with consistent focus treatment
+- compact results/count toolbar
+- restrained semantic badges
+- `rounded-xl`/`rounded-2xl` surfaces
+- reduce unnecessary nested card-inside-card layouts
+- destructive actions visually secondary
+- compact success/error/empty/loading feedback
+- reduced-motion-safe transitions and skeletons
+- no page-level horizontal overflow
+- practical desktop/mobile behavior with collapsed/pinned sidebar
 
-`AnalyticsTrendChart.jsx` now visually aligns with the same Dashboard system while preserving:
+Do not create a large premature shared component abstraction solely to normalize visuals. Extract small reusable primitives only after repeated patterns are stable.
 
-- native SVG calculation logic
-- chart legend
-- SVG accessibility metadata
-- accessible fallback data table
+Presentation-only work must preserve backend APIs, routes, authentication, RBAC, hooks, query semantics, business logic, mutation behavior, and Media Picker behavior unless a concrete requirement says otherwise.
 
-The visual refinement intentionally avoids:
+## Completed Admin Module UI Pages
 
-- excessive gradients
-- glassmorphism
-- oversized headings
-- unnecessary decorative cards
+### Batch 1
 
-## Codex Review
+Services:
 
-The first review of the shell refinement reported no Critical or High findings.
+`PASS`
 
-Three substantive findings were reported.
+Verified:
 
-### Accessible-name mismatch
+- filters
+- visibility
+- featured state
+- edit route
+- delete permission
+- refresh
+- responsive layout
 
-Visible Website/Logout labels were being overridden by non-matching accessible labels.
+Subscribers:
 
-Status:
+`PASS`
 
-`RESOLVED`
+Verified:
 
-### Mobile drawer desktop-breakpoint lifecycle
+- search/status filters
+- unsubscribe
+- delete permission
+- pagination
+- refresh
+- responsive table/cards
 
-A drawer opened on mobile could remain logically active after resizing to desktop, leaving body scroll/keyboard handling active.
+Projects:
 
-Status:
+`PASS`
 
-`RESOLVED`
+Verified:
 
-### Duplicate navigation DOM IDs
+- Search
+- Category
+- Project Type
+- Status
+- Visibility
+- Project Featured
+- Case Study Publication
+- Case Study Featured
+- Apply/Clear
+- Refresh
+- Edit
+- Hide/Show
+- Make Featured/Standard
+- Publish/Unpublish Case Study
+- Feature/Unfeature Case Study
+- unpublished Case Study feature control disabled
+- delete permission
+- responsive cards/sidebar alignment
 
-Desktop and mobile `AdminNavigation` instances could create duplicate group/submenu IDs.
+Leads / CRM:
 
-Resolved by using stable per-instance unique ID prefixes.
+`PASS`
 
-Status:
+Verified:
 
-`RESOLVED`
+- pipeline status quick filters
+- overdue/today follow-up filters
+- normal filters
+- sorting
+- page size
+- refresh
+- View/Edit
+- delete permission
+- pagination
+- responsive layout
 
-After these fixes:
+### Batch 2
 
-- targeted lint passed
-- production build passed
-- mobile-to-desktop drawer edge case passed manual browser verification
+Service Packages:
+
+`PASS`
+
+Verified:
+
+- Search
+- Service
+- Group
+- Visibility
+- Featured
+- Apply/Clear
+- Refresh
+- Edit
+- Manage Designs
+- Hide/Show
+- Make Featured/Standard
+- delete permission
+- responsive layout
+
+Package Designs:
+
+`PASS`
+
+Verified:
+
+- direct `/admin/package-designs`
+- `?servicePackage=<id>` pre-filter
+- Search
+- Service
+- Package
+- Group
+- Visibility
+- Default
+- Featured
+- Service/Group changes reset selected Package
+- Apply/Clear
+- Clear removes query parameter
+- Refresh
+- Edit
+- Hide/Show
+- Make Featured/Standard
+- Make Default
+- already-default disabled
+- Packages link
+- Live Demo
+- delete permission
+- responsive layout
+
+Service Orders:
+
+`PASS`
+
+Verified:
+
+- Search
+- Status
+- Group
+- Service
+- Apply/Clear
+- Refresh
+- Service/Package/Design snapshots
+- Open Order route
+- pagination
+- responsive layout
+
+Appointments / Consultations:
+
+`PASS`
+
+Verified:
+
+- Search
+- Status
+- Service
+- Preferred From/To
+- Apply/Clear
+- Service filter fallback/retry
+- Refresh
+- Appointment status badge
+- meeting type
+- email/phone links
+- Service/Package display
+- preferred schedule/timezone
+- assigned Admin
+- submitted date
+- Open Appointment
+- pagination
+- responsive layout
+
+## Important Batch 2 Review Remediations
+
+The first Codex review of Batch 2 found two issues.
+
+### Package Designs URL synchronization
+
+Finding:
+
+Same-route URL query changes no longer synchronized `servicePackage` filter state after the synchronous set-state effect was removed for lint compliance.
+
+Resolution:
+
+The page now uses an `AdminPackageDesignsWorkspace` plus an outer `AdminPackageDesignsPage` keyed by `location.search`.
+
+Current behavior:
+
+- direct `?servicePackage=<id>` initializes correctly
+- same-route query change remounts/reinitializes the workspace
+- browser Back/Forward query changes restore the correct filter
+- Clear removes the query parameter and clears the package filter
+- no `react-hooks/set-state-in-effect` suppression or synchronous state-setting effect is required
+
+### Appointments loading semantics
+
+Finding:
+
+Visual skeletons replaced the previous programmatic loading status.
+
+Resolution:
+
+The current loading skeleton wrapper includes:
+
+- `role="status"`
+- `aria-live="polite"`
+- `sr-only` text: `Loading consultation requests...`
+
+Final fresh Codex review after restaging both fixes:
+
+- Critical / High: `NONE`
+- Medium: `NONE`
+- Low: `NONE`
+- Regression assessment: `SAFE`
+- Scope assessment: `CLEAN`
+- Final verdict: `READY TO COMMIT`
 
 ## Verification Evidence
 
-Final targeted ESLint for the changed JSX scope passed with no errors or warnings:
+### Batch 1
 
-- `AdminLayout.jsx`
-- `AdminMobileDrawer.jsx`
-- `AdminNavigation.jsx`
-- `AdminSidebar.jsx`
-- `AdminTopbar.jsx`
-- `AdminDashboardPage.jsx`
-- `AdminAnalyticsOverview.jsx`
-- `AnalyticsTrendChart.jsx`
+Combined targeted ESLint:
+
+`PASS`
+
+Browser verification:
+
+`PASS`
 
 Production build:
+
+`PASS`
+
+Staged whitespace check:
+
+`PASS`
+
+Codex final verdict:
+
+`READY TO COMMIT`
+
+Commit/push:
+
+`84334b8`
+
+### Batch 2
+
+Combined targeted ESLint for:
+
+- `AdminServicePackagesPage.jsx`
+- `AdminPackageDesignsPage.jsx`
+- `AdminServiceOrdersPage.jsx`
+- `AdminAppointmentsPage.jsx`
+
+Result:
+
+`PASS`
+
+Production build against the final corrected staged state:
 
 `npm run build`
 
@@ -261,120 +491,46 @@ Result:
 
 `PASS`
 
-Latest observed Vite build:
+Latest observed Batch 2 Vite output:
 
+- Vite `8.1.5`
 - 280 modules transformed
-- main JS approximately 1,741.27 kB
-- gzip approximately 363.42 kB
+- CSS approximately `103.19 kB`, gzip `15.77 kB`
+- JS approximately `1,756.22 kB`, gzip `367.90 kB`
 
-The existing greater-than-500-kB chunk warning remains non-blocking and belongs to the later Performance Optimization phase.
-
-Repository-wide/client-wide lint still contains older unrelated lint debt.
-
-It is not considered a regression from this Admin UI/UX milestone.
-
-`git diff --check` currently reports no actual whitespace errors.
-
-Git may print CRLF-to-LF normalization warnings for tracked files. These are informational unless future inspection shows unintended line-ending churn.
-
-## Manual Browser Verification
-
-Admin shell verification:
+`git diff --cached --check`:
 
 `PASS`
 
-Verified:
+Final staged scope:
 
-- `/admin -> /admin/dashboard`
-- existing Analytics Dashboard rendering
-- default collapsed desktop sidebar
-- hover expansion
-- mouse-leave collapse
-- pin/unpin
-- pinned-state persistence after refresh
-- nested `Service Packages -> Package Designs`
-- active route and active branch states
-- keyboard focus expansion
-- visible focus
-- mobile drawer opening/closing
-- backdrop close
-- Escape close
-- route-click close
-- focus restoration
-- no observed page-level horizontal overflow
-- View Website
-- Logout
+- exactly four expected files
+- no unstaged changes before commit
 
-Mobile drawer breakpoint edge-case:
+Fresh Codex review:
 
-`PASS`
+`READY TO COMMIT`
 
-Dashboard verification:
+Commit/push:
 
-`PASS`
+`23f54a1`
 
-Verified:
+Final Git verification after push:
 
-- `7d`
-- `30d`
-- `90d`
-- `All time`
-- Refresh data
-- operational metrics
-- current Subscriber state
-- trend chart
-- legend
-- accessible trend-data expander/table
-- status breakdowns
-- conversions
-- Top Services
-- Lead Sources
-- pipeline values
-- collapsed/pinned content alignment
-- mobile overflow behavior
-
-## Git Closeout
-
-Final milestone scope:
-
-- 11 files
-- 1,151 insertions
-- 708 deletions
-
-Final staged validation:
-
-`git diff --cached --check`
-
-Result:
-
-`PASS`
-
-Commit:
-
-`351c425 Refine admin shell and analytics dashboard`
-
-Push:
-
-`main -> origin/main`
-
-Final verification:
-
-- `HEAD -> main` = `351c425`
-- `origin/main` = `351c425`
-- full commit hash:
-  `351c425f3ef80c0f398ab09fc505d5bcc6c1d6e9`
+- `HEAD` = `23f54a11511914428f68042af2a3f76274122080`
+- `origin/main` = `23f54a11511914428f68042af2a3f76274122080`
 - working tree clean
-- branch up to date with remote
+- branch up to date with `origin/main`
 
 ## Known Non-Blocking Project-Wide Items
 
-- client production bundle remains above Vite's recommended chunk-size threshold
-- CRLF-to-LF warnings exist on tracked files
+- client production bundle remains above Vite's recommended 500 kB chunk threshold
+- CRLF-to-LF warnings exist on tracked files and are informational unless unintended line-ending churn appears
 - automated test coverage remains limited
 - repository-wide ESLint contains older unrelated issues
 - README remains materially stale
 - production `TRUST_PROXY_HOPS` must match deployment topology
-- other documented Media/Audit/controller limitations remain unchanged
+- documented Media/Audit/controller limitations remain unchanged
 
 Do not run:
 
@@ -382,37 +538,29 @@ Do not run:
 
 ## Immediate Next Action
 
-Continue the Professional UI/UX phase with:
+Continue:
 
-`Individual Admin Module Internal UI Polish`
+`Professional UI/UX -> Individual Admin Module Internal UI Polish`
 
-Preserve the completed shared Admin shell and analytics-first Dashboard.
+Do not reopen the completed shell/Dashboard or the two completed module batches unless a concrete regression appears.
 
-Do not redesign all Admin modules at once.
+Next action:
 
-Start by auditing the existing Admin module pages and identifying reusable visual patterns and safe implementation batches.
+1. inspect the remaining Admin pages
+2. group them into safe presentation-only batches
+3. prefer low-risk list/read-only modules before higher-risk editor/detail/auth/Media Picker workflows
+4. keep backend/API/RBAC/routes/business behavior unchanged
+5. use targeted ESLint + browser verification + production build + Git scope checks + Codex review before each commit
 
-Avoid changing backend APIs, authentication, RBAC, routing, Media Picker behavior, or module business logic unless a concrete UI requirement requires it.
+Avoid redesigning all remaining Admin modules simultaneously.
 
-## Next UI/UX Scope
+## Later UI/UX Scope
 
-Current next scope:
-
-`Individual Admin Module Internal UI Polish`
-
-Important:
-
-- do not redesign every module simultaneously
-- preserve the shared Admin shell
-- do not recreate global navigation inside individual pages
-- use larger practical batches for low-risk visual normalization
-- use smaller verified steps for forms, authentication, permissions, routing, Media Picker, and other higher-risk workflows
-
-After Admin internal page polish, continue with:
+After remaining Admin internal page polish:
 
 `Public Website UI/UX`
 
-Remaining later phases:
+Later phases:
 
 - Email and Notifications
 - Final SEO

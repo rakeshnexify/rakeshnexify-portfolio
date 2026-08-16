@@ -775,13 +775,16 @@ Explicitly deferred:
 
 ## Admin CMS Shell / Navigation
 
-Professional UI/UX phase uses one shared authenticated Admin shell with centralized operational navigation and an analytics-first Dashboard.
+Professional UI/UX uses one shared authenticated Admin shell with centralized operational navigation, an analytics-first Dashboard, and progressively normalized module internals.
 
-Latest committed checkpoint:
+Verified UI checkpoint history:
 
-`351c425 Refine admin shell and analytics dashboard`
+- `351c425 Refine admin shell and analytics dashboard`
+- `1051ec8 Document admin UI refinement milestone`
+- `84334b8 Polish admin module interfaces`
+- `23f54a1 Polish admin services and sales interfaces`
 
-The 2026-08-16 refinement preserves the established Admin architecture while hardening accessibility, responsive behavior, reduced-motion handling, navigation identity, and Dashboard visual hierarchy. The refinement is verified, committed, and pushed to `main`.
+The shared shell milestone is complete. Individual Admin module internal polish is active and is being completed in small verified batches without changing backend/API/business behavior.
 
 Frontend architecture:
 
@@ -864,6 +867,27 @@ Contextual back-to-module/list navigation on editors/details remains valid.
 
 Page-specific loading/error states and module logic remain local to each page.
 
+Presentation-only Admin module refinements should follow the established visual system:
+
+- practical workspace width around `max-w-[1440px]`
+- compact eyebrow/context line plus `2xl`/`3xl` page title rather than oversized hero treatment
+- concise descriptions and right-aligned primary actions where appropriate
+- filter surfaces generally use `rounded-2xl`, compact `p-4`/`p-5`, and consistent approximately 44px controls
+- results toolbars keep counts/context compact and place refresh/actions predictably
+- status badges use restrained semantic colors and compact radii
+- content cards generally use `rounded-xl`/`rounded-2xl`; avoid unnecessary nested card-inside-card layouts
+- destructive actions remain visually secondary to normal edit/open actions
+- loading/error/empty/success states remain compact and accessible
+- transitions and skeleton animation must respect reduced-motion preferences
+- page-level horizontal overflow must not be introduced
+- desktop/mobile layouts must remain practical with collapsed, hover-expanded, and pinned Admin sidebar states
+
+Presentation polish must preserve existing API calls, query semantics, authentication, RBAC, routes, business logic, mutation behavior, and backend-authoritative permissions unless a concrete product requirement explicitly changes them.
+
+Query-driven Admin pages must preserve URL/state synchronization. In particular, Package Designs supports `?servicePackage=<id>` and must react correctly to same-route query changes, Back/Forward navigation, and Clear behavior. The current implementation uses a `location.search`-keyed workspace remount so URL changes reinitialize filter state without a synchronous set-state effect.
+
+Accessible loading semantics remain required even when visual skeletons are used; skeleton-only loading states should retain an appropriate programmatic status announcement when the prior experience exposed one.
+
 Dashboard contract:
 
 `/admin/dashboard` remains analytics-first.
@@ -894,19 +918,33 @@ Do not introduce a global theme rewrite merely for the Admin shell.
 
 The dark Admin navigation rail and light Admin content surfaces are intentional and may coexist until a later explicit theme-system milestone.
 
+Completed Admin internal UI batches:
+
+Batch 1 — commit `84334b8 Polish admin module interfaces`
+
+- Services
+- Subscribers
+- Projects
+- Leads / CRM
+
+Batch 2 — commit `23f54a1 Polish admin services and sales interfaces`
+
+- Service Packages
+- Package Designs
+- Service Orders
+- Appointments / Consultations
+
+Both batches were manually browser-verified, targeted ESLint-clean, production-build verified, whitespace-checked, Codex-reviewed, committed, and pushed to `main`.
+
 Current UI/UX scope:
 
-The Admin Shell + Sidebar + Existing Analytics Dashboard refinement is complete, verified, committed, and pushed.
+The shared Admin Shell + Sidebar + Analytics Dashboard refinement is complete.
 
-Latest checkpoint:
+Eight representative/operational Admin module pages have also completed internal visual normalization across the first two verified batches.
 
-`351c425 Refine admin shell and analytics dashboard`
+Individual Admin module internal polish remains active for the remaining Admin pages. Continue in safe batches and preserve the established shell and visual contract.
 
-Individual Admin module internal visual redesign remains the next separate Professional UI/UX scope.
-
-Backend APIs, authentication, RBAC, Analytics business logic, public navigation, and public-site behavior remain outside presentation-only shell refinements.
-
-
+Backend APIs, authentication, RBAC, Analytics business logic, public navigation, and public-site behavior remain outside presentation-only Admin UI refinements.
 
 
 ## Admin Analytics Dashboard
@@ -1763,8 +1801,10 @@ No additional major functional module remains in the current functional roadmap.
 
 ## Current / Future Separate Phases
 
-- Professional UI/UX — active; shared Admin shell/sidebar + analytics Dashboard milestone complete
-- Professional UI/UX — remaining: individual Admin module internal polish and public-site visual polish
+- Professional UI/UX — active
+- Professional UI/UX — completed: shared Admin shell/sidebar + analytics Dashboard refinement
+- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations
+- Professional UI/UX — remaining: remaining individual Admin module internal polish, then public-site visual polish
 - Email and Notifications
 - Final SEO/testing/performance/security
 - Production deployment
