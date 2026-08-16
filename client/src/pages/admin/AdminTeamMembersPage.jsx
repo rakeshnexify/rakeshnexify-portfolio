@@ -25,10 +25,10 @@ const memberStatusLabels = {
 };
 
 const memberStatusStyles = {
-  active: "bg-emerald-100 text-emerald-700",
-  inactive: "bg-amber-100 text-amber-700",
-  former: "bg-slate-200 text-slate-700",
-  archived: "bg-red-100 text-red-700",
+  active: "bg-emerald-50 text-emerald-700",
+  inactive: "bg-amber-50 text-amber-700",
+  former: "bg-slate-100 text-slate-700",
+  archived: "bg-red-50 text-red-700",
 };
 
 const availabilityLabels = {
@@ -39,11 +39,17 @@ const availabilityLabels = {
 };
 
 const availabilityStyles = {
-  available: "bg-emerald-100 text-emerald-700",
-  limited: "bg-amber-100 text-amber-700",
-  unavailable: "bg-red-100 text-red-700",
-  "on-leave": "bg-blue-100 text-blue-700",
+  available: "bg-emerald-50 text-emerald-700",
+  limited: "bg-amber-50 text-amber-700",
+  unavailable: "bg-red-50 text-red-700",
+  "on-leave": "bg-blue-50 text-blue-700",
 };
+
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
 
 function createApiFilters(filters) {
   const apiFilters = {
@@ -132,14 +138,9 @@ function AdminTeamMembersPage() {
   );
 
   useEffect(() => {
-    const routeMessage =
-      location.state?.successMessage || location.state?.message || "";
-
-    if (!routeMessage) {
+    if (!location.state?.successMessage && !location.state?.message) {
       return;
     }
-
-    setSuccessMessage(routeMessage);
 
     navigate(location.pathname, {
       replace: true,
@@ -388,41 +389,41 @@ function AdminTeamMembersPage() {
   const canDeleteTeamMembers = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+    <main className="min-h-screen bg-slate-100">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-              Team Management
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              Team
             </p>
 
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Manage Team Members
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              Team Members
             </h1>
 
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-              Create, organise and publish Team member profiles, availability,
-              professional roles, visibility and featured status.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Manage Team profiles, professional roles, availability,
+              publication state and featured priority.
             </p>
           </div>
 
           <Link
             to="/admin/team/new"
-            className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
           >
-            Add New Team Member
+            Add Team Member
           </Link>
-        </div>
+        </header>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div>
               <label
                 htmlFor="team-member-search"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Search
               </label>
@@ -433,17 +434,17 @@ function AdminTeamMembersPage() {
                 type="search"
                 value={formFilters.search}
                 onChange={handleFilterChange}
-                placeholder="Search name, role, position, skill or tool"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                placeholder="Name, role, position, skill or tool"
+                className={inputClassName}
               />
             </div>
 
             <div>
               <label
                 htmlFor="team-member-professional-role"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Professional Role
+                Professional role
               </label>
 
               <input
@@ -453,16 +454,16 @@ function AdminTeamMembersPage() {
                 value={formFilters.professionalRole}
                 onChange={handleFilterChange}
                 placeholder="MERN Stack Developer"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               />
             </div>
 
             <div>
               <label
                 htmlFor="team-member-status"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Member Status
+                Member status
               </label>
 
               <select
@@ -470,7 +471,7 @@ function AdminTeamMembersPage() {
                 name="status"
                 value={formFilters.status}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All statuses</option>
                 <option value="active">Active</option>
@@ -483,7 +484,7 @@ function AdminTeamMembersPage() {
             <div>
               <label
                 htmlFor="team-member-availability"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Availability
               </label>
@@ -493,7 +494,7 @@ function AdminTeamMembersPage() {
                 name="availabilityStatus"
                 value={formFilters.availabilityStatus}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All availability statuses</option>
                 <option value="available">Available</option>
@@ -506,9 +507,9 @@ function AdminTeamMembersPage() {
             <div>
               <label
                 htmlFor="team-member-visibility"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Public Visibility
+                Public visibility
               </label>
 
               <select
@@ -516,7 +517,7 @@ function AdminTeamMembersPage() {
                 name="visibility"
                 value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All Team members</option>
                 <option value="visible">Visible</option>
@@ -527,9 +528,9 @@ function AdminTeamMembersPage() {
             <div>
               <label
                 htmlFor="team-member-featured"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Featured Status
+                Display type
               </label>
 
               <select
@@ -537,7 +538,7 @@ function AdminTeamMembersPage() {
                 name="featured"
                 value={formFilters.featured}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All Team members</option>
                 <option value="featured">Featured</option>
@@ -546,36 +547,44 @@ function AdminTeamMembersPage() {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
-              Clear Filters
+              Clear
             </button>
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
               Apply Filters
             </button>
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm font-semibold text-slate-600">
-            {isLoading
-              ? "Loading Team members..."
-              : `${resultCount} Team member(s) found`}
-          </p>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-800">
+              {isLoading
+                ? "Loading Team members..."
+                : `${resultCount} Team member${resultCount === 1 ? "" : "s"}`}
+            </p>
+
+            {!isLoading && (
+              <p className="mt-1 text-xs text-slate-500">
+                Showing the records matching the applied filters.
+              </p>
+            )}
+          </div>
 
           <button
             type="button"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
           >
             Refresh
           </button>
@@ -585,7 +594,7 @@ function AdminTeamMembersPage() {
           {successMessage && (
             <div
               role="status"
-              className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
+              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
             >
               {successMessage}
             </div>
@@ -594,7 +603,7 @@ function AdminTeamMembersPage() {
           {error && (
             <div
               role="alert"
-              className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
+              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
             >
               {error}
             </div>
@@ -603,32 +612,35 @@ function AdminTeamMembersPage() {
 
         {isLoading && (
           <div
-            className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3"
-            aria-label="Loading Team members"
+            role="status"
+            aria-live="polite"
+            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
           >
+            <span className="sr-only">Loading Team members...</span>
+
             {[1, 2, 3, 4, 5, 6].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-[34rem] animate-pulse rounded-3xl border border-slate-200 bg-white"
+                className="h-[30rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
         )}
 
         {!isLoading && !error && teamMembers.length === 0 && (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-10 text-center">
-            <p className="text-lg font-bold text-slate-950">
+          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+            <p className="text-base font-bold text-slate-950">
               No Team members found
             </p>
 
             <p className="mt-2 text-sm text-slate-500">
-              Try changing or clearing the current filters.
+              Change the filters or create the first Team member.
             </p>
           </div>
         )}
 
         {!isLoading && teamMembers.length > 0 && (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {teamMembers.map((teamMember) => {
               const skills = Array.isArray(teamMember.skills)
                 ? teamMember.skills
@@ -652,197 +664,186 @@ function AdminTeamMembersPage() {
                 availabilityStyles[teamMember.availabilityStatus] ||
                 "bg-slate-100 text-slate-700";
 
-              const isActionPending = actionTeamMemberId === teamMember._id;
+              const isActionPending =
+                actionTeamMemberId === teamMember._id;
 
               return (
                 <article
                   key={teamMember._id}
-                  className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+                  className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <div className="relative h-44 bg-gradient-to-br from-brand-100 via-white to-slate-100">
-                    <div className="absolute left-5 top-5 flex flex-wrap gap-2">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-bold ${memberStatusStyle}`}
-                      >
-                        {memberStatusLabel}
-                      </span>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-slate-950 text-sm font-bold text-white">
+                        <span>{getInitials(teamMember.name)}</span>
 
-                      {teamMember.isFeatured && (
-                        <span className="rounded-full bg-brand-600 px-3 py-1 text-xs font-bold text-white">
-                          Featured
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="absolute -bottom-12 left-6 h-24 w-24 overflow-hidden rounded-2xl border-4 border-white bg-slate-900 shadow-lg">
-                      <div className="flex h-full w-full items-center justify-center text-2xl font-black text-white">
-                        {getInitials(teamMember.name)}
+                        {teamMember.profileImageUrl && (
+                          <img
+                            src={teamMember.profileImageUrl}
+                            alt={
+                              teamMember.profileImageAlt ||
+                              `${teamMember.name} profile`
+                            }
+                            className="absolute inset-0 size-full object-cover"
+                            onError={(event) => {
+                              event.currentTarget.hidden = true;
+                            }}
+                          />
+                        )}
                       </div>
 
-                      {teamMember.profileImageUrl && (
-                        <img
-                          src={teamMember.profileImageUrl}
-                          alt={
-                            teamMember.profileImageAlt ||
-                            `${teamMember.name} profile`
-                          }
-                          className="absolute inset-0 h-full w-full object-cover"
-                          onError={(event) => {
-                            event.currentTarget.hidden = true;
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="px-6 pb-6 pt-16">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <h2 className="text-xl font-black text-slate-950">
+                      <div className="min-w-0">
+                        <h2 className="break-words text-lg font-bold text-slate-950">
                           {teamMember.name}
                         </h2>
 
-                        <p className="mt-1 text-sm font-bold text-brand-600">
+                        <p className="mt-1 break-words text-sm font-semibold text-brand-700">
                           {teamMember.professionalRole}
                         </p>
 
                         {teamMember.teamPosition && (
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="mt-1 break-words text-sm text-slate-500">
                             {teamMember.teamPosition}
                           </p>
                         )}
                       </div>
+                    </div>
+
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      {teamMember.isFeatured && (
+                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                          Featured
+                        </span>
+                      )}
 
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
                           teamMember.isVisible
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-slate-200 text-slate-700"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                       >
                         {teamMember.isVisible ? "Visible" : "Hidden"}
                       </span>
                     </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span
+                      className={`rounded-lg px-2.5 py-1 text-xs font-bold ${memberStatusStyle}`}
+                    >
+                      {memberStatusLabel}
+                    </span>
 
                     <span
-                      className={`mt-4 inline-flex rounded-full px-3 py-1 text-xs font-bold ${availabilityStyle}`}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-bold ${availabilityStyle}`}
                     >
                       {availabilityLabel}
                     </span>
 
-                    <p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-600">
-                      {teamMember.shortIntroduction ||
-                        "No short introduction has been added."}
-                    </p>
+                    <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
+                      Order {teamMember.order ?? 0}
+                    </span>
+                  </div>
 
-                    <div className="mt-5">
-                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
-                        Main Skills
+                  <p className="mt-4 line-clamp-3 break-words text-sm leading-6 text-slate-600">
+                    {teamMember.shortIntroduction ||
+                      "No short introduction has been added."}
+                  </p>
+
+                  <div className="mt-5">
+                    <p className={labelClassName}>Main skills</p>
+
+                    {skills.length > 0 ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {skills.slice(0, 5).map((skill) => (
+                          <span
+                            key={skill}
+                            className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+
+                        {skills.length > 5 && (
+                          <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                            +{skills.length - 5}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-sm text-slate-500">
+                        No skills added
                       </p>
+                    )}
+                  </div>
 
-                      {skills.length > 0 ? (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {skills.slice(0, 5).map((skill) => (
-                            <span
-                              key={skill}
-                              className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
-                            >
-                              {skill}
-                            </span>
-                          ))}
+                  <dl className="mt-5 border-t border-slate-100 pt-4 text-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <dt className="text-slate-500">Updated</dt>
 
-                          {skills.length > 5 && (
-                            <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                              +{skills.length - 5}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="mt-2 text-sm text-slate-500">
-                          No skills added
-                        </p>
-                      )}
+                      <dd className="font-semibold text-slate-700">
+                        {formatDate(teamMember.updatedAt)}
+                      </dd>
                     </div>
+                  </dl>
 
-                    <dl className="mt-5 grid grid-cols-2 gap-3 rounded-2xl bg-slate-50 p-4 text-sm">
-                      <div>
-                        <dt className="text-xs font-bold uppercase tracking-wide text-slate-400">
-                          Display Order
-                        </dt>
+                  <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
+                    <Link
+                      to={`/admin/team/${teamMember._id}/edit`}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+                    >
+                      Edit
+                    </Link>
 
-                        <dd className="mt-1 font-bold text-slate-700">
-                          {teamMember.order ?? 0}
-                        </dd>
-                      </div>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleVisibility(teamMember)}
+                      disabled={actionTeamMemberId !== ""}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                    >
+                      {isActionPending
+                        ? "Working..."
+                        : teamMember.isVisible
+                          ? "Hide"
+                          : "Show"}
+                    </button>
 
-                      <div>
-                        <dt className="text-xs font-bold uppercase tracking-wide text-slate-400">
-                          Updated
-                        </dt>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleFeatured(teamMember)}
+                      disabled={actionTeamMemberId !== ""}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                    >
+                      {isActionPending
+                        ? "Working..."
+                        : teamMember.isFeatured
+                          ? "Make Standard"
+                          : "Make Featured"}
+                    </button>
 
-                        <dd className="mt-1 font-bold text-slate-700">
-                          {formatDate(teamMember.updatedAt)}
-                        </dd>
-                      </div>
-                    </dl>
-
-                    <div className="mt-5 grid grid-cols-2 gap-3">
-                      <Link
-                        to={`/admin/team/${teamMember._id}/edit`}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
-                      >
-                        Edit
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => handleToggleVisibility(teamMember)}
-                        disabled={Boolean(actionTeamMemberId)}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : teamMember.isVisible
-                            ? "Hide"
-                            : "Show"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleToggleFeatured(teamMember)}
-                        disabled={Boolean(actionTeamMemberId)}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : teamMember.isFeatured
-                            ? "Unfeature"
-                            : "Feature"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteTeamMember(teamMember)}
-                        disabled={
-                          Boolean(actionTeamMemberId) || !canDeleteTeamMembers
-                        }
-                        title={
-                          canDeleteTeamMembers
-                            ? "Permanently delete Team member"
-                            : "Your role cannot permanently delete Team members"
-                        }
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isActionPending ? "Working..." : "Delete"}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteTeamMember(teamMember)}
+                      disabled={
+                        actionTeamMemberId !== "" || !canDeleteTeamMembers
+                      }
+                      title={
+                        canDeleteTeamMembers
+                          ? "Permanently delete Team member"
+                          : "Your role cannot permanently delete Team members"
+                      }
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                    >
+                      {isActionPending ? "Working..." : "Delete"}
+                    </button>
                   </div>
                 </article>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
     </main>
   );
 }

@@ -17,6 +17,12 @@ const initialFilters = {
   relatedProject: "",
 };
 
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 motion-reduce:transition-none";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
+
 function createApiFilters(filters) {
   const apiFilters = {
     search: filters.search.trim(),
@@ -121,13 +127,9 @@ function AdminTestimonialsPage() {
   );
 
   useEffect(() => {
-    const routeMessage = location.state?.successMessage || "";
-
-    if (!routeMessage) {
+    if (!location.state?.successMessage) {
       return;
     }
-
-    setSuccessMessage(routeMessage);
 
     navigate(location.pathname, {
       replace: true,
@@ -185,6 +187,7 @@ function AdminTestimonialsPage() {
         );
 
         setProjectOptions([]);
+
         setProjectOptionsError(
           requestError instanceof Error
             ? requestError.message
@@ -450,42 +453,39 @@ function AdminTestimonialsPage() {
   const canDeleteTestimonials = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+    <main className="min-h-screen bg-slate-100">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-              Testimonials Management
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              Social Proof
             </p>
 
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Manage Testimonials
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              Testimonials
             </h1>
 
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-              Manage client reviews, star ratings, profile media, related
-              Projects, display order, featured status and public visibility.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Manage client reviews, ratings, profile media, related Projects,
+              publication state and display priority.
             </p>
           </div>
 
           <Link
             to="/admin/testimonials/new"
-            className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
           >
-            Add New Testimonial
+            Add Testimonial
           </Link>
-        </div>
+        </header>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <div>
-              <label
-                htmlFor="testimonial-search"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="testimonial-search" className={labelClassName}>
                 Search
               </label>
 
@@ -496,14 +496,14 @@ function AdminTestimonialsPage() {
                 value={formFilters.search}
                 onChange={handleFilterChange}
                 placeholder="Client, company or review"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               />
             </div>
 
             <div>
               <label
                 htmlFor="testimonial-rating-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Rating
               </label>
@@ -513,7 +513,7 @@ function AdminTestimonialsPage() {
                 name="rating"
                 value={formFilters.rating}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All ratings</option>
                 <option value="5">5 stars</option>
@@ -527,7 +527,7 @@ function AdminTestimonialsPage() {
             <div>
               <label
                 htmlFor="testimonial-visibility-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Visibility
               </label>
@@ -537,7 +537,7 @@ function AdminTestimonialsPage() {
                 name="visibility"
                 value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All visibility</option>
                 <option value="visible">Visible</option>
@@ -548,9 +548,9 @@ function AdminTestimonialsPage() {
             <div>
               <label
                 htmlFor="testimonial-featured-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Featured
+                Display type
               </label>
 
               <select
@@ -558,7 +558,7 @@ function AdminTestimonialsPage() {
                 name="featured"
                 value={formFilters.featured}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All records</option>
                 <option value="featured">Featured</option>
@@ -569,7 +569,7 @@ function AdminTestimonialsPage() {
             <div>
               <label
                 htmlFor="testimonial-project-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Related Project
               </label>
@@ -580,7 +580,7 @@ function AdminTestimonialsPage() {
                 value={formFilters.relatedProject}
                 onChange={handleFilterChange}
                 disabled={Boolean(projectOptionsError)}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                className={inputClassName}
               >
                 <option value="">All Projects</option>
 
@@ -593,92 +593,115 @@ function AdminTestimonialsPage() {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={isLoading || Boolean(actionTestimonialId)}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Apply Filters
-            </button>
-
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleClearFilters}
               disabled={isLoading || Boolean(actionTestimonialId)}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
             >
-              Clear Filters
+              Clear
             </button>
 
             <button
-              type="button"
-              onClick={handleRefresh}
+              type="submit"
               disabled={isLoading || Boolean(actionTestimonialId)}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
             >
-              Refresh
+              Apply Filters
             </button>
           </div>
 
           {projectOptionsError && (
-            <p className="mt-4 text-sm font-medium text-amber-700">
+            <div
+              role="status"
+              className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800"
+            >
               Related Project filter unavailable: {projectOptionsError}
-            </p>
+            </div>
           )}
         </form>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-slate-600">
-            {isLoading
-              ? "Loading Testimonials..."
-              : `${resultCount} Testimonial${resultCount === 1 ? "" : "s"} found`}
-          </p>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-800">
+              {isLoading
+                ? "Loading Testimonials..."
+                : `${resultCount} Testimonial${resultCount === 1 ? "" : "s"}`}
+            </p>
+
+            {!isLoading && (
+              <p className="mt-1 text-xs text-slate-500">
+                Showing the records matching the applied filters.
+              </p>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={isLoading || Boolean(actionTestimonialId)}
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+          >
+            Refresh
+          </button>
         </div>
 
-        {successMessage && (
+        <div aria-live="polite">
+          {successMessage && (
+            <div
+              role="status"
+              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
+            >
+              {successMessage}
+            </div>
+          )}
+
+          {error && (
+            <div
+              role="alert"
+              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
+            >
+              {error}
+            </div>
+          )}
+        </div>
+
+        {isLoading && (
           <div
             role="status"
-            className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
+            aria-live="polite"
+            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
           >
-            {successMessage}
+            <span className="sr-only">Loading Testimonials...</span>
+
+            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
+              <div
+                key={placeholder}
+                className="h-[28rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
+              />
+            ))}
           </div>
         )}
 
-        {error && (
-          <div
-            role="alert"
-            className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
-          >
-            {error}
-          </div>
-        )}
-
-        {isLoading ? (
-          <div className="mt-8 grid min-h-64 place-items-center rounded-3xl border border-slate-200 bg-white">
-            <div className="text-center">
-              <div className="mx-auto size-11 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600" />
-              <p className="mt-4 text-sm font-semibold text-slate-600">
-                Loading Testimonials...
-              </p>
-            </div>
-          </div>
-        ) : testimonials.length === 0 ? (
-          <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-            <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-2xl text-brand-600">
+        {!isLoading && !error && testimonials.length === 0 && (
+          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-brand-50 text-xl text-brand-600">
               ★
             </div>
 
-            <h2 className="mt-5 text-2xl font-bold text-slate-950">
+            <h2 className="mt-4 text-base font-bold text-slate-950">
               No Testimonials found
             </h2>
 
-            <p className="mx-auto mt-3 max-w-xl leading-7 text-slate-600">
-              Create your first Testimonial or clear the current filters.
+            <p className="mt-2 text-sm text-slate-500">
+              Change the filters or create the first Testimonial.
             </p>
           </div>
-        ) : (
-          <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        )}
+
+        {!isLoading && testimonials.length > 0 && (
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {testimonials.map((testimonial) => {
               const isActionPending =
                 actionTestimonialId === testimonial._id;
@@ -686,180 +709,164 @@ function AdminTestimonialsPage() {
               return (
                 <article
                   key={testimonial._id}
-                  className="flex min-w-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+                  className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <div className="flex items-start gap-4 border-b border-slate-100 p-6">
-                    <div className="relative grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-brand-100 font-black text-brand-700">
-                      <span>{createInitials(testimonial.clientName)}</span>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-brand-100 text-sm font-bold text-brand-700">
+                        <span>{createInitials(testimonial.clientName)}</span>
 
-                      {testimonial.profileImageUrl && (
-                        <img
-                          src={testimonial.profileImageUrl}
-                          alt={
-                            testimonial.profileImageAlt ||
-                            `${testimonial.clientName} profile`
-                          }
-                          className="absolute inset-0 size-full object-cover"
-                          onError={(event) => {
-                            event.currentTarget.hidden = true;
-                          }}
-                        />
-                      )}
-                    </div>
+                        {testimonial.profileImageUrl && (
+                          <img
+                            src={testimonial.profileImageUrl}
+                            alt={
+                              testimonial.profileImageAlt ||
+                              `${testimonial.clientName} profile`
+                            }
+                            className="absolute inset-0 size-full object-cover"
+                            onError={(event) => {
+                              event.currentTarget.hidden = true;
+                            }}
+                          />
+                        )}
+                      </div>
 
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="min-w-0">
                         <h2 className="break-words text-lg font-bold text-slate-950">
                           {testimonial.clientName}
                         </h2>
 
-                        {testimonial.isFeatured && (
-                          <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-800">
-                            Featured
-                          </span>
+                        {(testimonial.clientRole ||
+                          testimonial.companyName) && (
+                          <p className="mt-1 break-words text-sm text-slate-500">
+                            {[
+                              testimonial.clientRole,
+                              testimonial.companyName,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </p>
                         )}
                       </div>
+                    </div>
 
-                      {(testimonial.clientRole || testimonial.companyName) && (
-                        <p className="mt-1 break-words text-sm text-slate-500">
-                          {[testimonial.clientRole, testimonial.companyName]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </p>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      {testimonial.isFeatured && (
+                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                          Featured
+                        </span>
                       )}
 
-                      <p
-                        className="mt-2 text-sm tracking-[0.08em] text-amber-500"
-                        aria-label={`${testimonial.rating} out of 5 stars`}
+                      <span
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+                          testimonial.isVisible
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
                       >
-                        {"★".repeat(testimonial.rating)}
-                        <span className="text-slate-200">
-                          {"★".repeat(5 - testimonial.rating)}
-                        </span>
-                      </p>
+                        {testimonial.isVisible ? "Visible" : "Hidden"}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col p-6">
-                    <p className="line-clamp-5 break-words leading-7 text-slate-600">
-                      “{testimonial.reviewText}”
-                    </p>
+                  <p
+                    className="mt-4 text-sm tracking-[0.08em] text-amber-500"
+                    aria-label={`${testimonial.rating} out of 5 stars`}
+                  >
+                    {"★".repeat(testimonial.rating)}
+                    <span aria-hidden="true" className="text-slate-200">
+                      {"★".repeat(5 - testimonial.rating)}
+                    </span>
+                  </p>
 
-                    <dl className="mt-6 grid gap-3 text-sm">
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Visibility
-                        </dt>
-                        <dd
-                          className={
-                            testimonial.isVisible
-                              ? "font-semibold text-emerald-700"
-                              : "font-semibold text-slate-500"
-                          }
-                        >
-                          {testimonial.isVisible ? "Visible" : "Hidden"}
-                        </dd>
-                      </div>
+                  <p className="mt-4 line-clamp-5 break-words text-sm leading-6 text-slate-600">
+                    “{testimonial.reviewText}”
+                  </p>
 
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Related Project
-                        </dt>
-                        <dd className="max-w-[65%] break-words text-right font-semibold text-slate-700">
-                          {getRelatedProjectLabel(
-                            testimonial.relatedProject,
-                          )}
-                        </dd>
-                      </div>
+                  <dl className="mt-5 divide-y divide-slate-100 border-y border-slate-100 text-sm">
+                    <div className="flex items-start justify-between gap-4 py-3">
+                      <dt className="text-slate-500">Related Project</dt>
 
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Order
-                        </dt>
-                        <dd className="font-semibold text-slate-700">
-                          {testimonial.order ?? 0}
-                        </dd>
-                      </div>
-
-                      <div className="flex items-start justify-between gap-4">
-                        <dt className="font-semibold text-slate-500">
-                          Updated
-                        </dt>
-                        <dd className="font-semibold text-slate-700">
-                          {formatUpdatedDate(testimonial.updatedAt)}
-                        </dd>
-                      </div>
-                    </dl>
-
-                    <div className="mt-auto grid grid-cols-2 gap-3 pt-6">
-                      <Link
-                        to={`/admin/testimonials/${testimonial._id}/edit`}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
-                      >
-                        Edit
-                      </Link>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleToggleVisibility(testimonial)
-                        }
-                        disabled={
-                          isLoading || Boolean(actionTestimonialId)
-                        }
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : testimonial.isVisible
-                            ? "Hide"
-                            : "Show"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleToggleFeatured(testimonial)
-                        }
-                        disabled={
-                          isLoading || Boolean(actionTestimonialId)
-                        }
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : testimonial.isFeatured
-                            ? "Unfeature"
-                            : "Feature"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleDeleteTestimonial(testimonial)
-                        }
-                        disabled={
-                          isLoading ||
-                          Boolean(actionTestimonialId) ||
-                          !canDeleteTestimonials
-                        }
-                        title={
-                          canDeleteTestimonials
-                            ? "Permanently delete Testimonial"
-                            : "Your role cannot permanently delete Testimonials"
-                        }
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isActionPending ? "Working..." : "Delete"}
-                      </button>
+                      <dd className="max-w-[65%] break-words text-right font-semibold text-slate-800">
+                        {getRelatedProjectLabel(testimonial.relatedProject)}
+                      </dd>
                     </div>
+
+                    <div className="flex items-start justify-between gap-4 py-3">
+                      <dt className="text-slate-500">Display order</dt>
+
+                      <dd className="font-semibold text-slate-800">
+                        {testimonial.order ?? 0}
+                      </dd>
+                    </div>
+
+                    <div className="flex items-start justify-between gap-4 py-3">
+                      <dt className="text-slate-500">Updated</dt>
+
+                      <dd className="font-semibold text-slate-700">
+                        {formatUpdatedDate(testimonial.updatedAt)}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
+                    <Link
+                      to={`/admin/testimonials/${testimonial._id}/edit`}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+                    >
+                      Edit
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleVisibility(testimonial)}
+                      disabled={isLoading || Boolean(actionTestimonialId)}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                    >
+                      {isActionPending
+                        ? "Working..."
+                        : testimonial.isVisible
+                          ? "Hide"
+                          : "Show"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleFeatured(testimonial)}
+                      disabled={isLoading || Boolean(actionTestimonialId)}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                    >
+                      {isActionPending
+                        ? "Working..."
+                        : testimonial.isFeatured
+                          ? "Make Standard"
+                          : "Make Featured"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteTestimonial(testimonial)}
+                      disabled={
+                        isLoading ||
+                        Boolean(actionTestimonialId) ||
+                        !canDeleteTestimonials
+                      }
+                      title={
+                        canDeleteTestimonials
+                          ? "Permanently delete Testimonial"
+                          : "Your role cannot permanently delete Testimonials"
+                      }
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                    >
+                      {isActionPending ? "Working..." : "Delete"}
+                    </button>
                   </div>
                 </article>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
     </main>
   );
 }
