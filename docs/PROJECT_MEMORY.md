@@ -791,6 +791,8 @@ Verified UI checkpoint history:
 - `5e48e33 Polish admin companies and posts interfaces`
 - `5695156 Document admin companies and posts UI milestone`
 - `89bd245 Polish admin contact messages interface`
+- `0da2474 Document admin contact messages UI milestone`
+- `5455e35 Polish admin detail interfaces`
 
 The shared shell milestone is complete. Individual Admin module internal polish is active and is being completed in small verified batches without changing backend/API/business behavior.
 
@@ -965,6 +967,11 @@ Batch 6 — commit `89bd245 Polish admin contact messages interface`
 
 - Contact Messages
 
+Batch 7 — commit `5455e35 Polish admin detail interfaces`
+
+- Appointment Detail
+- Service Order Detail
+
 All completed batches were manually browser-verified, targeted ESLint-clean, production-build verified, whitespace-checked, Codex-reviewed, committed, and pushed to `main`.
 
 Batch 3 preserves the established list-page behavior, including filtered local collection updates for Skills, Education, and Experience, UTC month/year timeline formatting for Education/Experience, existing delete RBAC, and accessible reduced-motion-safe loading states.
@@ -975,11 +982,13 @@ Batch 5 preserves server-refresh mutation behavior for both Companies and Posts.
 
 Batch 6 preserves the operational Contact Messages workflow without forcing a single mutation strategy. Status changes and deletes retain backend refresh through `refreshKey`; private Admin-note saves retain local message/note-draft replacement without a list reload; and Contact Message -> Lead conversion remains explicit/manual, preserves the original Contact Message, and navigates to the created Lead editor. Conversion remains available to `super-admin`, `admin`, and `editor`, while permanent deletion remains restricted to `super-admin` and `admin`. Filters/pagination/status-card behavior and `/admin/contact-messages` session-expiry redirect semantics remain unchanged.
 
+Batch 7 preserves behavior-sensitive detail workflows. Appointment Detail retains local merge after updates, explicit Appointment -> Lead conversion for all three Admin roles, linked-Lead rendering, current-path 401 redirect state, Admin+ deletion, and `409` backend-truth reconciliation for duplicate conversion or converted-Appointment delete conflicts. Preferred `YYYY-MM-DD` dates remain rendered without UTC date shifting. Service Order Detail retains immutable customer/project/commercial snapshots and the exact normal Admin update boundary of `status` + private `adminNotes`; snapshot price/billing/design values remain read-only and submission-derived, while permanent deletion remains Admin+ only.
+
 Current UI/UX scope:
 
 The shared Admin Shell + Sidebar + Analytics Dashboard refinement is complete.
 
-Nineteen Admin module pages have completed internal visual normalization across the first six verified batches.
+Twenty-one Admin module pages have completed internal visual normalization across the first seven verified batches.
 
 Individual Admin module internal polish remains active for the remaining Admin pages. Continue in safe batches and preserve the established shell and visual contract.
 
@@ -1842,7 +1851,7 @@ No additional major functional module remains in the current functional roadmap.
 
 - Professional UI/UX — active
 - Professional UI/UX — completed: shared Admin shell/sidebar + analytics Dashboard refinement
-- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations, Statistics, Skills, Education, Experience, Certifications / Achievements, Testimonials, FAQs, Team Members, Companies, Posts / Blog & News, Contact Messages
+- Professional UI/UX — completed Admin internal batches: Services, Subscribers, Projects, Leads / CRM, Service Packages, Package Designs, Service Orders, Appointments / Consultations, Statistics, Skills, Education, Experience, Certifications / Achievements, Testimonials, FAQs, Team Members, Companies, Posts / Blog & News, Contact Messages, Appointment Detail, Service Order Detail
 - Professional UI/UX — remaining: remaining individual Admin module internal polish, then public-site visual polish
 - Email and Notifications
 - Final SEO/testing/performance/security

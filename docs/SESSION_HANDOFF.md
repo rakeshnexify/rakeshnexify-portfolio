@@ -16,16 +16,16 @@ Major functional roadmap:
 
 Latest pushed Professional UI/UX checkpoint:
 
-`89bd245 Polish admin contact messages interface`
+`5455e35 Polish admin detail interfaces`
 
 Full hash:
 
-`89bd245a4434822d9a0581134f488df0f217eeed`
+`5455e359caadc08d4e34bc6f96e9904ab75a99c7`
 
 Latest verified Git state before this documentation replacement:
 
-- local `main` = `89bd245a4434822d9a0581134f488df0f217eeed`
-- `origin/main` = `89bd245a4434822d9a0581134f488df0f217eeed`
+- local `main` = `5455e359caadc08d4e34bc6f96e9904ab75a99c7`
+- `origin/main` = `5455e359caadc08d4e34bc6f96e9904ab75a99c7`
 - working tree clean
 - branch up to date with `origin/main`
 
@@ -218,6 +218,33 @@ Full hash:
 Pages:
 
 - `AdminContactMessagesPage.jsx`
+
+Status:
+
+`COMPLETE / VERIFIED / PUSHED`
+
+Documentation closeout for Batch 6:
+
+`0da2474 Document admin contact messages UI milestone`
+
+Full hash:
+
+`0da247469a359dd6790577fc5b15a753a51d83e7`
+
+### Admin Detail Interfaces polish — Batch 7
+
+Commit:
+
+`5455e35 Polish admin detail interfaces`
+
+Full hash:
+
+`5455e359caadc08d4e34bc6f96e9904ab75a99c7`
+
+Pages:
+
+- `AdminAppointmentDetailPage.jsx`
+- `AdminServiceOrderDetailPage.jsx`
 
 Status:
 
@@ -844,6 +871,76 @@ Verified:
 - collapsed/pinned sidebar alignment
 - no horizontal overflow
 
+### Batch 7
+
+Appointment Detail:
+
+`PASS`
+
+Verified:
+
+- back to Consultation requests
+- Refresh
+- requester details
+- email / phone links
+- Service / Package / Meeting Type / Assigned Admin
+- preferred date / time / timezone
+- confirmed schedule
+- Project Summary
+- Additional Message
+- Appointment update form
+- update success/error + field validation
+- update RBAC: super-admin/admin/editor
+- explicit Appointment -> Lead conversion
+- conversion field errors
+- successful conversion -> Linked Lead panel
+- Open Linked Lead route
+- duplicate/race conversion `409` backend refresh/reconciliation
+- delete RBAC: super-admin/admin
+- Editor delete section absent
+- converted Appointment delete backend protection
+- delete `409` backend refresh/reconciliation
+- loading/error/retry states
+- strict date-only preferred-date rendering preserved
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
+Service Order Detail:
+
+`PASS`
+
+Verified:
+
+- back to Service Orders
+- order number + status display
+- Open Selection
+- customer name/email/phone/company
+- email + phone links
+- immutable Service snapshot
+- immutable Package snapshot
+- package group/type
+- snapshot price/currency/custom pricing
+- snapshot billing
+- immutable Design snapshot
+- requirements
+- preferred start date
+- customer notes
+- exact seven status options
+- private Admin Notes
+- Save Order success/error
+- exact editable boundary: status + adminNotes only
+- customer/project/commercial data remains display-only
+- delete RBAC: super-admin/admin
+- Editor delete disabled
+- delete confirmation
+- successful delete -> `/admin/service-orders`
+- loading/not-found/error states
+- responsive layout
+- sticky management panel
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
 ## Important Batch 2 Review Remediations
 
 The first Codex review of Batch 2 found two issues.
@@ -1219,6 +1316,68 @@ Final Git verification after push:
 - working tree clean
 - branch up to date with `origin/main`
 
+### Batch 7
+
+Combined targeted ESLint for:
+
+- `AdminAppointmentDetailPage.jsx`
+- `AdminServiceOrderDetailPage.jsx`
+
+Result:
+
+`PASS`
+
+Manual browser verification:
+
+`PASS`
+
+Production build:
+
+`npm run build`
+
+Result:
+
+`PASS`
+
+Observed Batch 7 Vite output:
+
+- Vite `8.1.5`
+- 280 modules transformed
+- `dist/index.html` `1.83 kB`, gzip `0.63 kB`
+- CSS `103.65 kB`, gzip `15.90 kB`
+- JS `1,775.95 kB`, gzip `370.64 kB`
+- build completed in `528ms`
+
+The existing greater-than-500-kB chunk warning remains non-blocking and is deferred to Performance Optimization.
+
+Git verification:
+
+- exactly two expected files modified/staged
+- `git diff --check` passed
+- `git diff --cached --check` passed
+- CRLF-to-LF warnings were informational
+- no unstaged or unrelated scope before commit
+
+Fresh Codex review:
+
+- Critical / High: `NONE`
+- Medium: `NONE`
+- Low: `NONE`
+- Regression assessment: `SAFE`
+- Scope assessment: `CLEAN`
+- Final verdict: `READY TO COMMIT`
+
+Commit/push:
+
+`5455e35 Polish admin detail interfaces`
+
+Final Git verification after push:
+
+- `HEAD` = `5455e359caadc08d4e34bc6f96e9904ab75a99c7`
+- `origin/main` = `5455e359caadc08d4e34bc6f96e9904ab75a99c7`
+- working tree clean
+- branch up to date with `origin/main`
+
 ## Known Non-Blocking Project-Wide Items
 
 - client production bundle remains above Vite's recommended 500 kB chunk threshold
@@ -1239,13 +1398,13 @@ Continue:
 
 `Professional UI/UX -> Individual Admin Module Internal UI Polish`
 
-Do not reopen the completed shell/Dashboard or the six completed module batches unless a concrete regression appears.
+Do not reopen the completed shell/Dashboard or the seven completed module batches unless a concrete regression appears.
 
 Next action:
 
-1. continue the remaining Admin operational/read surfaces in smaller behavior-aware batches before broad editor/auth/Media workflows
-2. recommended next implementation batch: `AdminAppointmentDetailPage.jsx` and `AdminServiceOrderDetailPage.jsx`, after auditing their status/update/delete/detail behavior independently
-3. keep `AdminAuditLogsPage.jsx` and `AdminAuditLogDetailPage.jsx` together in a separate super-admin-only read-only Audit batch
+1. continue the remaining Admin internal surfaces in smaller behavior-aware batches before broad editor/auth/Media workflows
+2. recommended next implementation batch: `AdminAuditLogsPage.jsx` and `AdminAuditLogDetailPage.jsx` together as a super-admin-only, read-only Audit batch
+3. preserve Audit privacy/minimization, list-vs-detail data boundaries, 401 logout behavior, 403 non-logout behavior, and the complete absence of Audit mutation controls
 4. keep backend/API/RBAC/routes/business behavior unchanged
 5. use targeted ESLint + browser verification + production build + Git scope checks + fresh Codex review before each implementation commit
 
