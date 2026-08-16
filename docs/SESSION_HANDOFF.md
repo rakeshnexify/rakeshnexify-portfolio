@@ -16,16 +16,16 @@ Major functional roadmap:
 
 Latest pushed Professional UI/UX checkpoint:
 
-`9e801a7 Polish admin supporting content interfaces`
+`5e48e33 Polish admin companies and posts interfaces`
 
 Full hash:
 
-`9e801a7ea2364fefc9908b8c91764a5f9ad5ce0d`
+`5e48e33ac796da057162a4d95108e9eb379b01cc`
 
 Latest verified Git state before this documentation replacement:
 
-- local `main` = `9e801a7ea2364fefc9908b8c91764a5f9ad5ce0d`
-- `origin/main` = `9e801a7ea2364fefc9908b8c91764a5f9ad5ce0d`
+- local `main` = `5e48e33ac796da057162a4d95108e9eb379b01cc`
+- `origin/main` = `5e48e33ac796da057162a4d95108e9eb379b01cc`
 - working tree clean
 - branch up to date with `origin/main`
 
@@ -165,6 +165,33 @@ Pages:
 - `AdminTestimonialsPage.jsx`
 - `AdminFaqsPage.jsx`
 - `AdminTeamMembersPage.jsx`
+
+Status:
+
+`COMPLETE / VERIFIED / PUSHED`
+
+Documentation closeout for Batch 4:
+
+`f35e2f7 Document admin supporting content UI milestone`
+
+Full hash:
+
+`f35e2f759e82b4557d909462f5b9939d115b7207`
+
+### Admin Companies + Posts polish — Batch 5
+
+Commit:
+
+`5e48e33 Polish admin companies and posts interfaces`
+
+Full hash:
+
+`5e48e33ac796da057162a4d95108e9eb379b01cc`
+
+Pages:
+
+- `AdminCompaniesPage.jsx`
+- `AdminPostsPage.jsx`
 
 Status:
 
@@ -678,6 +705,77 @@ Verified:
 - collapsed/pinned sidebar alignment
 - no horizontal overflow
 
+### Batch 5
+
+Companies:
+
+`PASS`
+
+Verified:
+
+- Search
+- Industry
+- Relationship: Owned / Managed / Partner / Client / Other
+- Status: Planned / Active / Inactive / Archived
+- Visibility
+- Display Type
+- Apply/Clear
+- Refresh
+- Add Company
+- Edit
+- Hide/Show with server refresh
+- Make Featured/Make Standard with server refresh
+- Delete with server refresh
+- delete permission
+- Company relationship semantics preserved for Clients / Partners
+- logo + initials fallback
+- cover image + visual fallback
+- legal name/slug/industry
+- first 5 business areas + overflow count
+- result count/updated date
+- success/error/retry/loading/empty states
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
+Posts / Blog & News:
+
+`PASS`
+
+Verified:
+
+- Search
+- Type: Blog & News / Blog only / News only
+- only `blog` / `news` become API type filters
+- Category
+- Tag
+- Visibility
+- Display Type
+- Apply/Clear
+- Refresh
+- Add Post
+- Edit
+- Hide/Show with server refresh
+- Make Featured/Make Standard with server refresh
+- Delete with server refresh
+- delete permission
+- explicit 403 action handling preserved
+- Blog/News badges
+- Featured + Visible/Hidden badges
+- featured image + Blog/News initial fallback
+- title/slug/excerpt
+- category
+- first 3 tags + overflow count
+- author
+- published date
+- reading time
+- related Project count
+- display order
+- success/error/loading/empty states
+- responsive layout
+- collapsed/pinned sidebar alignment
+- no horizontal overflow
+
 ## Important Batch 2 Review Remediations
 
 The first Codex review of Batch 2 found two issues.
@@ -930,6 +1028,68 @@ Final Git verification after push:
 - working tree clean
 - branch up to date with `origin/main`
 
+### Batch 5
+
+Combined targeted ESLint for:
+
+- `AdminCompaniesPage.jsx`
+- `AdminPostsPage.jsx`
+
+Result:
+
+`PASS`
+
+Manual browser verification:
+
+`PASS`
+
+Production build:
+
+`npm run build`
+
+Result:
+
+`PASS`
+
+Observed Batch 5 Vite output:
+
+- Vite `8.1.5`
+- 280 modules transformed
+- `dist/index.html` `1.83 kB`, gzip `0.63 kB`
+- CSS `103.03 kB`, gzip `15.80 kB`
+- JS `1,765.24 kB`, gzip `369.30 kB`
+- build completed in `305ms`
+
+The existing greater-than-500-kB chunk warning remains non-blocking and is deferred to Performance Optimization.
+
+Git verification:
+
+- exactly two expected files modified/staged
+- `git diff --check` passed
+- `git diff --cached --check` passed
+- CRLF-to-LF warnings were informational
+- no unstaged or unrelated scope before commit
+
+Fresh Codex review:
+
+- Critical / High: `NONE`
+- Medium: `NONE`
+- Low: `NONE`
+- Regression assessment: `SAFE`
+- Scope assessment: `CLEAN`
+- Final verdict: `READY TO COMMIT`
+
+Commit/push:
+
+`5e48e33 Polish admin companies and posts interfaces`
+
+Final Git verification after push:
+
+- `HEAD` = `5e48e33ac796da057162a4d95108e9eb379b01cc`
+- `origin/main` = `5e48e33ac796da057162a4d95108e9eb379b01cc`
+- working tree clean
+- branch up to date with `origin/main`
+
 ## Known Non-Blocking Project-Wide Items
 
 - client production bundle remains above Vite's recommended 500 kB chunk threshold
@@ -950,14 +1110,14 @@ Continue:
 
 `Professional UI/UX -> Individual Admin Module Internal UI Polish`
 
-Do not reopen the completed shell/Dashboard or the four completed module batches unless a concrete regression appears.
+Do not reopen the completed shell/Dashboard or the five completed module batches unless a concrete regression appears.
 
 Next action:
 
-1. continue the remaining Admin list/read surfaces in smaller behavior-aware batches before broad editor/auth/Media workflows
-2. recommended next list batch: `AdminCompaniesPage.jsx` and `AdminPostsPage.jsx`
-3. handle `AdminContactMessagesPage.jsx` separately or in a small operational batch because message workflow actions require extra behavior verification
-4. keep Audit list/detail, Appointment detail, and Service Order detail in focused read/detail batches
+1. continue the remaining Admin operational/read surfaces in smaller behavior-aware batches before broad editor/auth/Media workflows
+2. recommended next implementation: `AdminContactMessagesPage.jsx` as a focused single-page operational batch because message workflow actions and Contact Message -> Lead conversion require extra behavior verification
+3. keep `AdminAppointmentDetailPage.jsx` and `AdminServiceOrderDetailPage.jsx` in a focused detail-page batch after their current behavior is audited
+4. keep `AdminAuditLogsPage.jsx` and `AdminAuditLogDetailPage.jsx` together in a separate super-admin-only read-only Audit batch
 5. keep backend/API/RBAC/routes/business behavior unchanged
 6. use targeted ESLint + browser verification + production build + Git scope checks + fresh Codex review before each implementation commit
 
