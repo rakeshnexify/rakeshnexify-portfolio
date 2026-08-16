@@ -10,7 +10,7 @@ function AdminTopbar({ admin, onOpenNavigation, onLogout }) {
       <div className="flex h-16 items-center gap-2.5 px-3 sm:gap-3 sm:px-5">
         <button
           aria-label="Open admin navigation"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors duration-150 motion-reduce:transition-none hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           onClick={onOpenNavigation}
           title="Open navigation"
           type="button"
@@ -19,7 +19,7 @@ function AdminTopbar({ admin, onOpenNavigation, onLogout }) {
         </button>
 
         <Link
-          aria-label="Go to admin dashboard"
+          aria-label="RN — RakeshNexify Admin CMS dashboard"
           className="flex min-w-0 items-center gap-2.5 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
           to="/admin/dashboard"
         >
@@ -34,6 +34,7 @@ function AdminTopbar({ admin, onOpenNavigation, onLogout }) {
             <span className="block truncate text-sm font-bold tracking-tight text-slate-950">
               RakeshNexify
             </span>
+
             <span className="block truncate text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">
               Admin CMS
             </span>
@@ -45,6 +46,7 @@ function AdminTopbar({ admin, onOpenNavigation, onLogout }) {
             <p className="max-w-44 truncate text-xs font-semibold leading-4 text-slate-800">
               {adminName}
             </p>
+
             <p className="max-w-44 truncate text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">
               {adminRole}
             </p>
@@ -52,7 +54,7 @@ function AdminTopbar({ admin, onOpenNavigation, onLogout }) {
 
           <a
             aria-label="View public website"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors duration-150 motion-reduce:transition-none hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
             href="/"
             title="View Website"
           >
@@ -60,8 +62,8 @@ function AdminTopbar({ admin, onOpenNavigation, onLogout }) {
           </a>
 
           <button
-            aria-label="Log out"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2"
+            aria-label="Log out of admin"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors duration-150 motion-reduce:transition-none hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2"
             onClick={onLogout}
             title="Logout"
             type="button"

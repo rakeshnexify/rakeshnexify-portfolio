@@ -59,7 +59,7 @@ function AdminLayout() {
   }, [logout, navigate]);
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
+    <div className="min-h-screen overflow-x-clip bg-slate-100 text-slate-900">
       <AdminSidebar
         admin={admin}
         isPinned={isPinned}
@@ -87,7 +87,7 @@ function AdminLayout() {
       />
 
       <div
-        className={`min-w-0 transition-[padding-left] duration-200 ease-out lg:min-h-screen ${
+        className={`min-w-0 transition-[padding-left] duration-200 ease-out motion-reduce:transition-none lg:min-h-screen ${
           isPinned ? "lg:pl-64" : "lg:pl-[72px]"
         }`}
       >

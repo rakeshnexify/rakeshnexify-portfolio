@@ -1,6 +1,6 @@
 # Project Memory
 
-Last updated: 2026-08-13
+Last updated: 2026-08-16
 
 ## Purpose
 
@@ -775,64 +775,80 @@ Explicitly deferred:
 
 ## Admin CMS Shell / Navigation
 
-Professional UI/UX phase milestone: the shared authenticated Admin shell, Admin sidebar navigation, and analytics-first Dashboard are implemented and committed.
+Professional UI/UX phase uses one shared authenticated Admin shell with centralized operational navigation and an analytics-first Dashboard.
 
-Latest implementation checkpoint:
+Baseline committed checkpoint:
 
 `6c8f95d Build professional admin shell and analytics dashboard`
 
+The current 2026-08-16 refinement preserves that architecture while hardening accessibility, responsive behavior, reduced-motion handling, navigation identity, and Dashboard visual hierarchy.
+
 Frontend architecture:
 
-- `client/src/components/admin/layout/AdminLayout.jsx`
-- `client/src/components/admin/layout/AdminSidebar.jsx`
-- `client/src/components/admin/layout/AdminMobileDrawer.jsx`
-- `client/src/components/admin/layout/AdminNavigation.jsx`
-- `client/src/components/admin/layout/AdminTopbar.jsx`
-- `client/src/components/admin/layout/adminIcons.jsx`
-- `client/src/config/adminNavigation.js`
-- `client/src/hooks/useAdminSidebarState.js`
+`client/src/components/admin/layout/AdminLayout.jsx`
+`client/src/components/admin/layout/AdminSidebar.jsx`
+`client/src/components/admin/layout/AdminMobileDrawer.jsx`
+`client/src/components/admin/layout/AdminNavigation.jsx`
+`client/src/components/admin/layout/AdminTopbar.jsx`
+`client/src/components/admin/layout/adminIcons.jsx`
+`client/src/config/adminNavigation.js`
+`client/src/hooks/useAdminSidebarState.js`
 
 Routing contract:
 
-`ProtectedAdminRoute -> AdminLayout -> Outlet -> Admin page`
+`ProtectedAdminRoute -> AdminLayout -> Outlet -> protected Admin page`
 
 `/admin/login` remains outside the authenticated visual shell.
 
 `/admin` redirects to `/admin/dashboard`.
 
-The Admin operational navigation is code-owned and separate from public `SiteSettings.sections` navigation/publication management.
+The Admin operational navigation is code-owned and must remain separate from public `SiteSettings.sections` navigation/publication management.
 
-Desktop sidebar behavior:
+Desktop sidebar contract:
 
-- default compact icon rail
-- approximately 72px collapsed width
-- temporary hover/focus expansion without permanently consuming content width
-- persistent pinned expansion
-- pinned state stored in versioned localStorage key:
-  `rakeshnexify_admin_sidebar_pinned_v1`
-- collapsed items retain accessible labels/tooltips and visible focus treatment
+Default desktop state is a compact approximately 72px icon rail.
 
-Mobile/tablet behavior:
+Unpinned hover temporarily expands the rail without permanently consuming content width.
 
-- off-canvas drawer instead of hover behavior
-- backdrop close
-- Escape close
-- focus trap
-- focus restoration
-- body-scroll lock/cleanup
-- drawer z-index remains below the reusable Media Picker layer
+Keyboard focus inside the rail also expands it so navigation does not depend on hover.
 
-Admin navigation hierarchy is centralized and role-aware.
+Pinned mode keeps the rail expanded and shifts the shared content area appropriately.
 
-Primary groups:
+Pinned preference remains stored in the versioned localStorage key:
 
-- Dashboard
-- Content
-- Services & Sales
-- CRM
-- Team
-- Site
-- System
+`rakeshnexify_admin_sidebar_pinned_v1`
+
+Sidebar width/label/color transitions must respect reduced-motion preferences.
+
+Collapsed navigation items retain usable accessible names, visible focus treatment, and supplemental visual tooltips.
+
+Controls with visible textual labels should normally derive their accessible name from that visible text. Explicit `aria-label` remains appropriate for genuinely icon-only controls.
+
+Mobile/tablet contract:
+
+Mobile uses an off-canvas drawer rather than desktop hover behavior.
+
+The drawer preserves backdrop close, explicit close control, Escape handling, focus entry, focus trapping, focus restoration, route-click close, body-scroll lock, and cleanup.
+
+If the viewport crosses into the desktop breakpoint while the drawer is open, the drawer must deactivate and release its scroll-lock/keyboard behavior.
+
+Focus restoration must not force focus onto a trigger that is no longer visible or focusable after a breakpoint change.
+
+Desktop and mobile reuse the same centralized Admin navigation configuration.
+
+Each mounted `AdminNavigation` instance must generate unique DOM IDs for group labels and nested `aria-controls` targets so simultaneous desktop/mobile navigation instances never create duplicate IDs.
+
+Admin navigation hierarchy remains centralized and role-aware.
+
+Primary groups remain:
+
+Dashboard
+Content
+Services & Sales
+CRM
+Team
+Site
+System
 
 `Service Packages -> Package Designs` is the current intentional nested Admin navigation relationship.
 
@@ -840,38 +856,54 @@ Admin Activity / Audit Log navigation is visible only to `super-admin`; backend 
 
 Admin page normalization contract:
 
-- shared shell owns Admin branding/account/logout/navigation chrome
-- individual Admin list/editor/detail pages must not reintroduce duplicate RN/RakeshNexify headers
-- individual pages must not duplicate Dashboard-back navigation that the sidebar already provides
-- contextual back-to-module/list navigation on editors/details remains valid
-- page-specific loading/error states and module logic remain local to the page
-- page-level `<main>` elements are allowed because `AdminLayout` uses a neutral Outlet wrapper
+The shared shell owns Admin branding, account identity, logout, global navigation, responsive layout, and sidebar spacing.
 
-Admin Dashboard contract:
+Individual Admin pages must not recreate global Admin shell chrome or compensate for the sidebar with manual layout margins.
 
-- `/admin/dashboard` is analytics-first
-- do not reintroduce a duplicate Management Modules card grid
-- module navigation belongs in the Admin sidebar
-- existing Analytics API/hook/range/refresh/retry/401 behavior remains Dashboard-owned
-- supported Analytics ranges remain `7d`, `30d`, `90d`, `all`
-- the shared Admin shell must not fetch Analytics
+Contextual back-to-module/list navigation on editors/details remains valid.
 
-Current UI/UX scope decision:
+Page-specific loading/error states and module logic remain local to each page.
 
-- the Admin shell/navigation/dashboard milestone is complete
-- individual Admin module internal visual redesign remains a later UI/UX task
-- backend/public APIs were intentionally unchanged by this milestone
+Dashboard contract:
 
-Accessibility expectations for future Admin shell changes:
+`/admin/dashboard` remains analytics-first.
 
-- keyboard-reachable navigation
-- visible focus
-- correct `aria-current`, `aria-expanded`, `aria-pressed` where applicable
-- collapsed-navigation accessible names/tooltips
-- mobile dialog semantics
-- Escape handling
-- focus trap/restoration
-- body-scroll cleanup
+Do not introduce a duplicate Management Modules navigation-card grid.
+
+Module discovery belongs in the Admin sidebar.
+
+Existing Analytics API/hook/business logic remains Dashboard-owned.
+
+Supported Analytics ranges remain:
+
+`7d`, `30d`, `90d`, `all`
+
+The existing range transition, refresh, retry, stale-data protection, and unauthorized-session behavior must remain intact.
+
+Dashboard visual treatment should remain professional and information-dense rather than using oversized hero headings/cards.
+
+Analytics sections may be visually refined, but calculations, privacy rules, API contracts, status semantics, conversion semantics, and accessible trend data must not be changed merely for presentation.
+
+The trend chart remains native SVG and must preserve an accessible title/description, visible legend, and tabular representation.
+
+Theme contract:
+
+There is currently no established full application dark-mode provider in the active architecture.
+
+Do not introduce a global theme rewrite merely for the Admin shell.
+
+The dark Admin navigation rail and light Admin content surfaces are intentional and may coexist until a later explicit theme-system milestone.
+
+Current UI/UX scope:
+
+The Admin Shell + Sidebar + Existing Analytics Dashboard foundation is complete at the implementation and runtime-verification level.
+
+Individual Admin module internal visual redesign remains a separate Professional UI/UX scope.
+
+Backend APIs, authentication, RBAC, Analytics business logic, public navigation, and public-site behavior remain outside presentation-only shell refinements.
+
+
+
 
 ## Admin Analytics Dashboard
 

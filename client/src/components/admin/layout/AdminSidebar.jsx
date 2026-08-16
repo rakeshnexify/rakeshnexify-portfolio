@@ -20,10 +20,10 @@ function AdminSidebar({
   return (
     <aside
       aria-label="Admin sidebar"
-      className={`fixed inset-y-0 left-0 z-40 hidden border-r border-slate-800/90 bg-slate-950 text-white shadow-2xl shadow-slate-950/20 transition-[width,box-shadow] duration-200 ease-out lg:flex lg:flex-col ${
+      className={`fixed inset-y-0 left-0 z-40 hidden border-r border-slate-800/90 bg-slate-950 text-white shadow-xl shadow-slate-950/20 transition-[width,box-shadow] duration-200 ease-out motion-reduce:transition-none lg:flex lg:flex-col ${
         isRailExpanded
-          ? "w-64 shadow-slate-950/35"
-          : "w-[72px] shadow-slate-950/15"
+          ? "w-64 shadow-slate-950/30"
+          : "w-[72px] shadow-slate-950/10"
       }`}
       onBlurCapture={onBlurCapture}
       onFocusCapture={onFocusCapture}
@@ -36,7 +36,7 @@ function AdminSidebar({
         }`}
       >
         <Link
-          aria-label="Admin dashboard"
+          aria-label="RN — RakeshNexify Admin CMS dashboard"
           className={`group flex min-w-0 items-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${
             isRailExpanded ? "gap-2.5" : "justify-center"
           }`}
@@ -44,20 +44,21 @@ function AdminSidebar({
         >
           <span
             aria-hidden="true"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-500 text-sm font-extrabold tracking-tight text-white shadow-lg shadow-brand-950/30"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-sm font-extrabold tracking-tight text-white shadow-md shadow-brand-950/30"
           >
             RN
           </span>
 
           <span
-            className={`min-w-0 overflow-hidden transition-[width,opacity] duration-150 ${
+            className={`min-w-0 overflow-hidden transition-[width,opacity] duration-150 motion-reduce:transition-none ${
               isRailExpanded ? "w-36 opacity-100" : "w-0 opacity-0"
             }`}
           >
             <span className="block truncate text-sm font-bold tracking-tight text-white">
               RakeshNexify
             </span>
-            <span className="block truncate text-[11px] font-medium text-slate-500">
+
+            <span className="block truncate text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
               Admin CMS
             </span>
           </span>
@@ -65,9 +66,9 @@ function AdminSidebar({
 
         {isRailExpanded ? (
           <button
-            aria-label={isPinned ? "Unpin sidebar" : "Pin sidebar open"}
+            aria-label={isPinned ? "Unpin admin sidebar" : "Pin admin sidebar"}
             aria-pressed={isPinned}
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
               isPinned
                 ? "bg-brand-500/15 text-brand-300 hover:bg-brand-500/20"
                 : "text-slate-500 hover:bg-white/[0.07] hover:text-white"
@@ -81,7 +82,7 @@ function AdminSidebar({
         ) : null}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-x-visible overflow-y-auto py-3 [scrollbar-width:thin] [scrollbar-color:rgb(51_65_85)_transparent]">
+      <div className="min-h-0 flex-1 overscroll-contain overflow-x-visible overflow-y-auto py-3 [scrollbar-color:rgb(51_65_85)_transparent] [scrollbar-width:thin]">
         <AdminNavigation
           className={isRailExpanded ? "px-2.5" : "px-2"}
           isRailExpanded={isRailExpanded}
@@ -89,10 +90,10 @@ function AdminSidebar({
         />
       </div>
 
-      <div className="shrink-0 border-t border-slate-800/90 p-2">
+      <div className="shrink-0 border-t border-slate-800/90 bg-slate-950 p-2">
         <div className="space-y-1">
           <a
-            className={`group relative flex min-h-10 items-center rounded-xl text-sm font-medium text-slate-300 transition-colors hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+            className={`group relative flex min-h-10 items-center rounded-xl text-sm font-medium text-slate-300 transition-colors duration-150 motion-reduce:transition-none hover:bg-white/[0.07] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
               isRailExpanded ? "px-3" : "justify-center px-2"
             }`}
             href="/"
@@ -100,13 +101,13 @@ function AdminSidebar({
           >
             <span
               aria-hidden="true"
-              className="flex h-8 w-8 shrink-0 items-center justify-center text-slate-400 group-hover:text-slate-200"
+              className="flex h-8 w-8 shrink-0 items-center justify-center text-slate-400 transition-colors duration-150 motion-reduce:transition-none group-hover:text-slate-200"
             >
               <AdminIcon name="external" size={18} />
             </span>
 
             <span
-              className={`min-w-0 truncate transition-[width,opacity,margin] duration-150 ${
+              className={`min-w-0 truncate transition-[width,opacity,margin] duration-150 motion-reduce:transition-none ${
                 isRailExpanded
                   ? "ml-2.5 w-auto flex-1 opacity-100"
                   : "ml-0 w-0 overflow-hidden opacity-0"
@@ -126,7 +127,7 @@ function AdminSidebar({
           </a>
 
           <div
-            className={`flex min-h-12 items-center rounded-xl bg-white/[0.035] ${
+            className={`flex min-h-12 items-center rounded-xl border border-transparent bg-white/[0.035] ${
               isRailExpanded ? "px-3" : "justify-center px-2"
             }`}
           >
@@ -138,7 +139,7 @@ function AdminSidebar({
             </span>
 
             <div
-              className={`min-w-0 transition-[width,opacity,margin] duration-150 ${
+              className={`min-w-0 transition-[width,opacity,margin] duration-150 motion-reduce:transition-none ${
                 isRailExpanded
                   ? "ml-2.5 w-auto flex-1 opacity-100"
                   : "ml-0 w-0 overflow-hidden opacity-0"
@@ -147,9 +148,11 @@ function AdminSidebar({
               <p className="truncate text-xs font-semibold text-slate-100">
                 {adminName}
               </p>
-              <p className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+
+              <p className="truncate text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
                 {adminRole}
               </p>
+
               {adminEmail ? (
                 <p className="mt-0.5 truncate text-[10px] text-slate-600">
                   {adminEmail}
@@ -159,7 +162,7 @@ function AdminSidebar({
           </div>
 
           <button
-            className={`group relative flex min-h-10 w-full items-center rounded-xl text-sm font-medium text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 ${
+            className={`group relative flex min-h-10 w-full items-center rounded-xl text-sm font-medium text-slate-400 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-500/10 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 ${
               isRailExpanded ? "px-3" : "justify-center px-2"
             }`}
             onClick={onLogout}
@@ -174,7 +177,7 @@ function AdminSidebar({
             </span>
 
             <span
-              className={`min-w-0 truncate text-left transition-[width,opacity,margin] duration-150 ${
+              className={`min-w-0 truncate text-left transition-[width,opacity,margin] duration-150 motion-reduce:transition-none ${
                 isRailExpanded
                   ? "ml-2.5 w-auto flex-1 opacity-100"
                   : "ml-0 w-0 overflow-hidden opacity-0"

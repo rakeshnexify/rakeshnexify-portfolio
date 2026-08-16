@@ -45,6 +45,7 @@ function AdminDashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { accessToken, logout } = useAdminAuth();
+
   const [analyticsRange, setAnalyticsRange] = useState("30d");
 
   const handleUnauthorized = useCallback(() => {
@@ -77,85 +78,95 @@ function AdminDashboardPage() {
     <main className="min-h-screen bg-slate-100">
       <section
         aria-labelledby="admin-analytics-heading"
-        className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8"
+        className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7"
       >
-        <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-700">
-              Admin Analytics
-            </p>
+        <header className="rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-sm sm:px-6">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                <span className="uppercase tracking-[0.14em] text-brand-700">
+                  Dashboard
+                </span>
 
-            <h1
-              id="admin-analytics-heading"
-              className="mt-2 break-words text-3xl font-black tracking-tight text-slate-950 sm:text-4xl"
-            >
-              Admin Analytics Dashboard
-            </h1>
+                <span aria-hidden="true" className="text-slate-300">
+                  /
+                </span>
 
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-              Monitor private operational performance across Service Orders,
-              Appointments, Leads, Contact Messages and newsletter Subscriber
-              activity.
-            </p>
+                <span className="text-slate-500">Analytics overview</span>
+              </div>
 
-            {hasCurrentAnalyticsData ? (
-              <p className="mt-3 text-xs font-semibold text-slate-400">
-                {formatRangeSummary(analyticsData.range)}
+              <h1
+                id="admin-analytics-heading"
+                className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl"
+              >
+                Admin Analytics
+              </h1>
+
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Monitor operational activity across Service Orders,
+                Appointments, Leads, Contact Messages and Subscriber activity.
               </p>
-            ) : null}
-          </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div
-              role="group"
-              aria-label="Analytics date range"
-              className="grid grid-cols-2 gap-2 sm:flex"
-            >
-              {ANALYTICS_RANGES.map((range) => {
-                const isActive = analyticsRange === range.value;
-
-                return (
-                  <button
-                    key={range.value}
-                    type="button"
-                    onClick={() => setAnalyticsRange(range.value)}
-                    aria-pressed={isActive}
-                    disabled={isAnalyticsLoading && isActive}
-                    className={`inline-flex min-h-10 items-center justify-center rounded-xl px-3 text-sm font-bold transition ${
-                      isActive
-                        ? "bg-slate-950 text-white"
-                        : "border border-slate-300 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-700"
-                    } disabled:cursor-not-allowed disabled:opacity-60`}
-                  >
-                    {range.label}
-                  </button>
-                );
-              })}
+              {hasCurrentAnalyticsData ? (
+                <p className="mt-2 text-xs font-semibold text-slate-400">
+                  {formatRangeSummary(analyticsData.range)}
+                </p>
+              ) : null}
             </div>
 
-            <button
-              type="button"
-              onClick={refreshAnalytics}
-              disabled={isAnalyticsLoading}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-bold text-brand-700 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isAnalyticsLoading ? "Refreshing..." : "Refresh"}
-            </button>
+            <div className="flex shrink-0 flex-col gap-3 lg:flex-row lg:items-center">
+              <div
+                aria-label="Analytics date range"
+                className="grid grid-cols-2 gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 sm:flex"
+                role="group"
+              >
+                {ANALYTICS_RANGES.map((range) => {
+                  const isActive = analyticsRange === range.value;
+
+                  return (
+                    <button
+                      aria-pressed={isActive}
+                      className={`inline-flex min-h-9 items-center justify-center rounded-lg px-3 text-xs font-bold transition-colors duration-150 motion-reduce:transition-none sm:min-w-[76px] ${
+                        isActive
+                          ? "bg-slate-950 text-white shadow-sm"
+                          : "text-slate-600 hover:bg-white hover:text-slate-950"
+                      } disabled:cursor-not-allowed disabled:opacity-60`}
+                      disabled={isAnalyticsLoading && isActive}
+                      key={range.value}
+                      onClick={() => setAnalyticsRange(range.value)}
+                      type="button"
+                    >
+                      {range.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-bold text-brand-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isAnalyticsLoading}
+                onClick={refreshAnalytics}
+                type="button"
+              >
+                {isAnalyticsLoading ? "Refreshing..." : "Refresh data"}
+              </button>
+            </div>
           </div>
-        </div>
+        </header>
 
         {analyticsError ? (
           <div
+            className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700"
             role="alert"
-            className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700"
           >
             <p className="font-black">Unable to load Admin analytics.</p>
+
             <p className="mt-1">{analyticsError.message}</p>
 
             <button
-              type="button"
-              onClick={refreshAnalytics}
               className="mt-3 min-h-10 font-bold underline underline-offset-4"
+              onClick={refreshAnalytics}
+              type="button"
             >
               Try again
             </button>
@@ -164,8 +175,8 @@ function AdminDashboardPage() {
 
         {!analyticsError && !hasCurrentAnalyticsData ? (
           <div
+            className="mt-4 rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500 shadow-sm"
             role="status"
-            className="mt-5 rounded-3xl border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500"
           >
             {isAnalyticsLoading
               ? "Loading Admin analytics..."
@@ -174,7 +185,7 @@ function AdminDashboardPage() {
         ) : null}
 
         {!analyticsError && hasCurrentAnalyticsData ? (
-          <div className="mt-5">
+          <div className="mt-4">
             <AdminAnalyticsOverview data={analyticsData} />
           </div>
         ) : null}

@@ -11,6 +11,8 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
 
+const DESKTOP_MEDIA_QUERY = "(min-width: 64rem)";
+
 function AdminMobileDrawer({
   admin,
   isOpen,
@@ -26,6 +28,13 @@ function AdminMobileDrawer({
       return undefined;
     }
 
+    const desktopMediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+
+    if (desktopMediaQuery.matches) {
+      onClose?.();
+      return undefined;
+    }
+
     const previousOverflow = document.body.style.overflow;
     const returnFocusElement = returnFocusRef?.current || null;
 
@@ -34,6 +43,12 @@ function AdminMobileDrawer({
     const focusTimer = window.setTimeout(() => {
       closeButtonRef.current?.focus();
     }, 0);
+
+    const handleDesktopViewportChange = (event) => {
+      if (event.matches) {
+        onClose?.();
+      }
+    };
 
     const handleKeyDown = (event) => {
       if (event.key === "Escape") {
@@ -79,15 +94,34 @@ function AdminMobileDrawer({
       }
     };
 
+    desktopMediaQuery.addEventListener(
+      "change",
+      handleDesktopViewportChange,
+    );
+
     document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.clearTimeout(focusTimer);
+
+      desktopMediaQuery.removeEventListener(
+        "change",
+        handleDesktopViewportChange,
+      );
+
       document.removeEventListener("keydown", handleKeyDown);
+
       document.body.style.overflow = previousOverflow;
 
       window.setTimeout(() => {
-        returnFocusElement?.focus();
+        const canRestoreFocus =
+          returnFocusElement?.isConnected &&
+          returnFocusElement.getClientRects().length > 0 &&
+          !returnFocusElement.hasAttribute("disabled");
+
+        if (canRestoreFocus) {
+          returnFocusElement.focus();
+        }
       }, 0);
     };
   }, [isOpen, onClose, returnFocusRef]);
@@ -132,6 +166,7 @@ function AdminMobileDrawer({
             >
               RakeshNexify
             </p>
+
             <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
               Admin CMS
             </p>
@@ -139,7 +174,7 @@ function AdminMobileDrawer({
 
           <button
             aria-label="Close admin navigation"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-transparent text-slate-400 transition-colors hover:border-slate-700 hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-transparent text-slate-400 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-700 hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
             onClick={onClose}
             ref={closeButtonRef}
             title="Close navigation"
@@ -149,7 +184,7 @@ function AdminMobileDrawer({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-4 [scrollbar-color:rgb(51_65_85)_transparent] [scrollbar-width:thin]">
+        <div className="min-h-0 flex-1 overscroll-contain overflow-x-hidden overflow-y-auto px-3 py-4 [scrollbar-color:rgb(51_65_85)_transparent] [scrollbar-width:thin]">
           <AdminNavigation
             isRailExpanded
             onNavigate={onClose}
@@ -170,9 +205,11 @@ function AdminMobileDrawer({
               <p className="truncate text-xs font-semibold text-slate-100">
                 {adminName}
               </p>
+
               <p className="mt-0.5 truncate text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
                 {adminRole}
               </p>
+
               {adminEmail ? (
                 <p className="mt-0.5 truncate text-[10px] text-slate-600">
                   {adminEmail}
@@ -183,7 +220,7 @@ function AdminMobileDrawer({
 
           <div className="grid grid-cols-2 gap-2">
             <a
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 text-xs font-semibold text-slate-300 transition-colors hover:border-slate-700 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 text-xs font-semibold text-slate-300 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-700 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
               href="/"
             >
               <AdminIcon name="external" size={17} />
@@ -191,7 +228,7 @@ function AdminMobileDrawer({
             </a>
 
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 text-xs font-semibold text-slate-300 transition-colors hover:border-rose-900/60 hover:bg-rose-500/10 hover:text-rose-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 text-xs font-semibold text-slate-300 transition-colors duration-150 motion-reduce:transition-none hover:border-rose-900/60 hover:bg-rose-500/10 hover:text-rose-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
               onClick={onLogout}
               type="button"
             >

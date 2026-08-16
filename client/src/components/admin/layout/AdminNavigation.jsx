@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router";
 import {
   getAdminNavigationGroupsForRole,
@@ -27,6 +27,7 @@ function collectInitiallyOpenKeys(groups, pathname) {
   };
 
   groups.forEach((group) => visit(group.items));
+
   return keys;
 }
 
@@ -38,12 +39,17 @@ function AdminNavigationItem({
   openKeys,
   setOpenKeys,
   onNavigate,
+  idPrefix,
 }) {
   const hasChildren = Array.isArray(item.children) && item.children.length > 0;
   const isActive = isAdminNavigationItemActive(item, pathname);
+
   const hasActiveDescendant =
     hasChildren && isAdminNavigationBranchActive(item, pathname) && !isActive;
+
   const isOpen = hasChildren && openKeys.has(item.key);
+
+  const childrenId = `${idPrefix}-children-${item.key}`;
 
   const toggleChildren = () => {
     if (!hasChildren) {
@@ -74,10 +80,10 @@ function AdminNavigationItem({
     : "justify-center px-2";
 
   const stateClasses = isActive
-    ? "bg-brand-500/16 text-white shadow-sm shadow-black/10"
+    ? "bg-brand-500/15 text-white"
     : hasActiveDescendant
-      ? "bg-white/[0.07] text-slate-100"
-      : "text-slate-300 hover:bg-white/[0.07] hover:text-white";
+      ? "bg-white/[0.06] text-slate-100"
+      : "text-slate-300 hover:bg-white/[0.06] hover:text-white";
 
   const iconClasses = isActive
     ? "text-brand-300"
@@ -90,12 +96,13 @@ function AdminNavigationItem({
       <div className="flex items-stretch gap-1">
         <Link
           aria-current={isActive ? "page" : undefined}
-          className={`group relative flex min-h-11 min-w-0 flex-1 items-center rounded-xl text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${linkLayoutClasses} ${stateClasses}`}
+          className={`group relative flex min-h-11 min-w-0 flex-1 items-center rounded-xl text-sm font-medium transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${linkLayoutClasses} ${stateClasses}`}
           onClick={() => {
             if (typeof onNavigate === "function") {
               onNavigate(item);
             }
           }}
+          title={!isRailExpanded ? item.label : undefined}
           to={item.route}
         >
           <span
@@ -105,14 +112,14 @@ function AdminNavigationItem({
             }`}
           >
             <AdminIcon
-              className={iconClasses}
+              className={`transition-colors duration-150 motion-reduce:transition-none ${iconClasses}`}
               name={item.icon}
               size={isNested ? 17 : 20}
             />
           </span>
 
           <span
-            className={`min-w-0 truncate text-left transition-[width,opacity,margin] duration-150 ${
+            className={`min-w-0 truncate text-left transition-[width,opacity,margin] duration-150 motion-reduce:transition-none ${
               isRailExpanded
                 ? "ml-2.5 w-auto flex-1 opacity-100"
                 : "ml-0 w-0 overflow-hidden opacity-0"
@@ -140,13 +147,13 @@ function AdminNavigationItem({
 
         {hasChildren && isRailExpanded ? (
           <button
-            aria-controls={`admin-nav-children-${item.key}`}
+            aria-controls={childrenId}
             aria-expanded={isOpen}
             aria-label={`${isOpen ? "Collapse" : "Expand"} ${item.label}`}
-            className={`flex w-9 shrink-0 items-center justify-center rounded-xl transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
+            className={`flex w-9 shrink-0 items-center justify-center rounded-xl transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 ${
               hasActiveDescendant
                 ? "text-slate-200 hover:bg-white/[0.08] hover:text-white"
-                : "text-slate-500 hover:bg-white/[0.07] hover:text-white"
+                : "text-slate-500 hover:bg-white/[0.06] hover:text-white"
             }`}
             onClick={toggleChildren}
             type="button"
@@ -162,11 +169,12 @@ function AdminNavigationItem({
       {hasChildren && isRailExpanded && isOpen ? (
         <ul
           className="mt-1 space-y-1 border-l border-slate-800/90 pl-1"
-          id={`admin-nav-children-${item.key}`}
+          id={childrenId}
         >
           {item.children.map((child) => (
             <AdminNavigationItem
               depth={depth + 1}
+              idPrefix={idPrefix}
               isRailExpanded={isRailExpanded}
               item={child}
               key={child.key}
@@ -188,6 +196,7 @@ function AdminNavigationContent({
   isRailExpanded,
   onNavigate,
   className,
+  idPrefix,
 }) {
   const [openKeys, setOpenKeys] = useState(() =>
     collectInitiallyOpenKeys(groups, pathname),
@@ -199,42 +208,47 @@ function AdminNavigationContent({
       className={`min-w-0 ${className}`.trim()}
     >
       <div className={isRailExpanded ? "space-y-5" : "space-y-2"}>
-        {groups.map((group, groupIndex) => (
-          <section
-            aria-labelledby={`admin-nav-group-${group.key}`}
-            className={
-              !isRailExpanded && groupIndex > 0
-                ? "border-t border-slate-800/80 pt-2"
-                : ""
-            }
-            key={group.key}
-          >
-            <h2
-              className={
-                isRailExpanded
-                  ? "mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500"
-                  : "sr-only"
-              }
-              id={`admin-nav-group-${group.key}`}
-            >
-              {group.label}
-            </h2>
+        {groups.map((group, groupIndex) => {
+          const groupHeadingId = `${idPrefix}-group-${group.key}`;
 
-            <ul className="space-y-1">
-              {group.items.map((item) => (
-                <AdminNavigationItem
-                  isRailExpanded={isRailExpanded}
-                  item={item}
-                  key={item.key}
-                  onNavigate={onNavigate}
-                  openKeys={openKeys}
-                  pathname={pathname}
-                  setOpenKeys={setOpenKeys}
-                />
-              ))}
-            </ul>
-          </section>
-        ))}
+          return (
+            <section
+              aria-labelledby={groupHeadingId}
+              className={
+                !isRailExpanded && groupIndex > 0
+                  ? "border-t border-slate-800/80 pt-2"
+                  : ""
+              }
+              key={group.key}
+            >
+              <h2
+                className={
+                  isRailExpanded
+                    ? "mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500"
+                    : "sr-only"
+                }
+                id={groupHeadingId}
+              >
+                {group.label}
+              </h2>
+
+              <ul className="space-y-1">
+                {group.items.map((item) => (
+                  <AdminNavigationItem
+                    idPrefix={idPrefix}
+                    isRailExpanded={isRailExpanded}
+                    item={item}
+                    key={item.key}
+                    onNavigate={onNavigate}
+                    openKeys={openKeys}
+                    pathname={pathname}
+                    setOpenKeys={setOpenKeys}
+                  />
+                ))}
+              </ul>
+            </section>
+          );
+        })}
       </div>
     </nav>
   );
@@ -247,12 +261,20 @@ function AdminNavigation({
   className = "",
 }) {
   const { pathname } = useLocation();
-  const groups = useMemo(() => getAdminNavigationGroupsForRole(role), [role]);
+  const reactId = useId();
+
+  const idPrefix = `admin-navigation-${reactId.replace(/:/g, "")}`;
+
+  const groups = useMemo(
+    () => getAdminNavigationGroupsForRole(role),
+    [role],
+  );
 
   return (
     <AdminNavigationContent
       className={className}
       groups={groups}
+      idPrefix={idPrefix}
       isRailExpanded={isRailExpanded}
       key={`${role || "authenticated"}:${pathname}`}
       onNavigate={onNavigate}
