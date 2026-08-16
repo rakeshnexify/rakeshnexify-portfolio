@@ -27,14 +27,20 @@ const educationTypeLabels = {
 };
 
 const educationTypeStyles = {
-  school: "bg-blue-100 text-blue-700",
-  college: "bg-violet-100 text-violet-700",
-  university: "bg-indigo-100 text-indigo-700",
-  course: "bg-cyan-100 text-cyan-700",
-  training: "bg-orange-100 text-orange-700",
-  certification: "bg-emerald-100 text-emerald-700",
+  school: "bg-blue-50 text-blue-700",
+  college: "bg-violet-50 text-violet-700",
+  university: "bg-indigo-50 text-indigo-700",
+  course: "bg-cyan-50 text-cyan-700",
+  training: "bg-orange-50 text-orange-700",
+  certification: "bg-emerald-50 text-emerald-700",
   other: "bg-slate-100 text-slate-700",
 };
+
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
 
 function createApiFilters(filters) {
   const apiFilters = {
@@ -135,13 +141,9 @@ function AdminEducationPage() {
   );
 
   useEffect(() => {
-    const routeMessage = location.state?.successMessage || "";
-
-    if (!routeMessage) {
+    if (!location.state?.successMessage) {
       return;
     }
-
-    setSuccessMessage(routeMessage);
 
     navigate(location.pathname, {
       replace: true,
@@ -165,13 +167,9 @@ function AdminEducationPage() {
       setIsLoading(true);
 
       try {
-        const response = await fetchAdminEducation(
-          accessToken,
-          apiFilters,
-          {
-            signal: controller.signal,
-          },
-        );
+        const response = await fetchAdminEducation(accessToken, apiFilters, {
+          signal: controller.signal,
+        });
 
         setEducationRecords(response.educationRecords);
         setResultCount(response.count);
@@ -319,13 +317,9 @@ function AdminEducationPage() {
       setError("");
       setSuccessMessage("");
 
-      const response = await updateAdminEducation(
-        accessToken,
-        education._id,
-        {
-          isVisible: !education.isVisible,
-        },
-      );
+      const response = await updateAdminEducation(accessToken, education._id, {
+        isVisible: !education.isVisible,
+      });
 
       setSuccessMessage(
         response.education.isVisible
@@ -351,13 +345,9 @@ function AdminEducationPage() {
       setError("");
       setSuccessMessage("");
 
-      const response = await updateAdminEducation(
-        accessToken,
-        education._id,
-        {
-          isFeatured: !education.isFeatured,
-        },
-      );
+      const response = await updateAdminEducation(accessToken, education._id, {
+        isFeatured: !education.isFeatured,
+      });
 
       setSuccessMessage(
         response.education.isFeatured
@@ -391,10 +381,7 @@ function AdminEducationPage() {
       setError("");
       setSuccessMessage("");
 
-      const response = await deleteAdminEducation(
-        accessToken,
-        education._id,
-      );
+      const response = await deleteAdminEducation(accessToken, education._id);
 
       setSuccessMessage(
         `"${response.deletedEducation.degree}" was permanently deleted.`,
@@ -417,42 +404,39 @@ function AdminEducationPage() {
   const canDeleteEducation = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+    <main className="min-h-screen bg-slate-100">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-              Education Management
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              Career
             </p>
 
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Manage Education
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              Education
             </h1>
 
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-              Create and manage institutions, qualifications, study timelines,
-              grades, supporting links, display order and publishing controls.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Manage qualifications, institutions, study timelines, publishing
+              state and display priority.
             </p>
           </div>
 
           <Link
             to="/admin/education/new"
-            className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
           >
-            Add New Education
+            Add Education
           </Link>
-        </div>
+        </header>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <div>
-              <label
-                htmlFor="education-search"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="education-search" className={labelClassName}>
                 Search
               </label>
 
@@ -463,16 +447,16 @@ function AdminEducationPage() {
                 value={formFilters.search}
                 onChange={handleFilterChange}
                 placeholder="Institution, degree or field"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               />
             </div>
 
             <div>
               <label
                 htmlFor="education-type-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Education Type
+                Education type
               </label>
 
               <select
@@ -480,7 +464,7 @@ function AdminEducationPage() {
                 name="educationType"
                 value={formFilters.educationType}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All types</option>
 
@@ -495,7 +479,7 @@ function AdminEducationPage() {
             <div>
               <label
                 htmlFor="education-visibility-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Visibility
               </label>
@@ -505,7 +489,7 @@ function AdminEducationPage() {
                 name="visibility"
                 value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All records</option>
                 <option value="visible">Visible</option>
@@ -516,9 +500,9 @@ function AdminEducationPage() {
             <div>
               <label
                 htmlFor="education-featured-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Display Type
+                Display type
               </label>
 
               <select
@@ -526,7 +510,7 @@ function AdminEducationPage() {
                 name="featured"
                 value={formFilters.featured}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All records</option>
                 <option value="featured">Featured</option>
@@ -537,9 +521,9 @@ function AdminEducationPage() {
             <div>
               <label
                 htmlFor="education-status-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Study Status
+                Study status
               </label>
 
               <select
@@ -547,7 +531,7 @@ function AdminEducationPage() {
                 name="studyStatus"
                 value={formFilters.studyStatus}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All statuses</option>
                 <option value="current">Currently studying</option>
@@ -556,36 +540,44 @@ function AdminEducationPage() {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
-              Clear Filters
+              Clear
             </button>
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
               Apply Filters
             </button>
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm font-semibold text-slate-600">
-            {isLoading
-              ? "Loading Education..."
-              : `${resultCount} Education record(s) found`}
-          </p>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-800">
+              {isLoading
+                ? "Loading Education..."
+                : `${resultCount} Education record${resultCount === 1 ? "" : "s"}`}
+            </p>
+
+            {!isLoading && (
+              <p className="mt-1 text-xs text-slate-500">
+                Showing the records matching the applied filters.
+              </p>
+            )}
+          </div>
 
           <button
             type="button"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
           >
             Refresh
           </button>
@@ -595,7 +587,7 @@ function AdminEducationPage() {
           {successMessage && (
             <div
               role="status"
-              className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
+              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
             >
               {successMessage}
             </div>
@@ -604,7 +596,7 @@ function AdminEducationPage() {
           {error && (
             <div
               role="alert"
-              className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
+              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
             >
               {error}
             </div>
@@ -613,32 +605,35 @@ function AdminEducationPage() {
 
         {isLoading && (
           <div
-            className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3"
-            aria-label="Loading Education records"
+            role="status"
+            aria-live="polite"
+            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
           >
+            <span className="sr-only">Loading Education records...</span>
+
             {[1, 2, 3, 4, 5, 6].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-[34rem] animate-pulse rounded-3xl border border-slate-200 bg-white"
+                className="h-[30rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
         )}
 
         {!isLoading && !error && educationRecords.length === 0 && (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-10 text-center">
-            <p className="text-lg font-bold text-slate-950">
+          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+            <p className="text-base font-bold text-slate-950">
               No Education records found
             </p>
 
             <p className="mt-2 text-sm text-slate-500">
-              Create the first Education record or change the current filters.
+              Change the filters or create the first Education record.
             </p>
           </div>
         )}
 
         {!isLoading && educationRecords.length > 0 && (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {educationRecords.map((education) => {
               const educationTypeLabel =
                 educationTypeLabels[education.educationType] ||
@@ -649,8 +644,7 @@ function AdminEducationPage() {
                 educationTypeStyles[education.educationType] ||
                 educationTypeStyles.other;
 
-              const isActionPending =
-                actionEducationId === education._id;
+              const isActionPending = actionEducationId === education._id;
 
               const timelineEnd = education.isCurrentlyStudying
                 ? "Present"
@@ -659,20 +653,20 @@ function AdminEducationPage() {
               return (
                 <article
                   key={education._id}
-                  className="flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+                  className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <div className="relative overflow-hidden bg-slate-950 px-6 py-7 text-white">
-                    <div className="absolute -right-10 -top-10 size-32 rounded-full bg-brand-600/20 blur-3xl" />
-
-                    <div className="relative flex items-start justify-between gap-4">
-                      <div className="relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-lg font-black">
-                        <span>{createInitials(education.institutionName)}</span>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-slate-950 text-sm font-bold text-white">
+                        <span>
+                          {createInitials(education.institutionName)}
+                        </span>
 
                         {education.logoUrl && (
                           <img
                             src={education.logoUrl}
                             alt=""
-                            className="absolute inset-0 size-full bg-white object-contain p-2"
+                            className="absolute inset-0 size-full bg-white object-contain p-1.5"
                             onError={(event) => {
                               event.currentTarget.hidden = true;
                             }}
@@ -680,151 +674,160 @@ function AdminEducationPage() {
                         )}
                       </div>
 
-                      <div className="flex flex-wrap justify-end gap-2">
-                        {education.isFeatured && (
-                          <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-slate-950">
-                            Featured
-                          </span>
-                        )}
+                      <div className="min-w-0">
+                        <p className="break-words text-sm font-semibold text-brand-700">
+                          {education.institutionName}
+                        </p>
 
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-bold ${
-                            education.isVisible
-                              ? "bg-emerald-400/20 text-emerald-200"
-                              : "bg-white/10 text-slate-300"
-                          }`}
-                        >
-                          {education.isVisible ? "Visible" : "Hidden"}
-                        </span>
+                        <h2 className="mt-1 break-words text-lg font-bold text-slate-950">
+                          {education.degree}
+                        </h2>
+
+                        {education.fieldOfStudy && (
+                          <p className="mt-1 break-words text-sm text-slate-500">
+                            {education.fieldOfStudy}
+                          </p>
+                        )}
                       </div>
                     </div>
 
-                    <p className="relative mt-6 break-words text-sm font-semibold text-brand-300">
-                      {education.institutionName}
-                    </p>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      {education.isFeatured && (
+                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                          Featured
+                        </span>
+                      )}
 
-                    <h2 className="relative mt-2 break-words text-xl font-black">
-                      {education.degree}
-                    </h2>
-
-                    <p className="relative mt-2 break-words text-sm text-slate-400">
-                      {education.fieldOfStudy}
-                    </p>
+                      <span
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+                          education.isVisible
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        {education.isVisible ? "Visible" : "Hidden"}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col p-6">
-                    <div className="flex flex-wrap gap-2">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-bold ${educationTypeStyle}`}
-                      >
-                        {educationTypeLabel}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span
+                      className={`rounded-lg px-2.5 py-1 text-xs font-bold ${educationTypeStyle}`}
+                    >
+                      {educationTypeLabel}
+                    </span>
+
+                    <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
+                      Order {education.order ?? 0}
+                    </span>
+
+                    {education.isCurrentlyStudying && (
+                      <span className="rounded-lg bg-cyan-50 px-2.5 py-1 text-xs font-bold text-cyan-700">
+                        Currently Studying
                       </span>
+                    )}
+                  </div>
 
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
-                        Order {education.order ?? 0}
-                      </span>
+                  <dl className="mt-5 divide-y divide-slate-100 border-y border-slate-100 text-sm">
+                    <div className="flex items-start justify-between gap-4 py-3">
+                      <dt className="text-slate-500">Study timeline</dt>
 
-                      {education.isCurrentlyStudying && (
-                        <span className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-bold text-cyan-700">
-                          Currently Studying
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
-                        Study Timeline
-                      </p>
-
-                      <p className="mt-2 font-bold text-slate-800">
+                      <dd className="text-right font-semibold text-slate-800">
                         {formatDate(education.startDate)} — {timelineEnd}
-                      </p>
-
-                      {education.grade && (
-                        <p className="mt-2 text-sm font-semibold text-brand-700">
-                          {education.grade}
-                        </p>
-                      )}
-
-                      {education.location && (
-                        <p className="mt-2 text-sm text-slate-500">
-                          {education.location}
-                        </p>
-                      )}
+                      </dd>
                     </div>
 
-                    <p className="mt-5 line-clamp-4 text-sm leading-7 text-slate-600">
-                      {education.shortDescription}
-                    </p>
+                    {education.grade && (
+                      <div className="flex items-start justify-between gap-4 py-3">
+                        <dt className="text-slate-500">Grade</dt>
 
-                    <dl className="mt-5 border-t border-slate-100 pt-4 text-sm">
-                      <div className="flex items-center justify-between gap-4">
-                        <dt className="text-slate-400">Updated</dt>
-
-                        <dd className="font-semibold text-slate-700">
-                          {formatUpdatedDate(education.updatedAt)}
+                        <dd className="text-right font-semibold text-slate-800">
+                          {education.grade}
                         </dd>
                       </div>
-                    </dl>
+                    )}
 
-                    <div className="mt-auto grid grid-cols-2 gap-3 pt-6">
-                      <Link
-                        to={`/admin/education/${education._id}/edit`}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
-                      >
-                        Edit
-                      </Link>
+                    {education.location && (
+                      <div className="flex items-start justify-between gap-4 py-3">
+                        <dt className="text-slate-500">Location</dt>
 
-                      <button
-                        type="button"
-                        onClick={() => handleToggleVisibility(education)}
-                        disabled={Boolean(actionEducationId)}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : education.isVisible
-                            ? "Hide"
-                            : "Show"}
-                      </button>
+                        <dd className="max-w-[65%] break-words text-right font-semibold text-slate-800">
+                          {education.location}
+                        </dd>
+                      </div>
+                    )}
 
-                      <button
-                        type="button"
-                        onClick={() => handleToggleFeatured(education)}
-                        disabled={Boolean(actionEducationId)}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : education.isFeatured
-                            ? "Unfeature"
-                            : "Feature"}
-                      </button>
+                    <div className="flex items-start justify-between gap-4 py-3">
+                      <dt className="text-slate-500">Updated</dt>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteEducation(education)}
-                        disabled={
-                          Boolean(actionEducationId) ||
-                          !canDeleteEducation
-                        }
-                        title={
-                          canDeleteEducation
-                            ? "Permanently delete Education record"
-                            : "Your role cannot permanently delete Education records"
-                        }
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {isActionPending ? "Working..." : "Delete"}
-                      </button>
+                      <dd className="text-right font-semibold text-slate-700">
+                        {formatUpdatedDate(education.updatedAt)}
+                      </dd>
                     </div>
+                  </dl>
+
+                  {education.shortDescription && (
+                    <p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-600">
+                      {education.shortDescription}
+                    </p>
+                  )}
+
+                  <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
+                    <Link
+                      to={`/admin/education/${education._id}/edit`}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+                    >
+                      Edit
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleVisibility(education)}
+                      disabled={actionEducationId !== ""}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                    >
+                      {isActionPending
+                        ? "Working..."
+                        : education.isVisible
+                          ? "Hide"
+                          : "Show"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleFeatured(education)}
+                      disabled={actionEducationId !== ""}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                    >
+                      {isActionPending
+                        ? "Working..."
+                        : education.isFeatured
+                          ? "Make Standard"
+                          : "Make Featured"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteEducation(education)}
+                      disabled={
+                        actionEducationId !== "" || !canDeleteEducation
+                      }
+                      title={
+                        canDeleteEducation
+                          ? "Permanently delete Education record"
+                          : "Your role cannot permanently delete Education records"
+                      }
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+                    >
+                      {isActionPending ? "Working..." : "Delete"}
+                    </button>
                   </div>
                 </article>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
     </main>
   );
 }

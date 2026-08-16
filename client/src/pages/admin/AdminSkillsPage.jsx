@@ -25,10 +25,16 @@ const proficiencyLabels = {
 
 const proficiencyStyles = {
   familiar: "bg-slate-100 text-slate-700",
-  proficient: "bg-blue-100 text-blue-700",
-  advanced: "bg-violet-100 text-violet-700",
-  expert: "bg-emerald-100 text-emerald-700",
+  proficient: "bg-blue-50 text-blue-700",
+  advanced: "bg-violet-50 text-violet-700",
+  expert: "bg-emerald-50 text-emerald-700",
 };
+
+const inputClassName =
+  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none";
+
+const labelClassName =
+  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
 
 function createApiFilters(filters) {
   const apiFilters = {
@@ -106,13 +112,9 @@ function AdminSkillsPage() {
   );
 
   useEffect(() => {
-    const routeMessage = location.state?.successMessage || "";
-
-    if (!routeMessage) {
+    if (!location.state?.successMessage) {
       return;
     }
-
-    setSuccessMessage(routeMessage);
 
     navigate(location.pathname, {
       replace: true,
@@ -386,42 +388,39 @@ function AdminSkillsPage() {
   const canDeleteSkills = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+    <main className="min-h-screen bg-slate-100">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-              Skills Management
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              Content
             </p>
 
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              Manage Skills
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              Skills
             </h1>
 
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-              Create, organise, filter and publish professional Skills with
-              proficiency, experience, display order and featured controls.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Manage professional skills, proficiency, experience, publishing
+              state and display priority.
             </p>
           </div>
 
           <Link
             to="/admin/skills/new"
-            className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
           >
-            Add New Skill
+            Add Skill
           </Link>
-        </div>
+        </header>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <div>
-              <label
-                htmlFor="skill-search"
-                className="text-sm font-semibold text-slate-700"
-              >
+              <label htmlFor="skill-search" className={labelClassName}>
                 Search
               </label>
 
@@ -432,14 +431,14 @@ function AdminSkillsPage() {
                 value={formFilters.search}
                 onChange={handleFilterChange}
                 placeholder="Name, slug or description"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               />
             </div>
 
             <div>
               <label
                 htmlFor="skill-category-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Category
               </label>
@@ -451,14 +450,14 @@ function AdminSkillsPage() {
                 value={formFilters.category}
                 onChange={handleFilterChange}
                 placeholder="Frontend Development"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               />
             </div>
 
             <div>
               <label
                 htmlFor="skill-proficiency-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Proficiency
               </label>
@@ -468,7 +467,7 @@ function AdminSkillsPage() {
                 name="proficiencyLevel"
                 value={formFilters.proficiencyLevel}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="">All levels</option>
                 <option value="familiar">Familiar</option>
@@ -481,7 +480,7 @@ function AdminSkillsPage() {
             <div>
               <label
                 htmlFor="skill-visibility-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
                 Visibility
               </label>
@@ -491,7 +490,7 @@ function AdminSkillsPage() {
                 name="visibility"
                 value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All Skills</option>
                 <option value="visible">Visible</option>
@@ -502,9 +501,9 @@ function AdminSkillsPage() {
             <div>
               <label
                 htmlFor="skill-featured-filter"
-                className="text-sm font-semibold text-slate-700"
+                className={labelClassName}
               >
-                Type
+                Display type
               </label>
 
               <select
@@ -512,7 +511,7 @@ function AdminSkillsPage() {
                 name="featured"
                 value={formFilters.featured}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className={inputClassName}
               >
                 <option value="all">All types</option>
                 <option value="featured">Featured</option>
@@ -521,34 +520,44 @@ function AdminSkillsPage() {
             </div>
           </div>
 
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
-              Clear Filters
+              Clear
             </button>
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
               Apply Filters
             </button>
           </div>
         </form>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm font-semibold text-slate-600">
-            {isLoading ? "Loading Skills..." : `${resultCount} Skill(s) found`}
-          </p>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-800">
+              {isLoading
+                ? "Loading Skills..."
+                : `${resultCount} Skill${resultCount === 1 ? "" : "s"}`}
+            </p>
+
+            {!isLoading && (
+              <p className="mt-1 text-xs text-slate-500">
+                Showing the records matching the applied filters.
+              </p>
+            )}
+          </div>
 
           <button
             type="button"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
           >
             Refresh
           </button>
@@ -558,7 +567,7 @@ function AdminSkillsPage() {
           {successMessage && (
             <div
               role="status"
-              className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
+              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
             >
               {successMessage}
             </div>
@@ -567,7 +576,7 @@ function AdminSkillsPage() {
           {error && (
             <div
               role="alert"
-              className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
+              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
             >
               {error}
             </div>
@@ -576,30 +585,35 @@ function AdminSkillsPage() {
 
         {isLoading && (
           <div
-            className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3"
-            aria-label="Loading Skills"
+            role="status"
+            aria-live="polite"
+            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
           >
+            <span className="sr-only">Loading Skills...</span>
+
             {[1, 2, 3, 4, 5, 6].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-96 animate-pulse rounded-3xl border border-slate-200 bg-white"
+                className="h-80 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
         )}
 
         {!isLoading && !error && skills.length === 0 && (
-          <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-10 text-center">
-            <p className="text-lg font-bold text-slate-950">No Skills found</p>
+          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+            <p className="text-base font-bold text-slate-950">
+              No Skills found
+            </p>
 
             <p className="mt-2 text-sm text-slate-500">
-              Create the first Skill or change the current filters.
+              Change the filters or create the first Skill.
             </p>
           </div>
         )}
 
         {!isLoading && skills.length > 0 && (
-          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {skills.map((skill) => {
               const proficiencyLabel =
                 proficiencyLabels[skill.proficiencyLevel] ||
@@ -615,25 +629,25 @@ function AdminSkillsPage() {
               return (
                 <article
                   key={skill._id}
-                  className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+                  className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
                       Order {skill.order ?? 0}
                     </span>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap justify-end gap-2">
                       {skill.isFeatured && (
-                        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
                           Featured
                         </span>
                       )}
 
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
                           skill.isVisible
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-slate-200 text-slate-700"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                       >
                         {skill.isVisible ? "Visible" : "Hidden"}
@@ -641,8 +655,8 @@ function AdminSkillsPage() {
                     </div>
                   </div>
 
-                  <div className="mt-6 flex items-start gap-4">
-                    <div className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-2xl bg-slate-950 text-lg font-black text-white">
+                  <div className="mt-5 flex items-start gap-3">
+                    <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-slate-950 text-base font-bold text-white">
                       {skill.iconUrl ? (
                         <img
                           src={skill.iconUrl}
@@ -658,58 +672,60 @@ function AdminSkillsPage() {
                     </div>
 
                     <div className="min-w-0">
-                      <h2 className="break-words text-xl font-black text-slate-950">
+                      <h2 className="break-words text-lg font-bold text-slate-950">
                         {skill.name}
                       </h2>
 
-                      <p className="mt-1 break-all text-xs font-semibold text-brand-600">
+                      <p className="mt-1 break-all text-xs font-semibold text-brand-700">
                         {skill.slug}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700">
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700">
                       {skill.category}
                     </span>
 
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-bold ${proficiencyStyle}`}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-bold ${proficiencyStyle}`}
                     >
                       {proficiencyLabel}
                     </span>
                   </div>
 
-                  <p className="mt-5 line-clamp-4 text-sm leading-7 text-slate-600">
-                    {skill.description}
-                  </p>
+                  {skill.description && (
+                    <p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-600">
+                      {skill.description}
+                    </p>
+                  )}
 
-                  <dl className="mt-5 grid grid-cols-2 gap-3 rounded-2xl bg-slate-50 p-4 text-sm">
+                  <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-slate-100 pt-4 text-sm">
                     <div>
-                      <dt className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                      <dt className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
                         Experience
                       </dt>
 
-                      <dd className="mt-1 font-bold text-slate-700">
+                      <dd className="mt-1 font-semibold text-slate-700">
                         {formatExperience(skill.yearsOfExperience)}
                       </dd>
                     </div>
 
                     <div>
-                      <dt className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                      <dt className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
                         Updated
                       </dt>
 
-                      <dd className="mt-1 font-bold text-slate-700">
+                      <dd className="mt-1 font-semibold text-slate-700">
                         {formatDate(skill.updatedAt)}
                       </dd>
                     </div>
                   </dl>
 
-                  <div className="mt-auto grid grid-cols-2 gap-3 border-t border-slate-100 pt-5">
+                  <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
                     <Link
                       to={`/admin/skills/${skill._id}/edit`}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
                     >
                       Edit
                     </Link>
@@ -717,8 +733,8 @@ function AdminSkillsPage() {
                     <button
                       type="button"
                       onClick={() => handleToggleVisibility(skill)}
-                      disabled={Boolean(actionSkillId)}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={actionSkillId !== ""}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                     >
                       {isActionPending
                         ? "Working..."
@@ -730,26 +746,26 @@ function AdminSkillsPage() {
                     <button
                       type="button"
                       onClick={() => handleToggleFeatured(skill)}
-                      disabled={Boolean(actionSkillId)}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={actionSkillId !== ""}
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                     >
                       {isActionPending
                         ? "Working..."
                         : skill.isFeatured
-                          ? "Unfeature"
-                          : "Feature"}
+                          ? "Make Standard"
+                          : "Make Featured"}
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleDeleteSkill(skill)}
-                      disabled={Boolean(actionSkillId) || !canDeleteSkills}
+                      disabled={actionSkillId !== "" || !canDeleteSkills}
                       title={
                         canDeleteSkills
                           ? "Permanently delete Skill"
                           : "Your role cannot permanently delete Skills"
                       }
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                     >
                       {isActionPending ? "Working..." : "Delete"}
                     </button>
@@ -759,7 +775,7 @@ function AdminSkillsPage() {
             })}
           </div>
         )}
-      </div>
+      </section>
     </main>
   );
 }
