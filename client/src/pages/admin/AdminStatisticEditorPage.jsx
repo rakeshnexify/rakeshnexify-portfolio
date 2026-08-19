@@ -1,5 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import {
+  Link,
+  useNavigate,
+  useParams,
+} from "react-router";
 
 import StatisticForm from "../../components/admin/statistics/StatisticForm";
 import useAdminAuth from "../../hooks/useAdminAuth";
@@ -13,60 +22,96 @@ import {
   defaultStatisticFormValues,
 } from "../../utils/statisticForm";
 
-function AdminStatisticEditorPage({ mode = "create" }) {
+function AdminStatisticEditorPage({
+  mode = "create",
+}) {
   const navigate = useNavigate();
-  const { id: statisticId } = useParams();
 
-  const { accessToken, logout } = useAdminAuth();
+  const {
+    id: statisticId,
+  } = useParams();
 
-  const isEditMode = mode === "edit";
+  const {
+    accessToken,
+    logout,
+  } = useAdminAuth();
 
-  const [statistic, setStatistic] = useState(null);
-  const [isLoading, setIsLoading] = useState(isEditMode);
-  const [loadError, setLoadError] = useState("");
+  const isEditMode =
+    mode === "edit";
+
+  const [
+    statistic,
+    setStatistic,
+  ] = useState(null);
+
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(isEditMode);
+
+  const [
+    loadError,
+    setLoadError,
+  ] = useState("");
 
   useEffect(() => {
-    if (!isEditMode || !statisticId || !accessToken) {
+    if (
+      !isEditMode ||
+      !statisticId ||
+      !accessToken
+    ) {
       return undefined;
     }
 
-    const controller = new AbortController();
+    const controller =
+      new AbortController();
 
     async function loadStatistic() {
       try {
         setIsLoading(true);
         setLoadError("");
 
-        const statisticData = await fetchAdminStatisticById(
-          accessToken,
-          statisticId,
-          {
-            signal: controller.signal,
-          },
-        );
+        const statisticData =
+          await fetchAdminStatisticById(
+            accessToken,
+            statisticId,
+            {
+              signal:
+                controller.signal,
+            },
+          );
 
         setStatistic(statisticData);
       } catch (error) {
-        if (error?.name === "AbortError") {
+        if (
+          error?.name ===
+          "AbortError"
+        ) {
           return;
         }
 
         if (error?.status === 401) {
           logout();
 
-          navigate("/admin/login", {
-            replace: true,
-            state: {
-              from: {
-                pathname: `/admin/statistics/${statisticId}/edit`,
+          navigate(
+            "/admin/login",
+            {
+              replace: true,
+              state: {
+                from: {
+                  pathname: `/admin/statistics/${statisticId}/edit`,
+                },
               },
             },
-          });
+          );
 
           return;
         }
 
-        console.error("Admin statistic loading failed:", error);
+        console.error(
+          "Admin statistic loading failed:",
+          error,
+        );
 
         setLoadError(
           error instanceof Error
@@ -74,7 +119,9 @@ function AdminStatisticEditorPage({ mode = "create" }) {
             : "Statistic could not be loaded.",
         );
       } finally {
-        if (!controller.signal.aborted) {
+        if (
+          !controller.signal.aborted
+        ) {
           setIsLoading(false);
         }
       }
@@ -85,87 +132,131 @@ function AdminStatisticEditorPage({ mode = "create" }) {
     return () => {
       controller.abort();
     };
-  }, [accessToken, isEditMode, logout, navigate, statisticId]);
+  }, [
+    accessToken,
+    isEditMode,
+    logout,
+    navigate,
+    statisticId,
+  ]);
 
-  const initialValues = useMemo(() => {
-    if (!isEditMode) {
-      return defaultStatisticFormValues;
-    }
+  const initialValues =
+    useMemo(() => {
+      if (!isEditMode) {
+        return defaultStatisticFormValues;
+      }
 
-    return createStatisticFormValues(statistic || {});
-  }, [isEditMode, statistic]);
+      return createStatisticFormValues(
+        statistic || {},
+      );
+    }, [
+      isEditMode,
+      statistic,
+    ]);
 
-  const handleMediaUnauthorized = useCallback(() => {
-    logout();
+  const handleMediaUnauthorized =
+    useCallback(() => {
+      logout();
 
-    navigate("/admin/login", {
-      replace: true,
-      state: {
-        from: {
-          pathname: isEditMode
-            ? `/admin/statistics/${statisticId}/edit`
-            : "/admin/statistics/new",
+      navigate(
+        "/admin/login",
+        {
+          replace: true,
+          state: {
+            from: {
+              pathname: isEditMode
+                ? `/admin/statistics/${statisticId}/edit`
+                : "/admin/statistics/new",
+            },
+          },
         },
-      },
-    });
-  }, [isEditMode, logout, navigate, statisticId]);
+      );
+    }, [
+      isEditMode,
+      logout,
+      navigate,
+      statisticId,
+    ]);
 
-  async function handleAuthenticationError(error) {
+  async function handleAuthenticationError(
+    error,
+  ) {
     if (error?.status !== 401) {
       return false;
     }
 
     logout();
 
-    navigate("/admin/login", {
-      replace: true,
-      state: {
-        from: {
-          pathname: isEditMode
-            ? `/admin/statistics/${statisticId}/edit`
-            : "/admin/statistics/new",
+    navigate(
+      "/admin/login",
+      {
+        replace: true,
+        state: {
+          from: {
+            pathname: isEditMode
+              ? `/admin/statistics/${statisticId}/edit`
+              : "/admin/statistics/new",
+          },
         },
       },
-    });
+    );
 
     return true;
   }
 
-  async function handleSubmit(statisticPayload) {
+  async function handleSubmit(
+    statisticPayload,
+  ) {
     try {
       if (isEditMode) {
-        const response = await updateAdminStatistic(
-          accessToken,
-          statisticId,
-          statisticPayload,
-        );
+        const response =
+          await updateAdminStatistic(
+            accessToken,
+            statisticId,
+            statisticPayload,
+          );
 
-        navigate("/admin/statistics", {
-          replace: true,
-          state: {
-            successMessage:
-              response.message || "Statistic updated successfully.",
+        navigate(
+          "/admin/statistics",
+          {
+            replace: true,
+            state: {
+              successMessage:
+                response.message ||
+                "Statistic updated successfully.",
+            },
           },
-        });
+        );
 
         return;
       }
 
-      const response = await createAdminStatistic(
-        accessToken,
-        statisticPayload,
-      );
+      const response =
+        await createAdminStatistic(
+          accessToken,
+          statisticPayload,
+        );
 
-      navigate("/admin/statistics", {
-        replace: true,
-        state: {
-          successMessage: response.message || "Statistic created successfully.",
+      navigate(
+        "/admin/statistics",
+        {
+          replace: true,
+          state: {
+            successMessage:
+              response.message ||
+              "Statistic created successfully.",
+          },
         },
-      });
+      );
     } catch (error) {
-      const wasAuthenticationError = await handleAuthenticationError(error);
+      const wasAuthenticationError =
+        await handleAuthenticationError(
+          error,
+        );
 
-      if (!wasAuthenticationError) {
+      if (
+        !wasAuthenticationError
+      ) {
         throw error;
       }
     }
@@ -173,81 +264,123 @@ function AdminStatisticEditorPage({ mode = "create" }) {
 
   if (isLoading) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-100 px-4">
-        <div className="text-center">
-          <div className="mx-auto size-12 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600" />
+      <main className="min-h-screen bg-slate-100">
+        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div
+            role="status"
+            aria-live="polite"
+            className="max-w-5xl space-y-4"
+          >
+            <span className="sr-only">
+              Loading statistic details...
+            </span>
 
-          <p className="mt-5 text-sm font-semibold text-slate-600">
-            Loading statistic details...
-          </p>
-        </div>
+            <div className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+
+            <div className="h-96 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+          </div>
+        </section>
       </main>
     );
   }
 
-  if (isEditMode && loadError) {
+  if (
+    isEditMode &&
+    loadError
+  ) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-100 px-4">
-        <div className="w-full max-w-lg rounded-3xl border border-red-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-red-600">
-            Statistic Error
-          </p>
-
-          <h1 className="mt-3 text-2xl font-bold text-slate-950">
-            Statistic could not be opened
-          </h1>
-
-          <p className="mt-4 leading-7 text-slate-600">{loadError}</p>
-
-          <Link
-            to="/admin/statistics"
-            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+      <main className="min-h-screen bg-slate-100">
+        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div
+            role="alert"
+            className="max-w-2xl rounded-2xl border border-red-200 bg-white p-5 shadow-sm sm:p-6"
           >
-            Return to statistics
-          </Link>
-        </div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">
+              Statistic Error
+            </p>
+
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              Statistic could not be opened
+            </h1>
+
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {loadError}
+            </p>
+
+            <Link
+              to="/admin/statistics"
+              className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+            >
+              â† Return to Statistics
+            </Link>
+          </div>
+        </section>
       </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <Link
-          to="/admin/statistics"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-brand-600"
-        >
-          <span aria-hidden="true">←</span>
-          Statistics Management
-        </Link>
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="max-w-5xl">
+          <Link
+            to="/admin/statistics"
+            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+          >
+            <span aria-hidden="true">&larr;</span>
 
-        <div className="mt-6">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-            {isEditMode ? "Update Statistic" : "Create Statistic"}
-          </p>
+            Statistics Management
+          </Link>
 
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            {isEditMode
-              ? `Edit ${statistic?.label || "statistic"}`
-              : "Add a new statistic"}
-          </h1>
+          <header className="mt-3">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              {isEditMode
+                ? "Update Statistic"
+                : "Create Statistic"}
+            </p>
 
-          <p className="mt-3 max-w-2xl leading-7 text-slate-600">
-            {isEditMode
-              ? "Update the statistic value, label, icon, display order and visibility."
-              : "Create a dynamic portfolio statistic such as projects completed, years of experience or technologies used."}
-          </p>
-        </div>
+            <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              {isEditMode
+                ? `Edit ${
+                    statistic?.label ||
+                    "Statistic"
+                  }`
+                : "Add a New Statistic"}
+            </h1>
 
-        <div className="mt-8">
-          <StatisticForm
-            key={isEditMode ? statistic?._id : "new-statistic"}
-            initialValues={initialValues}
-            onSubmit={handleSubmit}
-            submitLabel={isEditMode ? "Update Statistic" : "Create Statistic"}
-            accessToken={accessToken}
-            onMediaUnauthorized={handleMediaUnauthorized}
-          />
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              {isEditMode
+                ? "Update the statistic value, label, icon, display order and publication controls."
+                : "Create a reusable portfolio statistic that can be managed through the Admin CMS."}
+            </p>
+          </header>
+
+          <div className="mt-6">
+            <StatisticForm
+              key={
+                isEditMode
+                  ? statistic?._id
+                  : "new-statistic"
+              }
+              initialValues={
+                initialValues
+              }
+              onSubmit={
+                handleSubmit
+              }
+              submitLabel={
+                isEditMode
+                  ? "Update Statistic"
+                  : "Create Statistic"
+              }
+              accessToken={
+                accessToken
+              }
+              onMediaUnauthorized={
+                handleMediaUnauthorized
+              }
+            />
+          </div>
         </div>
       </section>
     </main>
