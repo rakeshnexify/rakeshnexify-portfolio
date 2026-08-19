@@ -332,7 +332,7 @@ function AdminSkillEditorPage({
   return (
     <main className="min-h-screen bg-slate-100">
       <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="max-w-5xl">
+        <div className="mx-auto max-w-5xl">
           <Link
             to="/admin/skills"
             className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
