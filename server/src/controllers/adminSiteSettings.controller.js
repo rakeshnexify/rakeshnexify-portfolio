@@ -942,6 +942,10 @@ function cleanPlatforms(value, fieldName) {
         ? cleanHttpUrl(platform.url, `${fieldPrefix}.url`)
         : "",
 
+      iconUrl: hasOwnProperty(platform, "iconUrl")
+        ? cleanHttpUrl(platform.iconUrl, `${fieldPrefix}.iconUrl`)
+        : "",
+
       isVisible: hasOwnProperty(platform, "isVisible")
         ? cleanBoolean(platform.isVisible, `${fieldPrefix}.isVisible`)
         : true,

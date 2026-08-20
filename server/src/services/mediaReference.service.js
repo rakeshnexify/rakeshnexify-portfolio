@@ -25,6 +25,9 @@ const MEDIA_REFERENCE_DEFINITIONS = Object.freeze([
       "owner.profileImageUrl",
       "owner.resumeUrl",
       "seo.ogImageUrl",
+      "socialPlatforms.iconUrl",
+      "developerPlatforms.iconUrl",
+      "freelancerPlatforms.iconUrl",
     ],
   },
 

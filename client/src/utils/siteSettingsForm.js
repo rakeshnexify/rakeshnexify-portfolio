@@ -362,6 +362,7 @@ function createEmptyPlatform(order = 1) {
     name: "",
     username: "",
     url: "",
+    iconUrl: "",
     isVisible: true,
     order,
   };
@@ -376,6 +377,8 @@ function normalizePlatform(platform, index) {
     username: cleanString(platform?.username),
 
     url: cleanString(platform?.url),
+
+    iconUrl: cleanString(platform?.iconUrl),
 
     isVisible: platform?.isVisible !== false,
 
@@ -615,6 +618,8 @@ function createPlatformPayload(platforms) {
     username: cleanString(platform.username),
 
     url: cleanString(platform.url),
+
+    iconUrl: cleanString(platform.iconUrl),
 
     isVisible: platform.isVisible !== false,
 

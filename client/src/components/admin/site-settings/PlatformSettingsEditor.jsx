@@ -1,3 +1,6 @@
+import { useState } from "react";
+
+import MediaField from "../media/MediaField";
 import { createEmptyPlatform } from "../../../utils/siteSettingsForm";
 
 const MAX_PLATFORMS = 25;
@@ -29,8 +32,12 @@ function PlatformSettingsEditor({
   platforms = [],
   fieldErrors = {},
   disabled = false,
+  accessToken = "",
+  onMediaUnauthorized,
   onChange,
 }) {
+  const [expandedIndex, setExpandedIndex] = useState(null);
+
   const platformItems = Array.isArray(platforms) ? platforms : [];
 
   function emitChange(nextPlatforms) {
@@ -62,10 +69,14 @@ function PlatformSettingsEditor({
       return;
     }
 
+    const newIndex = platformItems.length;
+
     emitChange([
       ...platformItems,
-      createEmptyPlatform(platformItems.length + 1),
+      createEmptyPlatform(newIndex + 1),
     ]);
+
+    setExpandedIndex(newIndex);
   }
 
   function removePlatform(index) {
@@ -74,6 +85,22 @@ function PlatformSettingsEditor({
     );
 
     emitChange(nextPlatforms);
+
+    setExpandedIndex((currentIndex) => {
+      if (currentIndex === null) {
+        return null;
+      }
+
+      if (currentIndex === index) {
+        return null;
+      }
+
+      if (currentIndex > index) {
+        return currentIndex - 1;
+      }
+
+      return currentIndex;
+    });
   }
 
   function movePlatform(index, direction) {
@@ -91,6 +118,24 @@ function PlatformSettingsEditor({
     ];
 
     emitChange(nextPlatforms);
+
+    setExpandedIndex((currentIndex) => {
+      if (currentIndex === index) {
+        return destinationIndex;
+      }
+
+      if (currentIndex === destinationIndex) {
+        return index;
+      }
+
+      return currentIndex;
+    });
+  }
+
+  function togglePlatform(index) {
+    setExpandedIndex((currentIndex) =>
+      currentIndex === index ? null : index,
+    );
   }
 
   const groupError = getFieldError(fieldErrors, fieldName);
@@ -142,46 +187,62 @@ function PlatformSettingsEditor({
           </p>
         </div>
       ) : (
-        <div className="mt-6 space-y-5">
+        <div className="mt-5 space-y-3">
           {platformItems.map((platform, index) => {
             const nameField = `${fieldName}.${index}.name`;
             const usernameField = `${fieldName}.${index}.username`;
             const urlField = `${fieldName}.${index}.url`;
+            const iconField = `${fieldName}.${index}.iconUrl`;
             const visibilityField = `${fieldName}.${index}.isVisible`;
 
             const nameError = getFieldError(fieldErrors, nameField);
-
             const usernameError = getFieldError(fieldErrors, usernameField);
-
             const urlError = getFieldError(fieldErrors, urlField);
-
-            const visibilityError = getFieldError(fieldErrors, visibilityField);
+            const iconError = getFieldError(fieldErrors, iconField);
+            const visibilityError = getFieldError(
+              fieldErrors,
+              visibilityField,
+            );
 
             const hasPreviewUrl = isSafePreviewUrl(platform.url);
+            const hasIconPreview = isSafePreviewUrl(platform.iconUrl);
+            const isExpanded = expandedIndex === index;
+            const editorId = `${fieldName}-${index}-editor`;
 
             return (
               <article
                 key={`${fieldName}-${index}`}
                 className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
               >
-                <div className="flex flex-col gap-4 border-b border-slate-200 bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-3">
+                <div
+                  className={`flex items-center gap-3 bg-white px-4 py-3 ${
+                    isExpanded ? "border-b border-slate-200" : ""
+                  }`}
+                >
+                  <button
+                    type="button"
+                    aria-expanded={isExpanded}
+                    aria-controls={editorId}
+                    disabled={disabled}
+                    onClick={() => togglePlatform(index)}
+                    className="flex min-w-0 flex-1 items-center gap-3 rounded-xl text-left outline-none transition focus-visible:ring-4 focus-visible:ring-brand-100 disabled:cursor-not-allowed"
+                  >
                     <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-sm font-black text-brand-700">
                       {index + 1}
                     </span>
 
-                    <div>
-                      <h3 className="font-bold text-slate-900">
+                    <span className="min-w-0">
+                      <span className="block truncate font-bold text-slate-900">
                         {platform.name || "New Platform"}
-                      </h3>
+                      </span>
 
-                      <p className="text-xs text-slate-500">
+                      <span className="mt-0.5 block text-xs text-slate-500">
                         Display order: {index + 1}
-                      </p>
-                    </div>
-                  </div>
+                      </span>
+                    </span>
+                  </button>
 
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <button
                       type="button"
                       aria-label={`Move ${platform.name || "platform"} up`}
@@ -215,169 +276,224 @@ function PlatformSettingsEditor({
                   </div>
                 </div>
 
-                <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-2">
-                  <div>
-                    <label
-                      htmlFor={nameField}
-                      className="text-sm font-semibold text-slate-700"
-                    >
-                      Platform Name
-                    </label>
-
-                    <input
-                      id={nameField}
-                      name={nameField}
-                      type="text"
-                      value={platform.name || ""}
-                      disabled={disabled}
-                      placeholder="Example: YouTube"
-                      onChange={(event) =>
-                        updatePlatform(index, "name", event.target.value)
-                      }
-                      className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
-                        nameError
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-slate-300 focus:border-brand-500"
-                      }`}
-                    />
-
-                    {nameError && (
-                      <p
-                        role="alert"
-                        className="mt-2 text-sm font-medium text-red-600"
-                      >
-                        {nameError}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor={usernameField}
-                      className="text-sm font-semibold text-slate-700"
-                    >
-                      Username or Profile Name
-                    </label>
-
-                    <input
-                      id={usernameField}
-                      name={usernameField}
-                      type="text"
-                      value={platform.username || ""}
-                      disabled={disabled}
-                      placeholder="Example: RakeshNexify"
-                      onChange={(event) =>
-                        updatePlatform(index, "username", event.target.value)
-                      }
-                      className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
-                        usernameError
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-slate-300 focus:border-brand-500"
-                      }`}
-                    />
-
-                    {usernameError && (
-                      <p
-                        role="alert"
-                        className="mt-2 text-sm font-medium text-red-600"
-                      >
-                        {usernameError}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="lg:col-span-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
+                {isExpanded && (
+                  <div
+                    id={editorId}
+                    className="grid gap-5 p-4 sm:p-5 lg:grid-cols-2"
+                  >
+                    <div>
                       <label
-                        htmlFor={urlField}
+                        htmlFor={nameField}
                         className="text-sm font-semibold text-slate-700"
                       >
-                        Profile URL
+                        Platform Name
                       </label>
 
-                      {hasPreviewUrl && (
-                        <a
-                          href={platform.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs font-bold text-brand-600 transition hover:text-brand-700"
+                      <input
+                        id={nameField}
+                        name={nameField}
+                        type="text"
+                        value={platform.name || ""}
+                        disabled={disabled}
+                        placeholder="Example: YouTube"
+                        onChange={(event) =>
+                          updatePlatform(index, "name", event.target.value)
+                        }
+                        className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                          nameError
+                            ? "border-red-400 focus:border-red-500"
+                            : "border-slate-300 focus:border-brand-500"
+                        }`}
+                      />
+
+                      {nameError && (
+                        <p
+                          role="alert"
+                          className="mt-2 text-sm font-medium text-red-600"
                         >
-                          Open profile ↗
-                        </a>
+                          {nameError}
+                        </p>
                       )}
                     </div>
 
-                    <input
-                      id={urlField}
-                      name={urlField}
-                      type="url"
-                      value={platform.url || ""}
-                      disabled={disabled}
-                      placeholder="https://example.com/username"
-                      onChange={(event) =>
-                        updatePlatform(index, "url", event.target.value)
-                      }
-                      className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
-                        urlError
-                          ? "border-red-400 focus:border-red-500"
-                          : "border-slate-300 focus:border-brand-500"
-                      }`}
-                    />
-
-                    {urlError ? (
-                      <p
-                        role="alert"
-                        className="mt-2 text-sm font-medium text-red-600"
+                    <div>
+                      <label
+                        htmlFor={usernameField}
+                        className="text-sm font-semibold text-slate-700"
                       >
-                        {urlError}
-                      </p>
-                    ) : (
-                      <p className="mt-2 text-xs leading-5 text-slate-500">
-                        Use a complete URL beginning with{" "}
-                        <span className="font-semibold">https://</span>
-                      </p>
-                    )}
-                  </div>
+                        Username or Profile Name
+                      </label>
 
-                  <div className="lg:col-span-2">
-                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4">
                       <input
-                        type="checkbox"
-                        name={visibilityField}
-                        checked={platform.isVisible !== false}
+                        id={usernameField}
+                        name={usernameField}
+                        type="text"
+                        value={platform.username || ""}
                         disabled={disabled}
+                        placeholder="Example: RakeshNexify"
                         onChange={(event) =>
                           updatePlatform(
                             index,
-                            "isVisible",
-                            event.target.checked,
+                            "username",
+                            event.target.value,
                           )
                         }
-                        className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                        className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                          usernameError
+                            ? "border-red-400 focus:border-red-500"
+                            : "border-slate-300 focus:border-brand-500"
+                        }`}
                       />
 
-                      <span>
-                        <span className="block text-sm font-semibold text-slate-800">
-                          Show this platform publicly
-                        </span>
+                      {usernameError && (
+                        <p
+                          role="alert"
+                          className="mt-2 text-sm font-medium text-red-600"
+                        >
+                          {usernameError}
+                        </p>
+                      )}
+                    </div>
 
-                        <span className="mt-1 block text-xs leading-5 text-slate-500">
-                          Hidden platforms remain saved in the Admin Panel but
-                          are not displayed on the public website.
-                        </span>
-                      </span>
-                    </label>
+                    <div className="lg:col-span-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <label
+                          htmlFor={urlField}
+                          className="text-sm font-semibold text-slate-700"
+                        >
+                          Profile URL
+                        </label>
 
-                    {visibilityError && (
-                      <p
-                        role="alert"
-                        className="mt-2 text-sm font-medium text-red-600"
-                      >
-                        {visibilityError}
-                      </p>
-                    )}
+                        {hasPreviewUrl && (
+                          <a
+                            href={platform.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-bold text-brand-600 transition hover:text-brand-700"
+                          >
+                            Open profile ↗
+                          </a>
+                        )}
+                      </div>
+
+                      <input
+                        id={urlField}
+                        name={urlField}
+                        type="url"
+                        value={platform.url || ""}
+                        disabled={disabled}
+                        placeholder="https://example.com/username"
+                        onChange={(event) =>
+                          updatePlatform(index, "url", event.target.value)
+                        }
+                        className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                          urlError
+                            ? "border-red-400 focus:border-red-500"
+                            : "border-slate-300 focus:border-brand-500"
+                        }`}
+                      />
+
+                      {urlError ? (
+                        <p
+                          role="alert"
+                          className="mt-2 text-sm font-medium text-red-600"
+                        >
+                          {urlError}
+                        </p>
+                      ) : (
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                          Use a complete URL beginning with{" "}
+                          <span className="font-semibold">https://</span>
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="lg:col-span-2">
+                      <MediaField
+                        id={iconField}
+                        name={iconField}
+                        label="Platform Icon / Logo"
+                        value={platform.iconUrl || ""}
+                        onChange={(event) =>
+                          updatePlatform(
+                            index,
+                            "iconUrl",
+                            event.target.value,
+                          )
+                        }
+                        accessToken={accessToken}
+                        allowedTypes={["image", "svg"]}
+                        pickerTitle={`Choose ${platform.name || "Platform"} Icon`}
+                        placeholder="https://..."
+                        helpText="Choose an SVG, PNG, JPG, WebP or AVIF asset from the Media Library, or paste a complete image URL."
+                        error={iconError}
+                        disabled={disabled}
+                        onUnauthorized={onMediaUnauthorized}
+                      />
+
+                      {hasIconPreview && (
+                        <div className="mt-3 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3">
+                          <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-slate-50">
+                            <img
+                              src={platform.iconUrl}
+                              alt={`${platform.name || "Platform"} icon preview`}
+                              className="max-h-8 max-w-8 object-contain"
+                            />
+                          </span>
+
+                          <span className="min-w-0">
+                            <span className="block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+                              Icon preview
+                            </span>
+
+                            <span className="mt-1 block truncate text-sm font-semibold text-slate-700">
+                              {platform.name || "New Platform"}
+                            </span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="lg:col-span-2">
+                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4">
+                        <input
+                          type="checkbox"
+                          name={visibilityField}
+                          checked={platform.isVisible !== false}
+                          disabled={disabled}
+                          onChange={(event) =>
+                            updatePlatform(
+                              index,
+                              "isVisible",
+                              event.target.checked,
+                            )
+                          }
+                          className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                        />
+
+                        <span>
+                          <span className="block text-sm font-semibold text-slate-800">
+                            Show this platform publicly
+                          </span>
+
+                          <span className="mt-1 block text-xs leading-5 text-slate-500">
+                            Hidden platforms remain saved in the Admin Panel
+                            but are not displayed on the public website.
+                          </span>
+                        </span>
+                      </label>
+
+                      {visibilityError && (
+                        <p
+                          role="alert"
+                          className="mt-2 text-sm font-medium text-red-600"
+                        >
+                          {visibilityError}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </article>
             );
           })}

@@ -322,6 +322,11 @@ function validatePlatformGroup(formValues, fieldName, errors) {
       errors[`${fieldPrefix}.url`] =
         "Enter a complete http:// or https:// URL without login credentials.";
     }
+
+    if (!isSafeHttpUrl(platform?.iconUrl)) {
+      errors[`${fieldPrefix}.iconUrl`] =
+        "Enter a complete http:// or https:// icon URL without login credentials.";
+    }
   });
 }
 
@@ -1661,10 +1666,45 @@ function SiteSettingsForm({
             onChange={handleAboutWorkItemsChange}
           />
 
-          <div className="rounded-2xl border border-brand-100 bg-brand-50/60 px-4 py-3 text-xs leading-5 text-slate-600">
-            Social profiles in the About shortcut use the existing Social
-            Platforms settings. Add, hide and reorder them from the Platforms
-            settings area; About does not duplicate that data.
+          <div className="grid gap-5">
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                About Platform Grids
+              </h3>
+
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Manage the Social Media and Freelancing icon grids shown
+                directly below the rotating Work Links card.
+              </p>
+            </div>
+
+            <PlatformSettingsEditor
+              title="Social Media Profiles"
+              description="Add, edit, remove, hide and reorder the social profiles shown in the public About Social Media grid."
+              fieldName="socialPlatforms"
+              platforms={formValues.socialPlatforms}
+              fieldErrors={combinedFieldErrors}
+              disabled={isSubmitting}
+              accessToken={accessToken}
+              onMediaUnauthorized={onMediaUnauthorized}
+              onChange={(nextPlatforms) =>
+                handlePlatformChange("socialPlatforms", nextPlatforms)
+              }
+            />
+
+            <PlatformSettingsEditor
+              title="Freelancing Profiles"
+              description="Add, edit, remove, hide and reorder the freelancing profiles shown in the public About Freelancing grid."
+              fieldName="freelancerPlatforms"
+              platforms={formValues.freelancerPlatforms}
+              fieldErrors={combinedFieldErrors}
+              disabled={isSubmitting}
+              accessToken={accessToken}
+              onMediaUnauthorized={onMediaUnauthorized}
+              onChange={(nextPlatforms) =>
+                handlePlatformChange("freelancerPlatforms", nextPlatforms)
+              }
+            />
           </div>
         </div>
       </SettingsCard>
@@ -2001,6 +2041,8 @@ function SiteSettingsForm({
             platforms={formValues.socialPlatforms}
             fieldErrors={combinedFieldErrors}
             disabled={isSubmitting}
+            accessToken={accessToken}
+            onMediaUnauthorized={onMediaUnauthorized}
             onChange={(nextPlatforms) =>
               handlePlatformChange("socialPlatforms", nextPlatforms)
             }
@@ -2013,6 +2055,8 @@ function SiteSettingsForm({
             platforms={formValues.developerPlatforms}
             fieldErrors={combinedFieldErrors}
             disabled={isSubmitting}
+            accessToken={accessToken}
+            onMediaUnauthorized={onMediaUnauthorized}
             onChange={(nextPlatforms) =>
               handlePlatformChange("developerPlatforms", nextPlatforms)
             }
@@ -2025,6 +2069,8 @@ function SiteSettingsForm({
             platforms={formValues.freelancerPlatforms}
             fieldErrors={combinedFieldErrors}
             disabled={isSubmitting}
+            accessToken={accessToken}
+            onMediaUnauthorized={onMediaUnauthorized}
             onChange={(nextPlatforms) =>
               handlePlatformChange("freelancerPlatforms", nextPlatforms)
             }

@@ -626,6 +626,13 @@ const platformSchema = new mongoose.Schema(
       default: "",
     },
 
+    iconUrl: {
+      type: String,
+      trim: true,
+      maxlength: [1000, "Platform icon URL cannot exceed 1000 characters."],
+      default: "",
+    },
+
     isVisible: {
       type: Boolean,
       default: true,

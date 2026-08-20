@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import useSiteSettings from "../../hooks/useSiteSettings";
@@ -63,14 +63,21 @@ function getIdentityArticle(role) {
 }
 
 function getSafeExternalUrl(value) {
-  const url = String(value || "").trim();
+  const rawUrl = String(value || "").trim();
 
-  if (!url) {
+  if (!rawUrl) {
     return "";
   }
 
+  const candidateUrl =
+    /^[a-z][a-z0-9+.-]*:\/\//i.test(rawUrl) ||
+    rawUrl.startsWith("/") ||
+    rawUrl.startsWith("#")
+      ? rawUrl
+      : `https://${rawUrl}`;
+
   try {
-    const parsedUrl = new URL(url);
+    const parsedUrl = new URL(candidateUrl);
 
     if (
       !["http:", "https:"].includes(parsedUrl.protocol) ||
@@ -87,24 +94,47 @@ function getSafeExternalUrl(value) {
   }
 }
 
-function getSocialProfiles(settings) {
-  const platforms = Array.isArray(settings?.socialPlatforms)
-    ? settings.socialPlatforms
+function getPlatformProfiles(settings, fieldName) {
+  const platforms = Array.isArray(settings?.[fieldName])
+    ? settings[fieldName]
     : [];
+  const usedUrls = new Set();
 
   return [...platforms]
-    .filter((platform) => platform?.isVisible !== false)
-    .sort(
-      (firstPlatform, secondPlatform) =>
-        Number(firstPlatform?.order || 0) -
-        Number(secondPlatform?.order || 0),
-    )
-    .map((platform) => ({
+    .map((platform, index) => ({
       name: String(platform?.name || "").trim(),
       username: String(platform?.username || "").trim(),
       url: getSafeExternalUrl(platform?.url),
+      iconUrl: getSafeExternalUrl(platform?.iconUrl),
+      isVisible: platform?.isVisible !== false,
+      order: Number(platform?.order || index + 1),
     }))
-    .filter((platform) => platform.name && platform.url);
+    .filter(
+      (platform) =>
+        platform.isVisible &&
+        platform.name &&
+        platform.url,
+    )
+    .sort(
+      (firstPlatform, secondPlatform) =>
+        firstPlatform.order - secondPlatform.order,
+    )
+    .filter((platform) => {
+      const normalizedUrl = platform.url.toLowerCase();
+
+      if (usedUrls.has(normalizedUrl)) {
+        return false;
+      }
+
+      usedUrls.add(normalizedUrl);
+      return true;
+    })
+    .map(({ name, username, url, iconUrl }) => ({
+      name,
+      username,
+      url,
+      iconUrl,
+    }));
 }
 
 function getPlatformMark(name) {
@@ -186,23 +216,66 @@ function usePrefersReducedMotion() {
   return prefersReducedMotion;
 }
 
-function SocialNetworkIcon() {
+function PlatformIconGrid({
+  title,
+  profiles,
+  variant,
+}) {
+  if (!profiles.length) {
+    return null;
+  }
+
   return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className="size-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <section
+      className={`public-about-platform-group public-about-platform-group-${variant}`}
+      aria-label={`${title} profiles`}
     >
-      <circle cx="18" cy="5" r="2.5" />
-      <circle cx="6" cy="12" r="2.5" />
-      <circle cx="18" cy="19" r="2.5" />
-      <path d="m8.2 10.8 7.5-4.4M8.2 13.2l7.5 4.4" />
-    </svg>
+      <div className="public-about-platform-group-header">
+        <span>{title}</span>
+        <span>{String(profiles.length).padStart(2, "0")}</span>
+      </div>
+
+      <div className="public-about-platform-grid">
+        {profiles.map((platform, index) => (
+          <a
+            key={`${variant}-${platform.name}-${platform.url}`}
+            href={platform.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="public-about-platform-tile"
+            style={{
+              "--public-about-platform-index": index,
+            }}
+            aria-label={`Open ${platform.name}${platform.username ? ` ${platform.username}` : ""}`}
+            title={
+              platform.username
+                ? `${platform.name} - ${platform.username}`
+                : platform.name
+            }
+          >
+            <span
+              className={`public-about-platform-mark ${
+                platform.iconUrl ? "public-about-platform-mark-media" : ""
+              }`}
+              aria-hidden="true"
+            >
+              {platform.iconUrl ? (
+                <img
+                  src={platform.iconUrl}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="public-about-platform-icon"
+                />
+              ) : (
+                getPlatformMark(platform.name)
+              )}
+            </span>
+
+          </a>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -266,7 +339,11 @@ function AboutSection() {
     [about],
   );
   const socialProfiles = useMemo(
-    () => getSocialProfiles(settings),
+    () => getPlatformProfiles(settings, "socialPlatforms"),
+    [settings],
+  );
+  const freelancerProfiles = useMemo(
+    () => getPlatformProfiles(settings, "freelancerPlatforms"),
     [settings],
   );
   const workItems = useMemo(
@@ -276,9 +353,6 @@ function AboutSection() {
 
   const [identityIndex, setIdentityIndex] = useState(0);
   const [workIndex, setWorkIndex] = useState(0);
-  const [isSocialOpen, setIsSocialOpen] = useState(false);
-
-  const socialPopoverRef = useRef(null);
 
   useEffect(() => {
     if (prefersReducedMotion || identityRoles.length <= 1) {
@@ -309,31 +383,6 @@ function AboutSection() {
     return () => window.clearInterval(intervalId);
   }, [prefersReducedMotion, workItems]);
 
-  useEffect(() => {
-    if (!isSocialOpen) {
-      return undefined;
-    }
-
-    function handlePointerDown(event) {
-      if (!socialPopoverRef.current?.contains(event.target)) {
-        setIsSocialOpen(false);
-      }
-    }
-
-    function handleKeyDown(event) {
-      if (event.key === "Escape") {
-        setIsSocialOpen(false);
-      }
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isSocialOpen]);
 
   function openResume() {
     if (!resumeUrl) {
@@ -493,8 +542,12 @@ function AboutSection() {
               </div>
             )}
 
-            {(activeWorkItem || socialProfiles.length > 0) && (
-              <div className="public-about-shortcuts">
+            {(
+              activeWorkItem ||
+              socialProfiles.length > 0 ||
+              freelancerProfiles.length > 0
+            ) && (
+              <div className="public-about-work-stack">
                 {activeWorkItem && (
                   <AboutWorkLink
                     item={activeWorkItem}
@@ -534,72 +587,24 @@ function AboutSection() {
                   </AboutWorkLink>
                 )}
 
-                {socialProfiles.length > 0 && (
-                  <div
-                    ref={socialPopoverRef}
-                    className="public-about-social"
-                  >
-                    <button
-                      type="button"
-                      className="public-about-social-trigger"
-                      aria-label={
-                        isSocialOpen
-                          ? "Hide social profiles"
-                          : "Show social profiles"
-                      }
-                      aria-expanded={isSocialOpen}
-                      aria-controls="about-social-profiles"
-                      onClick={() =>
-                        setIsSocialOpen((currentValue) => !currentValue)
-                      }
-                    >
-                      <SocialNetworkIcon />
-                    </button>
+                {(socialProfiles.length > 0 ||
+                  freelancerProfiles.length > 0) && (
+                  <div className="public-about-platform-groups">
+                    <PlatformIconGrid
+                      title="Social Media"
+                      profiles={socialProfiles}
+                      variant="social"
+                    />
 
-                    {isSocialOpen && (
-                      <div
-                        id="about-social-profiles"
-                        className="public-about-social-popover"
-                        aria-label="Social profiles"
-                      >
-                        {socialProfiles.map((platform, index) => (
-                          <a
-                            key={`${platform.name}-${platform.url}`}
-                            href={platform.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="public-about-social-link"
-                            style={{
-                              "--public-about-social-index": index,
-                            }}
-                          >
-                            <span className="public-about-social-mark">
-                              {getPlatformMark(platform.name)}
-                            </span>
-
-                            <span className="min-w-0">
-                              <strong>{platform.name}</strong>
-
-                              {platform.username && (
-                                <small>{platform.username}</small>
-                              )}
-                            </span>
-
-                            <span
-                              className="public-about-social-arrow"
-                              aria-hidden="true"
-                            >
-                              -&gt;
-                            </span>
-                          </a>
-                        ))}
-                      </div>
-                    )}
+                    <PlatformIconGrid
+                      title="Freelancing"
+                      profiles={freelancerProfiles}
+                      variant="freelance"
+                    />
                   </div>
                 )}
               </div>
             )}
-
 
             {resumeUrl && (
               <div className="public-about-resume">

@@ -2628,12 +2628,11 @@ body.public-theme-active .public-about-identity-value::after {
     public-about-role-underline 520ms 90ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-body.public-theme-active .public-about-shortcuts {
-  display: flex;
+body.public-theme-active .public-about-work-stack {
+  display: grid;
   width: min(100%, 36rem);
   margin-top: clamp(0.8rem, 1.5vw, 1rem);
-  align-items: flex-end;
-  gap: 0.65rem;
+  gap: 0.72rem;
 }
 
 body.public-theme-active .public-about-work-rotator {
@@ -2792,152 +2791,110 @@ body.public-theme-active .public-about-work-track span {
   animation: public-about-work-track 2.6s linear infinite;
 }
 
-body.public-theme-active .public-about-social {
-  position: relative;
-  flex: 0 0 auto;
-}
-
-body.public-theme-active .public-about-social-trigger {
+body.public-theme-active .public-about-platform-groups {
   display: grid;
-  width: 2.85rem;
-  height: 2.85rem;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--public-color-primary) 26%, var(--public-color-border));
-  border-radius: 0.9rem;
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--public-color-primary) 16%, var(--public-color-surface)),
-      color-mix(in srgb, var(--public-color-surface) 92%, transparent)
-    );
-  color: var(--public-color-primary);
-  box-shadow:
-    0 3px 0 color-mix(in srgb, var(--public-color-primary) 24%, var(--public-color-border)),
-    0 9px 20px rgb(15 23 42 / 0.08),
-    inset 0 1px 0 rgb(255 255 255 / 0.36);
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease,
-    border-color 180ms ease;
-}
-
-body.public-theme-active .public-about-social-trigger:hover {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--public-color-primary) 52%, var(--public-color-border));
-  box-shadow:
-    0 4px 0 color-mix(in srgb, var(--public-color-primary) 28%, var(--public-color-border)),
-    0 12px 24px rgb(37 99 235 / 0.1),
-    inset 0 1px 0 rgb(255 255 255 / 0.4);
-}
-
-body.public-theme-active .public-about-social-trigger:active {
-  transform: translateY(1px);
-  box-shadow:
-    0 1px 0 color-mix(in srgb, var(--public-color-primary) 24%, var(--public-color-border)),
-    0 5px 12px rgb(15 23 42 / 0.08);
-}
-
-body.public-theme-active .public-about-social-trigger:focus-visible {
-  outline: 2px solid var(--public-color-focus);
-  outline-offset: 3px;
-}
-
-body.public-theme-active .public-about-social-popover {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 0.65rem);
-  z-index: 40;
-  display: grid;
-  width: min(20rem, calc(100vw - 2rem));
-  max-height: min(24rem, 60vh);
-  gap: 0.38rem;
-  overflow-y: auto;
-  border: 1px solid color-mix(in srgb, var(--public-color-primary) 18%, var(--public-color-border));
-  border-radius: 1rem;
-  background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--public-color-surface) 96%, transparent),
-      color-mix(in srgb, var(--public-color-surface-elevated) 92%, transparent)
-    );
-  padding: 0.5rem;
-  box-shadow:
-    0 22px 50px rgb(15 23 42 / 0.16),
-    inset 0 1px 0 rgb(255 255 255 / 0.3);
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
-  animation: public-about-social-pop 220ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-body.public-theme-active .public-about-social-link {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
   gap: 0.62rem;
+}
+
+body.public-theme-active .public-about-platform-group {
+  --public-about-platform-accent: 59 130 246;
+
+  border-top: 1px solid
+    color-mix(
+      in srgb,
+      rgb(var(--public-about-platform-accent)) 16%,
+      var(--public-color-border)
+    );
+  padding-top: 0.5rem;
+}
+
+body.public-theme-active .public-about-platform-group-freelance {
+  --public-about-platform-accent: 20 184 166;
+}
+
+body.public-theme-active .public-about-platform-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: rgb(var(--public-about-platform-accent));
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+body.public-theme-active .public-about-platform-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.44rem;
+}
+
+body.public-theme-active .public-about-platform-tile {
+  display: grid;
+  width: 3.65rem;
+  height: 3.65rem;
+  flex: 0 0 3.65rem;
+  place-items: center;
   border: 1px solid transparent;
-  border-radius: 0.75rem;
-  padding: 0.48rem 0.55rem;
+  border-radius: 0.9rem;
+  background: transparent;
+  padding: 0.35rem;
   color: var(--public-color-text);
   text-decoration: none;
+  box-shadow: none;
   opacity: 0;
   transform: translateY(5px);
-  animation: public-about-social-item 280ms ease forwards;
+  animation:
+    public-about-platform-tile-in 320ms cubic-bezier(0.16, 1, 0.3, 1)
+      forwards;
   animation-delay:
-    calc(var(--public-about-social-index, 0) * 45ms + 70ms);
+    calc(var(--public-about-platform-index, 0) * 45ms);
   transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease;
+    transform 170ms ease,
+    border-color 170ms ease,
+    background 170ms ease;
 }
 
-body.public-theme-active .public-about-social-link:hover {
-  border-color: color-mix(in srgb, var(--public-color-primary) 16%, transparent);
-  background: var(--public-color-primary-soft);
-  transform: translateX(2px);
+body.public-theme-active .public-about-platform-tile:hover {
+  transform: translateY(-2px) scale(1.035);
+  border-color:
+    rgb(var(--public-about-platform-accent) / 0.14);
+  background:
+    rgb(var(--public-about-platform-accent) / 0.065);
 }
 
-body.public-theme-active .public-about-social-link:focus-visible {
+body.public-theme-active .public-about-platform-tile:focus-visible {
   outline: 2px solid var(--public-color-focus);
   outline-offset: 2px;
 }
 
-body.public-theme-active .public-about-social-mark {
+body.public-theme-active .public-about-platform-mark {
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 2.85rem;
+  height: 2.85rem;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--public-color-primary) 18%, transparent);
-  border-radius: 0.65rem;
-  background: var(--public-color-primary-soft);
-  color: var(--public-color-primary);
-  font-size: 0.58rem;
-  font-weight: 900;
-  letter-spacing: 0.03em;
-}
-
-body.public-theme-active .public-about-social-link strong {
-  display: block;
-  overflow: hidden;
-  color: var(--public-color-text-strong);
+  border: 0;
+  border-radius: 0.8rem;
+  background:
+    rgb(var(--public-about-platform-accent) / 0.07);
+  color: rgb(var(--public-about-platform-accent));
   font-size: 0.72rem;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: 900;
+  letter-spacing: 0.025em;
 }
 
-body.public-theme-active .public-about-social-link small {
-  display: block;
-  margin-top: 0.1rem;
+body.public-theme-active .public-about-platform-mark-media {
   overflow: hidden;
-  color: var(--public-color-text-muted);
-  font-size: 0.6rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  background: transparent;
 }
 
-body.public-theme-active .public-about-social-arrow {
-  color: var(--public-color-primary);
-  font-size: 0.78rem;
+body.public-theme-active .public-about-platform-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+  object-position: center;
 }
 
 body.public-theme-active[data-public-theme="dark"] .public-about-work-rotator {
@@ -2958,18 +2915,14 @@ body.public-theme-active[data-public-theme="dark"] .public-about-work-rotator {
 }
 
 body.public-theme-active[data-public-theme="dark"] .public-about-identity-rotator,
-body.public-theme-active[data-public-theme="dark"] .public-about-work-rotator,
-body.public-theme-active[data-public-theme="dark"] .public-about-social-popover {
+body.public-theme-active[data-public-theme="dark"] .public-about-work-rotator {
   box-shadow:
     0 18px 42px rgb(0 0 0 / 0.28),
     inset 0 1px 0 rgb(255 255 255 / 0.06);
 }
 
-body.public-theme-active[data-public-theme="dark"] .public-about-social-trigger {
-  box-shadow:
-    0 3px 0 rgb(3 7 18 / 0.9),
-    0 10px 24px rgb(0 0 0 / 0.3),
-    inset 0 1px 0 rgb(255 255 255 / 0.07);
+body.public-theme-active[data-public-theme="dark"] .public-about-platform-tile {
+  box-shadow: none;
 }
 
 @keyframes public-about-role-mask-reveal {
@@ -3018,19 +2971,7 @@ body.public-theme-active[data-public-theme="dark"] .public-about-social-trigger 
   }
 }
 
-@keyframes public-about-social-pop {
-  from {
-    opacity: 0;
-    transform: translateY(7px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes public-about-social-item {
+@keyframes public-about-platform-tile-in {
   to {
     opacity: 1;
     transform: translateY(0);
@@ -3045,26 +2986,33 @@ body.public-theme-active[data-public-theme="dark"] .public-about-social-trigger 
     font-size: 0.9rem;
   }
 
-  body.public-theme-active .public-about-shortcuts {
-    align-items: stretch;
+  body.public-theme-active .public-about-work-stack {
+    width: 100%;
   }
 
   body.public-theme-active .public-about-work-rotator {
     padding: 0.68rem 0.72rem 0.58rem;
   }
 
-  body.public-theme-active .public-about-social {
-    display: flex;
-    align-items: flex-end;
+  body.public-theme-active .public-about-platform-grid {
+    gap: 0.42rem;
   }
 
-  body.public-theme-active .public-about-social-popover {
-    position: fixed;
-    right: 1rem;
-    bottom: 1rem;
-    left: 1rem;
-    width: auto;
-    max-height: 54vh;
+  body.public-theme-active .public-about-platform-tile {
+    width: 3.35rem;
+    height: 3.35rem;
+    flex-basis: 3.35rem;
+    padding: 0.3rem;
+  }
+
+  body.public-theme-active .public-about-platform-mark {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  body.public-theme-active .public-about-platform-icon {
+    width: 2.05rem;
+    height: 2.05rem;
   }
 }
 
@@ -3073,12 +3021,11 @@ body.public-theme-active[data-public-theme="dark"] .public-about-social-trigger 
   body.public-theme-active .public-about-identity-value::after,
   body.public-theme-active .public-about-work-content,
   body.public-theme-active .public-about-work-track span,
-  body.public-theme-active .public-about-social-popover,
-  body.public-theme-active .public-about-social-link {
+  body.public-theme-active .public-about-platform-tile {
     animation: none !important;
   }
 
-  body.public-theme-active .public-about-social-link {
+  body.public-theme-active .public-about-platform-tile {
     opacity: 1;
     transform: none;
   }
