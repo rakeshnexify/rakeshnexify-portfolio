@@ -137,73 +137,140 @@ function AdminLoginPage() {
   const displayedError = submitError || authError;
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-8 sm:px-6">
-      <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl overflow-hidden rounded-3xl border border-slate-800 bg-white shadow-2xl lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="hidden bg-gradient-to-br from-brand-700 via-brand-600 to-slate-950 p-12 text-white lg:flex lg:flex-col lg:justify-between">
-          <div>
-            <div className="inline-flex size-14 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-xl font-extrabold backdrop-blur">
-              RN
-            </div>
+    <main className="min-h-screen bg-slate-950">
+      <div className="mx-auto grid min-h-screen w-full max-w-[1600px] lg:grid-cols-[minmax(0,1.05fr)_minmax(460px,0.95fr)]">
+        <section className="relative hidden overflow-hidden bg-gradient-to-br from-brand-700 via-brand-600 to-slate-950 px-10 py-10 text-white lg:flex lg:flex-col lg:justify-between xl:px-16 xl:py-14">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-24 top-24 size-72 rounded-full bg-white/10 blur-3xl"
+          />
 
-            <p className="mt-5 text-xl font-extrabold">RakeshNexify</p>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-24 right-0 size-96 rounded-full bg-brand-300/20 blur-3xl"
+          />
+
+          <div className="relative">
+            <Link
+              to="/"
+              className="inline-flex min-h-10 items-center gap-3 rounded-xl text-sm font-semibold text-white/90 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-700 motion-reduce:transition-none"
+            >
+              <span
+                aria-hidden="true"
+                className="grid size-10 place-items-center rounded-xl border border-white/20 bg-white/10 text-sm font-black backdrop-blur"
+              >
+                RN
+              </span>
+
+              <span>
+                <span className="block text-base font-extrabold">
+                  RakeshNexify
+                </span>
+
+                <span className="block text-xs font-medium text-brand-100">
+                  Portfolio Administration
+                </span>
+              </span>
+            </Link>
           </div>
 
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.2em] text-brand-100">
+          <div className="relative max-w-xl">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-100">
               Secure Administration
             </p>
 
-            <h1 className="mt-5 max-w-lg text-4xl font-bold leading-tight">
-              Manage your complete portfolio from one dashboard.
+            <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight xl:text-5xl">
+              Manage your portfolio from one protected workspace.
             </h1>
 
-            <p className="mt-5 max-w-lg leading-7 text-brand-100">
-              Update website sections, services, projects, companies, platform
-              links, contact enquiries and SEO settings without editing source
-              code.
+            <p className="mt-5 max-w-lg text-base leading-7 text-brand-100">
+              Maintain website content, business sections, enquiries and SEO
+              settings through the role-protected Admin CMS.
             </p>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {[
+                "Secure login",
+                "Role-based access",
+                "Dynamic CMS",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur"
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
           </div>
 
-          <p className="text-sm text-brand-100">
-            Protected by secure authentication and role-based access.
+          <p className="relative text-sm leading-6 text-brand-100">
+            Authorised administration only.
           </p>
         </section>
 
-        <section className="flex items-center bg-slate-50 p-6 sm:p-10 lg:p-12">
+        <section className="flex min-h-screen items-center bg-slate-50 px-4 py-8 sm:px-6 sm:py-10 lg:px-10 xl:px-16">
           <div className="mx-auto w-full max-w-md">
+            <div className="flex items-center justify-between gap-4 lg:hidden">
+              <Link
+                to="/"
+                className="inline-flex min-h-10 items-center gap-2 rounded-xl text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+              >
+                <span
+                  aria-hidden="true"
+                  className="grid size-9 place-items-center rounded-xl bg-brand-600 text-xs font-black text-white"
+                >
+                  RN
+                </span>
+
+                RakeshNexify
+              </Link>
+
+              <span className="rounded-lg bg-slate-200 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-600">
+                Admin
+              </span>
+            </div>
+
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-brand-600"
+              className="mt-6 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none lg:mt-0"
             >
-              <span aria-hidden="true">←</span>
+              <span aria-hidden="true">
+                &larr;
+              </span>
+
               Back to portfolio
             </Link>
 
-            <div className="mt-10">
-              <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
+            <header className="mt-7 sm:mt-9">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
                 Admin Portal
               </p>
 
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
                 Welcome back
               </h2>
 
-              <p className="mt-3 leading-7 text-slate-600">
-                Enter your authorised administrator credentials to access the
-                dashboard.
+              <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+                Enter your authorised administrator credentials to continue to
+                the dashboard.
               </p>
-            </div>
+            </header>
 
             {displayedError && (
               <div
                 role="alert"
-                className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"
+                className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm font-medium leading-6 text-red-700"
               >
                 {displayedError}
               </div>
             )}
 
-            <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+            <form
+              className="mt-7 space-y-5"
+              onSubmit={handleSubmit}
+              noValidate
+            >
               <div>
                 <label
                   htmlFor="admin-email"
@@ -219,13 +286,16 @@ function AdminLoginPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   autoComplete="email"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  spellCheck="false"
                   placeholder="admin@example.com"
                   disabled={isSubmitting}
                   aria-invalid={Boolean(fieldErrors.email)}
                   aria-describedby={
                     fieldErrors.email ? "admin-email-error" : undefined
                   }
-                  className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-slate-950 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                  className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 motion-reduce:transition-none ${
                     fieldErrors.email
                       ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100"
                       : "border-slate-300 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
@@ -270,7 +340,7 @@ function AdminLoginPage() {
                     aria-describedby={
                       fieldErrors.password ? "admin-password-error" : undefined
                     }
-                    className={`min-h-12 w-full rounded-xl border bg-white px-4 pr-20 text-slate-950 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                    className={`min-h-12 w-full rounded-xl border bg-white px-4 pr-20 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 motion-reduce:transition-none ${
                       fieldErrors.password
                         ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-100"
                         : "border-slate-300 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
@@ -283,7 +353,13 @@ function AdminLoginPage() {
                       setShowPassword((currentValue) => !currentValue);
                     }}
                     disabled={isSubmitting}
-                    className="absolute inset-y-0 right-0 px-4 text-xs font-bold text-slate-500 transition hover:text-brand-600 disabled:cursor-not-allowed"
+                    aria-pressed={showPassword}
+                    aria-label={
+                      showPassword
+                        ? "Hide admin password"
+                        : "Show admin password"
+                    }
+                    className="absolute inset-y-0 right-0 inline-flex min-w-16 items-center justify-center rounded-r-xl px-4 text-xs font-bold text-slate-500 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-600 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -302,7 +378,7 @@ function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={isSubmitting || isCheckingSession}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-brand-200 disabled:cursor-not-allowed disabled:bg-slate-400"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-200 disabled:cursor-not-allowed disabled:bg-slate-400 motion-reduce:transition-none"
               >
                 {isSubmitting
                   ? "Signing in..."
@@ -312,10 +388,12 @@ function AdminLoginPage() {
               </button>
             </form>
 
-            <p className="mt-6 text-center text-xs leading-5 text-slate-400">
-              Only authorised RakeshNexify administrators can access this
-              system.
-            </p>
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center">
+              <p className="text-xs leading-5 text-slate-500">
+                Only authorised RakeshNexify administrators can access this
+                system.
+              </p>
+            </div>
           </div>
         </section>
       </div>
