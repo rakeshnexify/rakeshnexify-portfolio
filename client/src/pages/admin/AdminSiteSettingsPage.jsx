@@ -108,53 +108,66 @@ function AdminSiteSettingsPage() {
 
   return (
     <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <header className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
               Website Management
             </p>
 
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
               Site Settings
             </h1>
 
-            <p className="mt-3 max-w-3xl leading-7 text-slate-600">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
               Open a settings category to manage only the website fields you
-              need. All categories remain connected to the same dynamic Site
+              need. Every category remains connected to the same dynamic Site
               Settings database record.
             </p>
-          </div>
+          </header>
 
           {settings && (
-            <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+            <aside
+              aria-label="Site settings status"
+              className="shrink-0 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm"
+            >
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
                 Last updated
               </p>
 
-              <p className="mt-2 text-sm font-semibold text-slate-700">
-                {formatDateTime(settings.updatedAt)}
-              </p>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <p className="text-sm font-semibold text-slate-700">
+                  {formatDateTime(settings.updatedAt)}
+                </p>
 
-              <span
-                className={`mt-3 inline-flex rounded-lg px-3 py-1.5 text-xs font-bold ${
-                  settings.isPublished
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-amber-100 text-amber-700"
-                }`}
-              >
-                {settings.isPublished ? "Published" : "Unpublished"}
-              </span>
-            </div>
+                <span
+                  className={`inline-flex rounded-lg px-3 py-1.5 text-xs font-bold ${
+                    settings.isPublished
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {settings.isPublished ? "Published" : "Unpublished"}
+                </span>
+              </div>
+            </aside>
           )}
         </div>
 
         {isLoading && (
-          <div className="mt-8 space-y-6">
+          <div
+            role="status"
+            aria-live="polite"
+            className="mt-6 grid gap-5 lg:grid-cols-2"
+          >
+            <span className="sr-only">
+              Loading Site Settings...
+            </span>
+
             {[1, 2, 3, 4].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-72 animate-pulse rounded-3xl border border-slate-200 bg-white"
+                className="h-64 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
@@ -163,18 +176,24 @@ function AdminSiteSettingsPage() {
         {!isLoading && loadError && (
           <div
             role="alert"
-            className="mt-8 rounded-3xl border border-red-200 bg-red-50 p-7"
+            className="mt-6 max-w-2xl rounded-2xl border border-red-200 bg-white p-5 shadow-sm sm:p-6"
           >
-            <h2 className="text-lg font-bold text-red-800">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">
+              Settings Error
+            </p>
+
+            <h2 className="mt-2 text-xl font-bold text-slate-950">
               Site settings could not be loaded
             </h2>
 
-            <p className="mt-2 text-sm leading-6 text-red-700">{loadError}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {loadError}
+            </p>
 
             <button
               type="button"
               onClick={handleRetry}
-              className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-red-300 bg-white px-5 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+              className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-5 text-sm font-semibold text-red-700 transition-colors hover:border-red-300 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
               Try Again
             </button>
@@ -182,7 +201,7 @@ function AdminSiteSettingsPage() {
         )}
 
         {!isLoading && !loadError && settings && (
-          <div className="mt-8">
+          <div className="mt-6">
             <SiteSettingsOverview />
           </div>
         )}
