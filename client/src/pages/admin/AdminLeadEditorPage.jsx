@@ -432,7 +432,7 @@ function AdminLeadEditorPage({ mode = "create" }) {
     return (
       <main className="grid min-h-screen place-items-center bg-slate-100 px-4">
         <div className="text-center">
-          <div className="mx-auto size-12 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600" />
+          <div className="mx-auto size-12 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600 motion-reduce:animate-none" />
 
           <p className="mt-5 text-sm font-semibold text-slate-600">
             Loading Lead editor...
@@ -458,7 +458,7 @@ function AdminLeadEditorPage({ mode = "create" }) {
 
           <Link
             to="/admin/leads"
-            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
           >
             Return to Leads
           </Link>
@@ -469,37 +469,37 @@ function AdminLeadEditorPage({ mode = "create" }) {
 
   return (
     <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <section className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <Link
           to="/admin/leads"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-brand-600"
+          className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
         >
-          <span aria-hidden="true">←</span>
+          <span aria-hidden="true">&larr;</span>
           Leads Management
         </Link>
 
-        <div className="mt-6">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
+        <header className="mt-3">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
             {isEditMode ? "Update Lead" : "Create Lead"}
           </p>
 
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+          <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
             {isEditMode
               ? `Edit ${lead?.name || "Lead"}`
               : "Add a new Lead"}
           </h1>
 
-          <p className="mt-3 max-w-3xl leading-7 text-slate-600">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
             {isEditMode
               ? "Update the opportunity pipeline, value, follow-up schedule, assignment and CRM details."
               : "Create a sales opportunity manually and track it through the CRM pipeline."}
           </p>
-        </div>
+        </header>
 
         {submitError && (
           <div
             role="alert"
-            className="mt-7 rounded-2xl border border-red-200 bg-red-50 p-5"
+            className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5"
           >
             <p className="text-sm font-semibold leading-6 text-red-700">
               {submitError}
@@ -508,7 +508,7 @@ function AdminLeadEditorPage({ mode = "create" }) {
         )}
 
         {isEditMode && (
-          <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
                 Private CRM Notes
@@ -549,7 +549,7 @@ function AdminLeadEditorPage({ mode = "create" }) {
                     : "lead-private-note-help"
                 }
                 placeholder="Add follow-up details, quote discussion or other internal CRM context..."
-                className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus-visible:outline-none motion-reduce:transition-none"
               />
 
               <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
@@ -580,7 +580,7 @@ function AdminLeadEditorPage({ mode = "create" }) {
                   <button
                     type="submit"
                     disabled={isAddingNote}
-                    className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
                   >
                     {isAddingNote ? "Saving Note..." : "Add Note"}
                   </button>
@@ -638,7 +638,7 @@ function AdminLeadEditorPage({ mode = "create" }) {
           </section>
         )}
 
-        <div className="mt-8">
+        <div className="mt-6">
           <LeadForm
             form={form}
             fieldErrors={fieldErrors}
