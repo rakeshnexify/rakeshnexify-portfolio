@@ -39,7 +39,7 @@ function AdminMediaPage() {
   const [selectedMediaId, setSelectedMediaId] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [folders, setFolders] = useState([]);
-  const [areFoldersLoading, setAreFoldersLoading] = useState(true);
+  const [areFoldersLoading, setAreFoldersLoading] = useState(Boolean(accessToken));
   const [folderRefreshKey, setFolderRefreshKey] = useState(0);
 
   const {
@@ -47,7 +47,6 @@ function AdminMediaPage() {
     count,
     total,
     page,
-    limit,
     totalPages,
     hasPreviousPage,
     hasNextPage,
@@ -80,9 +79,6 @@ function AdminMediaPage() {
 
   useEffect(() => {
     if (!accessToken) {
-      setFolders([]);
-      setAreFoldersLoading(false);
-
       return undefined;
     }
 
@@ -245,24 +241,24 @@ function AdminMediaPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
+    <main className="min-h-screen bg-slate-100">
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
             Media Management
           </p>
 
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
             Media Library
           </h1>
 
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-            Upload and manage reusable images, SVG files, PDFs, audio and video
-            assets stored securely through Cloudinary.
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            Upload, organize and maintain reusable images, SVG files, PDFs,
+            audio and video assets stored securely through Cloudinary.
           </p>
-        </div>
+        </header>
 
-        <div className="mt-8">
+        <div className="mt-6">
           <MediaUploadPanel
             accessToken={accessToken}
             canUpload={canEditMedia}
@@ -271,36 +267,40 @@ function AdminMediaPage() {
           />
         </div>
 
-        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-600">
                 Folders
               </p>
 
-              <h2 className="mt-1 text-xl font-black text-slate-950">
+              <h2 className="mt-1 text-lg font-bold text-slate-950">
                 Browse Media Folders
               </h2>
             </div>
 
             {areFoldersLoading && (
-              <span className="text-xs font-semibold text-slate-500">
+              <span
+                role="status"
+                className="text-xs font-semibold text-slate-500"
+              >
                 Loading folders...
               </span>
             )}
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => handleFolderSelect("")}
-              className={`inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 text-sm font-semibold transition ${
+              className={`inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none ${
                 !appliedFilters.folder
                   ? "border-brand-600 bg-brand-600 text-white"
-                  : "border-slate-300 bg-white text-slate-700 hover:border-brand-300 hover:text-brand-600"
+                  : "border-slate-300 bg-white text-slate-700 hover:border-brand-300 hover:text-brand-700"
               }`}
             >
               All Media
+
               <span
                 className={`rounded-full px-2 py-0.5 text-xs ${
                   !appliedFilters.folder
@@ -320,18 +320,18 @@ function AdminMediaPage() {
                   key={folderRecord.folder}
                   type="button"
                   onClick={() => handleFolderSelect(folderRecord.folder)}
-                  className={`inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 text-sm font-semibold transition ${
+                  className={`inline-flex min-h-10 max-w-full items-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none ${
                     isActive
                       ? "border-brand-600 bg-brand-600 text-white"
-                      : "border-slate-300 bg-white text-slate-700 hover:border-brand-300 hover:text-brand-600"
+                      : "border-slate-300 bg-white text-slate-700 hover:border-brand-300 hover:text-brand-700"
                   }`}
                 >
-                  <span aria-hidden="true">📁</span>
-
-                  <span className="break-all">{folderRecord.folder}</span>
+                  <span className="min-w-0 break-all">
+                    {folderRecord.folder}
+                  </span>
 
                   <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${
                       isActive
                         ? "bg-white/20 text-white"
                         : "bg-slate-100 text-slate-600"
@@ -353,9 +353,25 @@ function AdminMediaPage() {
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-600">
+                Library Filters
+              </p>
+
+              <h2 className="mt-1 text-lg font-bold text-slate-950">
+                Find the right asset
+              </h2>
+            </div>
+
+            <p className="text-xs font-semibold text-slate-500">
+              Filters apply when you submit this panel.
+            </p>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div>
               <label
                 htmlFor="media-search"
@@ -371,7 +387,7 @@ function AdminMediaPage() {
                 value={formFilters.search}
                 onChange={handleFilterChange}
                 placeholder="Title, filename, caption, tags..."
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
               />
             </div>
 
@@ -388,7 +404,7 @@ function AdminMediaPage() {
                 name="mediaType"
                 value={formFilters.mediaType}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
               >
                 <option value="">All Media</option>
                 <option value="image">Images</option>
@@ -413,7 +429,7 @@ function AdminMediaPage() {
                 value={formFilters.folder}
                 onChange={handleFilterChange}
                 placeholder="projects/covers"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
               />
             </div>
 
@@ -431,7 +447,7 @@ function AdminMediaPage() {
                 value={formFilters.tag}
                 onChange={handleFilterChange}
                 placeholder="Exact tag"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
               />
             </div>
 
@@ -448,12 +464,12 @@ function AdminMediaPage() {
                 name="sort"
                 value={formFilters.sort}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
               >
                 <option value="newest">Newest first</option>
                 <option value="oldest">Oldest first</option>
-                <option value="title-asc">Title A–Z</option>
-                <option value="title-desc">Title Z–A</option>
+                <option value="title-asc">Title A-Z</option>
+                <option value="title-desc">Title Z-A</option>
                 <option value="size-desc">Largest first</option>
                 <option value="size-asc">Smallest first</option>
               </select>
@@ -472,7 +488,7 @@ function AdminMediaPage() {
                 name="limit"
                 value={formFilters.limit}
                 onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
               >
                 <option value={12}>12</option>
                 <option value={24}>24</option>
@@ -486,7 +502,7 @@ function AdminMediaPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
             >
               Apply Filters
             </button>
@@ -495,7 +511,7 @@ function AdminMediaPage() {
               type="button"
               onClick={handleClearFilters}
               disabled={isLoading}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:opacity-50"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
             >
               Clear Filters
             </button>
@@ -504,7 +520,7 @@ function AdminMediaPage() {
               type="button"
               onClick={refreshMedia}
               disabled={isLoading}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:opacity-50"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
             >
               Refresh
             </button>
@@ -514,7 +530,7 @@ function AdminMediaPage() {
         {successMessage && (
           <div
             role="status"
-            className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
+            className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
           >
             {successMessage}
           </div>
@@ -523,13 +539,13 @@ function AdminMediaPage() {
         {errorMessage && error?.status !== 401 && (
           <div
             role="alert"
-            className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
+            className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
           >
             {errorMessage}
           </div>
         )}
 
-        <div className="mt-8 grid min-w-0 gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,400px)]">
           <section className="min-w-0">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm font-semibold text-slate-600">
@@ -546,9 +562,12 @@ function AdminMediaPage() {
             </div>
 
             {isLoading ? (
-              <div className="mt-6 grid min-h-72 place-items-center rounded-3xl border border-slate-200 bg-white">
+              <div
+                role="status"
+                className="mt-5 grid min-h-72 place-items-center rounded-2xl border border-slate-200 bg-white"
+              >
                 <div className="text-center">
-                  <div className="mx-auto size-11 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600" />
+                  <div className="mx-auto size-11 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600 motion-reduce:animate-none" />
 
                   <p className="mt-4 text-sm font-semibold text-slate-600">
                     Loading Media...
@@ -556,32 +575,30 @@ function AdminMediaPage() {
                 </div>
               </div>
             ) : media.length === 0 ? (
-              <div className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+              <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
                 <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-2xl font-black text-brand-600">
                   M
                 </div>
 
-                <h2 className="mt-5 text-2xl font-bold text-slate-950">
+                <h2 className="mt-5 text-xl font-bold text-slate-950">
                   No Media found
                 </h2>
 
-                <p className="mt-3 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-slate-600">
                   Upload an asset or clear the current filters.
                 </p>
               </div>
             ) : (
-              <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {media.map((item) => {
                   const dimensions = formatDimensions(item.width, item.height);
-
                   const duration = formatDuration(item.duration);
-
                   const isSelected = selectedMediaId === item._id;
 
                   return (
                     <article
                       key={item._id}
-                      className={`min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm transition ${
+                      className={`min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm transition-colors motion-reduce:transition-none ${
                         isSelected
                           ? "border-brand-500 ring-4 ring-brand-100"
                           : "border-slate-200 hover:border-brand-200"
@@ -617,7 +634,8 @@ function AdminMediaPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedMediaId(item._id)}
-                          className="mt-4 inline-flex min-h-9 w-full items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700"
+                          aria-pressed={isSelected}
+                          className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
                         >
                           {isSelected ? "Selected" : "View Details"}
                         </button>
@@ -629,14 +647,17 @@ function AdminMediaPage() {
             )}
 
             {totalPages > 1 && (
-              <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+              <nav
+                aria-label="Media pagination"
+                className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4"
+              >
                 <button
                   type="button"
                   disabled={!hasPreviousPage || isLoading}
                   onClick={() => handlePageChange(page - 1)}
-                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
                 >
-                  ← Previous
+                  &larr; Previous
                 </button>
 
                 <span className="text-sm font-semibold text-slate-600">
@@ -647,11 +668,11 @@ function AdminMediaPage() {
                   type="button"
                   disabled={!hasNextPage || isLoading}
                   onClick={() => handlePageChange(page + 1)}
-                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
                 >
-                  Next →
+                  Next &rarr;
                 </button>
-              </div>
+              </nav>
             )}
           </section>
 
@@ -667,7 +688,7 @@ function AdminMediaPage() {
             />
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }
