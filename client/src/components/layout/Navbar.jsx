@@ -327,7 +327,8 @@ function Navbar() {
               }}
               className="inline-flex min-w-0 max-w-full shrink-0 md:hidden lg:inline-flex"
             >
-              <Logo />
+              <Logo
+                showTagline />
             </a>
 
             <a
@@ -453,6 +454,46 @@ function Navbar() {
               </nav>
             )}
 
+            <button data-ui="public-desktop-theme-toggle-anchor"
+                type="button"
+                aria-label={`Switch to ${isDarkNavbar ? "light" : "dark"} theme`}
+                aria-pressed={isDarkNavbar}
+                onClick={toggleNavbarTheme}
+                className={`hidden lg:grid ml-auto size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${
+                  isDarkNavbar
+                    ? "text-slate-100 hover:bg-white/10 hover:text-white"
+                    : "text-slate-900 hover:bg-slate-100 hover:text-brand-600"
+                }`}
+              >
+                {isDarkNavbar ? (
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20.35 15.35A9 9 0 018.65 3.65a9 9 0 1011.7 11.7z" />
+                  </svg>
+                ) : (
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+                  </svg>
+                )}
+              </button>
+
             {contactSection && (
               <div className="hidden shrink-0 lg:block">
                 <Button
@@ -474,13 +515,13 @@ function Navbar() {
               </div>
             )}
 
-            <div className="flex shrink-0 items-center gap-1 lg:hidden">
+            <div className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
                 aria-label={`Switch to ${isDarkNavbar ? "light" : "dark"} theme`}
                 aria-pressed={isDarkNavbar}
                 onClick={toggleNavbarTheme}
-                className={`hidden size-10 shrink-0 place-items-center rounded-xl transition md:grid lg:hidden focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${
+                className={`grid lg:hidden ml-auto size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${
                   isDarkNavbar
                     ? "text-slate-100 hover:bg-white/10 hover:text-white"
                     : "text-slate-900 hover:bg-slate-100 hover:text-brand-600"
@@ -530,7 +571,7 @@ function Navbar() {
                   onClick={() => {
                     setIsMenuOpen((currentValue) => !currentValue);
                   }}
-                  className={`grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-900 transition hover:border-brand-600 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 md:max-lg:size-10 md:max-lg:border-transparent md:max-lg:bg-transparent ${
+                  className={`grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-900 transition hover:border-brand-600 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 md:max-lg:size-10 md:max-lg:border-transparent md:max-lg:bg-transparent lg:hidden ${
                     isDarkNavbar
                       ? "md:max-lg:text-slate-100 md:max-lg:hover:border-transparent md:max-lg:hover:bg-white/10 md:max-lg:hover:text-white"
                       : "md:max-lg:text-slate-900 md:max-lg:hover:border-transparent md:max-lg:hover:bg-slate-100 md:max-lg:hover:text-brand-600"

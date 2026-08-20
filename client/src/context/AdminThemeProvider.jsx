@@ -6,17 +6,17 @@ import {
 } from "react";
 import { useLocation } from "react-router";
 
-import PublicThemeContext from "./publicThemeContext";
+import AdminThemeContext from "./adminThemeContext";
 
-const PUBLIC_THEME_STORAGE_KEY = "rakeshnexify-public-theme";
+const ADMIN_THEME_STORAGE_KEY = "rakeshnexify-admin-theme";
 
-function getInitialPublicTheme() {
+function getInitialAdminTheme() {
   if (typeof window === "undefined") {
     return "light";
   }
 
   try {
-    const savedTheme = window.localStorage.getItem(PUBLIC_THEME_STORAGE_KEY);
+    const savedTheme = window.localStorage.getItem(ADMIN_THEME_STORAGE_KEY);
 
     if (savedTheme === "light" || savedTheme === "dark") {
       return savedTheme;
@@ -30,16 +30,16 @@ function getInitialPublicTheme() {
     : "light";
 }
 
-function PublicThemeProvider({ children }) {
+function AdminThemeProvider({ children }) {
   const { pathname } = useLocation();
-  const [theme, setTheme] = useState(getInitialPublicTheme);
+  const [theme, setTheme] = useState(getInitialAdminTheme);
 
   const isAdminRoute =
     pathname === "/admin" || pathname.startsWith("/admin/");
 
   useLayoutEffect(() => {
     try {
-      window.localStorage.setItem(PUBLIC_THEME_STORAGE_KEY, theme);
+      window.localStorage.setItem(ADMIN_THEME_STORAGE_KEY, theme);
     } catch {
       // Keep the in-memory theme functional when storage is unavailable.
     }
@@ -49,25 +49,26 @@ function PublicThemeProvider({ children }) {
     const root = document.documentElement;
     const body = document.body;
 
-    if (isAdminRoute) {
-      delete root.dataset.publicTheme;
-      body.classList.remove("public-theme-active");
-      delete body.dataset.publicTheme;
+    if (!isAdminRoute) {
+      delete root.dataset.adminTheme;
+      body.classList.remove("admin-theme-active");
+      delete body.dataset.adminTheme;
 
       return undefined;
     }
 
-    root.dataset.publicTheme = theme;
-    body.classList.add("public-theme-active");
-    body.dataset.publicTheme = theme;
+    root.dataset.adminTheme = theme;
+    body.classList.add("admin-theme-active");
+    body.dataset.adminTheme = theme;
 
     return () => {
-      body.classList.remove("public-theme-active");
-      delete body.dataset.publicTheme;
+      delete root.dataset.adminTheme;
+      body.classList.remove("admin-theme-active");
+      delete body.dataset.adminTheme;
     };
   }, [isAdminRoute, theme]);
 
-  const setPublicTheme = useCallback((nextTheme) => {
+  const setAdminTheme = useCallback((nextTheme) => {
     if (nextTheme !== "light" && nextTheme !== "dark") {
       return;
     }
@@ -85,17 +86,17 @@ function PublicThemeProvider({ children }) {
     () => ({
       theme,
       isDark: theme === "dark",
-      setTheme: setPublicTheme,
+      setTheme: setAdminTheme,
       toggleTheme,
     }),
-    [setPublicTheme, theme, toggleTheme],
+    [setAdminTheme, theme, toggleTheme],
   );
 
   return (
-    <PublicThemeContext.Provider value={contextValue}>
+    <AdminThemeContext.Provider value={contextValue}>
       {children}
-    </PublicThemeContext.Provider>
+    </AdminThemeContext.Provider>
   );
 }
 
-export default PublicThemeProvider;
+export default AdminThemeProvider;

@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { AdminIcon } from "./adminIcons";
+import AdminThemeToggle from "./AdminThemeToggle";
 
 function AdminTopbar({ admin, onOpenNavigation, onLogout }) {
   const adminName = admin?.name || "Admin";
@@ -42,6 +43,7 @@ function AdminTopbar({ admin, onOpenNavigation, onLogout }) {
         </Link>
 
         <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2">
+          <AdminThemeToggle />
           <div className="hidden min-w-0 rounded-xl border border-slate-200/80 bg-slate-50/80 px-3 py-1.5 text-right md:block">
             <p className="max-w-44 truncate text-xs font-semibold leading-4 text-slate-800">
               {adminName}

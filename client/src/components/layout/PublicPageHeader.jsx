@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
 import siteData from "../../data/siteData";
+import usePublicTheme from "../../hooks/usePublicTheme";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import {
   getNavbarNavigationItems,
@@ -44,6 +45,7 @@ function PublicNavigationLink({
 function PublicPageHeader() {
   const { pathname, hash } = useLocation();
   const { settings } = useSiteSettings();
+  const { isDark, toggleTheme } = usePublicTheme();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
@@ -272,6 +274,46 @@ function PublicPageHeader() {
               </nav>
             )}
 
+            <button data-ui="public-page-desktop-theme-toggle-anchor"
+              type="button"
+              aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
+              aria-pressed={isDark}
+              onClick={toggleTheme}
+              className={`hidden lg:grid ml-auto size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${
+                isDark
+                  ? "text-slate-100 hover:bg-white/10 hover:text-white"
+                  : "text-slate-900 hover:bg-slate-100 hover:text-brand-600"
+              }`}
+            >
+              {isDark ? (
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20.35 15.35A9 9 0 018.65 3.65a9 9 0 1011.7 11.7z" />
+                </svg>
+              ) : (
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+                </svg>
+              )}
+            </button>
+
             {contactItem && (
               <Link
                 to={contactItem.href}
@@ -282,6 +324,45 @@ function PublicPageHeader() {
               </Link>
             )}
 
+            <button
+              type="button"
+              aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
+              aria-pressed={isDark}
+              onClick={toggleTheme}
+              className={`grid lg:hidden ml-auto size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${
+                isDark
+                  ? "text-slate-100 hover:bg-white/10 hover:text-white"
+                  : "text-slate-900 hover:bg-slate-100 hover:text-brand-600"
+              }`}
+            >
+              {isDark ? (
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20.35 15.35A9 9 0 018.65 3.65a9 9 0 1011.7 11.7z" />
+                </svg>
+              ) : (
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+                </svg>
+              )}
+            </button>
             <div ref={mobileMenuRef} className="shrink-0 lg:hidden">
               <button
                 ref={mobileMenuButtonRef}

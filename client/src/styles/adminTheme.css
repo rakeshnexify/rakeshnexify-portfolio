@@ -1,0 +1,663 @@
+/* =========================================================
+   RAKESHNEXIFY ADMIN LIGHT / DARK THEME
+   Admin-only scope. Public theme remains completely separate.
+   Existing Admin layout and component structure are preserved.
+   ========================================================= */
+
+body.admin-theme-active {
+  --admin-color-bg: #f1f5f9;
+  --admin-color-bg-deep: #e8eef6;
+  --admin-color-surface: #ffffff;
+  --admin-color-surface-elevated: #f8fafc;
+  --admin-color-surface-hover: #f1f5f9;
+  --admin-color-text-strong: #0f172a;
+  --admin-color-text: #1e293b;
+  --admin-color-text-secondary: #475569;
+  --admin-color-text-muted: #64748b;
+  --admin-color-text-helper: #94a3b8;
+  --admin-color-border: #e2e8f0;
+  --admin-color-border-strong: #cbd5e1;
+  --admin-color-primary: #2563eb;
+  --admin-color-primary-hover: #1d4ed8;
+  --admin-color-primary-soft: rgb(37 99 235 / 0.1);
+  --admin-color-focus: #2563eb;
+  --admin-color-focus-ring: rgb(37 99 235 / 0.22);
+
+  --admin-btn-primary-top: #2a6bff;
+  --admin-btn-primary-bottom: #0f50ea;
+  --admin-btn-primary-depth: #0a3db8;
+  --admin-btn-primary-shadow: rgb(15 80 234 / 0.2);
+
+  --admin-btn-secondary-top: rgb(255 255 255 / 0.98);
+  --admin-btn-secondary-bottom: rgb(235 239 245 / 0.94);
+  --admin-btn-secondary-depth: #cbd5e1;
+  --admin-btn-secondary-border: rgb(120 135 155 / 0.24);
+  --admin-btn-secondary-shadow: rgb(15 23 42 / 0.1);
+  --admin-btn-highlight: rgb(255 255 255 / 0.28);
+
+  --admin-btn-danger-top: #d95a5a;
+  --admin-btn-danger-bottom: #be3f3f;
+  --admin-btn-danger-depth: #923232;
+  --admin-btn-danger-shadow: rgb(190 63 63 / 0.18);
+
+  --admin-btn-success-top: #2a9063;
+  --admin-btn-success-bottom: #18774d;
+  --admin-btn-success-depth: #115a3b;
+  --admin-btn-success-shadow: rgb(24 119 77 / 0.18);
+
+  --admin-btn-warning-top: #d09530;
+  --admin-btn-warning-bottom: #b37420;
+  --admin-btn-warning-depth: #865719;
+  --admin-btn-warning-shadow: rgb(179 116 32 / 0.18);
+
+  background: var(--admin-color-bg);
+  color: var(--admin-color-text);
+  color-scheme: light;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] {
+  --admin-color-bg: #0b0f14;
+  --admin-color-bg-deep: #080c10;
+  --admin-color-surface: #111820;
+  --admin-color-surface-elevated: #151e28;
+  --admin-color-surface-hover: #1a2430;
+  --admin-color-text-strong: #f9fafb;
+  --admin-color-text: #f3f4f6;
+  --admin-color-text-secondary: #cbd5e1;
+  --admin-color-text-muted: #94a3b8;
+  --admin-color-text-helper: #64748b;
+  --admin-color-border: #1e2936;
+  --admin-color-border-strong: #263241;
+  --admin-color-primary: #3b82f6;
+  --admin-color-primary-hover: #60a5fa;
+  --admin-color-primary-soft: rgb(59 130 246 / 0.12);
+  --admin-color-focus: #60a5fa;
+  --admin-color-focus-ring: rgb(96 165 250 / 0.25);
+
+  --admin-btn-primary-top: #3275ff;
+  --admin-btn-primary-bottom: #1557e8;
+  --admin-btn-primary-depth: #0a3ca8;
+  --admin-btn-primary-shadow: rgb(21 87 232 / 0.28);
+
+  --admin-btn-secondary-top: rgb(42 48 58 / 0.94);
+  --admin-btn-secondary-bottom: rgb(20 25 32 / 0.98);
+  --admin-btn-secondary-depth: #0b1016;
+  --admin-btn-secondary-border: rgb(255 255 255 / 0.12);
+  --admin-btn-secondary-shadow: rgb(0 0 0 / 0.32);
+  --admin-btn-highlight: rgb(255 255 255 / 0.17);
+
+  --admin-btn-danger-top: #c55353;
+  --admin-btn-danger-bottom: #a63d3d;
+  --admin-btn-danger-depth: #742d2d;
+  --admin-btn-danger-shadow: rgb(166 61 61 / 0.26);
+
+  --admin-btn-success-top: #27845c;
+  --admin-btn-success-bottom: #176b48;
+  --admin-btn-success-depth: #104d35;
+  --admin-btn-success-shadow: rgb(23 107 72 / 0.26);
+
+  --admin-btn-warning-top: #bd852b;
+  --admin-btn-warning-bottom: #97651d;
+  --admin-btn-warning-depth: #6d4916;
+  --admin-btn-warning-shadow: rgb(151 101 29 / 0.26);
+
+  background: var(--admin-color-bg);
+  color: var(--admin-color-text);
+  color-scheme: dark;
+}
+
+body.admin-theme-active .admin-theme-toggle {
+  color: var(--admin-color-text-secondary);
+  border-color: var(--admin-color-border);
+  background: linear-gradient(
+    145deg,
+    var(--admin-btn-secondary-top),
+    var(--admin-btn-secondary-bottom)
+  );
+  box-shadow:
+    0 2px 0 var(--admin-btn-secondary-depth),
+    0 7px 16px var(--admin-btn-secondary-shadow),
+    inset 0 1px 0 var(--admin-btn-highlight);
+  transition:
+    transform 140ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+body.admin-theme-active .admin-theme-toggle:hover {
+  color: var(--admin-color-primary);
+  border-color: color-mix(
+    in srgb,
+    var(--admin-color-primary) 42%,
+    var(--admin-color-border)
+  );
+  transform: translateY(-1px);
+}
+
+body.admin-theme-active .admin-theme-toggle:active {
+  box-shadow:
+    0 1px 0 var(--admin-btn-secondary-depth),
+    0 4px 9px var(--admin-btn-secondary-shadow),
+    inset 0 1px 0 var(--admin-btn-highlight);
+  transform: translateY(1px);
+}
+
+body.admin-theme-active .admin-theme-toggle:focus-visible {
+  outline: 2px solid var(--admin-color-focus);
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 4px var(--admin-color-focus-ring),
+    0 2px 0 var(--admin-btn-secondary-depth),
+    0 7px 16px var(--admin-btn-secondary-shadow);
+}
+
+/* Dark surfaces. */
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-white"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-white/80"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-white/90"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-white/95"] {
+  background-color: var(--admin-color-surface) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-50/50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-50/70"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-50/80"] {
+  background-color: var(--admin-color-surface-elevated) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-100"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-100/50"] {
+  background-color: var(--admin-color-bg) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-200"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-200/50"] {
+  background-color: var(--admin-color-surface-hover) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-100"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-100/50"] {
+  background-color: var(--admin-color-primary-soft) !important;
+}
+
+/* Text hierarchy. */
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-slate-950"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-slate-900"] {
+  color: var(--admin-color-text-strong) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-slate-800"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-slate-700"] {
+  color: var(--admin-color-text) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-slate-600"] {
+  color: var(--admin-color-text-secondary) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-slate-500"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-slate-400"] {
+  color: var(--admin-color-text-muted) !important;
+}
+
+/* Borders / dividers. */
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-slate-100"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-slate-200"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-slate-200/80"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-slate-200/90"] {
+  border-color: var(--admin-color-border) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-slate-300"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-slate-700"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-slate-800"] {
+  border-color: var(--admin-color-border-strong) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="divide-slate-100"] > :not(:last-child),
+body.admin-theme-active[data-admin-theme="dark"] [class~="divide-slate-200"] > :not(:last-child) {
+  border-color: var(--admin-color-border) !important;
+}
+
+/* Inputs / forms / selects. */
+body.admin-theme-active[data-admin-theme="dark"]
+  input:not([type="checkbox"]):not([type="radio"]),
+body.admin-theme-active[data-admin-theme="dark"] textarea,
+body.admin-theme-active[data-admin-theme="dark"] select {
+  color: var(--admin-color-text) !important;
+  border-color: var(--admin-color-border-strong);
+}
+
+body.admin-theme-active[data-admin-theme="dark"] input[class~="bg-white"],
+body.admin-theme-active[data-admin-theme="dark"] textarea[class~="bg-white"],
+body.admin-theme-active[data-admin-theme="dark"] select[class~="bg-white"] {
+  background-color: #0f161e !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] input::placeholder,
+body.admin-theme-active[data-admin-theme="dark"] textarea::placeholder {
+  color: var(--admin-color-text-helper) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="focus:ring-brand-100"]:focus,
+body.admin-theme-active[data-admin-theme="dark"] [class~="focus:ring-brand-200"]:focus {
+  --tw-ring-color: var(--admin-color-focus-ring) !important;
+}
+
+/* Hover states. */
+body.admin-theme-active[data-admin-theme="dark"] [class~="hover:bg-slate-50"]:hover,
+body.admin-theme-active[data-admin-theme="dark"] [class~="hover:bg-slate-100"]:hover,
+body.admin-theme-active[data-admin-theme="dark"] [class~="hover:bg-slate-200"]:hover {
+  background-color: var(--admin-color-surface-hover) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="hover:bg-white"]:hover {
+  background-color: var(--admin-color-surface-elevated) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="hover:text-slate-950"]:hover,
+body.admin-theme-active[data-admin-theme="dark"] [class~="hover:text-slate-900"]:hover {
+  color: var(--admin-color-text-strong) !important;
+}
+
+/* Semantic feedback. */
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-red-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-red-100"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-rose-50"] {
+  background-color: rgb(239 68 68 / 0.1) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-red-200"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-red-300"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-rose-200"] {
+  border-color: rgb(239 68 68 / 0.32) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-red-600"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-red-700"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-rose-700"] {
+  color: #fca5a5 !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-amber-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-amber-100"] {
+  background-color: rgb(245 158 11 / 0.1) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-amber-200"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-amber-300"] {
+  border-color: rgb(245 158 11 / 0.32) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-amber-700"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-amber-800"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-amber-900"] {
+  color: #fcd34d !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-emerald-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-emerald-100"] {
+  background-color: rgb(34 197 94 / 0.1) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-emerald-200"] {
+  border-color: rgb(34 197 94 / 0.32) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="text-emerald-700"] {
+  color: #86efac !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-blue-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-blue-100"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-cyan-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-cyan-100"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-violet-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-violet-100"] {
+  background-color: var(--admin-color-primary-soft) !important;
+}
+
+/* =========================================================
+   ADMIN COMPACT PREMIUM 3D BUTTON SYSTEM
+   ========================================================= */
+
+body.admin-theme-active
+  :is(button, a)[class*="rounded"][class*="inline-flex"] {
+  transition:
+    transform 140ms ease,
+    box-shadow 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.admin-theme-active
+  :is(button, a)[class*="rounded"][class*="inline-flex"]:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+body.admin-theme-active
+  :is(button, a)[class*="rounded"][class*="inline-flex"]:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+body.admin-theme-active button:disabled,
+body.admin-theme-active button[aria-disabled="true"],
+body.admin-theme-active a[aria-disabled="true"] {
+  cursor: not-allowed !important;
+  opacity: 0.56 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+body.admin-theme-active :is(button, a)[class*="bg-brand-600"],
+body.admin-theme-active :is(button, a)[class*="bg-brand-700"],
+body.admin-theme-active :is(button, a)[class*="bg-blue-600"] {
+  color: #fff !important;
+  border-color: rgb(255 255 255 / 0.1) !important;
+  background: linear-gradient(
+    145deg,
+    var(--admin-btn-primary-top),
+    var(--admin-btn-primary-bottom)
+  ) !important;
+  box-shadow:
+    0 2px 0 var(--admin-btn-primary-depth),
+    0 7px 15px var(--admin-btn-primary-shadow),
+    inset 0 1px 0 var(--admin-btn-highlight) !important;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.12);
+}
+
+body.admin-theme-active
+  :is(button, a)[class*="bg-brand-600"]:not(:disabled):hover,
+body.admin-theme-active
+  :is(button, a)[class*="bg-brand-700"]:not(:disabled):hover,
+body.admin-theme-active
+  :is(button, a)[class*="bg-blue-600"]:not(:disabled):hover {
+  box-shadow:
+    0 3px 0 var(--admin-btn-primary-depth),
+    0 9px 18px var(--admin-btn-primary-shadow),
+    inset 0 1px 0 rgb(255 255 255 / 0.25) !important;
+}
+
+body.admin-theme-active
+  :is(button, a)[class*="bg-brand-600"]:not(:disabled):active,
+body.admin-theme-active
+  :is(button, a)[class*="bg-brand-700"]:not(:disabled):active,
+body.admin-theme-active
+  :is(button, a)[class*="bg-blue-600"]:not(:disabled):active {
+  box-shadow:
+    0 1px 0 var(--admin-btn-primary-depth),
+    0 3px 8px var(--admin-btn-primary-shadow),
+    inset 0 1px 0 var(--admin-btn-highlight) !important;
+}
+
+body.admin-theme-active
+  :is(button, a)[class*="bg-white"][class*="border-slate-"],
+body.admin-theme-active
+  :is(button, a)[class*="bg-slate-50"][class*="border-slate-"] {
+  color: var(--admin-color-text-secondary) !important;
+  border-color: var(--admin-btn-secondary-border) !important;
+  background: linear-gradient(
+    145deg,
+    var(--admin-btn-secondary-top),
+    var(--admin-btn-secondary-bottom)
+  ) !important;
+  box-shadow:
+    0 2px 0 var(--admin-btn-secondary-depth),
+    0 6px 14px var(--admin-btn-secondary-shadow),
+    inset 0 1px 0 var(--admin-btn-highlight) !important;
+  backdrop-filter: blur(12px) saturate(135%);
+  -webkit-backdrop-filter: blur(12px) saturate(135%);
+}
+
+body.admin-theme-active
+  :is(button, a)[class*="border-brand-"]:not([class*="bg-brand-600"]):not([class*="bg-brand-700"]) {
+  color: var(--admin-color-primary) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--admin-color-primary) 62%,
+    transparent
+  ) !important;
+  background: linear-gradient(
+    145deg,
+    color-mix(
+      in srgb,
+      var(--admin-color-primary-soft) 70%,
+      var(--admin-color-surface)
+    ),
+    var(--admin-color-surface)
+  ) !important;
+  box-shadow:
+    0 2px 0 color-mix(
+      in srgb,
+      var(--admin-color-primary) 28%,
+      transparent
+    ),
+    0 6px 13px rgb(37 99 235 / 0.1),
+    inset 0 1px 0 var(--admin-btn-highlight) !important;
+}
+
+body.admin-theme-active
+  button[class*="h-10"][class*="w-10"]:not([class*="bg-brand-"]),
+body.admin-theme-active
+  button[class*="size-10"]:not([class*="bg-brand-"]) {
+  color: var(--admin-color-text-secondary) !important;
+  border-color: var(--admin-btn-secondary-border) !important;
+  background: linear-gradient(
+    145deg,
+    var(--admin-btn-secondary-top),
+    var(--admin-btn-secondary-bottom)
+  ) !important;
+  box-shadow:
+    0 2px 0 var(--admin-btn-secondary-depth),
+    0 6px 14px var(--admin-btn-secondary-shadow),
+    inset 0 1px 0 var(--admin-btn-highlight) !important;
+}
+
+body.admin-theme-active :is(button, a)[class*="bg-red-"],
+body.admin-theme-active :is(button, a)[class*="bg-rose-"],
+body.admin-theme-active
+  :is(button, a)[class*="border-red-"]:not([class*="bg-white"]),
+body.admin-theme-active
+  :is(button, a)[class*="border-rose-"]:not([class*="bg-white"]) {
+  color: #fff !important;
+  border-color: rgb(255 255 255 / 0.09) !important;
+  background: linear-gradient(
+    145deg,
+    var(--admin-btn-danger-top),
+    var(--admin-btn-danger-bottom)
+  ) !important;
+  box-shadow:
+    0 2px 0 var(--admin-btn-danger-depth),
+    0 6px 14px var(--admin-btn-danger-shadow),
+    inset 0 1px 0 var(--admin-btn-highlight) !important;
+}
+
+body.admin-theme-active :is(button, a)[class*="bg-emerald-"] {
+  color: #fff !important;
+  background: linear-gradient(
+    145deg,
+    var(--admin-btn-success-top),
+    var(--admin-btn-success-bottom)
+  ) !important;
+  box-shadow:
+    0 2px 0 var(--admin-btn-success-depth),
+    0 6px 14px var(--admin-btn-success-shadow),
+    inset 0 1px 0 var(--admin-btn-highlight) !important;
+}
+
+body.admin-theme-active :is(button, a)[class*="bg-amber-"] {
+  color: #fff !important;
+  background: linear-gradient(
+    145deg,
+    var(--admin-btn-warning-top),
+    var(--admin-btn-warning-bottom)
+  ) !important;
+  box-shadow:
+    0 2px 0 var(--admin-btn-warning-depth),
+    0 6px 14px var(--admin-btn-warning-shadow),
+    inset 0 1px 0 var(--admin-btn-highlight) !important;
+}
+
+body.admin-theme-active button:focus-visible,
+body.admin-theme-active a[class*="rounded"]:focus-visible {
+  outline: 2px solid var(--admin-color-focus) !important;
+  outline-offset: 2px;
+  --tw-ring-color: var(--admin-color-focus-ring) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] {
+  scrollbar-color: #334155 #111820;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.admin-theme-active .admin-theme-toggle,
+  body.admin-theme-active
+    :is(button, a)[class*="rounded"][class*="inline-flex"] {
+    transition-duration: 0.01ms !important;
+  }
+
+  body.admin-theme-active .admin-theme-toggle:hover,
+  body.admin-theme-active .admin-theme-toggle:active,
+  body.admin-theme-active
+    :is(button, a)[class*="rounded"][class*="inline-flex"]:hover,
+  body.admin-theme-active
+    :is(button, a)[class*="rounded"][class*="inline-flex"]:active {
+    transform: none !important;
+  }
+}
+/* =========================================================
+   ADMIN DASHBOARD DARK VISUAL QA FIX
+   Covers translucent/gradient analytics surfaces that were
+   not part of the first centralized Admin utility bridge.
+   ========================================================= */
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-50/40"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-50/60"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-50/90"] {
+  background-color: var(--admin-color-surface-elevated) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-100/60"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-100/70"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-100/80"] {
+  background-color: var(--admin-color-bg) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-200/60"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-200/70"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-slate-200/80"] {
+  background-color: var(--admin-color-surface-hover) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-white/60"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-white/70"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-white/80"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-white/90"] {
+  border-color: var(--admin-color-border) !important;
+}
+
+/* Dashboard analytics gradients must resolve to Admin semantic surfaces. */
+body.admin-theme-active[data-admin-theme="dark"] [class~="from-white"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="from-slate-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="from-slate-100"] {
+  --tw-gradient-from:
+    var(--admin-color-surface-elevated)
+    var(--tw-gradient-from-position) !important;
+  --tw-gradient-to:
+    rgb(21 30 40 / 0)
+    var(--tw-gradient-to-position) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="from-brand-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="from-brand-100"] {
+  --tw-gradient-from:
+    color-mix(
+      in srgb,
+      var(--admin-color-primary-soft) 78%,
+      var(--admin-color-surface)
+    )
+    var(--tw-gradient-from-position) !important;
+  --tw-gradient-to:
+    rgb(17 24 32 / 0)
+    var(--tw-gradient-to-position) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="via-white"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="via-slate-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="via-slate-100"] {
+  --tw-gradient-via:
+    var(--admin-color-surface)
+    var(--tw-gradient-via-position) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="to-white"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="to-slate-50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="to-slate-100"] {
+  --tw-gradient-to:
+    var(--admin-color-surface-elevated)
+    var(--tw-gradient-to-position) !important;
+}
+
+/* Analytics line-chart plotting surface and helper grid. */
+body.admin-theme-active[data-admin-theme="dark"]
+  svg[aria-labelledby~="analytics-trend-chart-title"] {
+  color: var(--admin-color-text-muted);
+}
+
+body.admin-theme-active[data-admin-theme="dark"]
+  svg[aria-labelledby~="analytics-trend-chart-title"] text {
+  fill: var(--admin-color-text-muted) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"]
+  svg[aria-labelledby~="analytics-trend-chart-title"] line {
+  stroke: color-mix(
+    in srgb,
+    var(--admin-color-border-strong) 82%,
+    transparent
+  ) !important;
+}
+
+/* Keep chart series vivid while the plotting surface stays restrained. */
+body.admin-theme-active[data-admin-theme="dark"]
+  [class~="bg-slate-50/40"]
+  svg[aria-labelledby~="analytics-trend-chart-title"] {
+  background: transparent !important;
+}
+/* =========================================================
+   ADMIN BRAND-SOFT DARK SURFACE FIX
+   Covers branded soft cards such as Current Subscribers.
+   ========================================================= */
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-50/50"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-50/60"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-50/70"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-50/80"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-50/90"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-100/60"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-100/70"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="bg-brand-100/80"] {
+  background-color:
+    color-mix(
+      in srgb,
+      var(--admin-color-primary-soft) 72%,
+      var(--admin-color-surface-elevated)
+    ) !important;
+}
+
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-brand-100"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-brand-200"],
+body.admin-theme-active[data-admin-theme="dark"] [class~="border-brand-300"] {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--admin-color-primary) 28%,
+      var(--admin-color-border)
+    ) !important;
+}

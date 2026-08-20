@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 
 import siteData from "../../data/siteData";
+import usePublicTheme from "../../hooks/usePublicTheme";
 import useServices from "../../hooks/useServices";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import {
@@ -226,7 +227,7 @@ function handleSamePageNavigation(event, href) {
     return;
   }
 
-  let targetId = "";
+  let targetId;
 
   try {
     targetId = decodeURIComponent(targetUrl.hash.slice(1));
@@ -342,6 +343,7 @@ function PlatformLink({ platform }) {
 
 function Footer() {
   const { settings } = useSiteSettings();
+  const { isDark } = usePublicTheme();
   const { services: loadedServices } = useServices();
 
   const currentYear = new Date().getFullYear();
@@ -466,7 +468,7 @@ function Footer() {
         : "lg:grid-cols-[1.4fr_1fr]";
 
   return (
-    <footer className="overflow-x-hidden border-t border-slate-800 bg-slate-950 text-slate-300">
+    <footer className="public-theme-footer overflow-x-hidden border-t border-slate-800 bg-slate-950 text-slate-300">
       <Container>
         <div className={`grid min-w-0 gap-12 py-16 sm:py-20 ${gridClasses}`}>
           <div className="min-w-0">
@@ -584,7 +586,7 @@ function Footer() {
         </div>
 
         <div className="pb-12 sm:pb-16">
-          <NewsletterSignupForm />
+          <NewsletterSignupForm variant={isDark ? "dark" : "light"} />
         </div>
 
         <div className="flex min-w-0 flex-col gap-4 border-t border-slate-800 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 
+import AdminThemeToggle from "../../components/admin/layout/AdminThemeToggle";
 import useAdminAuth from "../../hooks/useAdminAuth";
 
 const initialFormData = {
@@ -137,7 +138,8 @@ function AdminLoginPage() {
   const displayedError = submitError || authError;
 
   return (
-    <main className="min-h-screen bg-slate-950">
+    <main className="relative min-h-screen bg-slate-950">
+      <AdminThemeToggle className="fixed right-4 top-4 z-30 sm:right-6 sm:top-6" />
       <div className="mx-auto grid min-h-screen w-full max-w-[1600px] lg:grid-cols-[minmax(0,1.05fr)_minmax(460px,0.95fr)]">
         <section className="relative hidden overflow-hidden bg-gradient-to-br from-brand-700 via-brand-600 to-slate-950 px-10 py-10 text-white lg:flex lg:flex-col lg:justify-between xl:px-16 xl:py-14">
           <div
