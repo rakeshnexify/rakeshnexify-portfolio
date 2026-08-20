@@ -142,21 +142,6 @@ function cleanString(value) {
   return String(value ?? "").trim();
 }
 
-function createMultilineValue(value) {
-  if (typeof value === "string") {
-    return value;
-  }
-
-  if (!Array.isArray(value)) {
-    return "";
-  }
-
-  return value
-    .map((item) => cleanString(item))
-    .filter(Boolean)
-    .join("\n");
-}
-
 function createArrayFromLines(value) {
   const items = String(value ?? "")
     .split(/\r?\n/)
@@ -299,6 +284,76 @@ function normalizeSections(value) {
     .filter((section) => section.key)
     .sort(
       (firstSection, secondSection) => firstSection.order - secondSection.order,
+    );
+}
+
+function createEmptyAboutWorkItem(order = 1) {
+  return {
+    type: "",
+    title: "",
+    url: "",
+    openInNewTab: false,
+    isVisible: true,
+    order,
+  };
+}
+
+function normalizeAboutWorkItem(item, index) {
+  const numericOrder = Number(item?.order);
+
+  return {
+    type: cleanString(item?.type),
+    title: cleanString(item?.title),
+    url: cleanString(item?.url),
+    openInNewTab: item?.openInNewTab === true,
+    isVisible: item?.isVisible !== false,
+    order:
+      Number.isFinite(numericOrder) && numericOrder >= 0
+        ? numericOrder
+        : index + 1,
+  };
+}
+
+function normalizeAboutWorkItems(value) {
+  const source = Array.isArray(value) ? value : [];
+
+  return source
+    .map((item, index) => normalizeAboutWorkItem(item, index))
+    .sort(
+      (firstItem, secondItem) =>
+        firstItem.order - secondItem.order,
+    );
+}
+
+function createEmptyAboutIdentityRole(order = 1) {
+  return {
+    label: "",
+    isVisible: true,
+    order,
+  };
+}
+
+function normalizeAboutIdentityRole(role, index) {
+  const numericOrder = Number(role?.order);
+
+  return {
+    label: cleanString(role?.label),
+    isVisible: role?.isVisible !== false,
+    order:
+      Number.isFinite(numericOrder) && numericOrder >= 0
+        ? numericOrder
+        : index + 1,
+  };
+}
+
+function normalizeAboutIdentityRoles(value) {
+  const source = Array.isArray(value) ? value : [];
+
+  return source
+    .map((role, index) => normalizeAboutIdentityRole(role, index))
+    .sort(
+      (firstRole, secondRole) =>
+        firstRole.order - secondRole.order,
     );
 }
 
@@ -463,14 +518,15 @@ function createSiteSettingsFormValues(settings = {}) {
     },
 
     about: {
+      eyebrow: cleanString(about.eyebrow),
+
       heading: cleanString(about.heading) || cleanString(about.title),
 
       description: aboutDescription,
 
-      highlightsText:
-        typeof about.highlightsText === "string"
-          ? about.highlightsText
-          : createMultilineValue(about.highlights),
+      identityRoles: normalizeAboutIdentityRoles(about.identityRoles),
+
+      workItems: normalizeAboutWorkItems(about.workItems),
     },
 
     statisticsSection: normalizeListingSection(settings?.statisticsSection),
@@ -578,6 +634,25 @@ function createLegalLinksPayload(legalLinks) {
   }));
 }
 
+function createAboutWorkItemsPayload(items) {
+  return normalizeAboutWorkItems(items).map((item, index) => ({
+    type: item.type,
+    title: item.title,
+    url: item.url,
+    openInNewTab: item.openInNewTab === true,
+    isVisible: item.isVisible !== false,
+    order: index + 1,
+  }));
+}
+
+function createAboutIdentityRolesPayload(roles) {
+  return normalizeAboutIdentityRoles(roles).map((role, index) => ({
+    label: role.label,
+    isVisible: role.isVisible !== false,
+    order: index + 1,
+  }));
+}
+
 function createListingSectionPayload(section) {
   const normalizedSection = normalizeListingSection(section);
 
@@ -645,11 +720,19 @@ function createSiteSettingsPayload(formValues = {}) {
     },
 
     about: {
+      eyebrow: values.about.eyebrow,
+
       heading: values.about.heading,
 
       description: values.about.description,
 
-      highlights: createArrayFromLines(values.about.highlightsText),
+      identityRoles: createAboutIdentityRolesPayload(
+        values.about.identityRoles,
+      ),
+
+      workItems: createAboutWorkItemsPayload(
+        values.about.workItems,
+      ),
     },
 
     statisticsSection: createListingSectionPayload(values.statisticsSection),
@@ -798,6 +881,8 @@ function createSiteSettingsPayload(formValues = {}) {
 
 export {
   createArrayFromLines,
+  createEmptyAboutIdentityRole,
+  createEmptyAboutWorkItem,
   createEmptyLegalLink,
   createEmptyPlatform,
   createKeywordsArray,

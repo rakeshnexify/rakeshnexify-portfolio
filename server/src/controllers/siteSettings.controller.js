@@ -33,6 +33,18 @@ function serializePublicSettings(settings) {
     publicSettings[fieldName] = getOrderedArray(publicSettings[fieldName]);
   });
 
+  if (
+    publicSettings.about &&
+    typeof publicSettings.about === "object" &&
+    !Array.isArray(publicSettings.about)
+  ) {
+    publicSettings.about = {
+      ...publicSettings.about,
+      identityRoles: getOrderedArray(publicSettings.about.identityRoles),
+      workItems: getOrderedArray(publicSettings.about.workItems),
+    };
+  }
+
   const footer =
     publicSettings.footer && typeof publicSettings.footer === "object"
       ? {

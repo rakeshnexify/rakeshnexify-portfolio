@@ -144,23 +144,105 @@ const heroSchema = new mongoose.Schema(
   },
 );
 
+const aboutWorkItemSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      required: [true, "About work item type is required."],
+      trim: true,
+      maxlength: [50, "About work item type cannot exceed 50 characters."],
+    },
+
+    title: {
+      type: String,
+      required: [true, "About work item title is required."],
+      trim: true,
+      maxlength: [120, "About work item title cannot exceed 120 characters."],
+    },
+
+    url: {
+      type: String,
+      required: [true, "About work item URL is required."],
+      trim: true,
+      maxlength: [1000, "About work item URL cannot exceed 1000 characters."],
+    },
+
+    openInNewTab: {
+      type: Boolean,
+      default: false,
+    },
+
+    isVisible: {
+      type: Boolean,
+      default: true,
+    },
+
+    order: {
+      type: Number,
+      min: [0, "About work item order cannot be negative."],
+      default: 0,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const aboutIdentityRoleSchema = new mongoose.Schema(
+  {
+    label: {
+      type: String,
+      required: [true, "About identity role label is required."],
+      trim: true,
+      maxlength: [80, "About identity role cannot exceed 80 characters."],
+    },
+
+    isVisible: {
+      type: Boolean,
+      default: true,
+    },
+
+    order: {
+      type: Number,
+      min: [0, "About identity role order cannot be negative."],
+      default: 0,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
 const aboutSchema = new mongoose.Schema(
   {
+    eyebrow: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "",
+    },
+
     heading: {
       type: String,
       trim: true,
       maxlength: 150,
-      default: "About Me",
+      default: "",
     },
+
     description: {
       type: String,
       trim: true,
       maxlength: 3000,
-      default:
-        "I am a developer, creator and entrepreneur focused on building useful digital products and professional online experiences.",
+      default: "",
     },
-    highlights: {
-      type: [String],
+
+    identityRoles: {
+      type: [aboutIdentityRoleSchema],
+      default: [],
+    },
+
+    workItems: {
+      type: [aboutWorkItemSchema],
       default: [],
     },
   },

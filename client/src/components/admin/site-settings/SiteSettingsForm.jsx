@@ -8,6 +8,8 @@ import {
   createSiteSettingsFormValues,
   createSiteSettingsPayload,
 } from "../../../utils/siteSettingsForm";
+import AboutIdentityRolesEditor from "./AboutIdentityRolesEditor";
+import AboutWorkItemsEditor from "./AboutWorkItemsEditor";
 import LegalLinksEditor from "./LegalLinksEditor";
 import PlatformSettingsEditor from "./PlatformSettingsEditor";
 
@@ -20,6 +22,10 @@ const textareaClasses =
 const defaultFormValues = createSiteSettingsFormValues({});
 
 const MAX_PLATFORMS_PER_GROUP = 25;
+
+const MAX_ABOUT_IDENTITY_ROLES = 30;
+
+const MAX_ABOUT_WORK_ITEMS = 100;
 
 const MAX_LEGAL_LINKS = 20;
 
@@ -167,6 +173,116 @@ function isSafeHttpUrl(value) {
   } catch {
     return false;
   }
+}
+
+function normalizeAboutWorkUrlForValidation(value) {
+  const url = String(value || "").trim();
+
+  if (
+    !url ||
+    url.startsWith("/") ||
+    url.startsWith("#") ||
+    /^[a-z][a-z0-9+.-]*:\/\//i.test(url)
+  ) {
+    return url;
+  }
+
+  if (
+    /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?:[/?#].*)?$/i.test(
+      url,
+    )
+  ) {
+    return `https://${url}`;
+  }
+
+  return url;
+}
+
+function validateAboutWorkItems(formValues, errors) {
+  const items = formValues?.about?.workItems;
+
+  if (!Array.isArray(items)) {
+    errors["about.workItems"] =
+      "Work items must be provided as a list.";
+    return;
+  }
+
+  if (items.length > MAX_ABOUT_WORK_ITEMS) {
+    errors["about.workItems"] =
+      `A maximum of ${MAX_ABOUT_WORK_ITEMS} work items is allowed.`;
+  }
+
+  items.forEach((item, index) => {
+    const fieldPrefix = `about.workItems.${index}`;
+    const type = String(item?.type || "").trim();
+    const title = String(item?.title || "").trim();
+    const rawUrl = String(item?.url || "").trim();
+    const url = normalizeAboutWorkUrlForValidation(rawUrl);
+
+    if (!type) {
+      errors[`${fieldPrefix}.type`] = "Type / label is required.";
+    } else if (type.length > 50) {
+      errors[`${fieldPrefix}.type`] =
+        "Type / label cannot exceed 50 characters.";
+    }
+
+    if (!title) {
+      errors[`${fieldPrefix}.title`] = "Title is required.";
+    } else if (title.length > 120) {
+      errors[`${fieldPrefix}.title`] =
+        "Title cannot exceed 120 characters.";
+    }
+
+    if (!url) {
+      errors[`${fieldPrefix}.url`] = "Link is required.";
+    } else if (url.length > 1000) {
+      errors[`${fieldPrefix}.url`] =
+        "Link cannot exceed 1000 characters.";
+    } else if (!isSafePublicUrl(url)) {
+      errors[`${fieldPrefix}.url`] =
+        "Use a domain, #section, /relative-path or http/https URL.";
+    }
+  });
+}
+
+function validateAboutIdentityRoles(formValues, errors) {
+  const roles = formValues?.about?.identityRoles;
+
+  if (!Array.isArray(roles)) {
+    errors["about.identityRoles"] =
+      "Identity roles must be provided as a list.";
+    return;
+  }
+
+  if (roles.length > MAX_ABOUT_IDENTITY_ROLES) {
+    errors["about.identityRoles"] =
+      `A maximum of ${MAX_ABOUT_IDENTITY_ROLES} identity roles is allowed.`;
+  }
+
+  const usedLabels = new Set();
+
+  roles.forEach((role, index) => {
+    const fieldName = `about.identityRoles.${index}.label`;
+    const label = String(role?.label || "").trim();
+
+    if (!label) {
+      errors[fieldName] = "Identity role is required.";
+      return;
+    }
+
+    if (label.length > 80) {
+      errors[fieldName] = "Identity role cannot exceed 80 characters.";
+    }
+
+    const normalizedLabel = label.toLowerCase();
+
+    if (usedLabels.has(normalizedLabel)) {
+      errors[fieldName] = `The identity role "${label}" is already added.`;
+      return;
+    }
+
+    usedLabels.add(normalizedLabel);
+  });
 }
 
 function validatePlatformGroup(formValues, fieldName, errors) {
@@ -332,10 +448,13 @@ function prepareInitialValues(initialValues = {}) {
     about: {
       ...normalizedValues.about,
 
-      highlightsText:
-        typeof initialValues.about?.highlightsText === "string"
-          ? initialValues.about.highlightsText
-          : normalizedValues.about.highlightsText,
+      identityRoles: normalizedValues.about.identityRoles.map((role) => ({
+        ...role,
+      })),
+
+      workItems: normalizedValues.about.workItems.map((item) => ({
+        ...item,
+      })),
     },
 
     statisticsSection: {
@@ -628,6 +747,9 @@ function validateSiteSettingsForm(formValues) {
         `Footer order must be a whole number from 0 to ${MAX_SECTION_ORDER}.`;
     }
   });
+
+  validateAboutIdentityRoles(formValues, errors);
+  validateAboutWorkItems(formValues, errors);
 
   platformGroupFields.forEach((fieldName) => {
     validatePlatformGroup(formValues, fieldName, errors);
@@ -961,6 +1083,46 @@ function SiteSettingsForm({
     setServerErrors((currentErrors) =>
       removeErrorGroup(currentErrors, fieldPrefix),
     );
+  }
+
+  function handleAboutWorkItemsChange(nextItems) {
+    const items = Array.isArray(nextItems) ? nextItems : [];
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+
+      about: {
+        ...currentValues.about,
+
+        workItems: items.map((item, index) => ({
+          ...item,
+          order: index + 1,
+        })),
+      },
+    }));
+
+    clearFieldErrorGroup("about.workItems");
+    setSubmitError("");
+  }
+
+  function handleAboutIdentityRolesChange(nextRoles) {
+    const roles = Array.isArray(nextRoles) ? nextRoles : [];
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+
+      about: {
+        ...currentValues.about,
+
+        identityRoles: roles.map((role, index) => ({
+          ...role,
+          order: index + 1,
+        })),
+      },
+    }));
+
+    clearFieldErrorGroup("about.identityRoles");
+    setSubmitError("");
   }
 
   function handlePlatformChange(fieldName, nextPlatforms) {
@@ -1443,9 +1605,21 @@ function SiteSettingsForm({
       <SettingsCard
         isVisible={isPanelActive("about")}
         title="About Section"
-        description="Manage the About heading, description and skill or business highlights."
+        description="Manage the public About content, animated identity roles and manually linked rotating work items."
       >
         <div className="grid gap-5">
+          <TextInput
+            id="settings-about-eyebrow"
+            name="about.eyebrow"
+            label="About eyebrow"
+            value={formValues.about.eyebrow}
+            onChange={handleFieldChange}
+            error={getFieldError("about.eyebrow", "about")}
+            disabled={isSubmitting}
+            placeholder="About Me"
+            maxLength={100}
+          />
+
           <TextInput
             id="settings-about-heading"
             name="about.heading"
@@ -1454,9 +1628,16 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("about.heading", "about")}
             disabled={isSubmitting}
-            placeholder="About Me"
+            placeholder="RakeshNexify"
             maxLength={150}
             required
+          />
+
+          <AboutIdentityRolesEditor
+            roles={formValues.about.identityRoles}
+            fieldErrors={combinedFieldErrors}
+            disabled={isSubmitting}
+            onChange={handleAboutIdentityRolesChange}
           />
 
           <TextareaInput
@@ -1467,28 +1648,24 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("about.description", "about")}
             disabled={isSubmitting}
-            rows={10}
+            rows={8}
             maxLength={3000}
             placeholder="Write the complete About section content."
             helpText="Use a blank line to separate multiple paragraphs."
           />
 
-          <TextareaInput
-            id="settings-about-highlights"
-            name="about.highlightsText"
-            label="About highlights"
-            value={formValues.about.highlightsText}
-            onChange={handleFieldChange}
-            error={getFieldError(
-              "about.highlights",
-              "about.highlightsText",
-              "about",
-            )}
+          <AboutWorkItemsEditor
+            items={formValues.about.workItems}
+            fieldErrors={combinedFieldErrors}
             disabled={isSubmitting}
-            rows={6}
-            placeholder={"MERN Stack\nWordPress\nDigital Brands"}
-            helpText="Enter one highlight per line."
+            onChange={handleAboutWorkItemsChange}
           />
+
+          <div className="rounded-2xl border border-brand-100 bg-brand-50/60 px-4 py-3 text-xs leading-5 text-slate-600">
+            Social profiles in the About shortcut use the existing Social
+            Platforms settings. Add, hide and reorder them from the Platforms
+            settings area; About does not duplicate that data.
+          </div>
         </div>
       </SettingsCard>
 

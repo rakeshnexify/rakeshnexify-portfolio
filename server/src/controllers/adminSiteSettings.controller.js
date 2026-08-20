@@ -8,6 +8,8 @@ import { createAuditLog } from "../services/auditLog.service.js";
 const MAIN_SITE_KEY = "main";
 
 const MAX_PLATFORMS_PER_GROUP = 25;
+const MAX_ABOUT_IDENTITY_ROLES = 30;
+const MAX_ABOUT_WORK_ITEMS = 100;
 const MAX_LEGAL_LINKS = 20;
 const MAX_SECTION_ORDER = 10000;
 
@@ -86,7 +88,7 @@ const heroStringFields = [
 
 const buttonStringFields = ["label", "url"];
 
-const aboutStringFields = ["heading", "description"];
+const aboutStringFields = ["eyebrow", "heading", "description"];
 
 const listingSectionStringFields = ["eyebrow", "heading", "description"];
 
@@ -405,15 +407,209 @@ function appendHeroPayload(payload, heroValue) {
   }
 }
 
+function normalizeAboutWorkUrl(value) {
+  const url = cleanString(value);
+
+  if (
+    !url ||
+    url.startsWith("/") ||
+    url.startsWith("#") ||
+    /^[a-z][a-z0-9+.-]*:\/\//i.test(url)
+  ) {
+    return url;
+  }
+
+  if (
+    /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?:[/?#].*)?$/i.test(
+      url,
+    )
+  ) {
+    return `https://${url}`;
+  }
+
+  return url;
+}
+
+function cleanAboutWorkItems(value) {
+  const fieldName = "about.workItems";
+
+  if (!Array.isArray(value)) {
+    throw createHttpError("About work items must be an array.", 400, {
+      [fieldName]: "About work items must be an array.",
+    });
+  }
+
+  if (value.length > MAX_ABOUT_WORK_ITEMS) {
+    throw createHttpError(
+      `About cannot contain more than ${MAX_ABOUT_WORK_ITEMS} work items.`,
+      400,
+      {
+        [fieldName]:
+          `Add no more than ${MAX_ABOUT_WORK_ITEMS} work items.`,
+      },
+    );
+  }
+
+  return value.map((itemValue, index) => {
+    const fieldPrefix = `${fieldName}.${index}`;
+    const item = ensureObject(itemValue, fieldPrefix);
+    const type = cleanString(item.type);
+    const title = cleanString(item.title);
+    const rawUrl = cleanString(item.url);
+    const normalizedUrl = normalizeAboutWorkUrl(rawUrl);
+
+    if (!type) {
+      throw createHttpError("Every About work item requires a type.", 400, {
+        [`${fieldPrefix}.type`]: "Type / label is required.",
+      });
+    }
+
+    if (type.length > 50) {
+      throw createHttpError(
+        "About work item type cannot exceed 50 characters.",
+        400,
+        {
+          [`${fieldPrefix}.type`]:
+            "Type / label cannot exceed 50 characters.",
+        },
+      );
+    }
+
+    if (!title) {
+      throw createHttpError("Every About work item requires a title.", 400, {
+        [`${fieldPrefix}.title`]: "Title is required.",
+      });
+    }
+
+    if (title.length > 120) {
+      throw createHttpError(
+        "About work item title cannot exceed 120 characters.",
+        400,
+        {
+          [`${fieldPrefix}.title`]:
+            "Title cannot exceed 120 characters.",
+        },
+      );
+    }
+
+    if (!rawUrl) {
+      throw createHttpError("Every About work item requires a link.", 400, {
+        [`${fieldPrefix}.url`]: "Link is required.",
+      });
+    }
+
+    if (rawUrl.length > 1000) {
+      throw createHttpError(
+        "About work item link cannot exceed 1000 characters.",
+        400,
+        {
+          [`${fieldPrefix}.url`]:
+            "Link cannot exceed 1000 characters.",
+        },
+      );
+    }
+
+    return {
+      type,
+      title,
+      url: cleanPublicUrl(normalizedUrl, `${fieldPrefix}.url`),
+      openInNewTab: hasOwnProperty(item, "openInNewTab")
+        ? cleanBoolean(
+            item.openInNewTab,
+            `${fieldPrefix}.openInNewTab`,
+          )
+        : false,
+      isVisible: hasOwnProperty(item, "isVisible")
+        ? cleanBoolean(item.isVisible, `${fieldPrefix}.isVisible`)
+        : true,
+      order: hasOwnProperty(item, "order")
+        ? cleanOrder(item.order, `${fieldPrefix}.order`)
+        : index + 1,
+    };
+  });
+}
+
+function cleanAboutIdentityRoles(value) {
+  const fieldName = "about.identityRoles";
+
+  if (!Array.isArray(value)) {
+    throw createHttpError("About identity roles must be an array.", 400, {
+      [fieldName]: "About identity roles must be an array.",
+    });
+  }
+
+  if (value.length > MAX_ABOUT_IDENTITY_ROLES) {
+    throw createHttpError(
+      `About cannot contain more than ${MAX_ABOUT_IDENTITY_ROLES} identity roles.`,
+      400,
+      {
+        [fieldName]:
+          `Add no more than ${MAX_ABOUT_IDENTITY_ROLES} identity roles.`,
+      },
+    );
+  }
+
+  const usedLabels = new Set();
+
+  return value.map((roleValue, index) => {
+    const fieldPrefix = `${fieldName}.${index}`;
+    const role = ensureObject(roleValue, fieldPrefix);
+    const label = cleanString(role.label);
+
+    if (!label) {
+      throw createHttpError("Every About identity role requires a label.", 400, {
+        [`${fieldPrefix}.label`]: "Identity role is required.",
+      });
+    }
+
+    if (label.length > 80) {
+      throw createHttpError(
+        "About identity roles cannot exceed 80 characters.",
+        400,
+        {
+          [`${fieldPrefix}.label`]:
+            "Identity role cannot exceed 80 characters.",
+        },
+      );
+    }
+
+    const normalizedLabel = label.toLowerCase();
+
+    if (usedLabels.has(normalizedLabel)) {
+      throw createHttpError("About identity roles must be unique.", 400, {
+        [`${fieldPrefix}.label`]:
+          `The identity role "${label}" is already added.`,
+      });
+    }
+
+    usedLabels.add(normalizedLabel);
+
+    return {
+      label,
+      isVisible: hasOwnProperty(role, "isVisible")
+        ? cleanBoolean(role.isVisible, `${fieldPrefix}.isVisible`)
+        : true,
+      order: hasOwnProperty(role, "order")
+        ? cleanOrder(role.order, `${fieldPrefix}.order`)
+        : index + 1,
+    };
+  });
+}
+
 function appendAboutPayload(payload, aboutValue) {
   const about = ensureObject(aboutValue, "about");
 
   appendStringFields(payload, about, "about", aboutStringFields);
 
-  if (hasOwnProperty(about, "highlights")) {
-    payload["about.highlights"] = cleanStringArray(
-      about.highlights,
-      "about.highlights",
+  if (hasOwnProperty(about, "identityRoles")) {
+    payload["about.identityRoles"] = cleanAboutIdentityRoles(
+      about.identityRoles,
+    );
+  }
+
+  if (hasOwnProperty(about, "workItems")) {
+    payload["about.workItems"] = cleanAboutWorkItems(
+      about.workItems,
     );
   }
 }
@@ -953,6 +1149,18 @@ function serializeSettings(settings) {
       ? [...data[fieldName]].sort(sortByOrder)
       : [];
   });
+
+  if (isPlainObject(data.about)) {
+    data.about = {
+      ...data.about,
+      identityRoles: Array.isArray(data.about.identityRoles)
+        ? [...data.about.identityRoles].sort(sortByOrder)
+        : [],
+      workItems: Array.isArray(data.about.workItems)
+        ? [...data.about.workItems].sort(sortByOrder)
+        : [],
+    };
+  }
 
   if (isPlainObject(data.footer)) {
     data.footer = {
