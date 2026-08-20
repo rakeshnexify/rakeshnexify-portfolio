@@ -2,33 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import siteData from "../../data/siteData";
+import usePublicTheme from "../../hooks/usePublicTheme";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import { getNavbarNavigationItems } from "../../utils/publicNavigation";
 import Button from "../ui/Button";
 import Logo from "../ui/Logo";
 import Container from "./Container";
-
-const NAVBAR_THEME_STORAGE_KEY = "rakeshnexify-public-theme";
-
-function getInitialNavbarTheme() {
-  if (typeof window === "undefined") {
-    return "light";
-  }
-
-  try {
-    const savedTheme = window.localStorage.getItem(NAVBAR_THEME_STORAGE_KEY);
-
-    if (savedTheme === "light" || savedTheme === "dark") {
-      return savedTheme;
-    }
-  } catch {
-    // Storage can be unavailable in privacy-restricted browser contexts.
-  }
-
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
 
 function NavbarLink({
   section,
@@ -90,7 +69,8 @@ function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [activeSectionKey, setActiveSectionKey] = useState("hero");
-  const [navbarTheme, setNavbarTheme] = useState(getInitialNavbarTheme);
+  const { theme: navbarTheme, toggleTheme: toggleNavbarTheme } =
+    usePublicTheme();
 
   const mobileMenuRef = useRef(null);
   const mobileMenuButtonRef = useRef(null);
@@ -164,20 +144,6 @@ function Navbar() {
       goToHomepageSection(section.targetId, section.key);
     }
   }
-
-  function toggleNavbarTheme() {
-    setNavbarTheme((currentTheme) =>
-      currentTheme === "dark" ? "light" : "dark",
-    );
-  }
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(NAVBAR_THEME_STORAGE_KEY, navbarTheme);
-    } catch {
-      // Keep the in-memory toggle functional when storage is unavailable.
-    }
-  }, [navbarTheme]);
 
   useEffect(() => {
     function handleEscapeKey(event) {
@@ -570,79 +536,79 @@ function Navbar() {
                       : "md:max-lg:text-slate-900 md:max-lg:hover:border-transparent md:max-lg:hover:bg-slate-100 md:max-lg:hover:text-brand-600"
                   }`}
                 >
-                {isMenuOpen ? (
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="size-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  >
-                    <path d="M6 6l12 12" />
-                    <path d="M18 6L6 18" />
-                  </svg>
-                ) : (
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="size-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  >
-                    <path d="M4 7h16" />
-                    <path d="M4 12h16" />
-                    <path d="M4 17h16" />
-                  </svg>
-                )}
+                  {isMenuOpen ? (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="size-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    >
+                      <path d="M6 6l12 12" />
+                      <path d="M18 6L6 18" />
+                    </svg>
+                  ) : (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="size-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    >
+                      <path d="M4 7h16" />
+                      <path d="M4 12h16" />
+                      <path d="M4 17h16" />
+                    </svg>
+                  )}
                 </button>
 
-              {isMenuOpen && (
-                <div
-                  id="mobile-navigation"
-                  className="absolute inset-x-0 top-full min-w-0 border-t border-slate-200 bg-white shadow-xl shadow-slate-950/10"
-                >
-                  <Container>
-                    <nav
-                      className="max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain py-5"
-                      aria-label="Mobile navigation"
-                    >
-                      <div className="flex min-w-0 flex-col gap-2">
-                        {navigationSections.map((section) => (
-                          <NavbarLink
-                            key={section.key}
-                            section={section}
-                            isActive={activeSectionKey === section.key}
-                            isMobile
-                            onNavigate={
-                              section.type === "page"
-                                ? closeMobileMenu
-                                : goToHomepageSection
-                            }
-                          />
-                        ))}
+                {isMenuOpen && (
+                  <div
+                    id="mobile-navigation"
+                    className="absolute inset-x-0 top-full min-w-0 border-t border-slate-200 bg-white shadow-xl shadow-slate-950/10"
+                  >
+                    <Container>
+                      <nav
+                        className="max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain py-5"
+                        aria-label="Mobile navigation"
+                      >
+                        <div className="flex min-w-0 flex-col gap-2">
+                          {navigationSections.map((section) => (
+                            <NavbarLink
+                              key={section.key}
+                              section={section}
+                              isActive={activeSectionKey === section.key}
+                              isMobile
+                              onNavigate={
+                                section.type === "page"
+                                  ? closeMobileMenu
+                                  : goToHomepageSection
+                              }
+                            />
+                          ))}
 
-                        {contactSection && (
-                          <Button
-                            className="mt-3 w-full max-w-full"
-                            onClick={() =>
-                              goToHomepageSection(
-                                contactSection.targetId,
-                                contactSection.key,
-                              )
-                            }
-                          >
-                            {contactSection.label}
-                          </Button>
-                        )}
-                      </div>
-                    </nav>
-                  </Container>
-                </div>
-              )}
+                          {contactSection && (
+                            <Button
+                              className="mt-3 w-full max-w-full"
+                              onClick={() =>
+                                goToHomepageSection(
+                                  contactSection.targetId,
+                                  contactSection.key,
+                                )
+                              }
+                            >
+                              {contactSection.label}
+                            </Button>
+                          )}
+                        </div>
+                      </nav>
+                    </Container>
+                  </div>
+                )}
               </div>
             </div>
           </div>

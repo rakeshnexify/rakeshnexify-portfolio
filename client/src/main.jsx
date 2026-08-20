@@ -4,17 +4,20 @@ import { BrowserRouter } from "react-router";
 
 import App from "./App.jsx";
 import AdminAuthProvider from "./context/AdminAuthProvider.jsx";
+import PublicThemeProvider from "./context/PublicThemeProvider.jsx";
 import SiteSettingsProvider from "./context/SiteSettingsProvider.jsx";
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <SiteSettingsProvider>
-        <AdminAuthProvider>
-          <App />
-        </AdminAuthProvider>
-      </SiteSettingsProvider>
+      <PublicThemeProvider>
+        <SiteSettingsProvider>
+          <AdminAuthProvider>
+            <App />
+          </AdminAuthProvider>
+        </SiteSettingsProvider>
+      </PublicThemeProvider>
     </BrowserRouter>
   </StrictMode>,
 );
