@@ -8,10 +8,41 @@ import Button from "../ui/Button";
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
-function NavbarLink({ section, isActive, isMobile = false, onNavigate }) {
+const NAVBAR_THEME_STORAGE_KEY = "rakeshnexify-public-theme";
+
+function getInitialNavbarTheme() {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+
+  try {
+    const savedTheme = window.localStorage.getItem(NAVBAR_THEME_STORAGE_KEY);
+
+    if (savedTheme === "light" || savedTheme === "dark") {
+      return savedTheme;
+    }
+  } catch {
+    // Storage can be unavailable in privacy-restricted browser contexts.
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function NavbarLink({
+  section,
+  isActive,
+  isMobile = false,
+  isTablet = false,
+  isDark = false,
+  onNavigate,
+}) {
   const baseClasses = isMobile
     ? "min-w-0 break-words rounded-xl px-4 py-3 text-sm font-semibold transition"
-    : "max-w-24 truncate border-b-2 py-2 text-sm font-semibold transition-colors xl:max-w-28";
+    : isTablet
+      ? "min-w-0 max-w-20 truncate border-b-2 px-1.5 py-2 text-[13px] font-semibold transition-colors"
+      : "max-w-24 truncate border-b-2 py-2 text-sm font-semibold transition-colors xl:max-w-28";
 
   const stateClasses = isMobile
     ? isActive
@@ -19,7 +50,9 @@ function NavbarLink({ section, isActive, isMobile = false, onNavigate }) {
       : "text-slate-700 hover:bg-brand-50 hover:text-brand-600"
     : isActive
       ? "border-brand-600 text-brand-600"
-      : "border-transparent text-slate-600 hover:text-brand-600";
+      : isDark
+        ? "border-transparent text-slate-100 hover:text-brand-500"
+        : "border-transparent text-slate-600 hover:text-brand-600";
 
   if (section.type === "page") {
     return (
@@ -57,6 +90,7 @@ function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [activeSectionKey, setActiveSectionKey] = useState("hero");
+  const [navbarTheme, setNavbarTheme] = useState(getInitialNavbarTheme);
 
   const mobileMenuRef = useRef(null);
   const mobileMenuButtonRef = useRef(null);
@@ -82,7 +116,9 @@ function Navbar() {
   );
 
   const desktopNavigationSections = navigationSections.slice(0, 4);
+  const tabletNavigationSections = navigationSections.slice(0, 5);
   const overflowNavigationSections = navigationSections.slice(4);
+  const isDarkNavbar = navbarTheme === "dark";
 
   const isOverflowSectionActive = overflowNavigationSections.some(
     (section) => section.key === activeSectionKey,
@@ -128,6 +164,20 @@ function Navbar() {
       goToHomepageSection(section.targetId, section.key);
     }
   }
+
+  function toggleNavbarTheme() {
+    setNavbarTheme((currentTheme) =>
+      currentTheme === "dark" ? "light" : "dark",
+    );
+  }
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(NAVBAR_THEME_STORAGE_KEY, navbarTheme);
+    } catch {
+      // Keep the in-memory toggle functional when storage is unavailable.
+    }
+  }, [navbarTheme]);
 
   useEffect(() => {
     function handleEscapeKey(event) {
@@ -293,9 +343,15 @@ function Navbar() {
         Skip to main content
       </a>
 
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl md:max-lg:border-b-0 md:max-lg:bg-transparent md:max-lg:py-3 md:max-lg:backdrop-blur-none">
         <Container>
-          <div className="flex min-h-20 min-w-0 items-center justify-between gap-4 sm:gap-6">
+          <div
+            className={`flex min-h-20 min-w-0 items-center justify-between gap-4 sm:gap-6 md:max-lg:min-h-[72px] md:max-lg:gap-3 md:max-lg:rounded-2xl md:max-lg:border md:max-lg:px-4 md:max-lg:backdrop-blur-2xl md:max-lg:transition-colors ${
+              isDarkNavbar
+                ? "md:max-lg:border-white/10 md:max-lg:bg-slate-950/90 md:max-lg:shadow-[0_16px_36px_rgba(2,6,23,0.28)]"
+                : "md:max-lg:border-slate-200/80 md:max-lg:bg-white/80 md:max-lg:shadow-[0_14px_32px_rgba(15,23,42,0.12)]"
+            }`}
+          >
             <a
               href="#home"
               aria-label={`Go to ${brandName} homepage`}
@@ -303,10 +359,53 @@ function Navbar() {
                 event.preventDefault();
                 goToHomepageSection("home", "hero");
               }}
-              className="inline-flex min-w-0 max-w-full shrink-0"
+              className="inline-flex min-w-0 max-w-full shrink-0 md:hidden lg:inline-flex"
             >
               <Logo />
             </a>
+
+            <a
+              href="#home"
+              aria-label={`Go to ${brandName} homepage`}
+              onClick={(event) => {
+                event.preventDefault();
+                goToHomepageSection("home", "hero");
+              }}
+              className="hidden min-w-0 max-w-[176px] shrink-0 md:inline-flex lg:hidden"
+            >
+              <Logo
+                showTagline
+                className={`!gap-2 ${
+                  isDarkNavbar ? "[&_p:last-child]:!text-slate-300" : ""
+                }`}
+                iconClassName="!h-10 !w-10 !rounded-xl"
+                textClassName={`!text-base ${
+                  isDarkNavbar ? "!text-white" : "!text-slate-950"
+                }`}
+              />
+            </a>
+
+            {tabletNavigationSections.length > 0 && (
+              <nav
+                className="hidden min-w-0 flex-1 items-center justify-center gap-1 overflow-hidden md:flex lg:hidden min-[900px]:gap-2"
+                aria-label="Tablet navigation"
+              >
+                {tabletNavigationSections.map((section) => (
+                  <NavbarLink
+                    key={section.key}
+                    section={section}
+                    isActive={activeSectionKey === section.key}
+                    isTablet
+                    isDark={isDarkNavbar}
+                    onNavigate={
+                      section.type === "page"
+                        ? closeMobileMenu
+                        : goToHomepageSection
+                    }
+                  />
+                ))}
+              </nav>
+            )}
 
             {navigationSections.length > 0 && (
               <nav
@@ -409,21 +508,68 @@ function Navbar() {
               </div>
             )}
 
-            <div ref={mobileMenuRef} className="shrink-0 lg:hidden">
+            <div className="flex shrink-0 items-center gap-1 lg:hidden">
               <button
-                ref={mobileMenuButtonRef}
                 type="button"
-                aria-label={
-                  isMenuOpen ? "Close navigation menu" : "Open navigation menu"
-                }
-                aria-expanded={isMenuOpen}
-                aria-controls="mobile-navigation"
-                aria-haspopup="true"
-                onClick={() => {
-                  setIsMenuOpen((currentValue) => !currentValue);
-                }}
-                className="grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-900 transition hover:border-brand-600 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20"
+                aria-label={`Switch to ${isDarkNavbar ? "light" : "dark"} theme`}
+                aria-pressed={isDarkNavbar}
+                onClick={toggleNavbarTheme}
+                className={`hidden size-10 shrink-0 place-items-center rounded-xl transition md:grid lg:hidden focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${
+                  isDarkNavbar
+                    ? "text-slate-100 hover:bg-white/10 hover:text-white"
+                    : "text-slate-900 hover:bg-slate-100 hover:text-brand-600"
+                }`}
               >
+                {isDarkNavbar ? (
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20.35 15.35A9 9 0 018.65 3.65a9 9 0 1011.7 11.7z" />
+                  </svg>
+                ) : (
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="size-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  >
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
+                  </svg>
+                )}
+              </button>
+
+              <div ref={mobileMenuRef} className="shrink-0">
+                <button
+                  ref={mobileMenuButtonRef}
+                  type="button"
+                  aria-label={
+                    isMenuOpen
+                      ? "Close navigation menu"
+                      : "Open navigation menu"
+                  }
+                  aria-expanded={isMenuOpen}
+                  aria-controls="mobile-navigation"
+                  aria-haspopup="true"
+                  onClick={() => {
+                    setIsMenuOpen((currentValue) => !currentValue);
+                  }}
+                  className={`grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-900 transition hover:border-brand-600 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 md:max-lg:size-10 md:max-lg:border-transparent md:max-lg:bg-transparent ${
+                    isDarkNavbar
+                      ? "md:max-lg:text-slate-100 md:max-lg:hover:border-transparent md:max-lg:hover:bg-white/10 md:max-lg:hover:text-white"
+                      : "md:max-lg:text-slate-900 md:max-lg:hover:border-transparent md:max-lg:hover:bg-slate-100 md:max-lg:hover:text-brand-600"
+                  }`}
+                >
                 {isMenuOpen ? (
                   <svg
                     aria-hidden="true"
@@ -452,7 +598,7 @@ function Navbar() {
                     <path d="M4 17h16" />
                   </svg>
                 )}
-              </button>
+                </button>
 
               {isMenuOpen && (
                 <div
@@ -497,6 +643,7 @@ function Navbar() {
                   </Container>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </Container>
