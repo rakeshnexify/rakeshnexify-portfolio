@@ -449,6 +449,8 @@ function createSiteSettingsFormValues(settings = {}) {
     },
 
     hero: {
+      coverImageUrl: cleanString(hero.coverImageUrl),
+
       eyebrow: cleanString(hero.eyebrow),
 
       heading: cleanString(hero.heading) || cleanString(hero.title),
@@ -621,6 +623,8 @@ function createSiteSettingsPayload(formValues = {}) {
     },
 
     hero: {
+      coverImageUrl: values.hero.coverImageUrl,
+
       eyebrow: values.hero.eyebrow,
 
       heading: values.hero.heading,

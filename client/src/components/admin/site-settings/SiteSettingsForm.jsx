@@ -1314,9 +1314,26 @@ function SiteSettingsForm({
       <SettingsCard
         isVisible={isPanelActive("hero")}
         title="Hero Section"
-        description="Control the main heading, introduction and call-to-action buttons."
+        description="Control the technical cover image, main heading, introduction and call-to-action buttons."
       >
         <div className="grid gap-5">
+          <ImageUrlField
+            id="settings-hero-cover-image"
+            name="hero.coverImageUrl"
+            label="Hero Cover Image"
+            value={formValues.hero.coverImageUrl}
+            onChange={handleFieldChange}
+            error={getFieldError("hero.coverImageUrl", "hero")}
+            disabled={isSubmitting}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Hero Cover Image"
+            helpText="Optional technical cover/background image. Choose from the existing Media Library or paste an external URL. When empty, the Hero uses its built-in professional technical background."
+            onUnauthorized={onMediaUnauthorized}
+            previewAlt="Hero cover image preview"
+            previewClassName="h-44 w-full rounded-xl object-cover sm:h-56"
+          />
+
           <TextInput
             id="settings-hero-eyebrow"
             name="hero.eyebrow"

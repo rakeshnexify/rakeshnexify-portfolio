@@ -99,6 +99,12 @@ const ownerSchema = new mongoose.Schema(
 
 const heroSchema = new mongoose.Schema(
   {
+    coverImageUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
     eyebrow: {
       type: String,
       trim: true,

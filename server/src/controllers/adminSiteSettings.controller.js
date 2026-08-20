@@ -77,7 +77,12 @@ const ownerStringFields = [
   "resumeUrl",
 ];
 
-const heroStringFields = ["eyebrow", "heading", "description"];
+const heroStringFields = [
+  "coverImageUrl",
+  "eyebrow",
+  "heading",
+  "description",
+];
 
 const buttonStringFields = ["label", "url"];
 

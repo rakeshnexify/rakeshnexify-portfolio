@@ -20,6 +20,7 @@ function createInitialState() {
 function NewsletterSignupForm({
   variant = "dark",
   className = "",
+  consentMode = "checkbox",
 }) {
   const instanceId = useId();
 
@@ -64,6 +65,9 @@ function NewsletterSignupForm({
 
   const isLight =
     variant === "light";
+
+  const usesImplicitConsent =
+    consentMode === "implicit";
 
   useEffect(
     () => () => {
@@ -137,6 +141,7 @@ function NewsletterSignupForm({
     }
 
     if (
+      !usesImplicitConsent &&
       formData.consentAccepted !== true
     ) {
       nextFieldErrors.consentAccepted =
@@ -157,7 +162,10 @@ function NewsletterSignupForm({
       return;
     }
 
-    if (errors.consentAccepted) {
+    if (
+      !usesImplicitConsent &&
+      errors.consentAccepted
+    ) {
       consentInputRef.current?.focus();
     }
   }
@@ -419,53 +427,59 @@ function NewsletterSignupForm({
         ) : null}
       </div>
 
-      <div className="mt-1.5">
-        <label
-          htmlFor={consentId}
-          className={consentClasses}
-        >
-          <input
-            ref={consentInputRef}
-            id={consentId}
-            name="consentAccepted"
-            type="checkbox"
-            checked={
-              formData.consentAccepted
-            }
-            onChange={handleChange}
-            disabled={isSubmitting}
-            aria-invalid={
-              Boolean(
-                fieldErrors
-                  .consentAccepted,
-              )
-            }
-            aria-describedby={
-              fieldErrors
-                .consentAccepted
-                ? consentErrorId
-                : undefined
-            }
-            className="mt-0.5 size-4 shrink-0 rounded border-slate-400 accent-brand-600 focus:ring-brand-500"
-          />
-
-          <span>
-            I agree to receive newsletter and marketing updates from RakeshNexify.
-          </span>
-        </label>
-
-        {fieldErrors.consentAccepted ? (
-          <p
-            id={consentErrorId}
-            className={`mt-1.5 ${errorClasses}`}
+      {usesImplicitConsent ? (
+        <p className="newsletter-implicit-consent">
+          By subscribing, you agree to receive newsletter and marketing updates from RakeshNexify.
+        </p>
+      ) : (
+        <div className="mt-1.5">
+          <label
+            htmlFor={consentId}
+            className={consentClasses}
           >
-            {
-              fieldErrors
-                .consentAccepted
-            }
-          </p>
-        ) : null}
-      </div>
+            <input
+              ref={consentInputRef}
+              id={consentId}
+              name="consentAccepted"
+              type="checkbox"
+              checked={
+                formData.consentAccepted
+              }
+              onChange={handleChange}
+              disabled={isSubmitting}
+              aria-invalid={
+                Boolean(
+                  fieldErrors
+                    .consentAccepted,
+                )
+              }
+              aria-describedby={
+                fieldErrors
+                  .consentAccepted
+                  ? consentErrorId
+                  : undefined
+              }
+              className="mt-0.5 size-4 shrink-0 rounded border-slate-400 accent-brand-600 focus:ring-brand-500"
+            />
+
+            <span>
+              I agree to receive newsletter and marketing updates from RakeshNexify.
+            </span>
+          </label>
+
+          {fieldErrors.consentAccepted ? (
+            <p
+              id={consentErrorId}
+              className={`mt-1.5 ${errorClasses}`}
+            >
+              {
+                fieldErrors
+                  .consentAccepted
+              }
+            </p>
+          ) : null}
+        </div>
+      )}
 
       <div
         aria-live="polite"
