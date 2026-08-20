@@ -5,6 +5,7 @@ import { useAdminSidebarState } from "../../../hooks/useAdminSidebarState";
 import AdminMobileDrawer from "./AdminMobileDrawer";
 import AdminSidebar from "./AdminSidebar";
 import AdminTopbar from "./AdminTopbar";
+import AdminThemeToggle from "./AdminThemeToggle";
 
 function AdminLayout() {
   const navigate = useNavigate();
@@ -60,6 +61,7 @@ function AdminLayout() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-slate-100 text-slate-900">
+      <AdminThemeToggle className="fixed right-5 top-5 z-40 hidden lg:inline-flex" />
       <AdminSidebar
         admin={admin}
         isPinned={isPinned}
