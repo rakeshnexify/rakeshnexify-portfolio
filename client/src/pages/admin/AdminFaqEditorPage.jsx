@@ -145,76 +145,96 @@ function AdminFaqEditorPage({ mode = "create" }) {
 
   if (isLoading) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-100">
-        <div className="text-center">
-          <div className="mx-auto size-12 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600" />
-          <p className="mt-5 text-sm font-semibold text-slate-600">
-            Loading FAQ editor...
-          </p>
-        </div>
+      <main className="min-h-screen bg-slate-100">
+        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div
+            role="status"
+            aria-live="polite"
+            className="mx-auto max-w-5xl space-y-4"
+          >
+            <span className="sr-only">
+              Loading FAQ editor...
+            </span>
+
+            <div className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+
+            <div className="h-80 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+          </div>
+        </section>
       </main>
     );
   }
 
   if (loadError || hasMissingFaqId) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-100 p-4">
-        <div className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-red-50 text-2xl font-black text-red-600">
-            !
-          </div>
-
-          <h1 className="mt-5 text-2xl font-black text-slate-950">
-            FAQ editor could not be opened
-          </h1>
-
-          <p className="mt-3 text-slate-600">
-            {hasMissingFaqId ? "FAQ ID is required." : loadError}
-          </p>
-
-          <Link
-            to="/admin/faqs"
-            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-bold text-white"
+      <main className="min-h-screen bg-slate-100">
+        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div
+            role="alert"
+            className="mx-auto max-w-2xl rounded-2xl border border-red-200 bg-white p-5 shadow-sm sm:p-6"
           >
-            Return to FAQs
-          </Link>
-        </div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">
+              FAQ Error
+            </p>
+
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              FAQ editor could not be opened
+            </h1>
+
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {hasMissingFaqId ? "FAQ ID is required." : loadError}
+            </p>
+
+            <Link
+              to="/admin/faqs"
+              className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+            >
+              &larr; Return to FAQs
+            </Link>
+          </div>
+        </section>
       </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-        <Link
-          to="/admin/faqs"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-brand-600"
-        >
-          ← Back to FAQs
-        </Link>
+      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mx-auto max-w-5xl">
+          <Link
+            to="/admin/faqs"
+            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+          >
+            <span aria-hidden="true">
+              &larr;
+            </span>
 
-        <div className="mt-6 rounded-3xl bg-slate-950 p-7 text-white sm:p-9">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-400">
-            Help & Answers
-          </p>
+            FAQs Management
+          </Link>
 
-          <h1 className="mt-3 text-3xl font-black sm:text-4xl">
-            {isEditMode ? "Edit FAQ" : "Add FAQ"}
-          </h1>
+          <header className="mt-3">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              Help & Answers
+            </p>
 
-          <p className="mt-4 max-w-3xl leading-7 text-slate-400">
-            Manage the customer-facing question, answer, dynamic category,
-            display priority and public publication controls.
-          </p>
-        </div>
+            <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              {isEditMode ? "Edit FAQ" : "Add FAQ"}
+            </h1>
 
-        <div className="mt-8">
-          <FaqForm
-            key={isEditMode ? faq?._id : "new-faq"}
-            initialValues={initialValues}
-            onSubmit={handleSubmit}
-            submitLabel={isEditMode ? "Update FAQ" : "Create FAQ"}
-          />
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Manage the customer-facing question, answer, dynamic category,
+              display priority and public publication controls.
+            </p>
+          </header>
+
+          <div className="mt-6">
+            <FaqForm
+              key={isEditMode ? faq?._id : "new-faq"}
+              initialValues={initialValues}
+              onSubmit={handleSubmit}
+              submitLabel={isEditMode ? "Update FAQ" : "Create FAQ"}
+            />
+          </div>
         </div>
       </section>
     </main>
