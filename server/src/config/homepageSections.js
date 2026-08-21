@@ -27,7 +27,7 @@ const homepageSectionDefinitions = [
     isVisible: true,
     isNavigationVisible: true,
     isFooterNavigationVisible: false,
-    isPageVisible: true,
+    isPageVisible: false,
     order: 3,
     navigationOrder: 3,
     footerNavigationOrder: 3,

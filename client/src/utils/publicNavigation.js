@@ -19,8 +19,9 @@ const publicNavigationDestinations = Object.freeze({
     footer: true,
   },
   statistics: {
-    type: "page",
-    href: "/statistics",
+    type: "section",
+    href: "/#statistics",
+    targetId: "statistics",
     navbar: true,
     footer: true,
   },

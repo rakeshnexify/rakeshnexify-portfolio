@@ -456,10 +456,6 @@ function validateLegalLinks(formValues, errors) {
 function validateDynamicContentUrls(formValues, errors) {
   const urlFields = [
     {
-      fieldName: "statisticsSection.ctaButton.url",
-      value: formValues?.statisticsSection?.ctaButton?.url,
-    },
-    {
       fieldName: "skillsSection.ctaButton.url",
       value: formValues?.skillsSection?.ctaButton?.url,
     },
@@ -1037,6 +1033,7 @@ function ListingSectionSettingsCard({
   onChange,
   getFieldError,
   isVisible = true,
+  showCta = true,
 }) {
   return (
     <SettingsCard title={title} description={description} isVisible={isVisible}>
@@ -1078,39 +1075,41 @@ function ListingSectionSettingsCard({
           placeholder="Explain the content shown in this section."
         />
 
-        <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">
-          <TextInput
-            id={`settings-${fieldName}-cta-label`}
-            name={`${fieldName}.ctaButton.label`}
-            label="CTA button label"
-            value={values.ctaButton.label}
-            onChange={onChange}
-            error={getFieldError(
-              `${fieldName}.ctaButton.label`,
-              `${fieldName}.ctaButton`,
-              fieldName,
-            )}
-            disabled={disabled}
-            placeholder="View All"
-            maxLength={50}
-          />
+        {showCta && (
+          <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">
+            <TextInput
+              id={`settings-${fieldName}-cta-label`}
+              name={`${fieldName}.ctaButton.label`}
+              label="CTA button label"
+              value={values.ctaButton.label}
+              onChange={onChange}
+              error={getFieldError(
+                `${fieldName}.ctaButton.label`,
+                `${fieldName}.ctaButton`,
+                fieldName,
+              )}
+              disabled={disabled}
+              placeholder="View All"
+              maxLength={50}
+            />
 
-          <TextInput
-            id={`settings-${fieldName}-cta-url`}
-            name={`${fieldName}.ctaButton.url`}
-            label="CTA button URL"
-            value={values.ctaButton.url}
-            onChange={onChange}
-            error={getFieldError(
-              `${fieldName}.ctaButton.url`,
-              `${fieldName}.ctaButton`,
-              fieldName,
-            )}
-            disabled={disabled}
-            placeholder="#contact or /projects"
-            maxLength={500}
-          />
-        </div>
+            <TextInput
+              id={`settings-${fieldName}-cta-url`}
+              name={`${fieldName}.ctaButton.url`}
+              label="CTA button URL"
+              value={values.ctaButton.url}
+              onChange={onChange}
+              error={getFieldError(
+                `${fieldName}.ctaButton.url`,
+                `${fieldName}.ctaButton`,
+                fieldName,
+              )}
+              disabled={disabled}
+              placeholder="#contact or /projects"
+              maxLength={500}
+            />
+          </div>
+        )}
       </div>
     </SettingsCard>
   );
@@ -1839,12 +1838,13 @@ function SiteSettingsForm({
       <ListingSectionSettingsCard
         isVisible={isPanelActive("listing-sections")}
         title="Statistics Section Content"
-        description="Manage the heading, description and call-to-action displayed with your public portfolio statistics."
+        description="Manage the eyebrow, heading and description shown above the Home Statistics section."
         fieldName="statisticsSection"
         values={formValues.statisticsSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}
+        showCta={false}
       />
 
       <ListingSectionSettingsCard

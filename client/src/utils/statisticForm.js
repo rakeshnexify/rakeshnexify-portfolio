@@ -7,9 +7,12 @@ const defaultStatisticFormValues = {
   description: "",
   icon: "",
   iconUrl: "",
+  accent: "blue",
+  url: "",
+  openInNewTab: false,
   order: 0,
   isFeatured: false,
-  isVisible: false,
+  isVisible: true,
 };
 
 function cleanString(value) {
@@ -44,6 +47,12 @@ function createStatisticFormValues(statistic = {}) {
 
     iconUrl: cleanString(statistic?.iconUrl),
 
+    accent: cleanString(statistic?.accent) || "blue",
+
+    url: cleanString(statistic?.url),
+
+    openInNewTab: statistic?.openInNewTab === true,
+
     order:
       Number.isFinite(numericOrder) && numericOrder >= 0 ? numericOrder : 0,
 
@@ -72,6 +81,12 @@ function createStatisticPayload(formValues = {}) {
     icon: values.icon,
 
     iconUrl: values.iconUrl,
+
+    accent: values.accent,
+
+    url: values.url,
+
+    openInNewTab: values.openInNewTab,
 
     order: Number(values.order),
 

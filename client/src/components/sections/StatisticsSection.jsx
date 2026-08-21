@@ -1,121 +1,31 @@
-import { useMemo } from "react";
-import { Link } from "react-router";
+import { useEffect, useMemo, useRef } from "react";
 
 import useSiteSettings from "../../hooks/useSiteSettings";
 import useStatistics from "../../hooks/useStatistics";
 import Container from "../layout/Container";
-import ResponsiveCardRow from "../layout/ResponsiveCardRow";
 import Section from "../layout/Section";
-import SectionHeading from "../layout/SectionHeading";
 import StatisticCard from "../statistics/StatisticCard";
 
 const defaultSectionContent = {
-  eyebrow: "Impact in Numbers",
-
-  heading: "Experience, projects and progress at a glance",
-
+  eyebrow: "OUR IMPACT IN NUMBERS",
+  heading: "Building Solutions. Delivering Success.",
   description:
-    "A quick overview of the work, technologies, content and business experience behind RakeshNexify.",
-
-  ctaButton: {
-    label: "View All Statistics",
-    url: "/statistics",
-  },
+    "Numbers that reflect our commitment to quality, innovation, and client satisfaction.",
 };
 
-function containsControlCharacters(value) {
-  const text = String(value ?? "");
+function sortStatistics(firstStatistic, secondStatistic) {
+  const firstOrder = Number(firstStatistic?.order);
+  const secondOrder = Number(secondStatistic?.order);
 
-  for (let index = 0; index < text.length; index += 1) {
-    const characterCode = text.charCodeAt(index);
+  const safeFirstOrder = Number.isFinite(firstOrder) ? firstOrder : 0;
+  const safeSecondOrder = Number.isFinite(secondOrder) ? secondOrder : 0;
 
-    if (characterCode <= 31 || characterCode === 127) {
-      return true;
-    }
+  if (safeFirstOrder !== safeSecondOrder) {
+    return safeFirstOrder - safeSecondOrder;
   }
 
-  return false;
-}
-
-function getSafePublicUrl(value, fallbackUrl = "/statistics") {
-  const url = String(value || "").trim();
-
-  if (!url || containsControlCharacters(url)) {
-    return fallbackUrl;
-  }
-
-  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(url)) {
-    return url;
-  }
-
-  if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
-    return url;
-  }
-
-  try {
-    const parsedUrl = new URL(url);
-
-    if (
-      ["http:", "https:"].includes(parsedUrl.protocol) &&
-      Boolean(parsedUrl.hostname) &&
-      !parsedUrl.username &&
-      !parsedUrl.password
-    ) {
-      return url;
-    }
-  } catch {
-    return fallbackUrl;
-  }
-
-  return fallbackUrl;
-}
-
-function sortStatisticsForPreview(firstStatistic, secondStatistic) {
-  const firstFeatured = Boolean(firstStatistic?.isFeatured);
-
-  const secondFeatured = Boolean(secondStatistic?.isFeatured);
-
-  const featuredDifference = Number(secondFeatured) - Number(firstFeatured);
-
-  if (featuredDifference !== 0) {
-    return featuredDifference;
-  }
-
-  const firstOrder = Number(firstStatistic?.order || 0);
-
-  const secondOrder = Number(secondStatistic?.order || 0);
-
-  return firstOrder - secondOrder;
-}
-
-function DynamicActionLink({ url, children, className = "" }) {
-  const safeUrl = getSafePublicUrl(url);
-
-  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
-    return (
-      <a
-        href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-      </a>
-    );
-  }
-
-  if (safeUrl.startsWith("/")) {
-    return (
-      <Link to={safeUrl} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={safeUrl} className={className}>
-      {children}
-    </a>
+  return String(firstStatistic?.label || "").localeCompare(
+    String(secondStatistic?.label || ""),
   );
 }
 
@@ -128,6 +38,12 @@ function StatisticsSection() {
   } = useStatistics();
 
   const { settings } = useSiteSettings();
+  const trackRef = useRef(null);
+  const rowShellRef = useRef(null);
+  const animationFrameRef = useRef(0);
+  const isAutoScrollPausedRef = useRef(false);
+  const manualPauseUntilRef = useRef(0);
+  const autoScrollPositionRef = useRef(0);
 
   const sectionContent = settings?.statisticsSection || {};
 
@@ -143,26 +59,115 @@ function StatisticsSection() {
     String(sectionContent.description || "").trim() ||
     defaultSectionContent.description;
 
-  const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
-
-  const ctaLabel =
-    String(ctaButton.label || "").trim() ||
-    defaultSectionContent.ctaButton.label;
-
-  const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href,
-    defaultSectionContent.ctaButton.url,
-  );
-
   const statistics = useMemo(() => {
     const sourceStatistics = Array.isArray(loadedStatistics)
       ? loadedStatistics
       : [];
 
-    return [...sourceStatistics].sort(sortStatisticsForPreview);
+    return [...sourceStatistics].sort(sortStatistics);
   }, [loadedStatistics]);
 
-  const previewStatistics = statistics.slice(0, 3);
+  const hasOverflowStatistics = statistics.length > 6;
+
+  const carouselStatistics = useMemo(() => {
+    if (!hasOverflowStatistics) {
+      return statistics;
+    }
+
+    return [...statistics, ...statistics];
+  }, [hasOverflowStatistics, statistics]);
+
+  useEffect(() => {
+    const track = trackRef.current;
+
+    if (!track || !hasOverflowStatistics) {
+      return undefined;
+    }
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (reduceMotion) {
+      return undefined;
+    }
+
+    const speedPixelsPerSecond = 26;
+    let previousTimestamp = 0;
+
+    autoScrollPositionRef.current = track.scrollLeft;
+
+    function animate(timestamp) {
+      if (!previousTimestamp) {
+        previousTimestamp = timestamp;
+      }
+
+      const elapsedSeconds = Math.min(
+        (timestamp - previousTimestamp) / 1000,
+        0.05,
+      );
+
+      previousTimestamp = timestamp;
+
+      const isTemporarilyPaused =
+        isAutoScrollPausedRef.current ||
+        performance.now() < manualPauseUntilRef.current;
+
+      const loopWidth = track.scrollWidth / 2;
+
+      if (!isTemporarilyPaused && loopWidth > track.clientWidth) {
+        autoScrollPositionRef.current +=
+          speedPixelsPerSecond * elapsedSeconds;
+
+        if (autoScrollPositionRef.current >= loopWidth) {
+          autoScrollPositionRef.current -= loopWidth;
+        }
+
+        track.scrollLeft = autoScrollPositionRef.current;
+      } else if (Math.abs(track.scrollLeft - autoScrollPositionRef.current) > 1) {
+        autoScrollPositionRef.current = track.scrollLeft;
+      }
+
+      animationFrameRef.current = window.requestAnimationFrame(animate);
+    }
+
+    animationFrameRef.current = window.requestAnimationFrame(animate);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameRef.current);
+    };
+  }, [hasOverflowStatistics]);
+
+  function setAutoScrollPaused(isPaused) {
+    isAutoScrollPausedRef.current = isPaused;
+  }
+
+  function scrollStatistics(direction) {
+    const track = trackRef.current;
+
+    if (!track) {
+      return;
+    }
+
+    const firstCard = track.querySelector(".public-statistic-card");
+    const cardWidth = firstCard?.getBoundingClientRect().width || 280;
+    const computedStyles = window.getComputedStyle(track);
+    const gap = Number.parseFloat(computedStyles.columnGap) || 16;
+    const distance = (cardWidth + gap) * 2;
+
+    manualPauseUntilRef.current = performance.now() + 1500;
+
+    const targetLeft = track.scrollLeft + direction * distance;
+
+    track.scrollTo({
+      left: targetLeft,
+      behavior: "smooth",
+    });
+
+    window.setTimeout(() => {
+      autoScrollPositionRef.current = track.scrollLeft;
+    }, 350);
+  }
 
   if (!isLoading && !error && statistics.length === 0) {
     return null;
@@ -171,100 +176,160 @@ function StatisticsSection() {
   return (
     <Section
       id="statistics"
-      className="scroll-mt-20 border-t border-slate-200 bg-white"
+      className="public-statistics-section scroll-mt-20"
     >
+      <div
+        className="public-statistics-circuit public-statistics-circuit-left"
+        aria-hidden="true"
+      />
+      <div
+        className="public-statistics-circuit public-statistics-circuit-right"
+        aria-hidden="true"
+      />
+
       <Container>
-        <SectionHeading
-          eyebrow={eyebrow}
-          title={heading}
-          description={description}
-        />
-
-        <p aria-live="polite" className="sr-only">
-          {isLoading
-            ? "Loading statistics."
-            : `${statistics.length} statistics loaded.`}
-        </p>
-
-        {error && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-amber-800">
-                Portfolio statistics could not be loaded
-              </p>
-
-              <p className="mt-1 text-sm leading-6 text-amber-700">
-                Please retry the live Statistics API request.
-              </p>
+        <div className="public-statistics-content">
+          <header className="public-statistics-header">
+            <div className="public-statistics-eyebrow">
+              <span aria-hidden="true" />
+              <p>{eyebrow}</p>
+              <span aria-hidden="true" />
             </div>
 
-            <button
-              type="button"
-              onClick={refreshStatistics}
-              disabled={isLoading}
-              className="inline-flex min-h-10 max-w-full shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-white px-4 text-center text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isLoading ? "Retrying..." : "Retry Statistics"}
-            </button>
-          </div>
-        )}
+            <h2 className="public-statistics-heading">{heading}</h2>
 
-        {isLoading && statistics.length === 0 && (
-          <ResponsiveCardRow
-            desktopColumns={3}
-            ariaLabel="Loading portfolio statistics"
-            className="mt-10"
-          >
-            {[1, 2, 3].map((item) => (
+            <p className="public-statistics-description">
+              {description}
+            </p>
+
+            <span
+              className="public-statistics-heading-accent"
+              aria-hidden="true"
+            />
+          </header>
+
+          <p aria-live="polite" className="sr-only">
+            {isLoading
+              ? "Loading statistics."
+              : `${statistics.length} statistics loaded.`}
+          </p>
+
+          {error && (
+            <div className="public-statistics-error">
+              <div>
+                <p className="font-bold">Statistics could not be loaded</p>
+                <p className="mt-1 text-sm opacity-80">
+                  Retry the live statistics request.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={refreshStatistics}
+                disabled={isLoading}
+              >
+                {isLoading ? "Retrying..." : "Retry"}
+              </button>
+            </div>
+          )}
+
+          {isLoading && statistics.length === 0 && (
+            <div
+              className="public-statistics-track public-statistics-track-loading"
+              aria-label="Loading portfolio statistics"
+            >
+              {[1, 2, 3, 4, 5, 6].map((item) => (
+                <div
+                  key={item}
+                  className="public-statistic-skeleton"
+                />
+              ))}
+            </div>
+          )}
+
+          {statistics.length > 0 && (
+            <div
+              ref={rowShellRef}
+              className={[
+                "public-statistics-row-shell",
+                hasOverflowStatistics
+                  ? "public-statistics-row-shell-scrollable"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onPointerDown={() => setAutoScrollPaused(true)}
+              onPointerUp={() => setAutoScrollPaused(false)}
+              onPointerCancel={() => setAutoScrollPaused(false)}
+              onPointerLeave={() => setAutoScrollPaused(false)}
+            >
+              {hasOverflowStatistics && (
+                <>
+                  <button
+                    type="button"
+                    className="public-statistics-edge-control public-statistics-edge-control-left"
+                    onMouseEnter={() => setAutoScrollPaused(true)}
+                    onMouseLeave={() => setAutoScrollPaused(false)}
+                    onFocus={() => setAutoScrollPaused(true)}
+                    onBlur={() => setAutoScrollPaused(false)}
+                    onClick={() => scrollStatistics(-1)}
+                    aria-label="Scroll statistics left"
+                    title="Previous statistics"
+                  >
+                    <span aria-hidden="true">←</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="public-statistics-edge-control public-statistics-edge-control-right"
+                    onMouseEnter={() => setAutoScrollPaused(true)}
+                    onMouseLeave={() => setAutoScrollPaused(false)}
+                    onFocus={() => setAutoScrollPaused(true)}
+                    onBlur={() => setAutoScrollPaused(false)}
+                    onClick={() => scrollStatistics(1)}
+                    aria-label="Scroll statistics right"
+                    title="Next statistics"
+                  >
+                    <span aria-hidden="true">→</span>
+                  </button>
+
+                  <span className="public-statistics-count">
+                    {String(statistics.length).padStart(2, "0")} metrics
+                  </span>
+                </>
+              )}
+
               <div
-                key={item}
-                className="h-72 animate-pulse rounded-3xl bg-slate-200"
-              />
-            ))}
-          </ResponsiveCardRow>
-        )}
+                ref={trackRef}
+                className="public-statistics-track"
+                aria-label="Portfolio statistics"
+                tabIndex={statistics.length > 6 ? 0 : undefined}
+              >
+                {carouselStatistics.map((statistic, index) => {
+                  const isDuplicate =
+                    hasOverflowStatistics && index >= statistics.length;
 
-        {previewStatistics.length > 0 && (
-          <ResponsiveCardRow
-            desktopColumns={3}
-            ariaLabel="Portfolio statistics"
-            className="mt-10"
-          >
-            {previewStatistics.map((statistic, index) => (
-              <StatisticCard
-                key={
-                  statistic._id ||
-                  statistic.key ||
-                  `${statistic.label}-${index}`
-                }
-                statistic={statistic}
-                compact
-              />
-            ))}
-          </ResponsiveCardRow>
-        )}
-
-        {previewStatistics.length > 0 && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="font-bold text-slate-950">
-                Explore the complete portfolio impact
-              </p>
-
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                The homepage shows selected statistics only. Open the complete
-                Statistics page to view every published achievement and number.
-              </p>
+                  return (
+                    <div
+                      key={`${
+                        statistic._id ||
+                        statistic.key ||
+                        statistic.label ||
+                        "statistic"
+                      }-${index}`}
+                      aria-hidden={isDuplicate ? "true" : undefined}
+                    >
+                      <StatisticCard
+                        statistic={statistic}
+                        index={index % statistics.length}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-
-            <DynamicActionLink
-              url={ctaUrl}
-              className="inline-flex min-h-11 max-w-full shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
-            >
-              {ctaLabel} →
-            </DynamicActionLink>
-          </div>
-        )}
+          )}
+        </div>
       </Container>
     </Section>
   );

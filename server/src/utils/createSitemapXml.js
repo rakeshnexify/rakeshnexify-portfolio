@@ -2,10 +2,6 @@ const SITE_URL = "https://rakeshnexify.com";
 
 const publicPageDefinitions = [
   {
-    key: "statistics",
-    pathname: "/statistics",
-  },
-  {
     key: "skills",
     pathname: "/skills",
   },

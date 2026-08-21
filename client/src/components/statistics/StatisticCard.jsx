@@ -1,3 +1,6 @@
+import { useEffect, useRef } from "react";
+import { Link } from "react-router";
+
 const iconPaths = {
   briefcase: (
     <>
@@ -7,7 +10,6 @@ const iconPaths = {
       <path d="M10 12v2h4v-2" />
     </>
   ),
-
   code: (
     <>
       <path d="m9 18-6-6 6-6" />
@@ -15,7 +17,6 @@ const iconPaths = {
       <path d="m14 4-4 16" />
     </>
   ),
-
   building: (
     <>
       <path d="M4 21V5l8-3 8 3v16" />
@@ -26,21 +27,18 @@ const iconPaths = {
       <path d="M15 12h1" />
     </>
   ),
-
   video: (
     <>
       <rect x="3" y="5" width="14" height="14" rx="2" />
       <path d="m17 10 4-2v8l-4-2" />
     </>
   ),
-
   github: (
     <>
       <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3.3-.4 6.8-1.6 6.8-7A5.5 5.5 0 0 0 19.3 4 5.2 5.2 0 0 0 19.1.5S17.9.1 15 2a13.4 13.4 0 0 0-7 0C5.1.1 3.9.5 3.9.5A5.2 5.2 0 0 0 3.7 4a5.5 5.5 0 0 0-1.5 3.5c0 5.4 3.5 6.6 6.8 7A4.8 4.8 0 0 0 8 18v4" />
       <path d="M8 19c-3 .9-3-1.5-4-2" />
     </>
   ),
-
   layers: (
     <>
       <path d="m12 2 9 5-9 5-9-5 9-5Z" />
@@ -48,7 +46,6 @@ const iconPaths = {
       <path d="m3 17 9 5 9-5" />
     </>
   ),
-
   users: (
     <>
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -57,7 +54,6 @@ const iconPaths = {
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </>
   ),
-
   trophy: (
     <>
       <path d="M8 21h8" />
@@ -67,7 +63,6 @@ const iconPaths = {
       <path d="M17 6h3v2a4 4 0 0 1-4 4" />
     </>
   ),
-
   rocket: (
     <>
       <path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2" />
@@ -75,7 +70,6 @@ const iconPaths = {
       <circle cx="15" cy="8" r="1.5" />
     </>
   ),
-
   calendar: (
     <>
       <rect x="3" y="5" width="18" height="16" rx="2" />
@@ -85,6 +79,15 @@ const iconPaths = {
     </>
   ),
 };
+
+const accentTones = [
+  "violet",
+  "blue",
+  "cyan",
+  "orange",
+  "pink",
+  "emerald",
+];
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -100,11 +103,15 @@ function containsControlCharacters(value) {
   return false;
 }
 
-function getSafeImageUrl(value) {
+function getSafePublicUrl(value) {
   const url = String(value || "").trim();
 
   if (!url || containsControlCharacters(url)) {
     return "";
+  }
+
+  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(url)) {
+    return url;
   }
 
   if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
@@ -116,7 +123,7 @@ function getSafeImageUrl(value) {
 
     if (
       ["http:", "https:"].includes(parsedUrl.protocol) &&
-      Boolean(parsedUrl.hostname) &&
+      parsedUrl.hostname &&
       !parsedUrl.username &&
       !parsedUrl.password
     ) {
@@ -129,12 +136,14 @@ function getSafeImageUrl(value) {
   return "";
 }
 
-function createDisplayValue(statistic) {
-  const prefix = String(statistic?.prefix || "").trim();
-  const value = String(statistic?.value || "").trim();
-  const suffix = String(statistic?.suffix || "").trim();
+function getSafeImageUrl(value) {
+  const safeUrl = getSafePublicUrl(value);
 
-  return `${prefix}${value}${suffix}`;
+  return safeUrl.startsWith("http://") ||
+    safeUrl.startsWith("https://") ||
+    safeUrl.startsWith("/")
+    ? safeUrl
+    : "";
 }
 
 function createStatisticSymbol(statistic) {
@@ -158,7 +167,8 @@ function StatisticIcon({ statistic }) {
         src={iconUrl}
         alt=""
         loading="lazy"
-        className="size-7 object-contain"
+        decoding="async"
+        className="public-statistic-icon-image"
       />
     );
   }
@@ -174,10 +184,10 @@ function StatisticIcon({ statistic }) {
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.8"
+        strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="size-6"
+        className="public-statistic-icon-svg"
       >
         {iconPaths[iconName]}
       </svg>
@@ -185,89 +195,200 @@ function StatisticIcon({ statistic }) {
   }
 
   return (
-    <span aria-hidden="true" className="text-base font-extrabold">
+    <span aria-hidden="true" className="public-statistic-icon-fallback">
       {createStatisticSymbol(statistic)}
     </span>
   );
 }
 
-function StatisticCard({ statistic, compact = false }) {
-  const displayValue = createDisplayValue(statistic);
+function getNumericValue(value) {
+  const text = String(value ?? "").trim();
 
-  const isFeatured = statistic?.isFeatured === true;
+  if (!/^-?\d+(?:[.,]\d+)?$/.test(text)) {
+    return null;
+  }
+
+  const normalized = text.replace(",", ".");
+  const number = Number(normalized);
+
+  return Number.isFinite(number) ? number : null;
+}
+
+function AnimatedStatisticNumber({ value }) {
+  const valueRef = useRef(null);
+
+  useEffect(() => {
+    const element = valueRef.current;
+
+    if (!element) {
+      return undefined;
+    }
+
+    const rawValue = String(value ?? "").trim();
+    const numericValue = getNumericValue(rawValue);
+
+    if (numericValue === null) {
+      element.textContent = rawValue;
+      return undefined;
+    }
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (reduceMotion || !("IntersectionObserver" in window)) {
+      element.textContent = rawValue;
+      return undefined;
+    }
+
+    let animationFrameId = 0;
+    let startTime = 0;
+    let hasAnimated = false;
+
+    const decimals = rawValue.includes(".") || rawValue.includes(",")
+      ? (rawValue.split(/[.,]/)[1] || "").length
+      : 0;
+
+    function renderProgress(timestamp) {
+      if (!startTime) {
+        startTime = timestamp;
+      }
+
+      const progress = Math.min((timestamp - startTime) / 900, 1);
+      const easedProgress = 1 - (1 - progress) ** 3;
+      const currentValue = numericValue * easedProgress;
+
+      element.textContent =
+        decimals > 0
+          ? currentValue.toFixed(decimals)
+          : Math.round(currentValue).toLocaleString("en-US");
+
+      if (progress < 1) {
+        animationFrameId = window.requestAnimationFrame(renderProgress);
+      } else {
+        element.textContent = rawValue;
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+
+        if (!entry?.isIntersecting || hasAnimated) {
+          return;
+        }
+
+        hasAnimated = true;
+        observer.disconnect();
+
+        element.textContent = "0";
+        animationFrameId = window.requestAnimationFrame(renderProgress);
+      },
+      {
+        threshold: 0.35,
+      },
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [value]);
+
+  return <span ref={valueRef}>{String(value ?? "").trim()}</span>;
+}
+
+function StatisticDestination({
+  statistic,
+  children,
+  className,
+}) {
+  const safeUrl = getSafePublicUrl(statistic?.url);
+
+  if (!safeUrl) {
+    return <article className={className}>{children}</article>;
+  }
+
+  const openInNewTab = statistic?.openInNewTab === true;
+  const sharedProps = {
+    className,
+    target: openInNewTab ? "_blank" : undefined,
+    rel: openInNewTab ? "noopener noreferrer" : undefined,
+    "aria-label": `Open ${statistic?.label || "statistic"}`,
+  };
+
+  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
+    return (
+      <a href={safeUrl} {...sharedProps}>
+        {children}
+      </a>
+    );
+  }
+
+  if (safeUrl.startsWith("/")) {
+    return (
+      <Link to={safeUrl} {...sharedProps}>
+        {children}
+      </Link>
+    );
+  }
 
   return (
-    <article
-      className={`group relative flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border transition duration-300 hover:-translate-y-1 hover:shadow-xl ${
-        isFeatured
-          ? "border-brand-200 bg-brand-50 shadow-sm hover:shadow-brand-100/70"
-          : "border-slate-200 bg-white shadow-sm hover:border-brand-200 hover:shadow-slate-200/70"
-      } ${compact ? "p-6" : "p-6 sm:p-8"}`}
-    >
-      <div
-        aria-hidden="true"
-        className="absolute -right-10 -top-10 size-32 rounded-full bg-brand-100/70 transition duration-500 group-hover:scale-125"
-      />
+    <a href={safeUrl} {...sharedProps}>
+      {children}
+    </a>
+  );
+}
 
-      <div
-        aria-hidden="true"
-        className="absolute -bottom-16 -left-10 size-32 rounded-full bg-cyan-100/40 blur-2xl"
-      />
+function StatisticCard({ statistic, index = 0 }) {
+  const prefix = String(statistic?.prefix || "").trim();
+  const value = String(statistic?.value || "").trim();
+  const suffix = String(statistic?.suffix || "").trim();
+  const label = String(statistic?.label || "").trim();
+  const description = String(statistic?.description || "").trim();
 
-      <div className="relative flex h-full min-w-0 flex-col">
-        <div className="flex min-w-0 items-start justify-between gap-4">
-          <div
-            className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
-              isFeatured
-                ? "bg-brand-600 text-white"
-                : "bg-slate-50 text-brand-600 ring-1 ring-slate-200"
-            }`}
-          >
-            <StatisticIcon statistic={statistic} />
-          </div>
+  const configuredAccent = String(statistic?.accent || "")
+    .trim()
+    .toLowerCase();
 
-          <span
-            className={`rounded-full px-3 py-1.5 text-xs font-bold ${
-              isFeatured
-                ? "bg-brand-600/10 text-brand-700"
-                : "bg-slate-100 text-slate-500"
-            }`}
-          >
-            {isFeatured ? "Featured" : "Statistic"}
-          </span>
+  const accent = accentTones.includes(configuredAccent)
+    ? configuredAccent
+    : accentTones[index % accentTones.length];
+
+  const isClickable = Boolean(getSafePublicUrl(statistic?.url));
+
+  const cardClassName = [
+    "public-statistic-card",
+    `public-statistic-tone-${accent}`,
+    isClickable ? "public-statistic-card-clickable" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <StatisticDestination statistic={statistic} className={cardClassName}>
+      <div className="public-statistic-card-inner">
+        <div className="public-statistic-icon-ring">
+          <StatisticIcon statistic={statistic} />
         </div>
 
-        <p
-          className={`mt-7 break-words font-black tracking-tight text-slate-950 ${
-            compact ? "text-4xl sm:text-5xl" : "text-5xl sm:text-6xl"
-          }`}
-        >
-          {displayValue || "0"}
+        <p className="public-statistic-value">
+          {prefix && <span>{prefix}</span>}
+          <AnimatedStatisticNumber value={value} />
+          {suffix && <span>{suffix}</span>}
         </p>
 
-        <h3 className="mt-3 break-words text-lg font-bold text-slate-900">
-          {statistic?.label || "Portfolio Statistic"}
-        </h3>
+        <span className="public-statistic-divider" aria-hidden="true" />
 
-        {statistic?.description && (
-          <p
-            className={`mt-3 break-words text-sm leading-6 text-slate-600 ${
-              compact ? "line-clamp-3" : ""
-            }`}
-          >
-            {statistic.description}
-          </p>
+        {label && <h3 className="public-statistic-title">{label}</h3>}
+
+        {description && (
+          <p className="public-statistic-description">{description}</p>
         )}
-
-        <div className="mt-auto pt-6">
-          <div
-            className={`h-1.5 w-16 rounded-full transition-all duration-300 group-hover:w-24 ${
-              isFeatured ? "bg-brand-600" : "bg-slate-300"
-            }`}
-          />
-        </div>
       </div>
-    </article>
+    </StatisticDestination>
   );
 }
 

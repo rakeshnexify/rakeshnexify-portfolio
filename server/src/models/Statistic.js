@@ -66,6 +66,29 @@ const statisticSchema = new mongoose.Schema(
       default: "",
     },
 
+    accent: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      enum: {
+        values: ["violet", "blue", "cyan", "orange", "pink", "emerald"],
+        message: "Statistic accent is invalid.",
+      },
+      default: "blue",
+    },
+
+    url: {
+      type: String,
+      trim: true,
+      maxlength: [1000, "Statistic URL cannot exceed 1000 characters."],
+      default: "",
+    },
+
+    openInNewTab: {
+      type: Boolean,
+      default: false,
+    },
+
     order: {
       type: Number,
       min: [0, "Statistic display order cannot be negative."],

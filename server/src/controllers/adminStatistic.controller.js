@@ -14,6 +14,15 @@ const editableStringFields = [
   "iconUrl",
 ];
 
+const allowedStatisticAccents = new Set([
+  "violet",
+  "blue",
+  "cyan",
+  "orange",
+  "pink",
+  "emerald",
+]);
+
 function createHttpError(message, statusCode = 400, fieldErrors = {}) {
   const error = new Error(message);
 
@@ -54,6 +63,100 @@ function cleanBoolean(value, fieldName) {
   });
 }
 
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
+
+  for (let index = 0; index < text.length; index += 1) {
+    const characterCode = text.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function normalizeStatisticUrl(value) {
+  const url = String(value ?? "").trim();
+
+  if (
+    !url ||
+    url.startsWith("/") ||
+    url.startsWith("#") ||
+    /^[a-z][a-z0-9+.-]*:\/\//i.test(url)
+  ) {
+    return url;
+  }
+
+  if (
+    /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?:[/?#].*)?$/i.test(
+      url,
+    )
+  ) {
+    return `https://${url}`;
+  }
+
+  return url;
+}
+
+function cleanStatisticUrl(value) {
+  const url = normalizeStatisticUrl(value);
+
+  if (!url) {
+    return "";
+  }
+
+  if (containsControlCharacters(url)) {
+    throw createHttpError("Statistic URL contains invalid characters.", 400, {
+      url: "Statistic URL contains invalid characters.",
+    });
+  }
+
+  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(url)) {
+    return url;
+  }
+
+  if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
+    return url;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return parsedUrl.toString();
+    }
+  } catch {
+    // Validation error is returned below.
+  }
+
+  throw createHttpError(
+    "Statistic URL must be a safe internal path, section or http/https URL.",
+    400,
+    {
+      url: "Use /path, #section, a domain, or a complete http/https URL.",
+    },
+  );
+}
+
+function cleanStatisticAccent(value) {
+  const accent = String(value ?? "").trim().toLowerCase() || "blue";
+
+  if (!allowedStatisticAccents.has(accent)) {
+    throw createHttpError("Statistic accent is invalid.", 400, {
+      accent: "Choose a supported statistic accent.",
+    });
+  }
+
+  return accent;
+}
+
 function cleanOrder(value) {
   const numericOrder = Number(value);
 
@@ -78,6 +181,21 @@ function buildStatisticPayload(requestBody = {}) {
       payload[fieldName] = String(requestBody[fieldName] ?? "").trim();
     }
   });
+
+  if (hasOwnProperty(requestBody, "accent")) {
+    payload.accent = cleanStatisticAccent(requestBody.accent);
+  }
+
+  if (hasOwnProperty(requestBody, "url")) {
+    payload.url = cleanStatisticUrl(requestBody.url);
+  }
+
+  if (hasOwnProperty(requestBody, "openInNewTab")) {
+    payload.openInNewTab = cleanBoolean(
+      requestBody.openInNewTab,
+      "openInNewTab",
+    );
+  }
 
   if (hasOwnProperty(requestBody, "order")) {
     payload.order = cleanOrder(requestBody.order);

@@ -41,6 +41,10 @@ function validateStatisticForm(formValues) {
     errors.description = "Description cannot exceed 300 characters.";
   }
 
+  if (formValues.url.trim().length > 1000) {
+    errors.url = "Statistic URL cannot exceed 1000 characters.";
+  }
+
   const numericOrder = Number(formValues.order);
 
   if (!Number.isFinite(numericOrder) || numericOrder < 0) {
@@ -445,6 +449,87 @@ function StatisticForm({
             disabled={isSubmitting}
             onUnauthorized={onMediaUnauthorized}
           />
+        </div>
+
+        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+          <div>
+            <label
+              htmlFor="statistic-accent"
+              className="text-sm font-semibold text-slate-700"
+            >
+              Card accent
+            </label>
+
+            <select
+              id="statistic-accent"
+              name="accent"
+              value={formValues.accent}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+            >
+              <option value="violet">Violet</option>
+              <option value="blue">Blue</option>
+              <option value="cyan">Cyan</option>
+              <option value="orange">Orange</option>
+              <option value="pink">Pink</option>
+              <option value="emerald">Emerald</option>
+            </select>
+
+            <StatisticFieldError message={getFieldError("accent")} />
+          </div>
+
+          <div>
+            <label
+              htmlFor="statistic-url"
+              className="text-sm font-semibold text-slate-700"
+            >
+              Optional card link
+            </label>
+
+            <input
+              id="statistic-url"
+              name="url"
+              type="text"
+              value={formValues.url}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              maxLength={1000}
+              placeholder="/projects, #contact or example.com"
+              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+            />
+
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Supports internal paths, section links, complete URLs and bare
+              domains.
+            </p>
+
+            <StatisticFieldError message={getFieldError("url")} />
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <label className="flex cursor-pointer items-start gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <input
+              name="openInNewTab"
+              type="checkbox"
+              checked={formValues.openInNewTab}
+              onChange={handleInputChange}
+              disabled={isSubmitting || !formValues.url.trim()}
+              className="mt-1 size-4 accent-brand-600"
+            />
+
+            <span>
+              <span className="block text-sm font-bold text-slate-900">
+                Open card link in a new tab
+              </span>
+
+              <span className="mt-1 block text-sm leading-6 text-slate-500">
+                Useful for external destinations. Internal links can remain in
+                the same tab.
+              </span>
+            </span>
+          </label>
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">

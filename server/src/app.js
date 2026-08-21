@@ -220,7 +220,6 @@ if (isProduction) {
   /*
    * React Router deep routes:
    * /services
-   * /statistics
    * /skills
    * /education
    * /experience
