@@ -25,7 +25,7 @@ function SectionHeading({
       </h2>
 
       {description && (
-        <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+        <p className="public-section-heading-description mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
           {description}
         </p>
       )}

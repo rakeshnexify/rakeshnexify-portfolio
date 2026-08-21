@@ -1,23 +1,20 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import siteData from "../../data/siteData";
 import useProjects from "../../hooks/useProjects";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
-import ResponsiveCardRow from "../layout/ResponsiveCardRow";
 import Section from "../layout/Section";
-import SectionHeading from "../layout/SectionHeading";
 import ProjectCard from "../projects/ProjectCard";
 
+const HOME_PROJECT_LIMIT = 4;
+
 const defaultSectionContent = {
-  eyebrow: "Featured Projects",
-
-  heading: "Selected websites, applications and digital products",
-
+  eyebrow: "MY WORK",
+  heading: "Projects That Deliver Results",
   description:
-    "Explore my MERN applications, e-commerce websites, business platforms and frontend projects. Each project is built with a focus on clean design, useful features and responsive performance.",
-
+    "A selection of projects where code, creativity and problem-solving come together to build useful digital solutions.",
   ctaButton: {
     label: "View All Projects",
     url: "/projects",
@@ -87,10 +84,36 @@ function sortProjectsForPreview(firstProject, secondProject) {
   }
 
   const firstOrder = Number(firstProject?.order || 0);
-
   const secondOrder = Number(secondProject?.order || 0);
 
   return firstOrder - secondOrder;
+}
+
+function cleanCategory(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function createCategoryKey(value) {
+  return cleanCategory(value).toLowerCase();
+}
+
+function getHeadingParts(heading) {
+  const words = String(heading || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (words.length <= 1) {
+    return {
+      lead: "",
+      highlight: words[0] || "",
+    };
+  }
+
+  return {
+    lead: words.slice(0, -1).join(" "),
+    highlight: words.at(-1),
+  };
 }
 
 function DynamicActionLink({ url, children, className = "" }) {
@@ -124,6 +147,37 @@ function DynamicActionLink({ url, children, className = "" }) {
   );
 }
 
+function ProjectsFilterIcon({ all = false }) {
+  if (all) {
+    return (
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="4" y="4" width="6" height="6" rx="1.2" />
+        <rect x="14" y="4" width="6" height="6" rx="1.2" />
+        <rect x="4" y="14" width="6" height="6" rx="1.2" />
+        <rect x="14" y="14" width="6" height="6" rx="1.2" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M3.75 7.75A1.75 1.75 0 0 1 5.5 6h4l1.6 2h7.4a1.75 1.75 0 0 1 1.75 1.75v7A1.75 1.75 0 0 1 18.5 18.5h-13a1.75 1.75 0 0 1-1.75-1.75v-9Z" />
+    </svg>
+  );
+}
+
 function ProjectsSection() {
   const {
     projects: loadedProjects,
@@ -135,6 +189,7 @@ function ProjectsSection() {
   });
 
   const { settings } = useSiteSettings();
+  const [activeCategoryKey, setActiveCategoryKey] = useState("all");
 
   const sectionContent = settings?.projectsSection || {};
 
@@ -161,121 +216,233 @@ function ProjectsSection() {
     defaultSectionContent.ctaButton.url,
   );
 
+  const headingParts = getHeadingParts(heading);
+
   const projects = useMemo(() => {
     const sourceProjects = Array.isArray(loadedProjects) ? loadedProjects : [];
 
     return [...sourceProjects].sort(sortProjectsForPreview);
   }, [loadedProjects]);
 
-  const previewProjects = projects.slice(0, 2);
+  const categories = useMemo(() => {
+    const seenCategoryKeys = new Set();
+
+    return projects.reduce((result, project) => {
+      const label = cleanCategory(project?.category);
+
+      if (!label) {
+        return result;
+      }
+
+      const key = createCategoryKey(label);
+
+      if (!seenCategoryKeys.has(key)) {
+        seenCategoryKeys.add(key);
+        result.push({
+          key,
+          label,
+        });
+      }
+
+      return result;
+    }, []);
+  }, [projects]);
+
+  const activeCategoryExists =
+    activeCategoryKey === "all" ||
+    categories.some((category) => category.key === activeCategoryKey);
+
+  const resolvedActiveCategoryKey = activeCategoryExists
+    ? activeCategoryKey
+    : "all";
+
+  const filteredProjects = useMemo(() => {
+    if (resolvedActiveCategoryKey === "all") {
+      return projects;
+    }
+
+    return projects.filter(
+      (project) =>
+        createCategoryKey(project?.category) === resolvedActiveCategoryKey,
+    );
+  }, [projects, resolvedActiveCategoryKey]);
+
+  const previewProjects = filteredProjects.slice(0, HOME_PROJECT_LIMIT);
 
   return (
     <Section
       id="projects"
-      className="scroll-mt-20 border-t border-slate-200 bg-white"
+      className="public-projects-section scroll-mt-20 border-t border-slate-200 bg-white"
     >
       <Container>
-        <SectionHeading
-          eyebrow={eyebrow}
-          title={heading}
-          description={description}
-        />
-
-        <p aria-live="polite" className="sr-only">
-          {isLoading
-            ? "Loading projects."
-            : `${projects.length} projects loaded.`}
-        </p>
-
-        {error && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-bold text-amber-800">
-                Saved portfolio projects are being displayed
-              </p>
-
-              <p className="mt-1 text-sm leading-6 text-amber-700">
-                The live Projects API could not be reached.
-              </p>
+        <div className="public-projects-content">
+          <header className="public-projects-header">
+            <div className="public-projects-eyebrow">
+              <span aria-hidden="true">&lt;/&gt;</span>
+              <p>{eyebrow}</p>
+              <span aria-hidden="true">&lt;/&gt;</span>
             </div>
 
-            <button
-              type="button"
-              onClick={refreshProjects}
-              disabled={isLoading}
-              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+            <h2 className="public-projects-heading">
+              {headingParts.lead && (
+                <>
+                  {headingParts.lead}{" "}
+                </>
+              )}
+
+              <span>{headingParts.highlight}</span>
+            </h2>
+
+            <p className="public-projects-description">{description}</p>
+
+            <span className="public-projects-heading-accent" aria-hidden="true" />
+          </header>
+
+          <p aria-live="polite" className="sr-only">
+            {isLoading
+              ? "Loading projects."
+              : `${projects.length} projects loaded.`}
+          </p>
+
+          {error && (
+            <div className="public-projects-error">
+              <div>
+                <p className="font-bold">
+                  Saved portfolio projects are being displayed
+                </p>
+
+                <p className="mt-1 text-sm opacity-80">
+                  The live Projects API could not be reached.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={refreshProjects}
+                disabled={isLoading}
+              >
+                {isLoading ? "Retrying..." : "Retry"}
+              </button>
+            </div>
+          )}
+
+          {categories.length > 0 && (
+            <div
+              className="public-projects-filters"
+              aria-label="Filter projects by category"
             >
-              {isLoading ? "Retrying..." : "Retry"}
-            </button>
-          </div>
-        )}
-
-        {isLoading && projects.length === 0 && (
-          <div className="mt-10 grid gap-7 lg:grid-cols-2">
-            {[1, 2].map((item) => (
-              <div
-                key={item}
-                className="h-96 animate-pulse rounded-3xl bg-slate-200"
-              />
-            ))}
-          </div>
-        )}
-
-        {!isLoading && projects.length === 0 && (
-          <div className="mt-10 rounded-3xl border border-slate-200 bg-slate-50 px-6 py-12 text-center">
-            <p className="text-lg font-bold text-slate-950">
-              No public projects available
-            </p>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Projects will appear here after they are published.
-            </p>
-          </div>
-        )}
-
-        {previewProjects.length > 0 && (
-          <ResponsiveCardRow
-            desktopColumns={2}
-            ariaLabel="Featured projects"
-            className="mt-10"
-          >
-            {previewProjects.map((project, index) => (
-              <ProjectCard
-                key={
-                  project._id ||
-                  project.id ||
-                  project.slug ||
-                  `${project.title}-${index}`
+              <button
+                type="button"
+                aria-pressed={resolvedActiveCategoryKey === "all"}
+                className={
+                  resolvedActiveCategoryKey === "all"
+                    ? "public-project-filter public-project-filter-active"
+                    : "public-project-filter"
                 }
-                project={project}
-                index={index}
-                compact
-              />
-            ))}
-          </ResponsiveCardRow>
-        )}
+                onClick={() => setActiveCategoryKey("all")}
+              >
+                <span className="public-project-filter-icon">
+                  <ProjectsFilterIcon all />
+                </span>
+                <span>All Projects</span>
+              </button>
 
-        {previewProjects.length > 0 && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="font-bold text-slate-950">
-                Explore the complete project portfolio
+              {categories.map((category) => (
+                <button
+                  key={category.key}
+                  type="button"
+                  aria-pressed={resolvedActiveCategoryKey === category.key}
+                  className={
+                    resolvedActiveCategoryKey === category.key
+                      ? "public-project-filter public-project-filter-active"
+                      : "public-project-filter"
+                  }
+                  onClick={() => setActiveCategoryKey(category.key)}
+                >
+                  <span className="public-project-filter-icon">
+                    <ProjectsFilterIcon />
+                  </span>
+                  <span>{category.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {isLoading && projects.length === 0 && (
+            <div
+              className="public-projects-grid public-projects-grid-loading"
+              aria-label="Loading projects"
+            >
+              {[1, 2, 3, 4].map((item) => (
+                <div
+                  key={item}
+                  className="public-projects-skeleton"
+                />
+              ))}
+            </div>
+          )}
+
+          {!isLoading && projects.length === 0 && (
+            <div className="public-projects-empty">
+              <p className="text-lg font-bold">
+                No public projects available
               </p>
 
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                The homepage shows selected projects only. Open the complete
-                Projects page to view all published work and case studies.
+              <p className="mt-2 text-sm opacity-70">
+                Projects will appear here after they are published.
               </p>
             </div>
+          )}
 
-            <DynamicActionLink
-              url={ctaUrl}
-              className="inline-flex min-h-11 max-w-full shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
+          {projects.length > 0 && previewProjects.length === 0 && (
+            <div className="public-projects-empty">
+              <p className="text-lg font-bold">
+                No projects in this category
+              </p>
+
+              <button
+                type="button"
+                className="mt-3 text-sm font-semibold text-brand-600"
+                onClick={() => setActiveCategoryKey("all")}
+              >
+                Show all projects
+              </button>
+            </div>
+          )}
+
+          {previewProjects.length > 0 && (
+            <div
+              className="public-projects-grid"
+              aria-label="Selected projects"
             >
-              {ctaLabel} →
-            </DynamicActionLink>
-          </div>
-        )}
+              {previewProjects.map((project, index) => (
+                <ProjectCard
+                  key={
+                    project._id ||
+                    project.id ||
+                    project.slug ||
+                    `${project.title}-${index}`
+                  }
+                  project={project}
+                  index={index}
+                  compact
+                />
+              ))}
+            </div>
+          )}
+
+          {projects.length > 0 && (
+            <div className="public-projects-cta">
+              <DynamicActionLink
+                url={ctaUrl}
+                className="public-projects-cta-button"
+              >
+                <span>{ctaLabel}</span>
+                <span aria-hidden="true">→</span>
+              </DynamicActionLink>
+            </div>
+          )}
+        </div>
       </Container>
     </Section>
   );

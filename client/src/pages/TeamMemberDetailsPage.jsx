@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router";
 
 import CompanyCard from "../components/companies/CompanyCard";
 import Container from "../components/layout/Container";
+import PublicPageCTA from "../components/layout/PublicPageCTA";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import ProjectCard from "../components/projects/ProjectCard";
@@ -922,29 +923,9 @@ function TeamMemberDetailsPage() {
           </Container>
         </section>
 
-        <section className="border-t border-slate-200 bg-white py-14">
-          <Container>
-            <div className="rounded-3xl bg-slate-950 px-6 py-10 text-center text-white sm:px-10">
-              <p className="break-words text-sm font-bold uppercase tracking-[0.2em] text-brand-400">
-                Work With Our Team
-              </p>
-              <h2 className="mx-auto mt-4 max-w-3xl break-words text-3xl font-bold tracking-tight sm:text-4xl">
-                Need the right skills for your website or application?
-              </h2>
-              <p className="mx-auto mt-5 max-w-2xl break-words leading-7 text-slate-300">
-                Share your project goals, required features and expected
-                timeline. A suitable development plan and Team collaboration can
-                be prepared according to your requirements.
-              </p>
-              <Link
-                to="/#contact"
-                className="mt-7 inline-flex min-h-12 max-w-full items-center justify-center rounded-xl bg-brand-600 px-6 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
-              >
-                Discuss Your Project
-              </Link>
-            </div>
-          </Container>
-        </section>
+        <PublicPageCTA
+          ctaKey="teamMemberDetails"
+        />
       </main>
       <Footer />
     </>

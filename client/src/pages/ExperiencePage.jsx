@@ -5,6 +5,7 @@ import ExperienceTimelineCard, {
   getSafeHttpUrl,
 } from "../components/experience/ExperienceTimelineCard";
 import Container from "../components/layout/Container";
+import PublicPageCTA from "../components/layout/PublicPageCTA";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import PageSeo from "../components/seo/PageSeo";
@@ -452,32 +453,9 @@ function ExperiencePage() {
           </Container>
         </section>
 
-        <section className="border-t border-slate-200 bg-white py-14">
-          <Container>
-            <div className="rounded-3xl bg-slate-950 px-6 py-10 text-center text-white sm:px-10">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-brand-400">
-                Practical Experience
-              </p>
-
-              <h2 className="mx-auto mt-4 max-w-3xl text-2xl font-bold tracking-tight sm:text-4xl">
-                Looking for a developer with practical project and business
-                experience?
-              </h2>
-
-              <p className="mx-auto mt-5 max-w-2xl leading-7 text-slate-300">
-                Share your project goals, preferred technology and timeline to
-                begin a focused development discussion.
-              </p>
-
-              <Link
-                to="/#contact"
-                className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
-              >
-                Start a Conversation
-              </Link>
-            </div>
-          </Container>
-        </section>
+        <PublicPageCTA
+          ctaKey="experience"
+        />
       </main>
 
       <Footer />

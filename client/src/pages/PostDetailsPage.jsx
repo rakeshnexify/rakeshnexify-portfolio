@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 
 import Container from "../components/layout/Container";
+import PublicPageCTA from "../components/layout/PublicPageCTA";
 import { mergeHomepageSections } from "../config/homepageSections";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
@@ -735,26 +736,9 @@ function PostDetailsPage({ expectedType = "blog" }) {
           </section>
         </article>
 
-        <section className="border-t border-slate-200 bg-white py-14">
-          <Container>
-            <div className="rounded-3xl bg-slate-950 px-6 py-10 text-center text-white sm:px-10">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-brand-400">
-                Need Development Help?
-              </p>
-
-              <h2 className="mx-auto mt-4 max-w-3xl break-words text-2xl font-bold tracking-tight sm:text-4xl">
-                Discuss your next website or application
-              </h2>
-
-              <Link
-                to="/#contact"
-                className="mt-7 inline-flex min-h-12 max-w-full items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
-              >
-                Contact Me
-              </Link>
-            </div>
-          </Container>
-        </section>
+        <PublicPageCTA
+          ctaKey="postDetails"
+        />
       </main>
 
       <Footer />

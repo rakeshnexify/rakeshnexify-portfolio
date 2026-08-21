@@ -8,14 +8,6 @@ const statusLabels = {
   archived: "Archived",
 };
 
-const statusClasses = {
-  Planning: "bg-violet-100 text-violet-700",
-  Completed: "bg-emerald-100 text-emerald-700",
-  "Active Project": "bg-blue-100 text-blue-700",
-  "In Development": "bg-amber-100 text-amber-700",
-  Archived: "bg-slate-200 text-slate-700",
-};
-
 function formatProjectStatus(status) {
   if (!status) {
     return "Project";
@@ -31,41 +23,40 @@ function normaliseProject(project = {}, index = 0) {
     ? project.technologies
     : [];
 
-  const highlights = Array.isArray(project.features)
-    ? project.features
-    : Array.isArray(project.highlights)
-      ? project.highlights
-      : [];
+  const images = Array.isArray(project.images)
+    ? [...project.images]
+        .filter((image) => Boolean(String(image?.url || "").trim()))
+        .sort(
+          (firstImage, secondImage) =>
+            Number(firstImage?.order || 0) -
+            Number(secondImage?.order || 0),
+        )
+    : [];
 
   const numericOrder = Number(project.order);
 
+  const coverImageUrl =
+    String(project.coverImageUrl || "").trim() ||
+    String(images[0]?.url || "").trim();
+
+  const coverImageAlt =
+    String(images[0]?.alt || "").trim() ||
+    `${project.title || "Project"} preview`;
+
   return {
     id: project._id || project.id || project.slug || `project-${index + 1}`,
-
     title: project.title || "Untitled Project",
-
     slug: project.slug || "",
-
     shortDescription: project.shortDescription || "",
-
-    category: project.category || "Web Project",
-
+    category: project.category || "Project",
     status: formatProjectStatus(project.status),
-
     featured: Boolean(project.isFeatured ?? project.featured),
-
     order: Number.isFinite(numericOrder) ? numericOrder : index,
-
-    coverImageUrl: project.coverImageUrl || "",
-
+    coverImageUrl,
+    coverImageAlt,
     technologies,
-
-    highlights,
-
     liveUrl: links.liveUrl || project.liveUrl || "",
-
     sourceUrl: links.sourceCodeUrl || project.sourceUrl || "",
-
     caseStudyUrl:
       links.caseStudyUrl ||
       project.caseStudyUrl ||
@@ -73,53 +64,117 @@ function normaliseProject(project = {}, index = 0) {
   };
 }
 
-function ProjectAction({ href, children, variant = "primary" }) {
-  const baseClasses =
-    "inline-flex min-h-11 max-w-full items-center justify-center rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition";
+function ExternalArrowIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 17 17 7" />
+      <path d="M9 7h8v8" />
+    </svg>
+  );
+}
 
-  const variantClasses = {
-    primary: "bg-brand-600 text-white hover:bg-brand-700",
+function CodeIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m8.5 8-4 4 4 4" />
+      <path d="m15.5 8 4 4-4 4" />
+      <path d="m13.5 5-3 14" />
+    </svg>
+  );
+}
 
-    secondary: "bg-slate-950 text-white hover:bg-slate-800",
+function CaseStudyIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="4" width="16" height="16" rx="3" />
+      <path d="M8 9h8" />
+      <path d="M8 13h5" />
+    </svg>
+  );
+}
 
-    outline:
-      "border border-slate-300 bg-white text-slate-700 hover:border-brand-600 hover:text-brand-600",
-  };
+function FeaturedIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="m12 2.8 2.72 5.51 6.08.88-4.4 4.29 1.04 6.06L12 16.68l-5.44 2.86 1.04-6.06-4.4-4.29 6.08-.88L12 2.8Z" />
+    </svg>
+  );
+}
 
-  const actionClasses = `${baseClasses} ${
-    variantClasses[variant] || variantClasses.primary
-  }`;
-
+function ProjectAction({
+  href,
+  children,
+  icon,
+  variant = "primary",
+  ariaLabel,
+}) {
   if (!href) {
-    return (
-      <span
-        aria-disabled="true"
-        title="Link will be added soon"
-        className={`${baseClasses} cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400`}
-      >
-        {children}
-      </span>
-    );
+    return null;
   }
 
-  const isExternalLink = /^https?:\/\//i.test(href);
+  const className = [
+    "public-project-card-action",
+    `public-project-card-action-${variant}`,
+  ].join(" ");
 
-  if (isExternalLink) {
+  const content = (
+    <>
+      <span>{children}</span>
+      <span className="public-project-card-action-icon">
+        {icon}
+      </span>
+    </>
+  );
+
+  if (/^https?:\/\//i.test(href)) {
     return (
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={actionClasses}
+        className={className}
+        aria-label={ariaLabel}
       >
-        {children}
+        {content}
       </a>
     );
   }
 
   return (
-    <Link to={href} className={actionClasses}>
-      {children}
+    <Link
+      to={href}
+      className={className}
+      aria-label={ariaLabel}
+    >
+      {content}
     </Link>
   );
 }
@@ -130,149 +185,146 @@ function ProjectCard({ project, index = 0, compact = false }) {
   const projectNumber = String(index + 1).padStart(2, "0");
 
   const visibleTechnologies = compact
-    ? normalisedProject.technologies.slice(0, 5)
-    : normalisedProject.technologies;
+    ? normalisedProject.technologies.slice(0, 4)
+    : normalisedProject.technologies.slice(0, 6);
 
-  const visibleHighlights = compact
-    ? normalisedProject.highlights.slice(0, 4)
-    : normalisedProject.highlights.slice(0, 6);
+  const hiddenTechnologyCount = Math.max(
+    normalisedProject.technologies.length - visibleTechnologies.length,
+    0,
+  );
+
+  const cardClassName = compact
+    ? "public-project-card public-project-card-compact"
+    : "public-project-card";
 
   return (
-    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-slate-200/70">
-      <div className="relative min-w-0 overflow-hidden bg-slate-950 px-6 py-8 sm:px-8">
-        {normalisedProject.coverImageUrl && (
+    <article
+      className={cardClassName}
+      tabIndex={compact ? 0 : undefined}
+      aria-label={
+        compact
+          ? `${normalisedProject.title}. Tap or focus to view project details.`
+          : undefined
+      }
+    >
+      <div className="public-project-card-media">
+        {normalisedProject.coverImageUrl ? (
           <img
             src={normalisedProject.coverImageUrl}
-            alt={`${normalisedProject.title} cover`}
+            alt={normalisedProject.coverImageAlt}
             loading="lazy"
-            className="absolute inset-0 size-full object-cover opacity-25 transition duration-500 group-hover:scale-105"
+            className="public-project-card-image"
           />
+        ) : (
+          <div
+            className="public-project-card-image-placeholder"
+            aria-hidden="true"
+          >
+            <span>{projectNumber}</span>
+          </div>
         )}
 
-        {normalisedProject.coverImageUrl && (
-          <div className="absolute inset-0 bg-slate-950/70" />
-        )}
+        <div
+          className="public-project-card-media-overlay"
+          aria-hidden="true"
+        />
 
-        <div className="absolute -right-12 -top-12 size-40 rounded-full bg-brand-600/20 blur-3xl" />
+        <div className="public-project-card-media-top">
+          <span className="public-project-card-category">
+            {normalisedProject.category}
+          </span>
 
-        <div className="absolute -bottom-16 left-12 size-40 rounded-full bg-cyan-500/10 blur-3xl" />
-
-        <div className="relative min-w-0">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <span className="max-w-full break-words rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-slate-200">
-                {normalisedProject.category}
+          <div className="public-project-card-media-meta">
+            {normalisedProject.featured && (
+              <span
+                className="public-project-card-featured"
+                title="Featured project"
+                aria-label="Featured project"
+              >
+                <FeaturedIcon />
               </span>
+            )}
 
-              {normalisedProject.featured && (
-                <span className="rounded-full bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">
-                  Featured
-                </span>
-              )}
-            </div>
-
-            <span className="text-4xl font-black tracking-tight text-white/10">
+            <span
+              className="public-project-card-number"
+              aria-hidden="true"
+            >
               {projectNumber}
             </span>
           </div>
+        </div>
 
-          <div className="mt-10 flex min-w-0 items-end justify-between gap-5 sm:mt-12">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-brand-400">Project</p>
-
-              <h3 className="mt-2 break-words text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                {normalisedProject.title}
-              </h3>
-            </div>
-
-            <div className="grid size-12 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/10 text-white">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="size-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 5h16v14H4z" />
-                <path d="M8 9h8" />
-                <path d="M8 13h5" />
-              </svg>
-            </div>
-          </div>
+        <div className="public-project-card-media-bottom">
+          <span className="public-project-card-status">
+            <span aria-hidden="true" />
+            {normalisedProject.status}
+          </span>
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col p-6 sm:p-8">
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-          <span
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-              statusClasses[normalisedProject.status] ||
-              "bg-slate-200 text-slate-700"
-            }`}
-          >
-            {normalisedProject.status}
-          </span>
+      <div className="public-project-card-body">
+        <div className="public-project-card-main">
+          <h3 className="public-project-card-title">
+            {normalisedProject.title}
+          </h3>
 
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            {normalisedProject.technologies.length} Technologies
-          </span>
+          {normalisedProject.shortDescription && (
+            <p className="public-project-card-description">
+              {normalisedProject.shortDescription}
+            </p>
+          )}
+
+          {visibleTechnologies.length > 0 && (
+            <div
+              className="public-project-card-technologies"
+              aria-label={`${normalisedProject.title} technologies`}
+            >
+              {visibleTechnologies.map((technology, technologyIndex) => (
+                <span
+                  key={`${normalisedProject.id}-${technology}-${technologyIndex}`}
+                  className="public-project-card-technology"
+                >
+                  {technology}
+                </span>
+              ))}
+
+              {hiddenTechnologyCount > 0 && (
+                <span
+                  className="public-project-card-technology public-project-card-technology-more"
+                  title={`${hiddenTechnologyCount} more technologies`}
+                >
+                  +{hiddenTechnologyCount}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
-        {normalisedProject.shortDescription && (
-          <p className="mt-5 break-words text-base leading-7 text-slate-600">
-            {normalisedProject.shortDescription}
-          </p>
-        )}
+        <div className="public-project-card-actions">
+          <div className="public-project-card-actions-primary">
+            <ProjectAction
+              href={normalisedProject.liveUrl}
+              icon={<ExternalArrowIcon />}
+              ariaLabel={`Open live preview for ${normalisedProject.title}`}
+            >
+              Live Demo
+            </ProjectAction>
 
-        {visibleTechnologies.length > 0 && (
-          <div className="mt-6 flex min-w-0 flex-wrap gap-2">
-            {visibleTechnologies.map((technology, technologyIndex) => (
-              <span
-                key={`${normalisedProject.id}-${technology}-${technologyIndex}`}
-                className="max-w-full break-words rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600"
-              >
-                {technology}
-              </span>
-            ))}
+            <ProjectAction
+              href={normalisedProject.sourceUrl}
+              icon={<CodeIcon />}
+              variant="secondary"
+              ariaLabel={`View source code for ${normalisedProject.title}`}
+            >
+              View Code
+            </ProjectAction>
           </div>
-        )}
-
-        {visibleHighlights.length > 0 && (
-          <div className="mt-7 border-t border-slate-200 pt-6">
-            <p className="text-sm font-bold text-slate-950">
-              Project highlights
-            </p>
-
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-              {visibleHighlights.map((highlight, highlightIndex) => (
-                <li
-                  key={`${normalisedProject.id}-${highlight}-${highlightIndex}`}
-                  className="flex min-w-0 items-start gap-2.5 text-sm leading-6 text-slate-600"
-                >
-                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-brand-600" />
-
-                  <span className="min-w-0 break-words">{highlight}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <div className="mt-auto flex min-w-0 flex-col gap-3 pt-8 sm:flex-row sm:flex-wrap">
-          <ProjectAction href={normalisedProject.liveUrl}>
-            Live Preview
-          </ProjectAction>
-
-          <ProjectAction href={normalisedProject.sourceUrl} variant="secondary">
-            Source Code
-          </ProjectAction>
 
           <ProjectAction
             href={normalisedProject.caseStudyUrl}
-            variant="outline"
+            icon={<CaseStudyIcon />}
+            variant="case-study"
+            ariaLabel={`Open case study for ${normalisedProject.title}`}
           >
             Case Study
           </ProjectAction>

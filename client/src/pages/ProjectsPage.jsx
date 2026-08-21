@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import Container from "../components/layout/Container";
+import PublicPageCTA from "../components/layout/PublicPageCTA";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import ProjectCard from "../components/projects/ProjectCard";
@@ -50,6 +51,46 @@ function sortProjects(firstProject, secondProject) {
   }
 
   return Number(firstProject?.order || 0) - Number(secondProject?.order || 0);
+}
+
+
+function cleanCategory(value) {
+  return String(value || "").trim().replace(/\s+/g, " ");
+}
+
+function createCategoryKey(value) {
+  return cleanCategory(value).toLowerCase();
+}
+
+function ProjectsFilterIcon({ all = false }) {
+  if (all) {
+    return (
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="4" y="4" width="6" height="6" rx="1.2" />
+        <rect x="14" y="4" width="6" height="6" rx="1.2" />
+        <rect x="4" y="14" width="6" height="6" rx="1.2" />
+        <rect x="14" y="14" width="6" height="6" rx="1.2" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path d="M3.75 7.75A1.75 1.75 0 0 1 5.5 6h4l1.6 2h7.4a1.75 1.75 0 0 1 1.75 1.75v7A1.75 1.75 0 0 1 18.5 18.5h-13a1.75 1.75 0 0 1-1.75-1.75v-9Z" />
+    </svg>
+  );
 }
 
 function getErrorMessage(error) {
@@ -157,6 +198,8 @@ function ProjectsErrorState({ error, onRetry, isRetrying }) {
 }
 
 function ProjectsPage() {
+  const [activeCategoryKey, setActiveCategoryKey] = useState("all");
+
   const {
     projects: loadedProjects,
     isLoading,
@@ -206,6 +249,50 @@ function ProjectsPage() {
 
     return [...sourceProjects].sort(sortProjects);
   }, [loadedProjects]);
+
+  const categories = useMemo(() => {
+    const seenCategoryKeys = new Set();
+
+    return projects.reduce((result, project) => {
+      const label = cleanCategory(project?.category);
+
+      if (!label) {
+        return result;
+      }
+
+      const key = createCategoryKey(label);
+
+      if (!seenCategoryKeys.has(key)) {
+        seenCategoryKeys.add(key);
+
+        result.push({
+          key,
+          label,
+        });
+      }
+
+      return result;
+    }, []);
+  }, [projects]);
+
+  const activeCategoryExists =
+    activeCategoryKey === "all" ||
+    categories.some((category) => category.key === activeCategoryKey);
+
+  const resolvedActiveCategoryKey = activeCategoryExists
+    ? activeCategoryKey
+    : "all";
+
+  const filteredProjects = useMemo(() => {
+    if (resolvedActiveCategoryKey === "all") {
+      return projects;
+    }
+
+    return projects.filter(
+      (project) =>
+        createCategoryKey(project?.category) === resolvedActiveCategoryKey,
+    );
+  }, [projects, resolvedActiveCategoryKey]);
 
   if (isLoading && projects.length === 0) {
     return (
@@ -264,36 +351,38 @@ function ProjectsPage() {
       <main
         id="main-content"
         tabIndex={-1}
-        className="min-h-screen overflow-x-hidden bg-slate-50"
+        className="public-projects-page-shell min-h-screen overflow-x-hidden bg-slate-50"
       >
-        <section className="relative overflow-hidden bg-slate-950 py-16 text-white sm:py-20">
-          <div className="absolute -right-32 -top-32 size-96 rounded-full bg-brand-600/20 blur-3xl" />
+        <section className="public-projects-page-hero relative overflow-hidden bg-slate-950 py-5 text-white sm:py-6">
+          <div className="public-projects-page-hero-orb public-projects-page-hero-orb-a absolute -right-16 -top-20 size-56 rounded-full blur-3xl" />
 
-          <div className="absolute -bottom-40 left-10 size-96 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="public-projects-page-hero-orb public-projects-page-hero-orb-b absolute -bottom-28 left-12 size-52 rounded-full blur-3xl" />
 
           <Container>
-            <div className="relative min-w-0 max-w-4xl">
-              <p className="break-words text-sm font-bold uppercase tracking-[0.2em] text-brand-400">
-                {eyebrow}
-              </p>
+            <div className="public-projects-page-hero-content relative flex min-w-0 flex-col gap-5 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
+              <div className="min-w-0 flex-1">
+                <p className="public-projects-page-hero-eyebrow break-words text-[0.65rem] font-bold uppercase tracking-[0.18em] text-brand-400">
+                  {eyebrow}
+                </p>
 
-              <h1 className="mt-4 break-words text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-                {heading}
-              </h1>
+                <h1 className="public-projects-page-hero-heading mt-2 break-words text-2xl font-black leading-[1.05] tracking-tight sm:text-3xl lg:text-4xl">
+                  {heading}
+                </h1>
 
-              <p className="mt-6 max-w-3xl break-words text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-                {description}
-              </p>
+                <p className="public-projects-page-hero-description mt-2 line-clamp-2 max-w-4xl break-words text-xs leading-5 text-slate-300 sm:text-sm sm:leading-6 lg:line-clamp-1">
+                  {description}
+                </p>
+              </div>
 
-              <div className="mt-8 flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                <span className="inline-flex max-w-full items-center justify-center rounded-full border border-white/10 bg-white/10 px-4 py-2 text-center text-sm font-semibold text-slate-200">
+              <div className="public-projects-page-hero-actions flex min-w-0 shrink-0 flex-wrap items-center gap-2 lg:justify-end">
+                <span className="public-projects-page-count inline-flex min-h-9 max-w-full items-center justify-center rounded-full border border-white/10 bg-white/10 px-3.5 py-1.5 text-center text-xs font-semibold text-slate-200">
                   {projects.length}{" "}
                   {projects.length === 1 ? "Public Project" : "Public Projects"}
                 </span>
 
                 <Link
                   to="/#contact"
-                  className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl bg-brand-600 px-5 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
+                  className="public-projects-page-hero-cta inline-flex min-h-9 max-w-full items-center justify-center rounded-xl bg-brand-600 px-4 text-center text-xs font-semibold text-white transition hover:bg-brand-700"
                 >
                   Discuss Your Project
                 </Link>
@@ -302,7 +391,7 @@ function ProjectsPage() {
           </Container>
         </section>
 
-        <section className="py-12 sm:py-16">
+        <section className="public-projects-page-listing relative py-12 sm:py-16">
           <Container>
             {error && projects.length > 0 && (
               <div className="mb-8 flex min-w-0 flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -327,21 +416,89 @@ function ProjectsPage() {
               </div>
             )}
 
-            {projects.length > 0 ? (
-              <div className="grid min-w-0 gap-7 [&>*]:min-w-0 lg:grid-cols-2">
-                {projects.map((project, index) => (
-                  <ProjectCard
-                    key={
-                      project._id ||
-                      project.id ||
-                      project.slug ||
-                      `${project.title}-${index}`
+            {categories.length > 0 && (
+              <div
+                className="public-projects-filters public-projects-page-filters"
+                aria-label="Filter projects by category"
+              >
+                <button
+                  type="button"
+                  aria-pressed={resolvedActiveCategoryKey === "all"}
+                  className={
+                    resolvedActiveCategoryKey === "all"
+                      ? "public-project-filter public-project-filter-active"
+                      : "public-project-filter"
+                  }
+                  onClick={() => setActiveCategoryKey("all")}
+                >
+                  <span className="public-project-filter-icon">
+                    <ProjectsFilterIcon all />
+                  </span>
+
+                  <span>All Projects</span>
+                </button>
+
+                {categories.map((category) => (
+                  <button
+                    key={category.key}
+                    type="button"
+                    aria-pressed={resolvedActiveCategoryKey === category.key}
+                    className={
+                      resolvedActiveCategoryKey === category.key
+                        ? "public-project-filter public-project-filter-active"
+                        : "public-project-filter"
                     }
-                    project={project}
-                    index={index}
-                  />
+                    onClick={() => setActiveCategoryKey(category.key)}
+                  >
+                    <span className="public-project-filter-icon">
+                      <ProjectsFilterIcon />
+                    </span>
+
+                    <span>{category.label}</span>
+                  </button>
                 ))}
               </div>
+            )}
+
+            {projects.length > 0 ? (
+              filteredProjects.length > 0 ? (
+                <div
+                  className="public-projects-page-grid"
+                  aria-label="Projects"
+                >
+                  {filteredProjects.map((project, index) => (
+                    <ProjectCard
+                      key={
+                        project._id ||
+                        project.id ||
+                        project.slug ||
+                        `${project.title}-${index}`
+                      }
+                      project={project}
+                      index={index}
+                      compact
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="public-projects-page-empty">
+                  <p className="text-lg font-bold text-slate-950">
+                    No projects in this category
+                  </p>
+
+                  <p className="mt-2 text-sm text-slate-600">
+                    Choose another category or return to all published projects.
+                  </p>
+
+                  <button
+                    type="button"
+                    className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-600 bg-white px-4 text-sm font-semibold text-brand-600 transition hover:bg-brand-50"
+                    onClick={() => setActiveCategoryKey("all")}
+                  >
+                    Show All Projects
+                  </button>
+                </div>
+              )
             ) : (
               <div className="rounded-3xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm">
                 <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-2xl font-black text-brand-600">
@@ -368,32 +525,10 @@ function ProjectsPage() {
           </Container>
         </section>
 
-        <section className="border-t border-slate-200 bg-white py-14">
-          <Container>
-            <div className="rounded-3xl bg-slate-950 px-6 py-10 text-center text-white sm:px-10">
-              <p className="break-words text-sm font-bold uppercase tracking-[0.2em] text-brand-400">
-                Custom Development
-              </p>
-
-              <h2 className="mx-auto mt-4 max-w-3xl break-words text-2xl font-bold tracking-tight sm:text-4xl">
-                Need a professional website or web application?
-              </h2>
-
-              <p className="mx-auto mt-5 max-w-2xl break-words leading-7 text-slate-300">
-                Share your business idea, required features and expected
-                timeline. A suitable development plan can be prepared according
-                to your project goals.
-              </p>
-
-              <Link
-                to="/#contact"
-                className="mt-7 inline-flex min-h-12 max-w-full items-center justify-center rounded-xl bg-brand-600 px-6 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
-              >
-                Start Your Project
-              </Link>
-            </div>
-          </Container>
-        </section>
+        <PublicPageCTA
+          ctaKey="projects"
+          sectionClassName="public-projects-page-conversion"
+        />
       </main>
       <Footer />
     </>

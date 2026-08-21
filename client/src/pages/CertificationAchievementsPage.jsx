@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router";
 
 import CertificationAchievementCard, {
   certificationAchievementTypeLabels,
   getSafeHttpUrl,
 } from "../components/certification-achievements/CertificationAchievementCard";
 import Container from "../components/layout/Container";
+import PublicPageCTA from "../components/layout/PublicPageCTA";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import PageSeo from "../components/seo/PageSeo";
@@ -112,22 +112,6 @@ function CertificationAchievementsPage() {
     ? achievementRecords
     : [];
 
-  const typeCounts = useMemo(() => {
-    const counts = {
-      certification: 0,
-      license: 0,
-      award: 0,
-      achievement: 0,
-    };
-
-    records.forEach((record) => {
-      if (Object.prototype.hasOwnProperty.call(counts, record?.type)) {
-        counts[record.type] += 1;
-      }
-    });
-
-    return counts;
-  }, [records]);
 
   const pageTitle = `Certifications & Achievements | ${brandName}`;
 
@@ -337,32 +321,9 @@ function CertificationAchievementsPage() {
           </Container>
         </section>
 
-        <section className="border-t border-slate-200 bg-white py-14">
-          <Container>
-            <div className="rounded-3xl bg-slate-950 px-6 py-10 text-center text-white sm:px-10">
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-brand-400">
-                Verified Growth
-              </p>
-
-              <h2 className="mx-auto mt-4 max-w-3xl text-2xl font-bold tracking-tight sm:text-4xl">
-                Need a developer who keeps learning and proving practical
-                capability?
-              </h2>
-
-              <p className="mx-auto mt-5 max-w-2xl leading-7 text-slate-300">
-                Share your project goals and preferred technologies to start a
-                focused development discussion.
-              </p>
-
-              <Link
-                to="/#contact"
-                className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700"
-              >
-                Start a Conversation
-              </Link>
-            </div>
-          </Container>
-        </section>
+        <PublicPageCTA
+          ctaKey="certificationAchievements"
+        />
       </main>
 
       <Footer />
