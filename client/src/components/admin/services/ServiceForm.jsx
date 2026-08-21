@@ -9,6 +9,45 @@ import {
   defaultServiceFormValues,
 } from "../../../utils/serviceForm";
 
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
+
+  for (let index = 0; index < text.length; index += 1) {
+    const characterCode = text.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function isSafeExternalServiceUrl(value) {
+  const url = String(value || "").trim();
+
+  if (!url) {
+    return true;
+  }
+
+  if (containsControlCharacters(url)) {
+    return false;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    return (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      Boolean(parsedUrl.hostname) &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    );
+  } catch {
+    return false;
+  }
+}
+
 function validateServiceForm(formValues) {
   const errors = {};
 
@@ -26,6 +65,11 @@ function validateServiceForm(formValues) {
   if (formValues.shortDescription.trim().length < 10) {
     errors.shortDescription =
       "Short description must contain at least 10 characters.";
+  }
+
+  if (!isSafeExternalServiceUrl(formValues.orderUrl)) {
+    errors.orderUrl =
+      "Use a complete http:// or https:// service URL without login credentials.";
   }
 
   const numericOrder = Number(formValues.order);
@@ -356,6 +400,34 @@ function ServiceForm({
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <h2 className="text-xl font-bold text-slate-950">Display Settings</h2>
+
+        <div className="mt-6">
+          <label
+            htmlFor="service-order-url"
+            className="text-sm font-semibold text-slate-700"
+          >
+            Idomere service/order URL
+          </label>
+
+          <input
+            id="service-order-url"
+            name="orderUrl"
+            type="url"
+            value={formValues.orderUrl}
+            onChange={handleInputChange}
+            disabled={isSubmitting}
+            maxLength={500}
+            placeholder="https://idomere.com/..."
+            className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+          />
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Add the matching Idomere Technologies service or order page.
+            Leave this empty to hide the public Order Service button.
+          </p>
+
+          <ServiceFieldError message={getFieldError("orderUrl")} />
+        </div>
 
         <div className="mt-6 grid gap-5 md:grid-cols-3">
           <div>

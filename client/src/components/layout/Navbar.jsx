@@ -37,6 +37,27 @@ function NavbarLink({
         ? "border-transparent text-slate-100 hover:text-cyan-300"
         : "border-transparent text-slate-600 hover:text-brand-600";
 
+  const isExternal =
+    section?.isExternalNavigation === true ||
+    section?.type === "external" ||
+    /^https?:\/\//i.test(String(section?.href || "").trim());
+
+  if (isExternal) {
+    return (
+      <a
+        href={section.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onNavigate}
+        className={`${baseClasses} ${stateClasses}`}
+        title={`${section.label} - opens in a new tab`}
+      >
+        {section.label}
+        <span className="sr-only"> opens in a new tab</span>
+      </a>
+    );
+  }
+
   if (section.type === "page") {
     return (
       <Link
@@ -391,7 +412,7 @@ function Navbar() {
                     isTablet
                     isDark={isDarkNavbar}
                     onNavigate={
-                      section.type === "page"
+                      section.type !== "section"
                         ? closeMobileMenu
                         : goToHomepageSection
                     }
@@ -412,7 +433,7 @@ function Navbar() {
                     isActive={activeSectionKey === section.key}
                     isDark={isDarkNavbar}
                     onNavigate={
-                      section.type === "page"
+                      section.type !== "section"
                         ? closeMobileMenu
                         : goToHomepageSection
                     }
@@ -464,7 +485,7 @@ function Navbar() {
                               isMobile
                               isDark={isDarkNavbar}
                               onNavigate={
-                                section.type === "page"
+                                section.type !== "section"
                                   ? closeMoreMenu
                                   : () => navigateFromMoreMenu(section)
                               }
@@ -638,7 +659,7 @@ function Navbar() {
                               isMobile
                               isDark={isDarkNavbar}
                               onNavigate={
-                                section.type === "page"
+                                section.type !== "section"
                                   ? closeMobileMenu
                                   : goToHomepageSection
                               }

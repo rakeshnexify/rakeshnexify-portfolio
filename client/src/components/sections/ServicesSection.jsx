@@ -3,10 +3,11 @@ import { Link } from "react-router";
 import useServices from "../../hooks/useServices";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
-import ResponsiveCardRow from "../layout/ResponsiveCardRow";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import ServiceCard from "../services/ServiceCard";
+
+const HOME_SERVICE_LIMIT = 4;
 
 const defaultSectionContent = {
   eyebrow: "My Services",
@@ -144,83 +145,100 @@ function ServicesSection() {
 
   const previewServices = [...services]
     .sort(sortServicesForPreview)
-    .slice(0, 3);
+    .slice(0, HOME_SERVICE_LIMIT);
 
   return (
     <Section
       id="services"
-      className="scroll-mt-20 border-t border-slate-200 bg-slate-50"
+      className="public-services-section scroll-mt-20"
     >
+      <div className="public-services-flowfield" aria-hidden="true">
+        <span className="public-services-flow-route public-services-flow-route-one" />
+        <span className="public-services-flow-route public-services-flow-route-two" />
+        <span className="public-services-flow-route public-services-flow-route-three" />
+        <span className="public-services-flow-glow public-services-flow-glow-one" />
+        <span className="public-services-flow-glow public-services-flow-glow-two" />
+      </div>
+
       <Container>
-        <SectionHeading
-          eyebrow={eyebrow}
-          title={heading}
-          description={description}
-        />
+        <div className="public-services-content">
+          <SectionHeading
+            eyebrow={eyebrow}
+            title={heading}
+            description={description}
+            className="public-services-heading"
+          />
 
-        {error && (
-          <p className="mx-auto mt-6 max-w-2xl text-center text-sm text-amber-700">
-            Live services could not be loaded. Showing saved website data.
-          </p>
-        )}
-
-        {isLoading && (
-          <p className="mt-8 text-center text-sm font-medium text-slate-500">
-            Loading services...
-          </p>
-        )}
-
-        {!isLoading && services.length === 0 && (
-          <div className="mt-10 rounded-3xl border border-slate-200 bg-white p-8 text-center">
-            <p className="font-semibold text-slate-700">
-              Services will be added soon.
+          {error && (
+            <p className="public-services-status public-services-status-warning">
+              Live services could not be loaded. Showing saved website data.
             </p>
-          </div>
-        )}
+          )}
 
-        {previewServices.length > 0 && (
-          <ResponsiveCardRow
-            desktopColumns={3}
-            ariaLabel="Featured services"
-            className="mt-10"
-          >
-            {previewServices.map((service, index) => (
-              <ServiceCard
-                key={
-                  service._id ||
-                  service.id ||
-                  service.slug ||
-                  `${service.title}-${index}`
-                }
-                service={service}
-                index={index}
-                compact
-              />
-            ))}
-          </ResponsiveCardRow>
-        )}
+          {isLoading && (
+            <p className="public-services-status">
+              Loading services...
+            </p>
+          )}
 
-        {previewServices.length > 0 && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-bold text-slate-950">
-                Explore complete development services
-              </p>
-
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                The homepage shows selected services only. Open the complete
-                Services page to view all available options.
-              </p>
+          {!isLoading && services.length === 0 && (
+            <div className="public-services-empty">
+              <p>Services will be added soon.</p>
             </div>
+          )}
 
-            <DynamicActionLink
-              url={ctaUrl}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
+          {previewServices.length > 0 && (
+            <div
+              className="public-services-carousel"
+              role="region"
+              aria-label="Featured services"
             >
-              {ctaLabel} →
-            </DynamicActionLink>
-          </div>
-        )}
+              <div className="public-services-track">
+                {previewServices.map((service, index) => (
+                  <ServiceCard
+                    key={
+                      service._id ||
+                      service.id ||
+                      service.slug ||
+                      `${service.title}-${index}`
+                    }
+                    service={service}
+                    index={index}
+                    homePreview
+                    actionLabel="Order Service"
+                    actionHref={service?.orderUrl}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {previewServices.length > 0 && (
+            <div className="public-services-footer">
+              <DynamicActionLink
+                url={ctaUrl}
+                className="public-services-view-all"
+              >
+                <span>{ctaLabel}</span>
+
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  className="size-4"
+                >
+                  <path
+                    d="M4 10h12M11 5l5 5-5 5"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </DynamicActionLink>
+            </div>
+          )}
+        </div>
       </Container>
     </Section>
   );

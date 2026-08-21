@@ -79,6 +79,45 @@ function cleanOrder(value) {
   return numericOrder;
 }
 
+function cleanOrderUrl(value) {
+  const orderUrl = String(value || "").trim();
+
+  if (!orderUrl) {
+    return "";
+  }
+
+  for (let index = 0; index < orderUrl.length; index += 1) {
+    const characterCode = orderUrl.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      throw createHttpError("Please enter a valid service order URL.", 400, {
+        orderUrl:
+          "Use a complete http:// or https:// service URL without control characters.",
+      });
+    }
+  }
+
+  try {
+    const parsedUrl = new URL(orderUrl);
+
+    if (
+      !["http:", "https:"].includes(parsedUrl.protocol) ||
+      !parsedUrl.hostname ||
+      parsedUrl.username ||
+      parsedUrl.password
+    ) {
+      throw new Error("Unsafe service order URL.");
+    }
+  } catch {
+    throw createHttpError("Please enter a valid service order URL.", 400, {
+      orderUrl:
+        "Use a complete http:// or https:// service URL without login credentials.",
+    });
+  }
+
+  return orderUrl;
+}
+
 function buildSeoPayload(seoValue) {
   if (!seoValue || typeof seoValue !== "object" || Array.isArray(seoValue)) {
     throw createHttpError("SEO settings must be an object.", 400, {
@@ -111,6 +150,10 @@ function buildServicePayload(requestBody = {}) {
       payload[fieldName] = String(requestBody[fieldName] || "").trim();
     }
   });
+
+  if (hasOwnProperty(requestBody, "orderUrl")) {
+    payload.orderUrl = cleanOrderUrl(requestBody.orderUrl);
+  }
 
   if (hasOwnProperty(requestBody, "features")) {
     payload.features = cleanStringArray(requestBody.features, "features");

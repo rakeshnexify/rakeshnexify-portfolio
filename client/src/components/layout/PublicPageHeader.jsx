@@ -36,6 +36,19 @@ function PublicNavigationLink({
         ? "border-transparent text-slate-100 hover:text-cyan-300"
         : "border-transparent text-slate-600 hover:text-brand-600";
 
+  if (item.isExternalNavigation) {
+    return (
+      <a
+        href={item.href}
+        onClick={onNavigate}
+        title={item.label}
+        className={`${baseClasses} ${stateClasses}`}
+      >
+        {item.label}
+      </a>
+    );
+  }
+
   return (
     <Link
       to={item.href}

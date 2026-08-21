@@ -1,7 +1,58 @@
 import { Link } from "react-router";
 
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
+
+  for (let index = 0; index < text.length; index += 1) {
+    const characterCode = text.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function getSafeServiceActionUrl(value) {
+  const destination = String(value || "").trim();
+
+  if (!destination || containsControlCharacters(destination)) {
+    return "";
+  }
+
+  if (/^#[a-zA-Z][a-zA-Z0-9_-]*$/.test(destination)) {
+    return destination;
+  }
+
+  if (
+    destination.startsWith("/") &&
+    !destination.startsWith("//") &&
+    !destination.includes("\\")
+  ) {
+    return destination;
+  }
+
+  try {
+    const parsedUrl = new URL(destination);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return destination;
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
 function ServiceAction({ href, children, className = "" }) {
-  const destination = String(href || "").trim();
+  const destination = getSafeServiceActionUrl(href);
 
   if (!destination) {
     return null;
@@ -38,13 +89,121 @@ function ServiceAction({ href, children, className = "" }) {
   );
 }
 
+function HomeServiceCard({
+  service,
+  index,
+  actionLabel,
+  actionHref,
+}) {
+  const technologies = Array.isArray(service?.technologies)
+    ? service.technologies.slice(0, 2)
+    : [];
+
+  const safeActionLabel =
+    String(actionLabel || "").trim() || "Order Service";
+
+  const destination = getSafeServiceActionUrl(
+    actionHref || service?.orderUrl,
+  );
+
+  return (
+    <article className="public-service-card group">
+      <div className="public-service-card-top">
+        <div className="public-service-card-icon">
+          <span aria-hidden="true">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+
+          {service?.iconUrl && (
+            <img
+              key={service.iconUrl}
+              src={service.iconUrl}
+              alt=""
+              className="public-service-card-icon-image"
+              onError={(event) => {
+                event.currentTarget.hidden = true;
+              }}
+            />
+          )}
+        </div>
+
+        {service?.isFeatured && (
+          <span className="public-service-card-featured">
+            <span aria-hidden="true">★</span>
+            Featured
+          </span>
+        )}
+      </div>
+
+      <div className="public-service-card-copy">
+        <h3>{service?.title || "Professional Service"}</h3>
+
+        {service?.shortDescription && (
+          <p>{service.shortDescription}</p>
+        )}
+      </div>
+
+      {technologies.length > 0 && (
+        <div
+          className="public-service-card-hints"
+          aria-label="Service technologies"
+        >
+          {technologies.map((technology, technologyIndex) => (
+            <span
+              key={`${service?._id || service?.slug || index}-${technology}-${technologyIndex}`}
+            >
+              {technology}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {destination && (
+        <ServiceAction
+          href={destination}
+          className="public-service-card-action"
+        >
+          <span>{safeActionLabel}</span>
+
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            fill="none"
+            className="size-4"
+          >
+            <path
+              d="M4 10h12M11 5l5 5-5 5"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </ServiceAction>
+      )}
+    </article>
+  );
+}
+
 function ServiceCard({
   service,
   index = 0,
   compact = false,
+  homePreview = false,
   actionLabel = "Discuss this service",
-  actionHref = "#contact",
+  actionHref,
 }) {
+  if (homePreview) {
+    return (
+      <HomeServiceCard
+        service={service}
+        index={index}
+        actionLabel={actionLabel}
+        actionHref={actionHref}
+      />
+    );
+  }
+
   const serviceId =
     service?._id ||
     service?.id ||
@@ -63,6 +222,9 @@ function ServiceCard({
 
   const safeActionLabel =
     String(actionLabel || "").trim() || "Discuss this service";
+
+  const resolvedActionHref =
+    actionHref === undefined ? service?.orderUrl || "#contact" : actionHref;
 
   return (
     <article className="group flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-slate-200/70 sm:p-7">
@@ -148,7 +310,7 @@ function ServiceCard({
       )}
 
       <ServiceAction
-        href={actionHref}
+        href={resolvedActionHref}
         className="mt-auto pt-8 text-sm font-bold text-brand-600 transition hover:text-brand-700"
       >
         {safeActionLabel} →

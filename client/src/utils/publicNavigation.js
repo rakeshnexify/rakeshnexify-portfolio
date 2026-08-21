@@ -34,6 +34,7 @@ const publicNavigationDestinations = Object.freeze({
   services: {
     type: "page",
     href: "/services",
+    navbarHref: "https://idomere.com",
     navbar: true,
     footer: true,
   },
@@ -202,6 +203,7 @@ function createPublicNavigationItems(settingsSections) {
         label: getSafeSectionLabel(key, sourceSection?.label),
         type: destination.type,
         href: destination.href,
+        navbarHref: destination.navbarHref || "",
         targetId: destination.targetId || "",
         isHomepageVisible: sourceSection?.isVisible !== false,
         isNavigationVisible: sourceSection?.isNavigationVisible !== false,
@@ -258,6 +260,11 @@ function getNavbarNavigationItems(settingsSections) {
         item.isNavigationVisible !== false &&
         item.isDestinationAvailable !== false,
     )
+    .map((item) => ({
+      ...item,
+      href: item.navbarHref || item.href,
+      isExternalNavigation: Boolean(item.navbarHref),
+    }))
     .sort(sortByNavigationOrder);
 }
 

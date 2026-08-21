@@ -1,5 +1,34 @@
 import mongoose from "mongoose";
 
+function isSafeHttpUrl(value) {
+  const url = String(value || "").trim();
+
+  if (!url) {
+    return true;
+  }
+
+  for (let index = 0; index < url.length; index += 1) {
+    const characterCode = url.charCodeAt(index);
+
+    if (characterCode <= 31 || characterCode === 127) {
+      return false;
+    }
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    return (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      Boolean(parsedUrl.hostname) &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    );
+  } catch {
+    return false;
+  }
+}
+
 const seoSchema = new mongoose.Schema(
   {
     title: {
@@ -86,6 +115,18 @@ const serviceSchema = new mongoose.Schema(
       trim: true,
       maxlength: 500,
       default: "",
+    },
+
+    orderUrl: {
+      type: String,
+      trim: true,
+      maxlength: [500, "Service order URL cannot exceed 500 characters."],
+      default: "",
+      validate: {
+        validator: isSafeHttpUrl,
+        message:
+          "Service order URL must use http:// or https:// without login credentials.",
+      },
     },
 
     features: {
