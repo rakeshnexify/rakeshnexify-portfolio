@@ -25,12 +25,16 @@ function NavbarLink({
 
   const stateClasses = isMobile
     ? isActive
-      ? "bg-brand-50 text-brand-600"
-      : "text-slate-700 hover:bg-brand-50 hover:text-brand-600"
+      ? isDark
+        ? "bg-white/10 text-cyan-200"
+        : "bg-brand-50 text-brand-600"
+      : isDark
+        ? "text-slate-200 hover:bg-white/10 hover:text-cyan-200"
+        : "text-slate-700 hover:bg-brand-50 hover:text-brand-600"
     : isActive
       ? "border-brand-600 text-brand-600"
       : isDark
-        ? "border-transparent text-slate-100 hover:text-brand-500"
+        ? "border-transparent text-slate-100 hover:text-cyan-300"
         : "border-transparent text-slate-600 hover:text-brand-600";
 
   if (section.type === "page") {
@@ -103,6 +107,34 @@ function Navbar() {
   const isOverflowSectionActive = overflowNavigationSections.some(
     (section) => section.key === activeSectionKey,
   );
+
+  const headerClasses =
+    "public-tech-header sticky top-0 z-50";
+
+  const headerPanelClasses =
+    "public-tech-navbar-row relative flex min-h-20 min-w-0 items-center justify-between gap-4 overflow-visible sm:gap-6 md:max-lg:min-h-[72px] md:max-lg:gap-3";
+
+  const desktopMoreButtonClasses = isOverflowSectionActive
+    ? isDarkNavbar
+      ? "bg-white/10 text-cyan-200"
+      : "bg-brand-50 text-brand-600"
+    : isDarkNavbar
+      ? "text-slate-100 hover:bg-white/10 hover:text-cyan-200"
+      : "text-slate-600 hover:bg-white/70 hover:text-brand-600";
+
+  const desktopMoreMenuClasses =
+    "public-tech-menu-panel absolute right-0 top-full z-[80] mt-3 w-64 overflow-hidden rounded-2xl p-2";
+
+  const themeToggleClasses = isDarkNavbar
+    ? "public-tech-nav-control text-slate-100 hover:text-cyan-200"
+    : "public-tech-nav-control text-slate-900 hover:text-brand-600";
+
+  const mobileMenuButtonClasses = isDarkNavbar
+    ? "public-tech-nav-control border-white/10 text-slate-100 hover:text-cyan-200"
+    : "public-tech-nav-control border-sky-200/80 text-slate-900 hover:text-brand-600";
+
+  const mobileMenuPanelClasses =
+    "public-tech-mobile-menu absolute inset-x-0 top-full z-[70] min-w-0";
 
   function closeMobileMenu() {
     setIsMenuOpen(false);
@@ -309,15 +341,9 @@ function Navbar() {
         Skip to main content
       </a>
 
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl md:max-lg:border-b-0 md:max-lg:bg-transparent md:max-lg:py-3 md:max-lg:backdrop-blur-none">
+      <header className={headerClasses}>
         <Container>
-          <div
-            className={`flex min-h-20 min-w-0 items-center justify-between gap-4 sm:gap-6 md:max-lg:min-h-[72px] md:max-lg:gap-3 md:max-lg:rounded-2xl md:max-lg:border md:max-lg:px-4 md:max-lg:backdrop-blur-2xl md:max-lg:transition-colors ${
-              isDarkNavbar
-                ? "md:max-lg:border-white/10 md:max-lg:bg-slate-950/90 md:max-lg:shadow-[0_16px_36px_rgba(2,6,23,0.28)]"
-                : "md:max-lg:border-slate-200/80 md:max-lg:bg-white/80 md:max-lg:shadow-[0_14px_32px_rgba(15,23,42,0.12)]"
-            }`}
-          >
+          <div className={headerPanelClasses}>
             <a
               href="#home"
               aria-label={`Go to ${brandName} homepage`}
@@ -384,6 +410,7 @@ function Navbar() {
                     key={section.key}
                     section={section}
                     isActive={activeSectionKey === section.key}
+                    isDark={isDarkNavbar}
                     onNavigate={
                       section.type === "page"
                         ? closeMobileMenu
@@ -403,11 +430,7 @@ function Navbar() {
                       onClick={() => {
                         setIsMoreMenuOpen((currentValue) => !currentValue);
                       }}
-                      className={`inline-flex min-h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold transition ${
-                        isOverflowSectionActive
-                          ? "bg-brand-50 text-brand-600"
-                          : "text-slate-600 hover:bg-slate-100 hover:text-brand-600"
-                      }`}
+                      className={`inline-flex min-h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${desktopMoreButtonClasses}`}
                     >
                       More
 
@@ -430,7 +453,7 @@ function Navbar() {
                     {isMoreMenuOpen && (
                       <div
                         id="desktop-more-navigation"
-                        className="absolute right-0 top-full z-50 mt-3 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-950/10"
+                        className={desktopMoreMenuClasses}
                       >
                         <div className="flex max-h-[70vh] min-w-0 flex-col gap-1 overflow-y-auto">
                           {overflowNavigationSections.map((section) => (
@@ -439,6 +462,7 @@ function Navbar() {
                               section={section}
                               isActive={activeSectionKey === section.key}
                               isMobile
+                              isDark={isDarkNavbar}
                               onNavigate={
                                 section.type === "page"
                                   ? closeMoreMenu
@@ -459,11 +483,7 @@ function Navbar() {
                 aria-label={`Switch to ${isDarkNavbar ? "light" : "dark"} theme`}
                 aria-pressed={isDarkNavbar}
                 onClick={toggleNavbarTheme}
-                className={`hidden lg:grid ml-auto size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${
-                  isDarkNavbar
-                    ? "text-slate-100 hover:bg-white/10 hover:text-white"
-                    : "text-slate-900 hover:bg-slate-100 hover:text-brand-600"
-                }`}
+                className={`ml-auto hidden size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 lg:grid ${themeToggleClasses}`}
               >
                 {isDarkNavbar ? (
                   <svg
@@ -521,11 +541,7 @@ function Navbar() {
                 aria-label={`Switch to ${isDarkNavbar ? "light" : "dark"} theme`}
                 aria-pressed={isDarkNavbar}
                 onClick={toggleNavbarTheme}
-                className={`grid lg:hidden ml-auto size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${
-                  isDarkNavbar
-                    ? "text-slate-100 hover:bg-white/10 hover:text-white"
-                    : "text-slate-900 hover:bg-slate-100 hover:text-brand-600"
-                }`}
+                className={`ml-auto grid size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 lg:hidden ${themeToggleClasses}`}
               >
                 {isDarkNavbar ? (
                   <svg
@@ -571,11 +587,7 @@ function Navbar() {
                   onClick={() => {
                     setIsMenuOpen((currentValue) => !currentValue);
                   }}
-                  className={`grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-900 transition hover:border-brand-600 hover:text-brand-600 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 md:max-lg:size-10 md:max-lg:border-transparent md:max-lg:bg-transparent lg:hidden ${
-                    isDarkNavbar
-                      ? "md:max-lg:text-slate-100 md:max-lg:hover:border-transparent md:max-lg:hover:bg-white/10 md:max-lg:hover:text-white"
-                      : "md:max-lg:text-slate-900 md:max-lg:hover:border-transparent md:max-lg:hover:bg-slate-100 md:max-lg:hover:text-brand-600"
-                  }`}
+                  className={`grid size-11 shrink-0 place-items-center rounded-xl border transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 md:max-lg:size-10 lg:hidden ${mobileMenuButtonClasses}`}
                 >
                   {isMenuOpen ? (
                     <svg
@@ -610,7 +622,7 @@ function Navbar() {
                 {isMenuOpen && (
                   <div
                     id="mobile-navigation"
-                    className="absolute inset-x-0 top-full min-w-0 border-t border-slate-200 bg-white shadow-xl shadow-slate-950/10"
+                    className={mobileMenuPanelClasses}
                   >
                     <Container>
                       <nav
@@ -624,6 +636,7 @@ function Navbar() {
                               section={section}
                               isActive={activeSectionKey === section.key}
                               isMobile
+                              isDark={isDarkNavbar}
                               onNavigate={
                                 section.type === "page"
                                   ? closeMobileMenu

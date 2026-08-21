@@ -79,10 +79,9 @@ const skillSchema = new mongoose.Schema(
 
     description: {
       type: String,
-      required: [true, "Skill description is required."],
       trim: true,
-      minlength: [10, "Skill description must contain at least 10 characters."],
       maxlength: [500, "Skill description cannot exceed 500 characters."],
+      default: "",
     },
 
     category: {
@@ -103,6 +102,13 @@ const skillSchema = new mongoose.Schema(
         values: proficiencyLevels,
         message: "Invalid Skill proficiency level.",
       },
+    },
+
+    proficiencyPercent: {
+      type: Number,
+      min: [0, "Skill proficiency percentage cannot be negative."],
+      max: [100, "Skill proficiency percentage cannot exceed 100."],
+      default: null,
     },
 
     yearsOfExperience: {

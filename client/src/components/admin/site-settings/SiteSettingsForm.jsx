@@ -456,10 +456,6 @@ function validateLegalLinks(formValues, errors) {
 function validateDynamicContentUrls(formValues, errors) {
   const urlFields = [
     {
-      fieldName: "skillsSection.ctaButton.url",
-      value: formValues?.skillsSection?.ctaButton?.url,
-    },
-    {
       fieldName: "servicesSection.ctaButton.url",
       value: formValues?.servicesSection?.ctaButton?.url,
     },
@@ -1850,12 +1846,13 @@ function SiteSettingsForm({
       <ListingSectionSettingsCard
         isVisible={isPanelActive("listing-sections")}
         title="Skills Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public Skills."
+        description="Manage the eyebrow, heading and short description shown above the Home Skills grid."
         fieldName="skillsSection"
         values={formValues.skillsSection}
         disabled={isSubmitting}
         onChange={handleFieldChange}
         getFieldError={getFieldError}
+        showCta={false}
       />
 
       <ListingSectionSettingsCard

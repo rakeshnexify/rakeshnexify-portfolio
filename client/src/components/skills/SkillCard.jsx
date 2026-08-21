@@ -1,3 +1,10 @@
+const proficiencyPercentFallbacks = {
+  familiar: 35,
+  proficient: 60,
+  advanced: 80,
+  expert: 95,
+};
+
 const proficiencyDetails = {
   familiar: {
     label: "Familiar",
@@ -61,6 +68,12 @@ function normaliseSkill(skill = {}, index = 0) {
         .trim()
         .toLowerCase() || "familiar",
     yearsOfExperience: hasExperience ? numericExperience : null,
+    proficiencyPercent:
+      Number.isFinite(Number(skill.proficiencyPercent)) &&
+      Number(skill.proficiencyPercent) >= 0 &&
+      Number(skill.proficiencyPercent) <= 100
+        ? Number(skill.proficiencyPercent)
+        : null,
     icon: String(skill.icon || "").trim(),
     iconUrl: String(skill.iconUrl || "").trim(),
     featured: Boolean(skill.isFeatured ?? skill.featured),
@@ -79,14 +92,20 @@ function formatExperience(value) {
   return `${formattedValue} ${value === 1 ? "year" : "years"} experience`;
 }
 
-function SkillIcon({ skill }) {
+function SkillIcon({ skill, compact = false }) {
   const fallbackText =
     skill.icon && skill.icon.length <= 5
       ? skill.icon
       : createSkillInitials(skill.name);
 
   return (
-    <div className="relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-xl font-black text-slate-900 shadow-sm ring-4 ring-slate-100">
+    <div
+      className={
+        compact
+          ? "public-skill-icon"
+          : "relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-xl font-black text-slate-900 shadow-sm ring-4 ring-slate-100"
+      }
+    >
       <span aria-hidden="true">{fallbackText}</span>
 
       {skill.iconUrl && (
@@ -94,13 +113,105 @@ function SkillIcon({ skill }) {
           src={skill.iconUrl}
           alt=""
           loading="lazy"
-          className="absolute inset-0 size-full bg-white object-contain p-3"
+          className={
+            compact
+              ? "absolute inset-0 size-full object-contain p-2"
+              : "absolute inset-0 size-full bg-white object-contain p-3"
+          }
           onError={(event) => {
             event.currentTarget.hidden = true;
           }}
         />
       )}
     </div>
+  );
+}
+
+
+function getProficiencyPercent(skill) {
+  if (skill.proficiencyPercent !== null) {
+    return Math.round(skill.proficiencyPercent);
+  }
+
+  return (
+    proficiencyPercentFallbacks[skill.proficiencyLevel] ??
+    proficiencyPercentFallbacks.familiar
+  );
+}
+
+function CompactSkillCard({ skill }) {
+  const proficiencyPercent = getProficiencyPercent(skill);
+
+  const compactMeta = [
+    proficiencyDetails[skill.proficiencyLevel]?.label ||
+      skill.proficiencyLevel,
+    skill.yearsOfExperience !== null
+      ? `${skill.yearsOfExperience} yr${
+          skill.yearsOfExperience === 1 ? "" : "s"
+        }`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" • ");
+
+  return (
+    <article className="public-skill-card">
+      <div className="public-skill-card-top">
+        <SkillIcon skill={skill} compact />
+
+        <div className="public-skill-card-name-wrap">
+          <div className="public-skill-card-title-row">
+            <h3 className="public-skill-card-name">{skill.name}</h3>
+
+            {skill.featured && (
+              <span
+                className="public-skill-featured-badge"
+                aria-label="Featured skill"
+                title="Featured skill"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="public-skill-featured-icon"
+                >
+                  <path d="m12 2.75 2.14 4.34 4.79.7-3.47 3.38.82 4.77L12 13.69l-4.28 2.25.82-4.77-3.47-3.38 4.79-.7L12 2.75Z" />
+                </svg>
+              </span>
+            )}
+          </div>
+
+          {compactMeta && (
+            <span className="public-skill-card-meta">
+              {compactMeta}
+            </span>
+          )}
+        </div>
+
+        <span
+          className="public-skill-card-percent"
+          aria-label={`${proficiencyPercent} percent proficiency`}
+        >
+          {proficiencyPercent}%
+        </span>
+      </div>
+
+      <div
+        className="public-skill-progress-track"
+        role="progressbar"
+        aria-label={`${skill.name} proficiency`}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow={proficiencyPercent}
+      >
+        <span
+          className="public-skill-progress-value"
+          style={{
+            width: `${proficiencyPercent}%`,
+          }}
+        />
+      </div>
+    </article>
   );
 }
 
@@ -131,6 +242,10 @@ function SkillCard({ skill, index = 0, compact = false }) {
   const proficiencyDetailsForSkill =
     proficiencyDetails[normalisedSkill.proficiencyLevel] ||
     proficiencyDetails.familiar;
+
+  if (compact) {
+    return <CompactSkillCard skill={normalisedSkill} />;
+  }
 
   return (
     <article className="group relative flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/70">

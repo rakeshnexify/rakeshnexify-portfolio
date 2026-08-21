@@ -74,6 +74,31 @@ function cleanOrder(value, fieldName = "order") {
   return numericOrder;
 }
 
+function cleanProficiencyPercent(value) {
+  if (value === "" || value === null || value === undefined) {
+    return null;
+  }
+
+  const numericValue = Number(value);
+
+  if (
+    !Number.isFinite(numericValue) ||
+    numericValue < 0 ||
+    numericValue > 100
+  ) {
+    throw createHttpError(
+      "Skill proficiency percentage must be between 0 and 100.",
+      400,
+      {
+        proficiencyPercent:
+          "Proficiency percentage must be a number between 0 and 100.",
+      },
+    );
+  }
+
+  return numericValue;
+}
+
 function cleanYearsOfExperience(value) {
   if (value === "" || value === null || value === undefined) {
     return null;
@@ -145,6 +170,12 @@ function buildSkillPayload(requestBody = {}) {
   if (hasOwnProperty(requestBody, "proficiencyLevel")) {
     payload.proficiencyLevel = cleanProficiencyLevel(
       requestBody.proficiencyLevel,
+    );
+  }
+
+  if (hasOwnProperty(requestBody, "proficiencyPercent")) {
+    payload.proficiencyPercent = cleanProficiencyPercent(
+      requestBody.proficiencyPercent,
     );
   }
 

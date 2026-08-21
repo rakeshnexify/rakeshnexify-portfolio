@@ -178,8 +178,7 @@ function SkillForm({
         </h2>
 
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          Add the public name, URL slug, category and description for this
-          skill.
+          Add the public name, URL slug and category. Description is optional.
         </p>
 
         <div className="mt-7 grid gap-6 md:grid-cols-2">
@@ -289,7 +288,7 @@ function SkillForm({
               htmlFor="skill-description"
               className="text-sm font-semibold text-slate-700"
             >
-              Description <span className="text-red-600">*</span>
+              Description <span className="font-normal text-slate-400">(Optional)</span>
             </label>
 
             <textarea
@@ -298,7 +297,7 @@ function SkillForm({
               value={formValues.description}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              rows={6}
+              rows={4}
               maxLength={500}
               placeholder="Explain how this skill is used in your professional work."
               aria-invalid={Boolean(getFieldError("description"))}
@@ -306,7 +305,7 @@ function SkillForm({
             />
 
             <div className="mt-2 flex justify-between gap-4 text-xs text-slate-500">
-              <span>Minimum 10 characters</span>
+              <span>Optional. Maximum 500 characters.</span>
               <span>{String(formValues.description || "").length}/500</span>
             </div>
 
@@ -324,7 +323,7 @@ function SkillForm({
           Proficiency and Experience
         </h2>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-7 grid gap-6 md:grid-cols-3">
           <div>
             <label
               htmlFor="skill-proficiency-level"
@@ -352,6 +351,36 @@ function SkillForm({
             </select>
 
             <SkillFieldError message={getFieldError("proficiencyLevel")} />
+          </div>
+
+          <div>
+            <label
+              htmlFor="skill-proficiency-percent"
+              className="text-sm font-semibold text-slate-700"
+            >
+              Proficiency Percentage
+            </label>
+
+            <input
+              id="skill-proficiency-percent"
+              name="proficiencyPercent"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              value={formValues.proficiencyPercent}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              placeholder="90"
+              aria-invalid={Boolean(getFieldError("proficiencyPercent"))}
+              className={inputClasses}
+            />
+
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Optional. Used by the compact Home Skills progress bar.
+            </p>
+
+            <SkillFieldError message={getFieldError("proficiencyPercent")} />
           </div>
 
           <div>

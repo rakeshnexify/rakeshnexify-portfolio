@@ -13,6 +13,7 @@ function createDefaultSkillFormValues() {
     description: "",
     category: "",
     proficiencyLevel: "",
+    proficiencyPercent: "",
     yearsOfExperience: "",
     icon: "",
     iconUrl: "",
@@ -52,6 +53,12 @@ function createSkillFormValues(skill = {}) {
     category: skill.category || "",
 
     proficiencyLevel: skill.proficiencyLevel || "",
+
+    proficiencyPercent:
+      skill.proficiencyPercent === null ||
+      skill.proficiencyPercent === undefined
+        ? ""
+        : String(skill.proficiencyPercent),
 
     yearsOfExperience:
       skill.yearsOfExperience === null ||
@@ -99,6 +106,11 @@ function createSkillPayload(formValues = {}) {
     )
       .trim()
       .toLowerCase(),
+
+    proficiencyPercent:
+      String(formValues.proficiencyPercent ?? "").trim() === ""
+        ? null
+        : Number(formValues.proficiencyPercent),
 
     yearsOfExperience:
       yearsValue === "" ? null : Number(yearsValue),
@@ -169,13 +181,7 @@ function validateSkillFormValues(formValues = {}) {
       "Skill short name cannot exceed 50 characters.";
   }
 
-  if (!payload.description) {
-    fieldErrors.description =
-      "Skill description is required.";
-  } else if (payload.description.length < 10) {
-    fieldErrors.description =
-      "Skill description must contain at least 10 characters.";
-  } else if (payload.description.length > 500) {
+  if (payload.description.length > 500) {
     fieldErrors.description =
       "Skill description cannot exceed 500 characters.";
   }
@@ -197,6 +203,16 @@ function validateSkillFormValues(formValues = {}) {
   ) {
     fieldErrors.proficiencyLevel =
       "Please select a valid proficiency level.";
+  }
+
+  if (
+    payload.proficiencyPercent !== null &&
+    (!Number.isFinite(payload.proficiencyPercent) ||
+      payload.proficiencyPercent < 0 ||
+      payload.proficiencyPercent > 100)
+  ) {
+    fieldErrors.proficiencyPercent =
+      "Proficiency percentage must be between 0 and 100.";
   }
 
   if (
