@@ -1,98 +1,67 @@
+import { Link } from "react-router";
+
 import usePublicTheme from "../../hooks/usePublicTheme";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
 import NewsletterSignupForm from "../newsletter/NewsletterSignupForm";
 import Section from "../layout/Section";
 
-const technologyItems = [
-  {
-    label: "MERN Stack",
-    icon: "database",
-  },
-  {
-    label: "WordPress",
-    icon: "wordpress",
-  },
-  {
-    label: "E-commerce",
-    icon: "commerce",
-  },
-  {
-    label: "Web Applications",
-    icon: "code",
-  },
-];
-
-function TechnologyIcon({ type }) {
-  if (type === "commerce") {
-    return (
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        className="size-4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 5h2l2 10h10l2-7H6" />
-        <circle cx="9" cy="19" r="1.25" />
-        <circle cx="17" cy="19" r="1.25" />
-      </svg>
-    );
+function getVisibleHeroQuickLinks(hero) {
+  if (!Array.isArray(hero?.quickLinks)) {
+    return [];
   }
 
-  if (type === "code") {
-    return (
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        className="size-4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 5l-4 14" />
-      </svg>
-    );
-  }
+  return [...hero.quickLinks]
+    .filter(
+      (item) =>
+        item?.isVisible !== false &&
+        typeof item?.label === "string" &&
+        item.label.trim() &&
+        typeof item?.url === "string" &&
+        item.url.trim(),
+    )
+    .sort(
+      (firstItem, secondItem) =>
+        Number(firstItem?.order || 0) -
+        Number(secondItem?.order || 0),
+    )
+    .map((item) => ({
+      label: item.label.trim(),
+      url: item.url.trim(),
+      iconUrl:
+        typeof item.iconUrl === "string"
+          ? item.iconUrl.trim()
+          : "",
+      openInNewTab: item.openInNewTab === true,
+    }));
+}
 
-  if (type === "wordpress") {
+function isExternalHeroQuickLink(url) {
+  return /^https?:\/\//i.test(String(url || "").trim());
+}
+
+function HeroQuickLink({
+  item,
+  children,
+}) {
+  const commonProps = {
+    className: "public-hero-tech-chip",
+    target: item.openInNewTab ? "_blank" : undefined,
+    rel: item.openInNewTab ? "noopener noreferrer" : undefined,
+  };
+
+  if (isExternalHeroQuickLink(item.url) || item.url.startsWith("#")) {
     return (
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        className="size-4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="9" />
-        <path d="m7.5 8.5 3.2 8 1.9-5 2 5 2.9-8" />
-      </svg>
+      <a href={item.url} {...commonProps}>
+        {children}
+      </a>
     );
   }
 
   return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="size-4"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <ellipse cx="12" cy="6" rx="7" ry="3" />
-      <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
-      <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" />
-    </svg>
+    <Link to={item.url} {...commonProps}>
+      {children}
+    </Link>
   );
 }
 
@@ -134,7 +103,7 @@ function HeroSection() {
     "I create responsive websites, MERN applications, e-commerce platforms and scalable digital solutions.";
 
   const coverImageUrl = String(hero.coverImageUrl || "").trim();
-
+  const quickLinks = getVisibleHeroQuickLinks(hero);
 
   return (
     <Section id="home" className="public-hero-section scroll-mt-20">
@@ -190,24 +159,47 @@ function HeroSection() {
               />
             </div>
 
-            <div className="public-hero-technologies" aria-label="Technology focus">
-              {technologyItems.map((item, index) => (
-                <div className="contents" key={item.label}>
-                  {index > 0 && (
-                    <span className="public-hero-tech-separator" aria-hidden="true">
-                      •
-                    </span>
-                  )}
+            {quickLinks.length > 0 && (
+              <div
+                className="public-hero-technologies"
+                aria-label="Hero quick links"
+              >
+                {quickLinks.map((item, index) => (
+                  <div
+                    className="contents"
+                    key={`${item.label}-${item.url}`}
+                  >
+                    {index > 0 && (
+                      <span
+                        className="public-hero-tech-separator"
+                        aria-hidden="true"
+                      >
+                        •
+                      </span>
+                    )}
 
-                  <span className="public-hero-tech-chip">
-                    <span className="public-hero-tech-icon">
-                      <TechnologyIcon type={item.icon} />
-                    </span>
-                    {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+                    <HeroQuickLink item={item}>
+                      {item.iconUrl && (
+                        <span
+                          className="public-hero-tech-icon"
+                          aria-hidden="true"
+                        >
+                          <img
+                            src={item.iconUrl}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="public-hero-tech-image"
+                          />
+                        </span>
+                      )}
+
+                      <span>{item.label}</span>
+                    </HeroQuickLink>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </Container>

@@ -287,6 +287,44 @@ function normalizeSections(value) {
     );
 }
 
+function createEmptyHeroQuickLink(order = 1) {
+  return {
+    label: "",
+    url: "",
+    iconUrl: "",
+    openInNewTab: false,
+    isVisible: true,
+    order,
+  };
+}
+
+function normalizeHeroQuickLink(item, index) {
+  const numericOrder = Number(item?.order);
+
+  return {
+    label: cleanString(item?.label),
+    url: cleanString(item?.url),
+    iconUrl: cleanString(item?.iconUrl),
+    openInNewTab: item?.openInNewTab === true,
+    isVisible: item?.isVisible !== false,
+    order:
+      Number.isFinite(numericOrder) && numericOrder >= 0
+        ? numericOrder
+        : index + 1,
+  };
+}
+
+function normalizeHeroQuickLinks(value) {
+  const source = Array.isArray(value) ? value : [];
+
+  return source
+    .map((item, index) => normalizeHeroQuickLink(item, index))
+    .sort(
+      (firstItem, secondItem) =>
+        firstItem.order - secondItem.order,
+    );
+}
+
 function createEmptyAboutWorkItem(order = 1) {
   return {
     type: "",
@@ -518,6 +556,8 @@ function createSiteSettingsFormValues(settings = {}) {
       primaryButton: normalizeButton(primaryButton),
 
       secondaryButton: normalizeButton(secondaryButton),
+
+      quickLinks: normalizeHeroQuickLinks(hero.quickLinks),
     },
 
     about: {
@@ -639,6 +679,17 @@ function createLegalLinksPayload(legalLinks) {
   }));
 }
 
+function createHeroQuickLinksPayload(items) {
+  return normalizeHeroQuickLinks(items).map((item, index) => ({
+    label: item.label,
+    url: item.url,
+    iconUrl: item.iconUrl,
+    openInNewTab: item.openInNewTab === true,
+    isVisible: item.isVisible !== false,
+    order: index + 1,
+  }));
+}
+
 function createAboutWorkItemsPayload(items) {
   return normalizeAboutWorkItems(items).map((item, index) => ({
     type: item.type,
@@ -722,6 +773,10 @@ function createSiteSettingsPayload(formValues = {}) {
 
         url: values.hero.secondaryButton.url,
       },
+
+      quickLinks: createHeroQuickLinksPayload(
+        values.hero.quickLinks,
+      ),
     },
 
     about: {
@@ -888,6 +943,7 @@ export {
   createArrayFromLines,
   createEmptyAboutIdentityRole,
   createEmptyAboutWorkItem,
+  createEmptyHeroQuickLink,
   createEmptyLegalLink,
   createEmptyPlatform,
   createKeywordsArray,

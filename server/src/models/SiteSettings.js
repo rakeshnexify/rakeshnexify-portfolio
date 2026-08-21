@@ -97,6 +97,50 @@ const ownerSchema = new mongoose.Schema(
   },
 );
 
+const heroQuickLinkSchema = new mongoose.Schema(
+  {
+    label: {
+      type: String,
+      required: [true, "Hero quick-link title is required."],
+      trim: true,
+      maxlength: [80, "Hero quick-link title cannot exceed 80 characters."],
+    },
+
+    url: {
+      type: String,
+      required: [true, "Hero quick-link URL is required."],
+      trim: true,
+      maxlength: [1000, "Hero quick-link URL cannot exceed 1000 characters."],
+    },
+
+    iconUrl: {
+      type: String,
+      trim: true,
+      maxlength: [1000, "Hero quick-link icon URL cannot exceed 1000 characters."],
+      default: "",
+    },
+
+    openInNewTab: {
+      type: Boolean,
+      default: false,
+    },
+
+    isVisible: {
+      type: Boolean,
+      default: true,
+    },
+
+    order: {
+      type: Number,
+      min: [0, "Hero quick-link order cannot be negative."],
+      default: 0,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
 const heroSchema = new mongoose.Schema(
   {
     coverImageUrl: {
@@ -137,6 +181,11 @@ const heroSchema = new mongoose.Schema(
         label: "Contact Me",
         url: "#contact",
       }),
+    },
+
+    quickLinks: {
+      type: [heroQuickLinkSchema],
+      default: [],
     },
   },
   {

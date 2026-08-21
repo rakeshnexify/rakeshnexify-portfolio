@@ -10,6 +10,7 @@ const MAIN_SITE_KEY = "main";
 const MAX_PLATFORMS_PER_GROUP = 25;
 const MAX_ABOUT_IDENTITY_ROLES = 30;
 const MAX_ABOUT_WORK_ITEMS = 100;
+const MAX_HERO_QUICK_LINKS = 30;
 const MAX_LEGAL_LINKS = 20;
 const MAX_SECTION_ORDER = 10000;
 
@@ -393,10 +394,135 @@ function appendOwnerPayload(payload, ownerValue) {
   appendStringFields(payload, owner, "owner", ownerStringFields);
 }
 
+function normalizeHeroQuickLinkUrl(value) {
+  const url = cleanString(value);
+
+  if (
+    !url ||
+    url.startsWith("/") ||
+    url.startsWith("#") ||
+    /^[a-z][a-z0-9+.-]*:\/\//i.test(url)
+  ) {
+    return url;
+  }
+
+  if (
+    /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?:[/?#].*)?$/i.test(
+      url,
+    )
+  ) {
+    return `https://${url}`;
+  }
+
+  return url;
+}
+
+function cleanHeroQuickLinks(value) {
+  const fieldName = "hero.quickLinks";
+
+  if (!Array.isArray(value)) {
+    throw createHttpError("Hero quick links must be an array.", 400, {
+      [fieldName]: "Hero quick links must be an array.",
+    });
+  }
+
+  if (value.length > MAX_HERO_QUICK_LINKS) {
+    throw createHttpError(
+      `Hero cannot contain more than ${MAX_HERO_QUICK_LINKS} quick links.`,
+      400,
+      {
+        [fieldName]:
+          `Add no more than ${MAX_HERO_QUICK_LINKS} Hero quick links.`,
+      },
+    );
+  }
+
+  const usedLabels = new Set();
+
+  return value.map((itemValue, index) => {
+    const fieldPrefix = `${fieldName}.${index}`;
+    const item = ensureObject(itemValue, fieldPrefix);
+    const label = cleanString(item.label);
+    const rawUrl = cleanString(item.url);
+    const normalizedUrl = normalizeHeroQuickLinkUrl(rawUrl);
+
+    if (!label) {
+      throw createHttpError("Every Hero quick link requires a title.", 400, {
+        [`${fieldPrefix}.label`]: "Link title is required.",
+      });
+    }
+
+    if (label.length > 80) {
+      throw createHttpError(
+        "Hero quick-link titles cannot exceed 80 characters.",
+        400,
+        {
+          [`${fieldPrefix}.label`]:
+            "Link title cannot exceed 80 characters.",
+        },
+      );
+    }
+
+    const normalizedLabel = label.toLowerCase();
+
+    if (usedLabels.has(normalizedLabel)) {
+      throw createHttpError("Hero quick-link titles must be unique.", 400, {
+        [`${fieldPrefix}.label`]:
+          `The quick link "${label}" is already added.`,
+      });
+    }
+
+    usedLabels.add(normalizedLabel);
+
+    if (!rawUrl) {
+      throw createHttpError("Every Hero quick link requires a URL.", 400, {
+        [`${fieldPrefix}.url`]: "Link URL is required.",
+      });
+    }
+
+    if (rawUrl.length > 1000) {
+      throw createHttpError(
+        "Hero quick-link URL cannot exceed 1000 characters.",
+        400,
+        {
+          [`${fieldPrefix}.url`]:
+            "Link URL cannot exceed 1000 characters.",
+        },
+      );
+    }
+
+    return {
+      label,
+      url: cleanPublicUrl(normalizedUrl, `${fieldPrefix}.url`),
+      iconUrl: hasOwnProperty(item, "iconUrl")
+        ? cleanHttpUrl(item.iconUrl, `${fieldPrefix}.iconUrl`)
+        : "",
+      openInNewTab: hasOwnProperty(item, "openInNewTab")
+        ? cleanBoolean(
+            item.openInNewTab,
+            `${fieldPrefix}.openInNewTab`,
+          )
+        : false,
+      isVisible: hasOwnProperty(item, "isVisible")
+        ? cleanBoolean(item.isVisible, `${fieldPrefix}.isVisible`)
+        : true,
+      order: hasOwnProperty(item, "order")
+        ? cleanOrder(item.order, `${fieldPrefix}.order`)
+        : index + 1,
+    };
+  });
+}
+
 function appendHeroPayload(payload, heroValue) {
   const hero = ensureObject(heroValue, "hero");
 
   appendStringFields(payload, hero, "hero", heroStringFields);
+
+  if (hasOwnProperty(hero, "quickLinks")) {
+    payload["hero.quickLinks"] = cleanHeroQuickLinks(
+      hero.quickLinks,
+    );
+  }
 
   if (hasOwnProperty(hero, "primaryButton")) {
     appendButtonPayload(payload, hero.primaryButton, "hero.primaryButton");
@@ -1153,6 +1279,15 @@ function serializeSettings(settings) {
       ? [...data[fieldName]].sort(sortByOrder)
       : [];
   });
+
+  if (isPlainObject(data.hero)) {
+    data.hero = {
+      ...data.hero,
+      quickLinks: Array.isArray(data.hero.quickLinks)
+        ? [...data.hero.quickLinks].sort(sortByOrder)
+        : [],
+    };
+  }
 
   if (isPlainObject(data.about)) {
     data.about = {

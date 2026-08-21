@@ -34,6 +34,17 @@ function serializePublicSettings(settings) {
   });
 
   if (
+    publicSettings.hero &&
+    typeof publicSettings.hero === "object" &&
+    !Array.isArray(publicSettings.hero)
+  ) {
+    publicSettings.hero = {
+      ...publicSettings.hero,
+      quickLinks: getOrderedArray(publicSettings.hero.quickLinks),
+    };
+  }
+
+  if (
     publicSettings.about &&
     typeof publicSettings.about === "object" &&
     !Array.isArray(publicSettings.about)

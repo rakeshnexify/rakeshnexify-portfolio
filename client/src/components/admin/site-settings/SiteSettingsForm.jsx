@@ -10,6 +10,7 @@ import {
 } from "../../../utils/siteSettingsForm";
 import AboutIdentityRolesEditor from "./AboutIdentityRolesEditor";
 import AboutWorkItemsEditor from "./AboutWorkItemsEditor";
+import HeroQuickLinksEditor from "./HeroQuickLinksEditor";
 import LegalLinksEditor from "./LegalLinksEditor";
 import PlatformSettingsEditor from "./PlatformSettingsEditor";
 
@@ -26,6 +27,8 @@ const MAX_PLATFORMS_PER_GROUP = 25;
 const MAX_ABOUT_IDENTITY_ROLES = 30;
 
 const MAX_ABOUT_WORK_ITEMS = 100;
+
+const MAX_HERO_QUICK_LINKS = 30;
 
 const MAX_LEGAL_LINKS = 20;
 
@@ -245,6 +248,84 @@ function validateAboutWorkItems(formValues, errors) {
   });
 }
 
+function normalizeHeroQuickLinkUrlForValidation(value) {
+  const url = String(value || "").trim();
+
+  if (
+    !url ||
+    url.startsWith("/") ||
+    url.startsWith("#") ||
+    /^[a-z][a-z0-9+.-]*:\/\//i.test(url)
+  ) {
+    return url;
+  }
+
+  if (
+    /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+(?:[/?#].*)?$/i.test(
+      url,
+    )
+  ) {
+    return `https://${url}`;
+  }
+
+  return url;
+}
+
+function validateHeroQuickLinks(formValues, errors) {
+  const items = formValues?.hero?.quickLinks;
+
+  if (!Array.isArray(items)) {
+    errors["hero.quickLinks"] =
+      "Hero quick links must be provided as a list.";
+    return;
+  }
+
+  if (items.length > MAX_HERO_QUICK_LINKS) {
+    errors["hero.quickLinks"] =
+      `A maximum of ${MAX_HERO_QUICK_LINKS} Hero quick links is allowed.`;
+  }
+
+  const usedLabels = new Set();
+
+  items.forEach((item, index) => {
+    const fieldPrefix = `hero.quickLinks.${index}`;
+    const label = String(item?.label || "").trim();
+    const rawUrl = String(item?.url || "").trim();
+    const url = normalizeHeroQuickLinkUrlForValidation(rawUrl);
+
+    if (!label) {
+      errors[`${fieldPrefix}.label`] = "Link title is required.";
+    } else if (label.length > 80) {
+      errors[`${fieldPrefix}.label`] =
+        "Link title cannot exceed 80 characters.";
+    } else {
+      const normalizedLabel = label.toLowerCase();
+
+      if (usedLabels.has(normalizedLabel)) {
+        errors[`${fieldPrefix}.label`] =
+          `The quick link "${label}" is already added.`;
+      } else {
+        usedLabels.add(normalizedLabel);
+      }
+    }
+
+    if (!url) {
+      errors[`${fieldPrefix}.url`] = "Link URL is required.";
+    } else if (url.length > 1000) {
+      errors[`${fieldPrefix}.url`] =
+        "Link URL cannot exceed 1000 characters.";
+    } else if (!isSafePublicUrl(url)) {
+      errors[`${fieldPrefix}.url`] =
+        "Use a domain, #section, /relative-path or http/https URL.";
+    }
+
+    if (!isSafeHttpUrl(item?.iconUrl)) {
+      errors[`${fieldPrefix}.iconUrl`] =
+        "Enter a complete http:// or https:// icon URL.";
+    }
+  });
+}
+
 function validateAboutIdentityRoles(formValues, errors) {
   const roles = formValues?.about?.identityRoles;
 
@@ -449,6 +530,22 @@ function prepareInitialValues(initialValues = {}) {
 
   return {
     ...normalizedValues,
+
+    hero: {
+      ...normalizedValues.hero,
+
+      primaryButton: {
+        ...normalizedValues.hero.primaryButton,
+      },
+
+      secondaryButton: {
+        ...normalizedValues.hero.secondaryButton,
+      },
+
+      quickLinks: normalizedValues.hero.quickLinks.map((item) => ({
+        ...item,
+      })),
+    },
 
     about: {
       ...normalizedValues.about,
@@ -753,6 +850,7 @@ function validateSiteSettingsForm(formValues) {
     }
   });
 
+  validateHeroQuickLinks(formValues, errors);
   validateAboutIdentityRoles(formValues, errors);
   validateAboutWorkItems(formValues, errors);
 
@@ -1088,6 +1186,26 @@ function SiteSettingsForm({
     setServerErrors((currentErrors) =>
       removeErrorGroup(currentErrors, fieldPrefix),
     );
+  }
+
+  function handleHeroQuickLinksChange(nextItems) {
+    const items = Array.isArray(nextItems) ? nextItems : [];
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+
+      hero: {
+        ...currentValues.hero,
+
+        quickLinks: items.map((item, index) => ({
+          ...item,
+          order: index + 1,
+        })),
+      },
+    }));
+
+    clearFieldErrorGroup("hero.quickLinks");
+    setSubmitError("");
   }
 
   function handleAboutWorkItemsChange(nextItems) {
@@ -1481,7 +1599,7 @@ function SiteSettingsForm({
       <SettingsCard
         isVisible={isPanelActive("hero")}
         title="Hero Section"
-        description="Control the technical cover image, main heading, introduction and call-to-action buttons."
+        description="Control the technical cover image, main heading, introduction, dynamic quick links and call-to-action settings."
       >
         <div className="grid gap-5">
           <ImageUrlField
@@ -1537,6 +1655,15 @@ function SiteSettingsForm({
             rows={5}
             maxLength={1000}
             placeholder="Explain your professional services and value."
+          />
+
+          <HeroQuickLinksEditor
+            items={formValues.hero.quickLinks}
+            fieldErrors={combinedFieldErrors}
+            disabled={isSubmitting}
+            accessToken={accessToken}
+            onMediaUnauthorized={onMediaUnauthorized}
+            onChange={handleHeroQuickLinksChange}
           />
 
           <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">

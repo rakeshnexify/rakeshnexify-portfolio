@@ -429,7 +429,7 @@ function NewsletterSignupForm({
 
       {usesImplicitConsent ? (
         <p className="newsletter-implicit-consent">
-          By subscribing, you agree to receive newsletter and marketing updates from RakeshNexify.
+          By subscribing, you agree to updates.
         </p>
       ) : (
         <div className="mt-1.5">
