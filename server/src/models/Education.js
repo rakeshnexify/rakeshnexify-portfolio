@@ -167,16 +167,19 @@ const educationSchema = new mongoose.Schema(
 
     shortDescription: {
       type: String,
-      required: [true, "Short education description is required."],
       trim: true,
-      minlength: [
-        10,
-        "Short education description must contain at least 10 characters.",
-      ],
       maxlength: [
         600,
         "Short education description cannot exceed 600 characters.",
       ],
+      default: "",
+      validate: {
+        validator(value) {
+          return !value || value.length >= 10;
+        },
+        message:
+          "Short education description must contain at least 10 characters when provided.",
+      },
     },
 
     description: {

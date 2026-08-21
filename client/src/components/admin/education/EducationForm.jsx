@@ -477,7 +477,7 @@ function EducationForm({
               htmlFor="education-short-description"
               className="text-sm font-semibold text-slate-700"
             >
-              Short Description <span className="text-red-600">*</span>
+              Short Description
             </label>
 
             <textarea
@@ -494,7 +494,7 @@ function EducationForm({
             />
 
             <div className="mt-2 flex justify-between gap-4 text-xs text-slate-500">
-              <span>Minimum 10 characters</span>
+              <span>Optional - add only when useful</span>
               <span>
                 {String(formValues.shortDescription || "").length}/600
               </span>

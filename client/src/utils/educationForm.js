@@ -302,9 +302,9 @@ function validateEducationFormValues(formValues = {}) {
     errors.location = "Location cannot exceed 180 characters.";
   }
 
-  if (shortDescription.length < 10) {
+  if (shortDescription && shortDescription.length < 10) {
     errors.shortDescription =
-      "Short description must contain at least 10 characters.";
+      "Short description must contain at least 10 characters when provided.";
   } else if (shortDescription.length > 600) {
     errors.shortDescription =
       "Short description cannot exceed 600 characters.";
