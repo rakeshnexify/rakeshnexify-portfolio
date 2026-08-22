@@ -7601,17 +7601,17 @@ body.public-theme-active .public-services-section {
 }
 
 body.public-theme-active[data-public-theme="dark"] .public-services-section {
-  --services-bg: #050b14;
-  --services-bg-soft: #081321;
+  --services-bg: #030b16;
+  --services-bg-soft: #071a2d;
   --services-text: #f4f8ff;
   --services-muted: #a6b7cc;
-  --services-border: rgb(34 211 238 / 0.2);
-  --services-card: rgb(7 18 31 / 0.72);
-  --services-card-strong: rgb(10 24 40 / 0.9);
+  --services-border: rgb(34 211 238 / 0.28);
+  --services-card: rgb(9 29 52 / 0.94);
+  --services-card-strong: rgb(13 38 66 / 0.98);
   --services-cyan: #22d3ee;
   --services-blue: #60a5fa;
   --services-violet: #a78bfa;
-  --services-shadow: rgb(34 211 238 / 0.08);
+  --services-shadow: rgb(2 132 199 / 0.16);
   border-top-color: rgb(56 189 248 / 0.12);
   background:
     radial-gradient(circle at 12% 18%, rgb(34 211 238 / 0.11), transparent 30%),

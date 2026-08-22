@@ -1070,3 +1070,51 @@
     opacity: 0.85;
   }
 }
+/* =========================================================
+   EDUCATION DARK SURFACE CONTRAST REFINEMENT
+   Keeps Knowledge Prism artwork intact while separating
+   the section canvas from Education cards in dark mode.
+   ========================================================= */
+:global(body.public-theme-active[data-public-theme="dark"]) .section,
+:global(html[data-public-theme="dark"]) .section,
+:global(.dark) .section,
+:global(.theme-dark) .section,
+:global([data-theme="dark"]) .section {
+  --edu-bg: #040b15;
+  --edu-bg-soft: #07111f;
+  --edu-card: rgba(13, 29, 50, 0.97);
+  --edu-card-border: rgba(96, 165, 250, 0.22);
+  --edu-card-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(125, 211, 252, 0.035);
+}
+
+:global(body.public-theme-active[data-public-theme="dark"]) .card,
+:global(html[data-public-theme="dark"]) .card,
+:global(.dark) .card,
+:global(.theme-dark) .card,
+:global([data-theme="dark"]) .card {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 33, 56, 0.985) 0%,
+      rgba(10, 25, 43, 0.965) 100%
+    );
+  border-color: rgba(96, 165, 250, 0.22);
+  box-shadow:
+    var(--edu-card-shadow),
+    0 0 0 1px rgba(59, 130, 246, 0.025);
+}
+
+:global(body.public-theme-active[data-public-theme="dark"]) .card:hover,
+:global(html[data-public-theme="dark"]) .card:hover,
+:global(.dark) .card:hover,
+:global(.theme-dark) .card:hover,
+:global([data-theme="dark"]) .card:hover {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18, 39, 66, 0.99) 0%,
+      rgba(12, 29, 50, 0.98) 100%
+    );
+}
