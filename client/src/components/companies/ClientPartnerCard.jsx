@@ -1,5 +1,3 @@
-import { Link } from "react-router";
-
 const relationshipLabels = {
   client: "Client",
   partner: "Business Partner",
@@ -52,6 +50,31 @@ function getSafeMediaUrl(value) {
   return "";
 }
 
+function getSafeWebsiteUrl(value) {
+  const url = cleanText(value);
+
+  if (!url || containsControlCharacters(url)) {
+    return "";
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return parsedUrl.toString();
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
 function createInitials(name) {
   const initials = cleanText(name)
     .split(/\s+/)
@@ -65,7 +88,7 @@ function createInitials(name) {
 
 function ClientPartnerCard({ company }) {
   const name = cleanText(company?.name) || "Company";
-  const slug = cleanText(company?.slug);
+  const websiteUrl = getSafeWebsiteUrl(company?.websiteUrl);
   const industry = cleanText(company?.industry) || "Business";
   const description = cleanText(
     company?.shortDescription || company?.tagline || company?.description,
@@ -122,16 +145,22 @@ function ClientPartnerCard({ company }) {
       </div>
 
       <div className="mt-auto pt-6">
-        {slug ? (
-          <Link
-            to={`/companies/${encodeURIComponent(slug)}`}
+        {websiteUrl ? (
+          <a
+            href={websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl border border-brand-600 bg-white px-4 text-center text-sm font-semibold text-brand-600 transition hover:bg-brand-50"
           >
-            View Company Profile
-          </Link>
+            Visit Website
+            <span aria-hidden="true" className="ml-1.5">
+              ↗
+            </span>
+            <span className="sr-only"> opens in a new tab</span>
+          </a>
         ) : (
           <span className="inline-flex min-h-11 max-w-full cursor-not-allowed items-center justify-center rounded-xl border border-slate-200 bg-slate-100 px-4 text-center text-sm font-semibold text-slate-400">
-            Profile unavailable
+            Website unavailable
           </span>
         )}
       </div>

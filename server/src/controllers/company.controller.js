@@ -145,35 +145,4 @@ async function getPublicCompanies(req, res, next) {
   }
 }
 
-async function getPublicCompanyBySlug(req, res, next) {
-  try {
-    await createDefaultCompaniesWhenEmpty();
-
-    const slug = String(req.params.slug || "")
-      .trim()
-      .toLowerCase();
-
-    const company = await Company.findOne({
-      slug,
-      isVisible: true,
-    })
-      .select("-createdBy -updatedBy")
-      .lean();
-
-    if (!company) {
-      return res.status(404).json({
-        success: false,
-        message: "Company not found.",
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: company,
-    });
-  } catch (error) {
-    return next(error);
-  }
-}
-
-export { getPublicCompanies, getPublicCompanyBySlug };
+export { getPublicCompanies };

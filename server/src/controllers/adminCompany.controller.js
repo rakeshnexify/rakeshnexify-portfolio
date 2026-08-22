@@ -34,6 +34,38 @@ function createHttpError(message, statusCode = 400, fieldErrors = {}) {
   return error;
 }
 
+function cleanOptionalHttpUrl(value, fieldName) {
+  const cleanValue = String(value || "").trim();
+
+  if (!cleanValue) {
+    return "";
+  }
+
+  try {
+    const parsedUrl = new URL(cleanValue);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return parsedUrl.toString();
+    }
+  } catch {
+    // The field error below is intentionally shared for invalid URL shapes.
+  }
+
+  throw createHttpError(
+    `${fieldName} must be a valid http:// or https:// URL.`,
+    400,
+    {
+      [fieldName]:
+        `${fieldName} must be a valid http:// or https:// URL without credentials.`,
+    },
+  );
+}
+
 function hasOwnProperty(object, property) {
   return Object.prototype.hasOwnProperty.call(object, property);
 }
@@ -230,7 +262,11 @@ function buildCompanyPayload(requestBody = {}) {
       const cleanValue = String(requestBody[fieldName] || "").trim();
 
       payload[fieldName] =
-        fieldName === "slug" ? createSlug(cleanValue) : cleanValue;
+        fieldName === "slug"
+          ? createSlug(cleanValue)
+          : fieldName === "websiteUrl"
+            ? cleanOptionalHttpUrl(cleanValue, "websiteUrl")
+            : cleanValue;
     }
   });
 

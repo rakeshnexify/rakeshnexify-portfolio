@@ -38,10 +38,6 @@ const publicPageDefinitions = [
     pathname: "/team",
   },
   {
-    key: "companies",
-    pathname: "/companies",
-  },
-  {
     key: "clients-partners",
     pathname: "/clients-partners",
   },
@@ -86,12 +82,6 @@ function normalizeSectionKey(value) {
     .toLowerCase();
 
   return key === "home" ? "hero" : key;
-}
-
-function normalizeRelationship(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase();
 }
 
 function findSectionByKey(sections, requiredKey) {
@@ -230,39 +220,6 @@ function createProjectEntries({ projects, sections }) {
   });
 }
 
-function isClientPartnerCompany(company) {
-  const relationship = normalizeRelationship(company?.relationship);
-
-  return relationship === "client" || relationship === "partner";
-}
-
-function createCompanyEntries({ companies, sections }) {
-  const companiesPageVisible = isPublicPageVisible(sections, "companies");
-
-  if (companiesPageVisible) {
-    return createDynamicEntries({
-      items: companies,
-      basePath: "/companies",
-    });
-  }
-
-  const clientsPartnersPageVisible = isPublicPageVisible(
-    sections,
-    "clients-partners",
-  );
-
-  if (!clientsPartnersPageVisible) {
-    return [];
-  }
-
-  return createDynamicEntries({
-    items: Array.isArray(companies)
-      ? companies.filter(isClientPartnerCompany)
-      : [],
-    basePath: "/companies",
-  });
-}
-
 function removeDuplicateEntries(entries) {
   const entriesByPath = new Map();
 
@@ -297,8 +254,6 @@ function removeDuplicateEntries(entries) {
 
 export function createSitemapXml({
   projects = [],
-  companies = [],
-  teamMembers = [],
   posts = [],
   sections = [],
 } = {}) {
@@ -326,30 +281,6 @@ export function createSitemapXml({
     sections,
   });
 
-  const teamMemberEntries = isPublicPageVisible(sections, "team")
-    ? createDynamicEntries({
-        items: teamMembers,
-        basePath: "/team",
-      })
-    : [];
-
-  /*
-   * Company detail pages are canonical organization profiles.
-   *
-   * Companies public page ON:
-   *   all visible Company profiles remain indexable.
-   *
-   * Companies OFF + Clients & Partners ON:
-   *   only visible client/partner Company profiles remain indexable because
-   *   those are the only Company details still published by that collection.
-   *
-   * Both OFF:
-   *   no Company detail profiles are included.
-   */
-  const companyEntries = createCompanyEntries({
-    companies,
-    sections,
-  });
 
   const blogPostEntries = isPublicPageVisible(sections, "blog")
     ? createDynamicEntries({
@@ -380,8 +311,6 @@ export function createSitemapXml({
   const sitemapEntries = removeDuplicateEntries([
     ...staticEntries,
     ...projectEntries,
-    ...teamMemberEntries,
-    ...companyEntries,
     ...blogPostEntries,
     ...newsPostEntries,
   ]);

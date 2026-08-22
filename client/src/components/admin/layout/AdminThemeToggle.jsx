@@ -8,7 +8,7 @@ function AdminThemeToggle({ className = "" }) {
       type="button"
       aria-label={`Switch Admin to ${isDark ? "light" : "dark"} theme`}
       aria-pressed={isDark}
-      className={`admin-theme-toggle inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border focus-visible:outline-none ${className}`}
+      className={`admin-theme-toggle inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border focus-visible:outline-none sm:h-10 sm:w-10 ${className}`}
       onClick={toggleTheme}
       title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
     >
@@ -16,7 +16,7 @@ function AdminThemeToggle({ className = "" }) {
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
-          className="size-5"
+          className="size-[18px] sm:size-5"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
@@ -29,7 +29,7 @@ function AdminThemeToggle({ className = "" }) {
         <svg
           aria-hidden="true"
           viewBox="0 0 24 24"
-          className="size-5"
+          className="size-[18px] sm:size-5"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"

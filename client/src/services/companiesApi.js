@@ -84,37 +84,4 @@ async function fetchPublicCompanies(filters = {}, { signal } = {}) {
   };
 }
 
-async function fetchPublicCompanyBySlug(slug, { signal } = {}) {
-  const normalisedSlug = String(slug || "")
-    .trim()
-    .toLowerCase();
-
-  if (!normalisedSlug) {
-    throw new Error("Company slug is required.");
-  }
-
-  const response = await fetch(
-    createApiUrl(`/api/companies/${encodeURIComponent(normalisedSlug)}`),
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-      signal,
-    },
-  );
-
-  const responseData = await readCompaniesResponse(response);
-
-  if (
-    !responseData.data ||
-    typeof responseData.data !== "object" ||
-    Array.isArray(responseData.data)
-  ) {
-    throw new Error("Companies API did not return valid company details.");
-  }
-
-  return responseData.data;
-}
-
-export { fetchPublicCompanies, fetchPublicCompanyBySlug };
+export { fetchPublicCompanies };

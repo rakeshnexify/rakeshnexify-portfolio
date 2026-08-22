@@ -230,9 +230,6 @@ if (isProduction) {
    * /news
    * /news/:slug
    * /team
-   * /team/:slug
-   * /companies
-   * /companies/:slug
    * /admin/*
    *
    * Express 5 ke liye /{*splat}

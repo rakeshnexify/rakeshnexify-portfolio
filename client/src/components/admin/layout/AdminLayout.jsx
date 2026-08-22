@@ -61,7 +61,9 @@ function AdminLayout() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-slate-100 text-slate-900">
-      <AdminThemeToggle className="fixed right-5 top-5 z-40 hidden lg:inline-flex" />
+      <div className="hidden lg:block">
+        <AdminThemeToggle className="fixed right-5 top-5 z-40" />
+      </div>
       <AdminSidebar
         admin={admin}
         isPinned={isPinned}

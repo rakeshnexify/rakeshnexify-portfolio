@@ -165,10 +165,10 @@ const ADMIN_NAVIGATION_GROUPS = [
       },
       {
         key: "companies",
-        label: "Companies",
+        label: "Company Menu",
         route: "/admin/companies",
         icon: "companies",
-        description: "Manage companies, clients, and partners",
+        description: "Manage Companies dropdown links",
         activePrefixes: ["/admin/companies"],
       },
       {

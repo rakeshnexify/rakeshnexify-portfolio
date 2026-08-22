@@ -75,10 +75,10 @@ const publicNavigationDestinations = Object.freeze({
     footer: true,
   },
   companies: {
-    type: "page",
-    href: "/companies",
+    type: "menu",
+    href: "",
     navbar: true,
-    footer: true,
+    footer: false,
   },
   "clients-partners": {
     type: "page",
@@ -160,7 +160,7 @@ function getDestinationAvailability(section, destination) {
     return false;
   }
 
-  if (section.key === "hero") {
+  if (section.key === "hero" || destination.type === "menu") {
     return true;
   }
 
@@ -238,6 +238,50 @@ function sortByNavigationOrder(firstItem, secondItem) {
   );
 }
 
+function createPinnedNavigationLayout(
+  items,
+  maximumDirectItems,
+  pinnedKey = "companies",
+) {
+  const sourceItems = Array.isArray(items) ? items : [];
+  const safeMaximum = Math.max(0, Math.floor(Number(maximumDirectItems) || 0));
+
+  if (safeMaximum === 0) {
+    return {
+      directItems: [],
+      overflowItems: sourceItems,
+    };
+  }
+
+  if (sourceItems.length <= safeMaximum) {
+    return {
+      directItems: sourceItems,
+      overflowItems: [],
+    };
+  }
+
+  const pinnedIndex = sourceItems.findIndex((item) => item?.key === pinnedKey);
+
+  if (pinnedIndex < 0 || pinnedIndex < safeMaximum) {
+    return {
+      directItems: sourceItems.slice(0, safeMaximum),
+      overflowItems: sourceItems.slice(safeMaximum),
+    };
+  }
+
+  const pinnedItem = sourceItems[pinnedIndex];
+  const directItems = [
+    ...sourceItems.slice(0, Math.max(0, safeMaximum - 1)),
+    pinnedItem,
+  ];
+  const directKeys = new Set(directItems.map((item) => item?.key));
+
+  return {
+    directItems,
+    overflowItems: sourceItems.filter((item) => !directKeys.has(item?.key)),
+  };
+}
+
 function sortByFooterNavigationOrder(firstItem, secondItem) {
   const orderDifference =
     firstItem.footerNavigationOrder - secondItem.footerNavigationOrder;
@@ -296,7 +340,7 @@ function isPublicNavigationDestinationAvailable(settingsSections, sectionKey) {
 }
 
 function isPublicNavigationItemActive(item, pathname, hash) {
-  if (!item) {
+  if (!item || item.type === "menu") {
     return false;
   }
 
@@ -312,6 +356,7 @@ function isPublicNavigationItemActive(item, pathname, hash) {
 }
 
 export {
+  createPinnedNavigationLayout,
   createPublicNavigationItems,
   getFooterNavigationItems,
   getNavbarNavigationItems,

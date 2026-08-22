@@ -2,9 +2,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import siteData from "../../data/siteData";
+import useCompanyNavigation from "../../hooks/useCompanyNavigation";
 import usePublicTheme from "../../hooks/usePublicTheme";
 import useSiteSettings from "../../hooks/useSiteSettings";
-import { getNavbarNavigationItems } from "../../utils/publicNavigation";
+import {
+  createPinnedNavigationLayout,
+  getNavbarNavigationItems,
+} from "../../utils/publicNavigation";
+import CompanyNavigationMenu from "../navigation/CompanyNavigationMenu";
 import Button from "../ui/Button";
 import Logo from "../ui/Logo";
 import Container from "./Container";
@@ -90,6 +95,7 @@ function NavbarLink({
 
 function Navbar() {
   const { settings } = useSiteSettings();
+  const { companies: companyNavigationCompanies } = useCompanyNavigation();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
@@ -112,17 +118,35 @@ function Navbar() {
   );
 
   const navigationSections = useMemo(
-    () => visibleSections.filter((section) => section.key !== "contact"),
-    [visibleSections],
+    () =>
+      visibleSections.filter(
+        (section) =>
+          section.key !== "contact" &&
+          (section.key !== "companies" ||
+            companyNavigationCompanies.length > 0),
+      ),
+    [companyNavigationCompanies.length, visibleSections],
   );
 
   const contactSection = visibleSections.find(
     (section) => section.key === "contact",
   );
+  const companyNavigationSection = navigationSections.find(
+    (section) => section.key === "companies",
+  );
 
-  const desktopNavigationSections = navigationSections.slice(0, 4);
-  const tabletNavigationSections = navigationSections.slice(0, 5);
-  const overflowNavigationSections = navigationSections.slice(4);
+  const desktopNavigationLayout = useMemo(
+    () => createPinnedNavigationLayout(navigationSections, 4),
+    [navigationSections],
+  );
+  const tabletNavigationLayout = useMemo(
+    () => createPinnedNavigationLayout(navigationSections, 5),
+    [navigationSections],
+  );
+
+  const desktopNavigationSections = desktopNavigationLayout.directItems;
+  const tabletNavigationSections = tabletNavigationLayout.directItems;
+  const overflowNavigationSections = desktopNavigationLayout.overflowItems;
   const isDarkNavbar = navbarTheme === "dark";
 
   const isOverflowSectionActive = overflowNavigationSections.some(
@@ -404,20 +428,30 @@ function Navbar() {
                 className="hidden min-w-0 flex-1 items-center justify-center gap-1 overflow-hidden md:flex lg:hidden min-[900px]:gap-2"
                 aria-label="Tablet navigation"
               >
-                {tabletNavigationSections.map((section) => (
-                  <NavbarLink
-                    key={section.key}
-                    section={section}
-                    isActive={activeSectionKey === section.key}
-                    isTablet
-                    isDark={isDarkNavbar}
-                    onNavigate={
-                      section.type !== "section"
-                        ? closeMobileMenu
-                        : goToHomepageSection
-                    }
-                  />
-                ))}
+                {tabletNavigationSections.map((section) =>
+                  section.key === "companies" ? (
+                    <CompanyNavigationMenu
+                      key={section.key}
+                      label={section.label}
+                      companies={companyNavigationCompanies}
+                      variant="tablet"
+                      isDark={isDarkNavbar}
+                    />
+                  ) : (
+                    <NavbarLink
+                      key={section.key}
+                      section={section}
+                      isActive={activeSectionKey === section.key}
+                      isTablet
+                      isDark={isDarkNavbar}
+                      onNavigate={
+                        section.type !== "section"
+                          ? closeMobileMenu
+                          : goToHomepageSection
+                      }
+                    />
+                  ),
+                )}
               </nav>
             )}
 
@@ -426,19 +460,28 @@ function Navbar() {
                 className="hidden min-w-0 items-center gap-3 lg:flex xl:gap-4"
                 aria-label="Main navigation"
               >
-                {desktopNavigationSections.map((section) => (
-                  <NavbarLink
-                    key={section.key}
-                    section={section}
-                    isActive={activeSectionKey === section.key}
-                    isDark={isDarkNavbar}
-                    onNavigate={
-                      section.type !== "section"
-                        ? closeMobileMenu
-                        : goToHomepageSection
-                    }
-                  />
-                ))}
+                {desktopNavigationSections.map((section) =>
+                  section.key === "companies" ? (
+                    <CompanyNavigationMenu
+                      key={section.key}
+                      label={section.label}
+                      companies={companyNavigationCompanies}
+                      isDark={isDarkNavbar}
+                    />
+                  ) : (
+                    <NavbarLink
+                      key={section.key}
+                      section={section}
+                      isActive={activeSectionKey === section.key}
+                      isDark={isDarkNavbar}
+                      onNavigate={
+                        section.type !== "section"
+                          ? closeMobileMenu
+                          : goToHomepageSection
+                      }
+                    />
+                  ),
+                )}
 
                 {overflowNavigationSections.length > 0 && (
                   <div ref={moreMenuRef} className="relative shrink-0">
@@ -651,20 +694,34 @@ function Navbar() {
                         aria-label="Mobile navigation"
                       >
                         <div className="flex min-w-0 flex-col gap-2">
-                          {navigationSections.map((section) => (
-                            <NavbarLink
-                              key={section.key}
-                              section={section}
-                              isActive={activeSectionKey === section.key}
-                              isMobile
-                              isDark={isDarkNavbar}
-                              onNavigate={
-                                section.type !== "section"
-                                  ? closeMobileMenu
-                                  : goToHomepageSection
-                              }
-                            />
-                          ))}
+                          {navigationSections.map((section) =>
+                            section.key === "companies" ? (
+                              <CompanyNavigationMenu
+                                key={section.key}
+                                label={
+                                  companyNavigationSection?.label ||
+                                  section.label
+                                }
+                                companies={companyNavigationCompanies}
+                                variant="mobile"
+                                isDark={isDarkNavbar}
+                                onNavigate={closeMobileMenu}
+                              />
+                            ) : (
+                              <NavbarLink
+                                key={section.key}
+                                section={section}
+                                isActive={activeSectionKey === section.key}
+                                isMobile
+                                isDark={isDarkNavbar}
+                                onNavigate={
+                                  section.type !== "section"
+                                    ? closeMobileMenu
+                                    : goToHomepageSection
+                                }
+                              />
+                            ),
+                          )}
 
                           {contactSection && (
                             <Button

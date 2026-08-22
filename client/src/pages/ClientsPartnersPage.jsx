@@ -83,6 +83,31 @@ function getSafeMediaUrl(value) {
   return "";
 }
 
+function getSafeWebsiteUrl(value) {
+  const url = cleanText(value);
+
+  if (!url || containsControlCharacters(url)) {
+    return "";
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return parsedUrl.toString();
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
 function createAbsoluteSiteUrl(pathname) {
   const path = cleanText(pathname);
 
@@ -284,26 +309,26 @@ function ClientsPartnersPage() {
   const structuredData = useMemo(() => {
     const eligibleCompanies = clientsPartners
       .map((company) => {
-        const slug = cleanText(company?.slug);
         const name = cleanText(company?.name);
 
-        if (!slug || !name) {
+        if (!name) {
           return null;
         }
 
+        const websiteUrl = getSafeWebsiteUrl(company?.websiteUrl);
         const item = {
           "@type": "Organization",
           name,
-          url: createAbsoluteSiteUrl(
-            `/companies/${encodeURIComponent(slug)}`,
-          ),
         };
-
         const companyDescription = cleanText(
           company?.shortDescription || company?.tagline,
         );
 
         const logoUrl = getSafeMediaUrl(company?.logoUrl);
+
+        if (websiteUrl) {
+          item.url = websiteUrl;
+        }
 
         if (companyDescription) {
           item.description = companyDescription;
@@ -343,7 +368,6 @@ function ClientsPartnersPage() {
       },
     };
   }, [brandName, clientsPartners, description, heading, seoTitle]);
-
   const shouldEmitStructuredData = !isLoading && !error;
 
   if (isLoading && clientsPartners.length === 0) {

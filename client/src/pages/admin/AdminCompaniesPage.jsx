@@ -3,125 +3,95 @@ import { Link, useLocation, useNavigate } from "react-router";
 
 import useAdminAuth from "../../hooks/useAdminAuth";
 import {
-  deleteAdminCompany,
   fetchAdminCompanies,
   updateAdminCompany,
 } from "../../services/adminCompaniesApi";
 
-const initialFilters = {
-  search: "",
-  industry: "",
-  relationship: "",
-  status: "",
-  visibility: "all",
-  featured: "all",
-};
+function containsControlCharacters(value) {
+  const text = String(value ?? "");
 
-const relationshipLabels = {
-  owned: "Owned Company",
-  managed: "Managed Company",
-  partner: "Business Partner",
-  client: "Client Company",
-  other: "Associated Company",
-};
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
 
-const statusLabels = {
-  planned: "Planned",
-  active: "Active",
-  inactive: "Inactive",
-  archived: "Archived",
-};
-
-const statusClasses = {
-  planned: "bg-amber-50 text-amber-700",
-  active: "bg-emerald-50 text-emerald-700",
-  inactive: "bg-slate-100 text-slate-700",
-  archived: "bg-red-50 text-red-700",
-};
-
-const inputClassName =
-  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none";
-
-const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
-
-function createApiFilters(filters) {
-  const apiFilters = {
-    search: filters.search.trim(),
-    industry: filters.industry.trim(),
-    relationship: filters.relationship,
-    status: filters.status,
-  };
-
-  if (filters.visibility === "visible") {
-    apiFilters.isVisible = true;
+    if (code <= 31 || code === 127) {
+      return true;
+    }
   }
 
-  if (filters.visibility === "hidden") {
-    apiFilters.isVisible = false;
-  }
-
-  if (filters.featured === "featured") {
-    apiFilters.isFeatured = true;
-  }
-
-  if (filters.featured === "standard") {
-    apiFilters.isFeatured = false;
-  }
-
-  return apiFilters;
+  return false;
 }
 
-function formatDate(value) {
-  if (!value) {
-    return "Not available";
+function getSafeWebsiteUrl(value) {
+  const url = String(value || "").trim();
+
+  if (!url || containsControlCharacters(url)) {
+    return "";
   }
 
-  const date = new Date(value);
+  try {
+    const parsedUrl = new URL(url);
 
-  if (Number.isNaN(date.getTime())) {
-    return "Not available";
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return parsedUrl.toString();
+    }
+  } catch {
+    return "";
   }
 
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
+  return "";
 }
 
-function createInitials(name) {
-  const initials = String(name || "")
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((word) => word.charAt(0))
-    .join("")
-    .toUpperCase();
+function sortMenuCompanies(firstCompany, secondCompany) {
+  const firstOrder = Number(firstCompany?.order);
+  const secondOrder = Number(secondCompany?.order);
+  const safeFirstOrder = Number.isFinite(firstOrder) ? firstOrder : 0;
+  const safeSecondOrder = Number.isFinite(secondOrder) ? secondOrder : 0;
 
-  return initials || "CO";
+  if (safeFirstOrder !== safeSecondOrder) {
+    return safeFirstOrder - safeSecondOrder;
+  }
+
+  return String(firstCompany?.name || "").localeCompare(
+    String(secondCompany?.name || ""),
+    undefined,
+    { sensitivity: "base" },
+  );
+}
+
+function isCompanyMenuCandidate(company) {
+  return ["owned", "managed"].includes(
+    String(company?.relationship || "")
+      .trim()
+      .toLowerCase(),
+  );
+}
+
+function isCompanyInPublicMenu(company) {
+  return (
+    company?.isFeatured === true &&
+    company?.isVisible !== false &&
+    String(company?.status || "")
+      .trim()
+      .toLowerCase() === "active" &&
+    Boolean(getSafeWebsiteUrl(company?.websiteUrl))
+  );
 }
 
 function AdminCompaniesPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { accessToken, admin, logout } = useAdminAuth();
-
-  const [formFilters, setFormFilters] = useState({
-    ...initialFilters,
-  });
-
-  const [appliedFilters, setAppliedFilters] = useState({
-    ...initialFilters,
-  });
+  const { accessToken, logout } = useAdminAuth();
 
   const [companies, setCompanies] = useState([]);
-  const [resultCount, setResultCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [actionCompanyId, setActionCompanyId] = useState("");
-
   const [successMessage, setSuccessMessage] = useState(
     () => location.state?.successMessage || "",
   );
@@ -131,16 +101,8 @@ function AdminCompaniesPage() {
       return;
     }
 
-    navigate(location.pathname, {
-      replace: true,
-      state: null,
-    });
+    navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, location.state, navigate]);
-
-  const apiFilters = useMemo(
-    () => createApiFilters(appliedFilters),
-    [appliedFilters],
-  );
 
   useEffect(() => {
     if (!accessToken) {
@@ -153,7 +115,7 @@ function AdminCompaniesPage() {
       setIsLoading(true);
 
       try {
-        const response = await fetchAdminCompanies(accessToken, apiFilters, {
+        const response = await fetchAdminCompanies(accessToken, {}, {
           signal: controller.signal,
         });
 
@@ -162,7 +124,6 @@ function AdminCompaniesPage() {
         }
 
         setCompanies(response.companies);
-        setResultCount(response.count);
         setError("");
       } catch (requestError) {
         if (controller.signal.aborted || requestError?.name === "AbortError") {
@@ -171,28 +132,19 @@ function AdminCompaniesPage() {
 
         if (requestError?.status === 401) {
           logout();
-
           navigate("/admin/login", {
             replace: true,
-            state: {
-              from: {
-                pathname: "/admin/companies",
-              },
-            },
+            state: { from: { pathname: "/admin/companies" } },
           });
-
           return;
         }
 
-        console.error("Admin companies loading failed:", requestError);
-
+        console.error("Company submenu loading failed:", requestError);
         setCompanies([]);
-        setResultCount(0);
-
         setError(
           requestError instanceof Error
             ? requestError.message
-            : "Companies could not be loaded.",
+            : "Company submenu items could not be loaded.",
         );
       } finally {
         if (!controller.signal.aborted) {
@@ -202,82 +154,55 @@ function AdminCompaniesPage() {
     }
 
     loadCompanies();
+    return () => controller.abort();
+  }, [accessToken, logout, navigate, refreshKey]);
 
-    return () => {
-      controller.abort();
-    };
-  }, [accessToken, apiFilters, logout, navigate, refreshKey]);
+  const menuCompanies = useMemo(
+    () => companies.filter(isCompanyMenuCandidate).sort(sortMenuCompanies),
+    [companies],
+  );
 
-  function handleFilterChange(event) {
-    const { name, value } = event.target;
-
-    setFormFilters((currentFilters) => ({
-      ...currentFilters,
-      [name]: value,
-    }));
-  }
-
-  function handleFilterSubmit(event) {
-    event.preventDefault();
-
-    setIsLoading(true);
-    setError("");
-    setSuccessMessage("");
-
-    setAppliedFilters({
-      ...formFilters,
-    });
-  }
-
-  function handleClearFilters() {
-    setIsLoading(true);
-    setError("");
-    setSuccessMessage("");
-
-    setFormFilters({
-      ...initialFilters,
-    });
-
-    setAppliedFilters({
-      ...initialFilters,
-    });
-  }
+  const visibleMenuCount = useMemo(
+    () => menuCompanies.filter(isCompanyInPublicMenu).length,
+    [menuCompanies],
+  );
 
   function handleRefresh() {
-    setIsLoading(true);
     setError("");
     setSuccessMessage("");
-
     setRefreshKey((currentKey) => currentKey + 1);
   }
 
-  function handleCompanyActionError(requestError) {
+  function handleActionError(requestError) {
     if (requestError?.status === 401) {
       logout();
-
       navigate("/admin/login", {
         replace: true,
-        state: {
-          from: {
-            pathname: "/admin/companies",
-          },
-        },
+        state: { from: { pathname: "/admin/companies" } },
       });
-
       return;
     }
 
-    console.error("Admin company action failed:", requestError);
-
+    console.error("Company submenu action failed:", requestError);
     setError(
       requestError instanceof Error
         ? requestError.message
-        : "Company action could not be completed.",
+        : "Company submenu action could not be completed.",
     );
   }
 
-  async function handleToggleVisibility(company) {
+  async function handleToggleMenu(company) {
     if (!company?._id || actionCompanyId) {
+      return;
+    }
+
+    const currentlyInMenu = isCompanyInPublicMenu(company);
+    const websiteUrl = getSafeWebsiteUrl(company.websiteUrl);
+
+    if (!currentlyInMenu && !websiteUrl) {
+      setError(
+        `"${company.name}" needs a valid Website URL before it can appear in the Companies submenu.`,
+      );
       return;
     }
 
@@ -286,552 +211,199 @@ function AdminCompaniesPage() {
       setError("");
       setSuccessMessage("");
 
-      const response = await updateAdminCompany(accessToken, company._id, {
-        isVisible: !company.isVisible,
-      });
+      const payload = currentlyInMenu
+        ? { isFeatured: false }
+        : { isFeatured: true, isVisible: true, status: "active" };
 
-      setSuccessMessage(
-        response.company.isVisible
-          ? `"${response.company.name}" is now visible on the portfolio.`
-          : `"${response.company.name}" is now hidden from the portfolio.`,
+      const response = await updateAdminCompany(
+        accessToken,
+        company._id,
+        payload,
       );
 
+      setSuccessMessage(
+        currentlyInMenu
+          ? `"${response.company.name}" was removed from the Companies submenu.`
+          : `"${response.company.name}" is now visible in the Companies submenu.`,
+      );
       setRefreshKey((currentKey) => currentKey + 1);
     } catch (requestError) {
-      handleCompanyActionError(requestError);
+      handleActionError(requestError);
     } finally {
       setActionCompanyId("");
     }
   }
-
-  async function handleToggleFeatured(company) {
-    if (!company?._id || actionCompanyId) {
-      return;
-    }
-
-    try {
-      setActionCompanyId(company._id);
-      setError("");
-      setSuccessMessage("");
-
-      const response = await updateAdminCompany(accessToken, company._id, {
-        isFeatured: !company.isFeatured,
-      });
-
-      setSuccessMessage(
-        response.company.isFeatured
-          ? `"${response.company.name}" is now featured.`
-          : `"${response.company.name}" is now a standard company.`,
-      );
-
-      setRefreshKey((currentKey) => currentKey + 1);
-    } catch (requestError) {
-      handleCompanyActionError(requestError);
-    } finally {
-      setActionCompanyId("");
-    }
-  }
-
-  async function handleDeleteCompany(company) {
-    if (!company?._id || actionCompanyId) {
-      return;
-    }
-
-    const isConfirmed = window.confirm(
-      `Permanently delete "${company.name}"?\n\nThis action cannot be undone.`,
-    );
-
-    if (!isConfirmed) {
-      return;
-    }
-
-    try {
-      setActionCompanyId(company._id);
-      setError("");
-      setSuccessMessage("");
-
-      const response = await deleteAdminCompany(accessToken, company._id);
-
-      setSuccessMessage(
-        `"${response.deletedCompany.name}" was permanently deleted.`,
-      );
-
-      setRefreshKey((currentKey) => currentKey + 1);
-    } catch (requestError) {
-      handleCompanyActionError(requestError);
-    } finally {
-      setActionCompanyId("");
-    }
-  }
-
-  const canDeleteCompanies = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-              Business Management
-            </p>
+    <main className="min-h-screen bg-slate-100 dark:bg-slate-950">
+      <section className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <header className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-7">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+                Navigation
+              </p>
+              <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+                Company Submenu
+              </h1>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Manage only the company links shown under the public Companies
+                menu. Company profile filters, business details and public
+                company pages are no longer part of this Admin area.
+              </p>
+            </div>
 
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-              Companies
-            </h1>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Manage company profiles, business relationships, operational
-              status, publication visibility and featured priority.
-            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/admin/site-settings/navigation"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-brand-500 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+              >
+                Edit Companies Menu
+              </Link>
+              <Link
+                to="/admin/companies/new"
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2"
+              >
+                Add Submenu Company
+              </Link>
+            </div>
           </div>
 
-          <Link
-            to="/admin/companies/new"
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-          >
-            Add Company
-          </Link>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                Saved links
+              </p>
+              <p className="mt-1 text-2xl font-bold text-slate-950 dark:text-white">
+                {menuCompanies.length}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                Live in submenu
+              </p>
+              <p className="mt-1 text-2xl font-bold text-emerald-600">
+                {visibleMenuCount}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/70">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                Parent menu
+              </p>
+              <p className="mt-1 text-sm font-bold text-slate-950 dark:text-white">
+                Site Settings → Navigation
+              </p>
+            </div>
+          </div>
         </header>
 
-        <form
-          onSubmit={handleFilterSubmit}
-          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
-        >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div>
-              <label htmlFor="company-search" className={labelClassName}>
-                Search
-              </label>
-
-              <input
-                id="company-search"
-                name="search"
-                type="search"
-                value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Name, slug, industry or service"
-                className={inputClassName}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="company-industry" className={labelClassName}>
-                Industry
-              </label>
-
-              <input
-                id="company-industry"
-                name="industry"
-                type="text"
-                value={formFilters.industry}
-                onChange={handleFilterChange}
-                placeholder="E-commerce and Online Retail"
-                className={inputClassName}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="company-relationship" className={labelClassName}>
-                Relationship
-              </label>
-
-              <select
-                id="company-relationship"
-                name="relationship"
-                value={formFilters.relationship}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="">All relationships</option>
-                <option value="owned">Owned Company</option>
-                <option value="managed">Managed Company</option>
-                <option value="partner">Business Partner</option>
-                <option value="client">Client Company</option>
-                <option value="other">Associated Company</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="company-status" className={labelClassName}>
-                Status
-              </label>
-
-              <select
-                id="company-status"
-                name="status"
-                value={formFilters.status}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="">All statuses</option>
-                <option value="planned">Planned</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="company-visibility" className={labelClassName}>
-                Visibility
-              </label>
-
-              <select
-                id="company-visibility"
-                name="visibility"
-                value={formFilters.visibility}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All companies</option>
-                <option value="visible">Visible</option>
-                <option value="hidden">Hidden</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="company-featured" className={labelClassName}>
-                Display type
-              </label>
-
-              <select
-                id="company-featured"
-                name="featured"
-                value={formFilters.featured}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All companies</option>
-                <option value="featured">Featured</option>
-                <option value="standard">Standard</option>
-              </select>
-            </div>
+        {successMessage && (
+          <div role="status" className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+            {successMessage}
           </div>
+        )}
 
-          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        {error && (
+          <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+            {error}
+          </div>
+        )}
+
+        <section className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-bold text-slate-950 dark:text-white">
+                Submenu companies
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                Order controls placement. Remove only hides the link from the
+                menu; it does not destroy Company data used elsewhere.
+              </p>
+            </div>
             <button
               type="button"
-              onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-500 px-4 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-brand-300 dark:hover:bg-brand-950/30"
             >
-              Clear
-            </button>
-
-            <button
-              type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-            >
-              Apply Filters
+              Refresh
             </button>
           </div>
-        </form>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-800">
-              {isLoading
-                ? "Loading companies..."
-                : `${resultCount} compan${resultCount === 1 ? "y" : "ies"}`}
-            </p>
-
-            {!isLoading && (
-              <p className="mt-1 text-xs text-slate-500">
-                Showing company profiles matching the applied filters.
+          {isLoading ? (
+            <div className="grid min-h-60 place-items-center p-8">
+              <div className="text-center">
+                <div className="mx-auto size-10 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600 motion-reduce:animate-none dark:border-slate-700" />
+                <p className="mt-4 text-sm font-semibold text-slate-500">
+                  Loading submenu links...
+                </p>
+              </div>
+            </div>
+          ) : menuCompanies.length === 0 ? (
+            <div className="px-5 py-14 text-center">
+              <p className="text-lg font-bold text-slate-950 dark:text-white">
+                No company submenu links yet
               </p>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
-          >
-            Refresh
-          </button>
-        </div>
-
-        <div aria-live="polite">
-          {successMessage && (
-            <div
-              role="status"
-              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
-            >
-              {successMessage}
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+                Add a company name and website URL. It can then appear directly
+                inside the public Companies dropdown.
+              </p>
             </div>
-          )}
+          ) : (
+            <div className="divide-y divide-slate-200 dark:divide-slate-800">
+              {menuCompanies.map((company) => {
+                const websiteUrl = getSafeWebsiteUrl(company.websiteUrl);
+                const isInMenu = isCompanyInPublicMenu(company);
+                const isBusy = actionCompanyId === company._id;
 
-          {error && (
-            <div
-              role="alert"
-              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
-              <p className="font-medium leading-6">{error}</p>
-
-              <button
-                type="button"
-                onClick={handleRefresh}
-                className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-        </div>
-
-        {isLoading && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-          >
-            <span className="sr-only">Loading companies...</span>
-
-            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
-              <div
-                key={placeholder}
-                className="h-[31rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
-              />
-            ))}
-          </div>
-        )}
-
-        {!isLoading && !error && companies.length === 0 && (
-          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
-            <p className="text-base font-bold text-slate-950">
-              No companies found
-            </p>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Change the current filters or create the first Company.
-            </p>
-          </div>
-        )}
-
-        {!isLoading && companies.length > 0 && (
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {companies.map((company) => {
-              const businessAreas = Array.isArray(company.businessAreas)
-                ? company.businessAreas
-                : [];
-
-              const statusLabel =
-                statusLabels[company.status] || company.status || "Company";
-
-              const relationshipLabel =
-                relationshipLabels[company.relationship] ||
-                company.relationship ||
-                "Company";
-
-              const isActionPending = actionCompanyId === company._id;
-
-              return (
-                <article
-                  key={company._id}
-                  className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-                >
-                  <div className="relative h-36 overflow-hidden bg-slate-950">
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand-600/35 via-slate-950 to-cyan-500/20" />
-
-                    {company.coverImageUrl && (
-                      <img
-                        src={company.coverImageUrl}
-                        alt={`${company.name} cover`}
-                        loading="lazy"
-                        onError={(event) => {
-                          event.currentTarget.hidden = true;
-                        }}
-                        className="absolute inset-0 size-full object-cover opacity-50"
-                      />
-                    )}
-
-                    <div className="absolute inset-0 bg-slate-950/35" />
-
-                    <div className="relative flex h-full flex-col justify-between p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl border border-white/15 bg-white/10 text-sm font-bold text-white">
-                          <span>{createInitials(company.name)}</span>
-
-                          {company.logoUrl && (
-                            <img
-                              src={company.logoUrl}
-                              alt={`${company.name} logo`}
-                              loading="lazy"
-                              onError={(event) => {
-                                event.currentTarget.hidden = true;
-                              }}
-                              className="absolute inset-0 size-full bg-white object-contain p-1"
-                            />
-                          )}
-                        </div>
-
-                        <span className="rounded-lg border border-white/10 bg-slate-950/60 px-2.5 py-1 text-xs font-bold text-white">
-                          Order {company.order ?? 0}
-                        </span>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2">
-                        {company.isFeatured && (
-                          <span className="rounded-lg bg-amber-300 px-2.5 py-1 text-xs font-bold text-slate-950">
-                            Featured
-                          </span>
-                        )}
-
-                        <span
-                          className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                            company.isVisible
-                              ? "bg-emerald-400/90 text-slate-950"
-                              : "bg-slate-700 text-slate-100"
-                          }`}
-                        >
-                          {company.isVisible ? "Visible" : "Hidden"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="flex flex-wrap gap-2">
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                          statusClasses[company.status] ||
-                          "bg-slate-100 text-slate-700"
-                        }`}
-                      >
-                        {statusLabel}
-                      </span>
-
-                      <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-                        {relationshipLabel}
+                return (
+                  <article key={company._id} className="grid gap-4 px-5 py-5 lg:grid-cols-[5rem_minmax(0,1fr)_auto] lg:items-center">
+                    <div>
+                      <span className="inline-flex min-w-14 items-center justify-center rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                        #{Number.isFinite(Number(company.order)) ? Number(company.order) : 0}
                       </span>
                     </div>
 
-                    <h2 className="mt-4 break-words text-lg font-bold text-slate-950">
-                      {company.name}
-                    </h2>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="truncate text-base font-bold text-slate-950 dark:text-white">
+                          {company.name}
+                        </h3>
+                        <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${isInMenu ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"}`}>
+                          {isInMenu ? "In menu" : "Removed"}
+                        </span>
+                      </div>
 
-                    {company.legalName &&
-                      company.legalName !== company.name && (
-                        <p className="mt-1 break-words text-sm font-medium text-slate-500">
-                          {company.legalName}
-                        </p>
-                      )}
-
-                    <p className="mt-1 break-all text-xs font-semibold text-brand-600">
-                      {company.slug}
-                    </p>
-
-                    <p className="mt-4 text-sm font-semibold text-slate-700">
-                      {company.industry || "Industry not specified"}
-                    </p>
-
-                    {company.shortDescription && (
-                      <p className="mt-2 line-clamp-3 break-words text-sm leading-6 text-slate-600">
-                        {company.shortDescription}
-                      </p>
-                    )}
-
-                    <div className="mt-5">
-                      <p className={labelClassName}>Business areas</p>
-
-                      {businessAreas.length > 0 ? (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {businessAreas.slice(0, 5).map((area) => (
-                            <span
-                              key={`${company._id}-${area}`}
-                              className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
-                            >
-                              {area}
-                            </span>
-                          ))}
-
-                          {businessAreas.length > 5 && (
-                            <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                              +{businessAreas.length - 5}
-                            </span>
-                          )}
-                        </div>
+                      {websiteUrl ? (
+                        <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block truncate text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">
+                          {websiteUrl}
+                        </a>
                       ) : (
-                        <p className="mt-2 text-sm text-slate-500">
-                          No business areas added
+                        <p className="mt-1 text-sm font-medium text-amber-600">
+                          Website URL required
                         </p>
                       )}
                     </div>
 
-                    <dl className="mt-5 divide-y divide-slate-100 border-y border-slate-100 text-sm">
-                      <div className="flex items-center justify-between gap-4 py-3">
-                        <dt className="text-slate-500">Business areas</dt>
-
-                        <dd className="font-semibold text-slate-800">
-                          {businessAreas.length}
-                        </dd>
-                      </div>
-
-                      <div className="flex items-center justify-between gap-4 py-3">
-                        <dt className="text-slate-500">Updated</dt>
-
-                        <dd className="text-right font-semibold text-slate-700">
-                          {formatDate(company.updatedAt)}
-                        </dd>
-                      </div>
-                    </dl>
-
-                    <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
-                      <Link
-                        to={`/admin/companies/${company._id}/edit`}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-                      >
+                    <div className="flex flex-wrap gap-2 lg:justify-end">
+                      {websiteUrl && (
+                        <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-3.5 text-xs font-bold text-slate-700 transition hover:border-brand-500 hover:text-brand-700 dark:border-slate-700 dark:text-slate-200">
+                          Open Website
+                        </a>
+                      )}
+                      <Link to={`/admin/companies/${company._id}/edit`} className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-500 px-3.5 text-xs font-bold text-brand-700 transition hover:bg-brand-50 dark:text-brand-300 dark:hover:bg-brand-950/30">
                         Edit
                       </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => handleToggleVisibility(company)}
-                        disabled={actionCompanyId !== ""}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : company.isVisible
-                            ? "Hide"
-                            : "Show"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleToggleFeatured(company)}
-                        disabled={actionCompanyId !== ""}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : company.isFeatured
-                            ? "Make Standard"
-                            : "Make Featured"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteCompany(company)}
-                        disabled={
-                          actionCompanyId !== "" || !canDeleteCompanies
-                        }
-                        title={
-                          canDeleteCompanies
-                            ? "Permanently delete company"
-                            : "Your role cannot permanently delete companies"
-                        }
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                      >
-                        {isActionPending ? "Working..." : "Delete"}
+                      <button type="button" onClick={() => handleToggleMenu(company)} disabled={isBusy} className={`inline-flex min-h-10 items-center justify-center rounded-xl px-3.5 text-xs font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60 ${isInMenu ? "bg-slate-700 hover:bg-slate-800" : "bg-brand-600 hover:bg-brand-700"}`}>
+                        {isBusy ? "Saving..." : isInMenu ? "Remove from Menu" : "Add to Menu"}
                       </button>
                     </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </section>
     </main>
   );

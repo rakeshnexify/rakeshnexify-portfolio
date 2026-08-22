@@ -54,7 +54,6 @@ const dedicatedPageSectionKeys = new Set([
   "experience",
   "achievements",
   "team",
-  "companies",
   "clients-partners",
   "testimonials",
   "faq",
@@ -75,7 +74,6 @@ const homepageSectionKeys = new Set([
   "experience",
   "achievements",
   "team",
-  "companies",
   "clients-partners",
   "posts",
   "testimonials",
@@ -106,7 +104,9 @@ const navigationSectionKeys = new Set([
 
 const footerNavigationSectionKeys = new Set(
   defaultFormValues.sections
-    .filter((section) => section.key !== "posts")
+    .filter(
+      (section) => !["posts", "companies"].includes(section.key),
+    )
     .map((section) => section.key),
 );
 
@@ -1934,17 +1934,6 @@ function SiteSettingsForm({
 
       <ListingSectionSettingsCard
         isVisible={isPanelActive("listing-sections")}
-        title="Companies Section Content"
-        description="Manage the heading, description and call-to-action displayed above your companies and brands."
-        fieldName="companiesSection"
-        values={formValues.companiesSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
         title="Clients & Partners Section Content"
         description="Manage the heading, description and call-to-action displayed above your public Clients & Partners."
         fieldName="clientsPartnersSection"
@@ -2408,13 +2397,17 @@ function SiteSettingsForm({
             const homepagePosition = homepageSectionIndexes.indexOf(index);
 
             const capabilityLabel =
-              hasHomepageSection && hasDedicatedPage
-                ? "Homepage + Page"
-                : hasDedicatedPage
-                  ? "Public Page"
-                  : hasHomepageSection
-                    ? "Homepage Section"
-                    : "Registry Item";
+              section.key === "companies"
+                ? "Navigation Menu"
+                : hasHomepageSection && hasDedicatedPage
+                  ? "Homepage + Page"
+                  : hasDedicatedPage
+                    ? "Public Page"
+                    : hasHomepageSection
+                      ? "Homepage Section"
+                      : hasNavigationItem
+                        ? "Navigation Item"
+                        : "Registry Item";
 
             return (
               <div
@@ -2433,6 +2426,15 @@ function SiteSettingsForm({
                         {section.key}
                       </span>
                     </p>
+
+                    {section.key === "companies" && (
+                      <p className="mt-2 max-w-2xl text-xs leading-5 text-slate-500">
+                        This is a Navbar-only dropdown. Edit its parent label,
+                        visibility and Navbar order here. Manage submenu company
+                        names, website URLs, status, relationship and display
+                        order in Company Menu.
+                      </p>
+                    )}
                   </div>
 
                   <span

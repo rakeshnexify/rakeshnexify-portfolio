@@ -2,12 +2,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
 import siteData from "../../data/siteData";
+import useCompanyNavigation from "../../hooks/useCompanyNavigation";
 import usePublicTheme from "../../hooks/usePublicTheme";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import {
+  createPinnedNavigationLayout,
   getNavbarNavigationItems,
   isPublicNavigationItemActive,
 } from "../../utils/publicNavigation";
+import CompanyNavigationMenu from "../navigation/CompanyNavigationMenu";
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
@@ -65,6 +68,7 @@ function PublicNavigationLink({
 function PublicPageHeader() {
   const { pathname, hash } = useLocation();
   const { settings } = useSiteSettings();
+  const { companies: companyNavigationCompanies } = useCompanyNavigation();
   const { isDark, toggleTheme } = usePublicTheme();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -84,14 +88,27 @@ function PublicPageHeader() {
     [settings?.sections],
   );
 
-  const standardNavigationItems = navigationItems.filter(
-    (item) => item.key !== "contact",
+  const standardNavigationItems = useMemo(
+    () =>
+      navigationItems.filter(
+        (item) =>
+          item.key !== "contact" &&
+          (item.key !== "companies" || companyNavigationCompanies.length > 0),
+      ),
+    [companyNavigationCompanies.length, navigationItems],
   );
 
   const contactItem = navigationItems.find((item) => item.key === "contact");
+  const companyNavigationItem = standardNavigationItems.find(
+    (item) => item.key === "companies",
+  );
 
-  const desktopNavigationItems = standardNavigationItems.slice(0, 4);
-  const overflowNavigationItems = standardNavigationItems.slice(4);
+  const desktopNavigationLayout = useMemo(
+    () => createPinnedNavigationLayout(standardNavigationItems, 4),
+    [standardNavigationItems],
+  );
+  const desktopNavigationItems = desktopNavigationLayout.directItems;
+  const overflowNavigationItems = desktopNavigationLayout.overflowItems;
 
   const isOverflowItemActive = overflowNavigationItems.some((item) =>
     isPublicNavigationItemActive(item, pathname, hash),
@@ -219,19 +236,28 @@ function PublicPageHeader() {
                 aria-label="Main navigation"
                 className="hidden min-w-0 items-center gap-3 lg:flex xl:gap-4"
               >
-                {desktopNavigationItems.map((item) => (
-                  <PublicNavigationLink
-                    key={item.key}
-                    item={item}
-                    isActive={isPublicNavigationItemActive(
-                      item,
-                      pathname,
-                      hash,
-                    )}
-                    isDark={isDark}
-                    onNavigate={closeMobileMenu}
-                  />
-                ))}
+                {desktopNavigationItems.map((item) =>
+                  item.key === "companies" ? (
+                    <CompanyNavigationMenu
+                      key={item.key}
+                      label={item.label}
+                      companies={companyNavigationCompanies}
+                      isDark={isDark}
+                    />
+                  ) : (
+                    <PublicNavigationLink
+                      key={item.key}
+                      item={item}
+                      isActive={isPublicNavigationItemActive(
+                        item,
+                        pathname,
+                        hash,
+                      )}
+                      isDark={isDark}
+                      onNavigate={closeMobileMenu}
+                    />
+                  ),
+                )}
 
                 {overflowNavigationItems.length > 0 && (
                   <div ref={moreMenuRef} className="relative shrink-0">
@@ -449,20 +475,31 @@ function PublicPageHeader() {
                       className="max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain py-5"
                     >
                       <div className="flex min-w-0 flex-col gap-2">
-                        {standardNavigationItems.map((item) => (
-                          <PublicNavigationLink
-                            key={item.key}
-                            item={item}
-                            isActive={isPublicNavigationItemActive(
-                              item,
-                              pathname,
-                              hash,
-                            )}
-                            isMobile
-                            isDark={isDark}
-                            onNavigate={closeMobileMenu}
-                          />
-                        ))}
+                        {standardNavigationItems.map((item) =>
+                          item.key === "companies" ? (
+                            <CompanyNavigationMenu
+                              key={item.key}
+                              label={companyNavigationItem?.label || item.label}
+                              companies={companyNavigationCompanies}
+                              variant="mobile"
+                              isDark={isDark}
+                              onNavigate={closeMobileMenu}
+                            />
+                          ) : (
+                            <PublicNavigationLink
+                              key={item.key}
+                              item={item}
+                              isActive={isPublicNavigationItemActive(
+                                item,
+                                pathname,
+                                hash,
+                              )}
+                              isMobile
+                              isDark={isDark}
+                              onNavigate={closeMobileMenu}
+                            />
+                          ),
+                        )}
 
                         {contactItem && (
                           <Link

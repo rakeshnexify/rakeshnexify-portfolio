@@ -1,16 +1,13 @@
-import Company from "../models/Company.js";
 import Post from "../models/Post.js";
 import Project from "../models/Project.js";
 import SiteSettings from "../models/SiteSettings.js";
-import TeamMember from "../models/TeamMember.js";
 import createSitemapXml from "../utils/createSitemapXml.js";
 
 const MAIN_SITE_KEY = "main";
 
 async function getSitemapXml(req, res, next) {
   try {
-    const [projects, companies, teamMembers, posts, siteSettings] =
-      await Promise.all([
+    const [projects, posts, siteSettings] = await Promise.all([
         Project.find({
           isVisible: true,
         })
@@ -21,24 +18,6 @@ async function getSitemapXml(req, res, next) {
           })
           .lean(),
 
-        Company.find({
-          isVisible: true,
-        })
-          .select({
-            slug: 1,
-            relationship: 1,
-            updatedAt: 1,
-          })
-          .lean(),
-
-        TeamMember.find({
-          isVisible: true,
-        })
-          .select({
-            slug: 1,
-            updatedAt: 1,
-          })
-          .lean(),
 
         Post.find({
           isVisible: true,
@@ -61,8 +40,6 @@ async function getSitemapXml(req, res, next) {
 
     const sitemapXml = createSitemapXml({
       projects,
-      companies,
-      teamMembers,
       posts,
 
       sections: Array.isArray(siteSettings?.sections)
