@@ -8243,3 +8243,328 @@ body.public-theme-active[data-public-theme="dark"] .public-services-view-all:foc
     display: none;
   }
 }
+/* RNX Mobile Home Section Heading Scale v141 */
+@media (max-width: 639px) {
+  body.public-theme-active :is(
+    #about,
+    #skills,
+    #services,
+    #projects,
+    #companies,
+    #experience,
+    #education,
+    #certifications,
+    #certification-achievements,
+    #achievements,
+    #team,
+    #testimonials,
+    #blog,
+    #posts,
+    #faq,
+    #faqs,
+    #contact
+  ) h2 {
+    font-size: clamp(1.25rem, 6vw, 1.65rem) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.035em !important;
+  }
+}
+/* RNX Services Cinematic Film Surface v143 */
+body.public-theme-active .public-services-section .public-service-card {
+  --service-film-accent: var(--services-cyan);
+  --service-film-speed: 13s;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--service-film-accent) 34%,
+      var(--services-border)
+    );
+  background:
+    radial-gradient(
+      ellipse at 18% 4%,
+      color-mix(in srgb, var(--service-film-accent) 17%, transparent),
+      transparent 44%
+    ),
+    radial-gradient(
+      ellipse at 92% 94%,
+      color-mix(in srgb, var(--services-violet) 9%, transparent),
+      transparent 48%
+    ),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--services-card-strong) 95%, transparent),
+      color-mix(in srgb, var(--services-card) 97%, var(--services-blue) 3%)
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--service-film-accent) 5%, transparent),
+    0 18px 44px color-mix(in srgb, var(--services-shadow) 84%, transparent);
+}
+
+body.public-theme-active
+  .public-services-section
+  .public-service-card:nth-child(4n + 2) {
+  --service-film-accent: var(--services-blue);
+  --service-film-speed: 14.5s;
+}
+
+body.public-theme-active
+  .public-services-section
+  .public-service-card:nth-child(4n + 3) {
+  --service-film-accent: var(--services-violet);
+  --service-film-speed: 12s;
+}
+
+body.public-theme-active
+  .public-services-section
+  .public-service-card:nth-child(4n + 4) {
+  --service-film-accent:
+    color-mix(
+      in srgb,
+      var(--services-cyan) 52%,
+      var(--services-violet)
+    );
+  --service-film-speed: 15.5s;
+}
+
+body.public-theme-active .public-services-section .public-service-card::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: -34%;
+  top: 19%;
+  width: 168%;
+  height: 4.2rem;
+  border-top: 1px solid
+    color-mix(in srgb, var(--service-film-accent) 22%, transparent);
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--service-film-accent) 20%, transparent);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--service-film-accent) 34%, transparent)
+        0 0.42rem,
+      transparent 0.42rem 1.18rem
+    )
+    top / auto 0.28rem repeat-x,
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--service-film-accent) 30%, transparent)
+        0 0.42rem,
+      transparent 0.42rem 1.18rem
+    )
+    bottom / auto 0.28rem repeat-x,
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 1.95rem,
+      color-mix(in srgb, var(--service-film-accent) 14%, transparent)
+        1.95rem 2.02rem,
+      transparent 2.02rem 3.9rem
+    )
+    center / auto 100% repeat-x,
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--service-film-accent) 8%, transparent),
+      transparent
+    );
+  opacity: 0.42;
+  transform: rotate(-6deg);
+  transform-origin: center;
+  pointer-events: none;
+  animation:
+    serviceCardFilmRun var(--service-film-speed) linear infinite,
+    serviceCardFilmBreathe 4.8s ease-in-out infinite alternate;
+  will-change: background-position, opacity, transform;
+}
+
+body.public-theme-active .public-services-section .public-service-card::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -30% -58%;
+  background:
+    linear-gradient(
+      108deg,
+      transparent 35%,
+      color-mix(in srgb, var(--service-film-accent) 5%, transparent) 43%,
+      color-mix(in srgb, var(--service-film-accent) 17%, transparent) 48%,
+      rgb(255 255 255 / 0.08) 50%,
+      color-mix(in srgb, var(--service-film-accent) 11%, transparent) 53%,
+      transparent 61%
+    );
+  opacity: 0;
+  transform: translateX(-42%) rotate(-4deg);
+  pointer-events: none;
+  animation: serviceCardProjectorSweep 8.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+body.public-theme-active
+  .public-services-section
+  .public-service-card
+  > * {
+  position: relative;
+  z-index: 1;
+}
+
+body.public-theme-active .public-services-section .public-service-card:hover {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--service-film-accent) 58%,
+      var(--services-border)
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--service-film-accent) 8%, transparent),
+    0 24px 58px
+      color-mix(in srgb, var(--service-film-accent) 12%, transparent),
+    0 16px 38px color-mix(in srgb, var(--services-shadow) 94%, transparent);
+}
+
+body.public-theme-active .public-services-section .public-service-card:hover::before {
+  opacity: 0.58;
+}
+
+body.public-theme-active[data-public-theme="dark"]
+  .public-services-section
+  .public-service-card {
+  border-color:
+    color-mix(
+      in srgb,
+      var(--service-film-accent) 40%,
+      var(--services-border)
+    );
+  background:
+    radial-gradient(
+      ellipse at 18% 4%,
+      color-mix(in srgb, var(--service-film-accent) 20%, transparent),
+      transparent 44%
+    ),
+    radial-gradient(
+      ellipse at 92% 94%,
+      color-mix(in srgb, var(--services-violet) 11%, transparent),
+      transparent 48%
+    ),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--services-card-strong) 93%, #071426),
+      color-mix(in srgb, var(--services-card) 95%, #020817)
+    );
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.035),
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--service-film-accent) 7%, transparent),
+    0 22px 50px rgb(0 0 0 / 0.24);
+}
+
+body.public-theme-active[data-public-theme="dark"]
+  .public-services-section
+  .public-service-card::before {
+  opacity: 0.48;
+}
+
+body.public-theme-active[data-public-theme="dark"]
+  .public-services-section
+  .public-service-card::after {
+  filter: saturate(1.12);
+}
+
+@media (max-width: 639px) {
+  body.public-theme-active
+    .public-services-section
+    .public-service-card::before {
+    left: -46%;
+    top: 24%;
+    width: 192%;
+    height: 3.4rem;
+    opacity: 0.3;
+    transform: rotate(-7deg);
+  }
+
+  body.public-theme-active
+    .public-services-section
+    .public-service-card::after {
+    opacity: 0;
+    animation-duration: 11s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.public-theme-active
+    .public-services-section
+    .public-service-card::before,
+  body.public-theme-active
+    .public-services-section
+    .public-service-card::after {
+    animation: none !important;
+  }
+
+  body.public-theme-active
+    .public-services-section
+    .public-service-card::before {
+    background-position:
+      0 0,
+      0 100%,
+      0 50%,
+      0 0;
+  }
+}
+
+@keyframes serviceCardFilmRun {
+  from {
+    background-position:
+      0 0,
+      0 100%,
+      0 50%,
+      0 0;
+  }
+
+  to {
+    background-position:
+      14.16rem 0,
+      14.16rem 100%,
+      15.6rem 50%,
+      9rem 0;
+  }
+}
+
+@keyframes serviceCardFilmBreathe {
+  from {
+    opacity: 0.32;
+    transform: translate3d(-1.5%, -2%, 0) rotate(-6deg);
+  }
+
+  to {
+    opacity: 0.52;
+    transform: translate3d(1.5%, 2%, 0) rotate(-4.5deg);
+  }
+}
+
+@keyframes serviceCardProjectorSweep {
+  0%,
+  18% {
+    opacity: 0;
+    transform: translateX(-44%) rotate(-4deg);
+  }
+
+  34% {
+    opacity: 0.72;
+  }
+
+  52% {
+    opacity: 0.15;
+    transform: translateX(40%) rotate(-4deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(40%) rotate(-4deg);
+  }
+}

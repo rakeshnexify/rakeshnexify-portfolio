@@ -1,0 +1,569 @@
+.section {
+  --team-bg: #fbfcff;
+  --team-bg-deep: #f3f6fb;
+  --team-card: rgba(255, 255, 255, 0.94);
+  --team-text: #0f172a;
+  --team-muted: #64748b;
+  --team-border: rgba(148, 163, 184, 0.2);
+  --team-blue: #2563eb;
+  --team-violet: #7c3aed;
+  --team-green: #059669;
+  --team-amber: #ea580c;
+  --team-shadow: 0 16px 42px rgba(15, 23, 42, 0.08);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-top: 1px solid var(--team-border);
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--team-green) 8%, transparent), transparent 20rem),
+    radial-gradient(circle at 86% 22%, color-mix(in srgb, var(--team-violet) 9%, transparent), transparent 24rem),
+    radial-gradient(circle at 58% 92%, color-mix(in srgb, var(--team-blue) 8%, transparent), transparent 22rem),
+    linear-gradient(145deg, var(--team-bg) 0%, var(--team-bg-deep) 52%, var(--team-bg) 100%);
+  color: var(--team-text);
+}
+
+:global(body.public-theme-active[data-public-theme="dark"]) .section,
+:global(html[data-public-theme="dark"]) .section,
+:global(.dark) .section,
+:global(.theme-dark) .section,
+:global([data-theme="dark"]) .section {
+  --team-bg: #050b14;
+  --team-bg-deep: #08111f;
+  --team-card: rgba(12, 24, 42, 0.96);
+  --team-text: #f8fafc;
+  --team-muted: #9eb0c6;
+  --team-border: rgba(96, 165, 250, 0.16);
+  --team-blue: #60a5fa;
+  --team-violet: #a78bfa;
+  --team-green: #34d399;
+  --team-amber: #fb923c;
+  --team-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.backdrop::before,
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  opacity: 0.34;
+  will-change: transform;
+}
+
+.backdrop::before {
+  background:
+    repeating-linear-gradient(
+      118deg,
+      transparent 0 5.4rem,
+      color-mix(in srgb, var(--team-blue) 12%, transparent) 5.5rem 5.62rem,
+      transparent 5.74rem 10.6rem,
+      color-mix(in srgb, var(--team-violet) 10%, transparent) 10.72rem 10.84rem,
+      transparent 10.96rem 16rem
+    );
+  transform: rotate(-6deg) scale(1.08);
+  animation: teamWeaveDrift 24s linear infinite;
+}
+
+.backdrop::after {
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--team-blue) 46%, transparent) 0 1.5px, transparent 1.8px),
+    radial-gradient(circle, color-mix(in srgb, var(--team-green) 38%, transparent) 0 1.4px, transparent 1.7px),
+    radial-gradient(circle, color-mix(in srgb, var(--team-violet) 38%, transparent) 0 1.3px, transparent 1.6px);
+  background-size: 9rem 7rem, 13rem 10rem, 17rem 12rem;
+  background-position: 0 0, 4rem 3rem, 8rem 1rem;
+  mask-image:
+    linear-gradient(
+      90deg,
+      transparent,
+      black 12%,
+      black 88%,
+      transparent
+    );
+  opacity: 0.34;
+  animation: teamNodeFloat 22s ease-in-out infinite alternate;
+}
+
+.softShapeOne,
+.softShapeTwo {
+  position: absolute;
+  width: 28rem;
+  height: 5.8rem;
+  border: 1px solid color-mix(in srgb, var(--team-blue) 16%, transparent);
+  border-radius: 999px;
+  opacity: 0.46;
+  filter: blur(0.2px);
+  will-change: transform;
+}
+
+.softShapeOne::before,
+.softShapeTwo::before {
+  content: "";
+  position: absolute;
+  inset: 0.65rem 1rem;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--team-blue) 13%, transparent),
+      color-mix(in srgb, var(--team-violet) 14%, transparent),
+      transparent
+    );
+  filter: blur(10px);
+}
+
+.softShapeOne {
+  left: -10rem;
+  top: 18%;
+  transform: rotate(-12deg);
+  animation: teamRibbonOne 18s ease-in-out infinite alternate;
+}
+
+.softShapeTwo {
+  right: -9rem;
+  bottom: 13%;
+  border-color: color-mix(in srgb, var(--team-green) 16%, transparent);
+  transform: rotate(13deg);
+  animation: teamRibbonTwo 20s ease-in-out infinite alternate;
+}
+
+.heading {
+  max-width: 50rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  color: var(--team-blue);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.eyebrowIcon {
+  display: inline-grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--team-blue) 8%, transparent);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--team-blue) 10%, transparent);
+}
+
+.eyebrowIcon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.heading h2 {
+  margin: 0.9rem auto 0;
+  color: var(--team-text);
+  font-size: clamp(2.15rem, 5vw, 3.35rem);
+  font-weight: 900;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.heading p {
+  max-width: 40rem;
+  margin: 1rem auto 0;
+  color: var(--team-muted);
+  font-size: 0.94rem;
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.headingAccent {
+  display: block;
+  width: 3rem;
+  height: 2px;
+  margin: 1rem auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--team-blue), var(--team-violet));
+}
+
+.memberGrid {
+  display: grid;
+  max-width: 72rem;
+  margin: 2.2rem auto 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.memberCard {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--team-border);
+  border-radius: 1rem;
+  background: var(--team-card);
+  box-shadow: var(--team-shadow);
+  color: inherit;
+}
+
+.memberPhoto {
+  display: grid;
+  aspect-ratio: 1 / 0.96;
+  place-items: end center;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 50% 60%,
+      color-mix(in srgb, var(--team-blue) 9%, transparent),
+      transparent 52%
+    ),
+    color-mix(in srgb, var(--team-blue) 4%, var(--team-card));
+}
+
+.memberPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.memberInitials {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: var(--team-blue);
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.memberIdentity {
+  min-height: 6.25rem;
+  padding: 0.9rem 0.8rem 1rem;
+  text-align: center;
+}
+
+.memberAccent {
+  display: block;
+  width: 1.55rem;
+  height: 2px;
+  margin: 0 auto 0.7rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.accentBlue {
+  color: var(--team-blue);
+}
+
+.accentViolet {
+  color: var(--team-violet);
+}
+
+.accentGreen {
+  color: var(--team-green);
+}
+
+.accentAmber {
+  color: var(--team-amber);
+}
+
+.memberIdentity h3 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--team-text);
+  font-size: 0.9rem;
+  font-weight: 850;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.memberIdentity p {
+  margin: 0.2rem 0 0;
+  overflow: hidden;
+  color: var(--team-muted);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.footerAction {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.7rem;
+}
+
+.teamCta {
+  display: inline-flex;
+  min-height: 2.6rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border-radius: 999px;
+  padding: 0.42rem 0.9rem;
+  color: var(--team-blue);
+  font-size: 0.72rem;
+  font-weight: 820;
+  transition:
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.teamCta:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--team-blue) 7%, transparent);
+}
+
+.teamCta svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.notice,
+.emptyState {
+  max-width: 52rem;
+  margin: 1.5rem auto 0;
+  border: 1px solid var(--team-border);
+  border-radius: 0.9rem;
+  background: var(--team-card);
+  box-shadow: var(--team-shadow);
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+}
+
+.notice strong,
+.emptyState strong {
+  color: var(--team-text);
+  font-size: 0.8rem;
+}
+
+.notice p,
+.emptyState p {
+  margin: 0.15rem 0 0;
+  color: var(--team-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.notice button {
+  min-height: 2.2rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--team-amber) 24%, transparent);
+  border-radius: 0.65rem;
+  padding: 0.3rem 0.75rem;
+  background: color-mix(in srgb, var(--team-amber) 8%, transparent);
+  color: var(--team-amber);
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.emptyState {
+  display: grid;
+  min-height: 10rem;
+  place-items: center;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.emptyState > span {
+  display: grid;
+  width: 2.7rem;
+  height: 2.7rem;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--team-blue) 8%, transparent);
+  color: var(--team-blue);
+}
+
+.emptyState > span svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.skeletonCard {
+  aspect-ratio: 0.72 / 1;
+  border-radius: 1rem;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--team-border) 30%, transparent),
+      color-mix(in srgb, var(--team-border) 70%, transparent),
+      color-mix(in srgb, var(--team-border) 30%, transparent)
+    );
+  background-size: 200% 100%;
+  animation: teamSkeleton 1.35s ease-in-out infinite;
+}
+
+@media (max-width: 899px) {
+  .memberGrid {
+    width: calc(100% + 1.25rem);
+    max-width: none;
+    margin-right: -1.25rem;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(13rem, 42vw);
+    gap: 0.75rem;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding-right: 1.25rem;
+    padding-bottom: 0.55rem;
+    scroll-snap-type: inline mandatory;
+    scrollbar-width: thin;
+  }
+
+  .memberCard,
+  .skeletonCard {
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 639px) {
+  .heading p {
+    display: none;
+  }
+
+  .heading h2 {
+    font-size: clamp(1.9rem, 10vw, 2.5rem);
+  }
+
+  .heading p {
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  .backdrop::before {
+    opacity: 0.2;
+  }
+
+  .backdrop::after {
+    opacity: 0.2;
+    background-size: 8rem 6rem, 11rem 8rem, 14rem 10rem;
+  }
+
+  .softShapeOne {
+    left: -18rem;
+    top: 28%;
+  }
+
+  .softShapeTwo {
+    right: -18rem;
+    bottom: 18%;
+  }
+
+  .memberGrid {
+    width: calc(100% + 1rem);
+    margin-top: 1.6rem;
+    margin-right: -1rem;
+    grid-auto-columns: minmax(12.5rem, 72vw);
+    gap: 0.65rem;
+    padding-right: 1rem;
+  }
+
+  .memberIdentity {
+    min-height: 5.2rem;
+    padding: 0.72rem 0.55rem 0.78rem;
+  }
+
+  .memberIdentity h3 {
+    font-size: 0.8rem;
+  }
+
+  .memberIdentity p {
+    font-size: 0.6rem;
+  }
+
+  .notice {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .notice button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop::before,
+  .backdrop::after,
+  .softShapeOne,
+  .softShapeTwo,
+  .memberCard,
+  .teamCta,
+  .skeletonCard {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@keyframes teamWeaveDrift {
+  from {
+    transform: translate3d(-2%, -1%, 0) rotate(-6deg) scale(1.08);
+  }
+
+  to {
+    transform: translate3d(7%, 3%, 0) rotate(-3deg) scale(1.08);
+  }
+}
+
+@keyframes teamNodeFloat {
+  from {
+    transform: translate3d(-2%, -2%, 0) scale(0.98);
+    opacity: 0.24;
+  }
+
+  to {
+    transform: translate3d(3%, 4%, 0) scale(1.03);
+    opacity: 0.38;
+  }
+}
+
+@keyframes teamRibbonOne {
+  from {
+    transform: translate3d(-8%, -4%, 0) rotate(-12deg);
+  }
+
+  to {
+    transform: translate3d(20%, 10%, 0) rotate(-7deg);
+  }
+}
+
+@keyframes teamRibbonTwo {
+  from {
+    transform: translate3d(9%, 6%, 0) rotate(13deg);
+  }
+
+  to {
+    transform: translate3d(-18%, -9%, 0) rotate(7deg);
+  }
+}
+
+@keyframes teamSkeleton {
+  from {
+    background-position: 180% 0;
+  }
+
+  to {
+    background-position: -20% 0;
+  }
+}

@@ -23,8 +23,6 @@ import ServicesPage from "../pages/ServicesPage";
 import SkillsPage from "../pages/SkillsPage";
 import TestimonialsPage from "../pages/TestimonialsPage";
 import TeamPage from "../pages/TeamPage";
-import TeamMemberDetailsPage from "../pages/TeamMemberDetailsPage";
-
 import AdminAuditLogDetailPage from "../pages/admin/AdminAuditLogDetailPage";
 import AdminAuditLogsPage from "../pages/admin/AdminAuditLogsPage";
 import AdminAppointmentDetailPage from "../pages/admin/AdminAppointmentDetailPage";
@@ -340,9 +338,7 @@ function AppRoutes() {
 
           <Route element={<PublicPageVisibilityRoute sectionKey="team" />}>
             <Route path="/team" element={<TeamPage />} />
-
-            <Route path="/team/:slug" element={<TeamMemberDetailsPage />} />
-          </Route>
+</Route>
 
           <Route element={<PublicPageVisibilityRoute sectionKey="companies" />}>
             <Route path="/companies" element={<CompaniesPage />} />

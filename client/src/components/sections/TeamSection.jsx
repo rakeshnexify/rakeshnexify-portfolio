@@ -4,24 +4,28 @@ import { Link } from "react-router";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import useTeamMembers from "../../hooks/useTeamMembers";
 import Container from "../layout/Container";
-import ResponsiveCardRow from "../layout/ResponsiveCardRow";
 import Section from "../layout/Section";
-import SectionHeading from "../layout/SectionHeading";
-import TeamMemberCard from "../team/TeamMemberCard";
+import styles from "./TeamSection.module.css";
+
+const HOME_TEAM_LIMIT = 5;
 
 const defaultSectionContent = {
   eyebrow: "Meet My Team",
-
-  heading: "Skilled professionals working together on modern digital projects",
-
+  heading: "The People Behind the Work",
   description:
-    "Meet the developers, designers and collaborators who contribute their skills, experience and ideas to our websites, applications and business platforms.",
-
+    "A focused team bringing practical skills, thoughtful collaboration and care to every digital project.",
   ctaButton: {
-    label: "View All Team Members",
+    label: "Meet The Full Team",
     url: "/team",
   },
 };
+
+const accentClasses = [
+  styles.accentBlue,
+  styles.accentViolet,
+  styles.accentGreen,
+  styles.accentAmber,
+];
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -74,7 +78,6 @@ function sortTeamMembersForPreview(firstMember, secondMember) {
   const firstFeatured = Boolean(
     firstMember?.isFeatured ?? firstMember?.featured,
   );
-
   const secondFeatured = Boolean(
     secondMember?.isFeatured ?? secondMember?.featured,
   );
@@ -97,6 +100,18 @@ function sortTeamMembersForPreview(firstMember, secondMember) {
   );
 }
 
+function createInitials(name) {
+  const initials = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase();
+
+  return initials || "TM";
+}
+
 function DynamicActionLink({ url, children, className = "" }) {
   const safeUrl = getSafePublicUrl(url);
 
@@ -109,7 +124,6 @@ function DynamicActionLink({ url, children, className = "" }) {
         className={className}
       >
         {children}
-
         <span className="sr-only"> opens in a new tab</span>
       </a>
     );
@@ -130,6 +144,67 @@ function DynamicActionLink({ url, children, className = "" }) {
   );
 }
 
+function TeamIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M8.5 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7-1a3 3 0 1 0 0-6"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+      <path
+        d="M2.5 20v-1.5A4.5 4.5 0 0 1 7 14h3a4.5 4.5 0 0 1 4.5 4.5V20m1-6h1.2a4.8 4.8 0 0 1 4.8 4.8V20"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M5 12h13m-5-5 5 5-5 5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function HomeTeamCard({ member, index }) {
+  const name = String(member?.name || "").trim() || "Team Member";
+  const role =
+    String(member?.professionalRole || "").trim() || "Professional Team Member";
+  const imageUrl = String(member?.profileImageUrl || "").trim();
+  const imageAlt =
+    String(member?.profileImageAlt || "").trim() || `${name} profile photo`;
+  const accentClass = accentClasses[index % accentClasses.length];
+
+  return (
+    <article className={styles.memberCard}>
+      <div className={styles.memberPhoto}>
+        {imageUrl ? (
+          <img src={imageUrl} alt={imageAlt} loading="lazy" />
+        ) : (
+          <span className={styles.memberInitials}>{createInitials(name)}</span>
+        )}
+      </div>
+
+      <div className={styles.memberIdentity}>
+        <span className={`${styles.memberAccent} ${accentClass}`} />
+        <h3>{name}</h3>
+        <p>{role}</p>
+      </div>
+    </article>
+  );
+}
+
 function TeamSection() {
   const {
     teamMembers: loadedTeamMembers,
@@ -139,7 +214,6 @@ function TeamSection() {
   } = useTeamMembers();
 
   const { settings } = useSiteSettings();
-
   const sectionContent = settings?.teamSection || {};
 
   const eyebrow =
@@ -173,121 +247,99 @@ function TeamSection() {
     return [...sourceTeamMembers].sort(sortTeamMembersForPreview);
   }, [loadedTeamMembers]);
 
-  const previewTeamMembers = teamMembers.slice(0, 3);
+  const previewTeamMembers = teamMembers.slice(0, HOME_TEAM_LIMIT);
 
   return (
-    <Section
-      id="team"
-      className="scroll-mt-20 border-t border-slate-200 bg-slate-50"
-    >
+    <Section id="team" className={`${styles.section} scroll-mt-20`}>
+      <div className={styles.backdrop} aria-hidden="true">
+        <span className={styles.softShapeOne} />
+        <span className={styles.softShapeTwo} />
+      </div>
+
       <Container>
-        <SectionHeading
-          eyebrow={eyebrow}
-          title={heading}
-          description={description}
-        />
-
-        <p aria-live="polite" className="sr-only">
-          {isLoading
-            ? "Loading Team members."
-            : `${teamMembers.length} Team members loaded.`}
-        </p>
-
-        {error && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-amber-800">
-                Saved Team information is being displayed
-              </p>
-
-              <p className="mt-1 text-sm leading-6 text-amber-700">
-                The live Team API could not be reached.
-              </p>
+        <div className={styles.content}>
+          <header className={styles.heading}>
+            <div className={styles.eyebrow}>
+              <span className={styles.eyebrowIcon}>
+                <TeamIcon />
+              </span>
+              <span>{eyebrow}</span>
             </div>
 
-            <button
-              type="button"
-              onClick={refreshTeamMembers}
-              disabled={isLoading}
-              className="inline-flex min-h-10 max-w-full shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-white px-4 text-center text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isLoading ? "Retrying..." : "Retry Team"}
-            </button>
-          </div>
-        )}
+            <h2>{heading}</h2>
 
-        {isLoading && teamMembers.length === 0 && (
-          <div className="mt-10 grid min-w-0 gap-7 [&>*]:min-w-0 md:grid-cols-2 xl:grid-cols-3">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="h-[34rem] animate-pulse rounded-3xl bg-slate-200"
-              />
-            ))}
-          </div>
-        )}
+            {description && <p>{description}</p>}
 
-        {!isLoading && teamMembers.length === 0 && (
-          <div className="mt-10 rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-            <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-2xl font-black text-brand-600">
-              0
+            <span className={styles.headingAccent} aria-hidden="true" />
+          </header>
+
+          <p aria-live="polite" className="sr-only">
+            {isLoading
+              ? "Loading Team members."
+              : `${teamMembers.length} Team members loaded.`}
+          </p>
+
+          {error && (
+            <div className={styles.notice}>
+              <div>
+                <strong>Saved team information is being displayed</strong>
+                <p>The live Team API could not be reached.</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={refreshTeamMembers}
+                disabled={isLoading}
+              >
+                {isLoading ? "Retrying..." : "Retry"}
+              </button>
             </div>
+          )}
 
-            <p className="mt-6 text-lg font-bold text-slate-950">
-              No public Team members available
-            </p>
-
-            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-              Team member profiles will appear here after they are created and
-              published from the Admin Panel.
-            </p>
-          </div>
-        )}
-
-        {previewTeamMembers.length > 0 && (
-          <ResponsiveCardRow
-            desktopColumns={3}
-            ariaLabel="Featured Team members"
-            className="mt-10"
-          >
-            {previewTeamMembers.map((teamMember, index) => (
-              <TeamMemberCard
-                key={
-                  teamMember._id ||
-                  teamMember.id ||
-                  teamMember.slug ||
-                  `${teamMember.name}-${index}`
-                }
-                teamMember={teamMember}
-                index={index}
-                compact
-              />
-            ))}
-          </ResponsiveCardRow>
-        )}
-
-        {previewTeamMembers.length > 0 && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="font-bold text-slate-950">
-                Meet every professional working with RakeshNexify
-              </p>
-
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                The homepage shows selected Team members only. Open the complete
-                Team page to view all published profiles, skills and
-                professional links.
-              </p>
+          {isLoading && teamMembers.length === 0 && (
+            <div className={styles.memberGrid} aria-hidden="true">
+              {[1, 2, 3, 4, 5].map((item) => (
+                <div key={item} className={styles.skeletonCard} />
+              ))}
             </div>
+          )}
 
-            <DynamicActionLink
-              url={ctaUrl}
-              className="inline-flex min-h-11 max-w-full shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
-            >
-              {ctaLabel} →
-            </DynamicActionLink>
-          </div>
-        )}
+          {!isLoading && teamMembers.length === 0 && (
+            <div className={styles.emptyState}>
+              <span>
+                <TeamIcon />
+              </span>
+              <strong>No public Team members available</strong>
+              <p>Published Team profiles will appear here automatically.</p>
+            </div>
+          )}
+
+          {previewTeamMembers.length > 0 && (
+            <div className={styles.memberGrid}>
+              {previewTeamMembers.map((member, index) => (
+                <HomeTeamCard
+                  key={
+                    member._id ||
+                    member.id ||
+                    member.slug ||
+                    `${member.name}-${index}`
+                  }
+                  member={member}
+                  index={index}
+                />
+              ))}
+            </div>
+          )}
+
+          {previewTeamMembers.length > 0 && (
+            <div className={styles.footerAction}>
+              <DynamicActionLink url={ctaUrl} className={styles.teamCta}>
+                {ctaLabel}
+                <ArrowIcon />
+              </DynamicActionLink>
+            </div>
+          )}
+        </div>
       </Container>
     </Section>
   );
