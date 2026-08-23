@@ -510,7 +510,7 @@ function validateDynamicContentUrls(formValues, errors) {
   ];
 
   urlFields.forEach(({ fieldName, value }) => {
-    if (!isSafePublicUrl(value)) {
+    if (String(value || "").trim() && !isSafePublicUrl(value)) {
       errors[fieldName] =
         "Use a #section, /relative-path or complete http:// or https:// URL.";
     }

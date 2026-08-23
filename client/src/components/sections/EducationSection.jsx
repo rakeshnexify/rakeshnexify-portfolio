@@ -5,13 +5,7 @@ import Section from "../layout/Section";
 import styles from "./EducationSection.module.css";
 
 
-const defaultSectionContent = {
-  eyebrow: "Education Journey",
-  heading: "Academic learning and professional qualifications",
-  description:
-    "Explore the institutions, qualifications, courses and training that shaped my technical knowledge and professional development.",
-};
-
+import PublicSectionEyebrow from "../layout/PublicSectionEyebrow";
 const educationTypeLabels = {
   school: "School",
   college: "College",
@@ -98,7 +92,7 @@ function splitHeading(value) {
   if (words.length <= 1) {
     return {
       prefix: "",
-      accent: words[0] || "Education",
+      accent: words[0] || "",
     };
   }
 
@@ -451,15 +445,9 @@ function EducationSection() {
 
   const sectionContent = settings?.educationSection || {};
 
-  const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
-  const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
-  const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+  const eyebrow = String(sectionContent.eyebrow || "").trim();
+  const heading = String(sectionContent.heading || "").trim();
+  const description = String(sectionContent.description || "").trim();
 
   const education = Array.isArray(educationRecords)
     ? educationRecords
@@ -474,23 +462,46 @@ function EducationSection() {
       <Container>
         <div className={styles.content}>
           <header className={styles.intro}>
-            <div className={styles.eyebrowRow}>
-              <span className={styles.eyebrowLine} />
-              <span className={styles.eyebrow}>
-                <EducationCapIcon />
-                {eyebrow}
-              </span>
-              <span className={styles.eyebrowLine} />
-            </div>
+            {eyebrow && (
 
-            <h2 className={styles.heading}>
-              {headingParts.prefix && <span>{headingParts.prefix} </span>}
-              <span className={styles.headingAccent}>
-                {headingParts.accent}
-              </span>
-            </h2>
+              <PublicSectionEyebrow eyebrow={eyebrow} />
 
-            <span className={styles.headingMark} aria-hidden="true" />
+            )}
+
+            {heading && (
+
+
+              <>
+
+
+                <h2 className={styles.heading}>
+
+
+                              {headingParts.prefix && <span>{headingParts.prefix} </span>}
+
+
+                              <span className={styles.headingAccent}>
+
+
+                                {headingParts.accent}
+
+
+                              </span>
+
+
+                            </h2>
+
+
+
+
+
+
+
+
+              </>
+
+
+            )}
 
             {description && (
               <p className={styles.description}>{description}</p>

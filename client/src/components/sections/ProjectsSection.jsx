@@ -1,6 +1,4 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router";
-
 import siteData from "../../data/siteData";
 import useProjects from "../../hooks/useProjects";
 import useSiteSettings from "../../hooks/useSiteSettings";
@@ -8,18 +6,9 @@ import Container from "../layout/Container";
 import Section from "../layout/Section";
 import ProjectCard from "../projects/ProjectCard";
 
+import PublicSectionHeader from "../layout/PublicSectionHeader";
+import PublicCTAButton from "../layout/PublicCTAButton";
 const HOME_PROJECT_LIMIT = 4;
-
-const defaultSectionContent = {
-  eyebrow: "MY WORK",
-  heading: "Projects That Deliver Results",
-  description:
-    "A selection of projects where code, creativity and problem-solving come together to build useful digital solutions.",
-  ctaButton: {
-    label: "View All Projects",
-    url: "/projects",
-  },
-};
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -116,37 +105,6 @@ function getHeadingParts(heading) {
   };
 }
 
-function DynamicActionLink({ url, children, className = "" }) {
-  const safeUrl = getSafePublicUrl(url);
-
-  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
-    return (
-      <a
-        href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-      </a>
-    );
-  }
-
-  if (safeUrl.startsWith("/")) {
-    return (
-      <Link to={safeUrl} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={safeUrl} className={className}>
-      {children}
-    </a>
-  );
-}
-
 function ProjectsFilterIcon({ all = false }) {
   if (all) {
     return (
@@ -194,27 +152,21 @@ function ProjectsSection() {
   const sectionContent = settings?.projectsSection || {};
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim();
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
   const ctaLabel =
-    String(ctaButton.label || "").trim() ||
-    defaultSectionContent.ctaButton.label;
+    String(ctaButton.label || "").trim();
 
   const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href,
-    defaultSectionContent.ctaButton.url,
-  );
+    ctaButton.url || ctaButton.href, "");
 
   const headingParts = getHeadingParts(heading);
 
@@ -276,27 +228,25 @@ function ProjectsSection() {
     >
       <Container>
         <div className="public-projects-content">
-          <header className="public-projects-header">
-            <div className="public-projects-eyebrow">
-              <span aria-hidden="true">&lt;/&gt;</span>
-              <p>{eyebrow}</p>
-              <span aria-hidden="true">&lt;/&gt;</span>
-            </div>
-
-            <h2 className="public-projects-heading">
-              {headingParts.lead && (
-                <>
-                  {headingParts.lead}{" "}
-                </>
-              )}
-
-              <span>{headingParts.highlight}</span>
-            </h2>
-
-            <p className="public-projects-description">{description}</p>
-
-            <span className="public-projects-heading-accent" aria-hidden="true" />
-          </header>
+          <PublicSectionHeader
+            as="header"
+            eyebrow={eyebrow}
+            title={heading}
+            titleContent={
+              <>
+                {headingParts.lead && (
+                  <>
+                    {headingParts.lead}{" "}
+                  </>
+                )}
+                <span>{headingParts.highlight}</span>
+              </>
+            }
+            description={description}
+            className="public-projects-header"
+            titleClassName="public-projects-heading"
+            descriptionClassName="public-projects-description"
+          />
 
           <p aria-live="polite" className="sr-only">
             {isLoading
@@ -433,13 +383,10 @@ function ProjectsSection() {
 
           {projects.length > 0 && (
             <div className="public-projects-cta">
-              <DynamicActionLink
+              <PublicCTAButton
                 url={ctaUrl}
-                className="public-projects-cta-button"
-              >
-                <span>{ctaLabel}</span>
-                <span aria-hidden="true">→</span>
-              </DynamicActionLink>
+                label={ctaLabel}
+              />
             </div>
           )}
         </div>

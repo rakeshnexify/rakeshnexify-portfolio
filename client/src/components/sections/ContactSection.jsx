@@ -254,12 +254,10 @@ function ContactSection() {
     defaultSectionContent.eyebrow;
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const enquiryEyebrow =
     String(sectionContent.enquiryEyebrow || "").trim() ||

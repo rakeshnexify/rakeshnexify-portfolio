@@ -1,6 +1,4 @@
 import { useMemo } from "react";
-import { Link } from "react-router";
-
 import { mergeHomepageSections } from "../../config/homepageSections";
 import usePosts from "../../hooks/usePosts";
 import useSiteSettings from "../../hooks/useSiteSettings";
@@ -9,18 +7,8 @@ import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import PostCard from "../posts/PostCard";
 
+import PublicCTAButton from "../layout/PublicCTAButton";
 const SITE_URL = "https://rakeshnexify.com";
-
-const defaultSectionContent = {
-  eyebrow: "Latest Articles & News",
-  heading: "Fresh development articles, project updates and announcements",
-  description:
-    "Explore the latest Blog articles and News published through the RakeshNexify content system.",
-  ctaButton: {
-    label: "View Blog",
-    url: "/blog",
-  },
-};
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -138,38 +126,6 @@ function sortLatestPosts(firstPost, secondPost) {
   return firstKey.localeCompare(secondKey);
 }
 
-function DynamicActionLink({ url, children, className = "" }) {
-  const safeUrl = getSafePublicUrl(url);
-
-  if (/^https?:\/\//i.test(safeUrl)) {
-    return (
-      <a
-        href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-        <span className="sr-only"> opens in a new tab</span>
-      </a>
-    );
-  }
-
-  if (safeUrl.startsWith("/")) {
-    return (
-      <Link to={safeUrl} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={safeUrl} className={className}>
-      {children}
-    </a>
-  );
-}
-
 function LatestPostsSection() {
   const { posts, isLoading, error, refreshPosts } = usePosts();
   const { settings } = useSiteSettings();
@@ -177,27 +133,21 @@ function LatestPostsSection() {
   const sectionContent = settings?.postsSection || {};
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim();
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
   const ctaLabel =
-    String(ctaButton.label || "").trim() ||
-    defaultSectionContent.ctaButton.label;
+    String(ctaButton.label || "").trim();
 
   const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href,
-    defaultSectionContent.ctaButton.url,
-  );
+    ctaButton.url || ctaButton.href, "");
 
   const sectionsByKey = useMemo(() => {
     return new Map(
@@ -351,21 +301,21 @@ function LatestPostsSection() {
 
               <div className="flex min-w-0 shrink-0 flex-col gap-3 sm:flex-row">
                 {isConfiguredCtaAvailable && (
-                  <DynamicActionLink
+                  <PublicCTAButton
                     url={ctaUrl}
-                    className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
-                  >
-                    {ctaLabel} →
-                  </DynamicActionLink>
+                    label={ctaLabel}
+                  />
                 )}
 
                 {secondaryPageType && (
-                  <Link
-                    to={`/${secondaryPageType}`}
-                    className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl border border-brand-200 bg-white px-5 py-2.5 text-center text-sm font-semibold text-brand-700 transition hover:bg-brand-100"
-                  >
-                    View {secondaryPageType === "news" ? "News" : "Blog"} →
-                  </Link>
+                  <PublicCTAButton
+                    url={`/${secondaryPageType}`}
+                    label={`View ${
+                      secondaryPageType === "news"
+                        ? "News"
+                        : "Blog"
+                    }`}
+                  />
                 )}
               </div>
             </div>

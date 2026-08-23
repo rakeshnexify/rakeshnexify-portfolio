@@ -1,6 +1,4 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router";
-
 import { mergeHomepageSections } from "../../config/homepageSections";
 import useCertificationAchievements from "../../hooks/useCertificationAchievements";
 import useSiteSettings from "../../hooks/useSiteSettings";
@@ -8,6 +6,8 @@ import Container from "../layout/Container";
 import Section from "../layout/Section";
 import styles from "./CertificationAchievementsSection.module.css";
 
+import PublicSectionEyebrow from "../layout/PublicSectionEyebrow";
+import PublicCTAButton from "../layout/PublicCTAButton";
 const SITE_URL = "https://rakeshnexify.com";
 
 const HOME_CREDENTIAL_LIMIT = 3;
@@ -35,17 +35,6 @@ const supportedTypes = [
 const typeLabels = Object.fromEntries(
   supportedTypes.map((type) => [type.value, type.label]),
 );
-
-const defaultSectionContent = {
-  eyebrow: "Certificates & Achievements",
-  heading: "Certifications & Achievements",
-  description:
-    "Recognitions that reflect practical learning, verified skills and professional progress.",
-  ctaButton: {
-    label: "View All Achievements",
-    url: "/achievements",
-  },
-};
 
 function getSafePublicUrl(value, fallbackUrl = "/achievements") {
   const url = String(value || "").trim();
@@ -191,38 +180,6 @@ function getCredentialsCtaLabel(value) {
   }
 
   return "View All Credentials";
-}
-
-function DynamicActionLink({ url, children, className = "" }) {
-  const safeUrl = getSafePublicUrl(url);
-
-  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
-    return (
-      <a
-        href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-        <span className="sr-only"> opens in a new tab</span>
-      </a>
-    );
-  }
-
-  if (safeUrl.startsWith("/")) {
-    return (
-      <Link to={safeUrl} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={safeUrl} className={className}>
-      {children}
-    </a>
-  );
 }
 
 function ArrowIcon() {
@@ -756,27 +713,21 @@ function CertificationAchievementsSection() {
   const sectionContent = settings?.achievementsSection || {};
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim();
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
   const ctaLabel =
-    String(ctaButton.label || "").trim() ||
-    defaultSectionContent.ctaButton.label;
+    String(ctaButton.label || "").trim();
 
   const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href,
-    defaultSectionContent.ctaButton.url,
-  );
+    ctaButton.url || ctaButton.href, "");
 
   const credentialsCtaLabel = getCredentialsCtaLabel(ctaLabel);
 
@@ -875,18 +826,13 @@ function CertificationAchievementsSection() {
       <Container>
         <div className={styles.content}>
           <header className={styles.heading}>
-            <div className={styles.eyebrow}>
-              <span className={styles.eyebrowIcon}>
-                <MedalIcon />
-              </span>
-              <span>{eyebrow}</span>
-            </div>
+            <PublicSectionEyebrow eyebrow={eyebrow} />
 
             <h2>{heading}</h2>
 
             {description && <p>{description}</p>}
 
-            <span className={styles.headingMark} aria-hidden="true" />
+
           </header>
 
           <p aria-live="polite" className="sr-only">
@@ -997,13 +943,10 @@ function CertificationAchievementsSection() {
                   )}
 
                   {credentialRecords.length > 0 && shouldShowCta && (
-                    <DynamicActionLink
+                    <PublicCTAButton
                       url={ctaUrl}
-                      className={styles.panelAction}
-                    >
-                      {credentialsCtaLabel}
-                      <ArrowIcon />
-                    </DynamicActionLink>
+                      label={credentialsCtaLabel}
+                    />
                   )}
                 </section>
               )}
@@ -1038,13 +981,10 @@ function CertificationAchievementsSection() {
                   )}
 
                   {achievementPreviewRecords.length > 0 && shouldShowCta && (
-                    <DynamicActionLink
+                    <PublicCTAButton
                       url={ctaUrl}
-                      className={styles.panelAction}
-                    >
-                      {ctaLabel}
-                      <ArrowIcon />
-                    </DynamicActionLink>
+                      label={ctaLabel}
+                    />
                   )}
                 </section>
               )}

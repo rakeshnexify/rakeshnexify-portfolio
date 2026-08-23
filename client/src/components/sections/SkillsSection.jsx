@@ -6,13 +6,7 @@ import Container from "../layout/Container";
 import Section from "../layout/Section";
 import SkillCard from "../skills/SkillCard";
 
-const defaultSectionContent = {
-  eyebrow: "MY EXPERTISE",
-  heading: "Skills That Build Solutions",
-  description:
-    "Technologies and tools I use to build modern, scalable and efficient applications.",
-};
-
+import PublicSectionEyebrow from "../layout/PublicSectionEyebrow";
 function sortSkills(firstSkill, secondSkill) {
   const orderDifference =
     Number(firstSkill?.order || 0) - Number(secondSkill?.order || 0);
@@ -48,16 +42,13 @@ function SkillsSection() {
   const sectionContent = settings?.skillsSection || {};
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim();
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const skills = useMemo(() => {
     const sourceSkills = Array.isArray(loadedSkills) ? loadedSkills : [];
@@ -116,16 +107,13 @@ function SkillsSection() {
       <Container>
         <div className="public-skills-content">
           <header className="public-skills-header">
-            <div className="public-skills-eyebrow">
-              <span aria-hidden="true" />
-              <span className="public-skills-eyebrow-dot" aria-hidden="true" />
-              <p>{eyebrow}</p>
-              <span aria-hidden="true" />
-            </div>
+            <PublicSectionEyebrow eyebrow={eyebrow} />
 
             <h2 className="public-skills-heading">{heading}</h2>
 
             <p className="public-skills-description">{description}</p>
+
+
           </header>
 
           <p aria-live="polite" className="sr-only">

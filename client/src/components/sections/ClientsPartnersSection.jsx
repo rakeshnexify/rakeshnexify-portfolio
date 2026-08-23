@@ -1,24 +1,11 @@
 import { useMemo } from "react";
-import { Link } from "react-router";
-
-import ClientPartnerCard from "../companies/ClientPartnerCard";
 import Container from "../layout/Container";
 import Section from "../layout/Section";
-import SectionHeading from "../layout/SectionHeading";
 import useCompanies from "../../hooks/useCompanies";
 import useSiteSettings from "../../hooks/useSiteSettings";
 
-const defaultSectionContent = {
-  eyebrow: "Clients & Partners",
-  heading: "Trusted clients and business partners",
-  description:
-    "Companies and organizations I have worked with, supported or partnered with.",
-  ctaButton: {
-    label: "View All Clients & Partners",
-    url: "/clients-partners",
-  },
-};
-
+import PublicSectionEyebrow from "../layout/PublicSectionEyebrow";
+import PublicCTAButton from "../layout/PublicCTAButton";
 function cleanText(value) {
   return String(value ?? "").trim();
 }
@@ -70,6 +57,46 @@ function getSafePublicUrl(value, fallback = "/clients-partners") {
   return fallback;
 }
 
+function getSafeMediaUrl(value) {
+  const url = cleanText(value);
+
+  if (!url || containsControlCharacters(url)) {
+    return "";
+  }
+
+  if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) {
+    return url;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    if (
+      ["http:", "https:"].includes(parsedUrl.protocol) &&
+      parsedUrl.hostname &&
+      !parsedUrl.username &&
+      !parsedUrl.password
+    ) {
+      return url;
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
+function createInitials(name) {
+  const initials = cleanText(name)
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase();
+
+  return initials || "CP";
+}
+
 function findSection(sections, key) {
   if (!Array.isArray(sections)) {
     return null;
@@ -108,63 +135,29 @@ function sortClientsPartners(firstCompany, secondCompany) {
   );
 }
 
-function DynamicActionLink({ url, children, className }) {
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return (
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-        <span className="sr-only"> opens in a new tab</span>
-      </a>
-    );
-  }
-
-  if (url.startsWith("/")) {
-    return (
-      <Link to={url} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={url} className={className}>
-      {children}
-    </a>
-  );
-}
-
 function ClientsPartnersSection() {
   const { companies, isLoading, error, refreshCompanies } = useCompanies();
-
   const { settings } = useSiteSettings();
 
   const sectionContent = settings?.clientsPartnersSection || {};
   const registryItem = findSection(settings?.sections, "clients-partners");
 
   const eyebrow =
-    cleanText(sectionContent.eyebrow) || defaultSectionContent.eyebrow;
+    cleanText(sectionContent.eyebrow);
 
   const heading =
-    cleanText(sectionContent.heading || sectionContent.title) ||
-    defaultSectionContent.heading;
+    cleanText(sectionContent.heading);
 
   const description =
-    cleanText(sectionContent.description) || defaultSectionContent.description;
+    cleanText(sectionContent.description);
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
   const ctaLabel =
-    cleanText(ctaButton.label) || defaultSectionContent.ctaButton.label;
+    cleanText(ctaButton.label);
 
   const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href,
-    defaultSectionContent.ctaButton.url,
-  );
+    ctaButton.url || ctaButton.href, "");
 
   const clientsPartners = useMemo(() => {
     const sourceCompanies = Array.isArray(companies) ? companies : [];
@@ -202,101 +195,134 @@ function ClientsPartnersSection() {
   return (
     <Section
       id="clients-partners"
-      className="scroll-mt-20 border-t border-slate-200 bg-white"
+      className="rnx-home-clients-section scroll-mt-20 border-t border-slate-200/60"
     >
       <Container>
-        <SectionHeading
-          eyebrow={eyebrow}
-          title={heading}
-          description={description}
-        />
+        <div className="rnx-home-clients-shell">
+          <div className="rnx-home-clients-panel">
+            <div className="rnx-home-clients-hero">
+              <div className="rnx-home-clients-heading">
+                <PublicSectionEyebrow eyebrow={eyebrow} />
+                <h2 className="rnx-home-clients-title">{heading}</h2>
+                <p className="rnx-home-clients-description">{description}</p>
 
-        <p aria-live="polite" className="sr-only">
-          {isLoading
-            ? "Loading clients and partners."
-            : `${clientsPartners.length} clients and partners loaded.`}
-        </p>
 
-        {!isLoading && !error && clientsPartners.length > 0 && (
-          <div className="mt-8 flex flex-wrap gap-3">
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
-              {clientCount} {clientCount === 1 ? "Client" : "Clients"}
-            </span>
-
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
-              {partnerCount} {partnerCount === 1 ? "Partner" : "Partners"}
-            </span>
           </div>
-        )}
 
-        {error && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-red-200 bg-red-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-red-800">
-                Clients and partners could not be loaded
-              </p>
+              {!isLoading && !error && clientsPartners.length > 0 && (
+                <div className="rnx-home-clients-counts">
+                  <span className="rnx-home-clients-count rnx-home-clients-count--client">
+                    {clientCount} {clientCount === 1 ? "Client" : "Clients"}
+                  </span>
 
-              <p className="mt-1 break-words text-sm leading-6 text-red-700">
-                {error}
-              </p>
+                  <span className="rnx-home-clients-count rnx-home-clients-count--partner">
+                    {partnerCount} {partnerCount === 1 ? "Partner" : "Partners"}
+                  </span>
+                </div>
+              )}
             </div>
 
-            <button
-              type="button"
-              onClick={refreshCompanies}
-              disabled={isLoading}
-              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-red-300 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isLoading ? "Retrying..." : "Retry"}
-            </button>
-          </div>
-        )}
-
-        {isLoading && clientsPartners.length === 0 && (
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <div
-                key={item}
-                className="h-72 animate-pulse rounded-3xl bg-slate-100"
-              />
-            ))}
-          </div>
-        )}
-
-        {!isLoading && !error && clientsPartners.length === 0 && (
-          <div className="mt-10 rounded-3xl border border-slate-200 bg-slate-50 px-6 py-12 text-center">
-            <p className="text-lg font-bold text-slate-950">
-              No public clients or partners available
+            <p aria-live="polite" className="sr-only">
+              {isLoading
+                ? "Loading clients and partners."
+                : `${clientsPartners.length} clients and partners loaded.`}
             </p>
 
-            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-              Companies marked as Client Company or Business Partner will appear
-              here after they are published from Companies Management.
-            </p>
-          </div>
-        )}
+            {error && (
+              <div className="mt-8 flex flex-col gap-4 rounded-3xl border border-red-200 bg-red-50/90 p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-red-800">
+                    Clients and partners could not be loaded
+                  </p>
 
-        {previewCompanies.length > 0 && (
-          <div className="mt-10 grid min-w-0 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {previewCompanies.map((company) => (
-              <ClientPartnerCard
-                key={company._id || company.id || company.slug}
-                company={company}
-              />
-            ))}
-          </div>
-        )}
+                  <p className="mt-1 break-words text-sm leading-6 text-red-700">
+                    {error}
+                  </p>
+                </div>
 
-        {previewCompanies.length > 0 && showCta && (
-          <div className="mt-8 flex justify-center">
-            <DynamicActionLink
-              url={ctaUrl}
-              className="inline-flex min-h-11 max-w-full items-center justify-center rounded-xl bg-brand-600 px-5 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
-            >
-              {ctaLabel} →
-            </DynamicActionLink>
+                <button
+                  type="button"
+                  onClick={refreshCompanies}
+                  disabled={isLoading}
+                  className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-red-300 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isLoading ? "Retrying..." : "Retry"}
+                </button>
+              </div>
+            )}
+
+            {isLoading && clientsPartners.length === 0 && (
+              <div className="rnx-home-clients-cards" aria-hidden="true">
+                {[1, 2, 3, 4, 5, 6].map((item) => (
+                  <div
+                    key={item}
+                    className="rnx-home-clients-card rnx-home-clients-card--loading"
+                  />
+                ))}
+              </div>
+            )}
+
+            {!isLoading && !error && clientsPartners.length === 0 && (
+              <div className="mt-10 rounded-3xl border border-slate-200/80 bg-white/80 px-6 py-12 text-center shadow-sm backdrop-blur">
+                <p className="text-lg font-bold text-slate-950">
+                  No public clients or partners available
+                </p>
+
+                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                  Companies marked as Client Company or Business Partner will appear
+                  here after they are published from Companies Management.
+                </p>
+              </div>
+            )}
+
+            {previewCompanies.length > 0 && (
+              <div className="rnx-home-clients-cards" role="list">
+                {previewCompanies.map((company) => {
+                  const companyId = company?._id || company?.id || company?.slug;
+                  const name = cleanText(company?.name) || "Company";
+                  const logoUrl = getSafeMediaUrl(company?.logoUrl);
+
+                  return (
+                    <article
+                      key={companyId}
+                      role="listitem"
+                      className="rnx-home-clients-card"
+                    >
+                      <div className="rnx-home-clients-card-shine" />
+
+                      <div className="rnx-home-clients-card-logo">
+                        {logoUrl ? (
+                          <img
+                            src={logoUrl}
+                            alt={`${name} logo`}
+                            loading="lazy"
+                            decoding="async"
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        ) : (
+                          <span className="rnx-home-clients-card-initials">
+                            {createInitials(name)}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="rnx-home-clients-card-name">{name}</h3>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+
+            {previewCompanies.length > 0 && showCta && (
+              <div className="rnx-home-clients-cta-wrap">
+                <PublicCTAButton
+                  url={ctaUrl}
+                  label={ctaLabel}
+                />
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </Container>
     </Section>
   );

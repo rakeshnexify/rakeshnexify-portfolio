@@ -1,6 +1,4 @@
 import { useMemo } from "react";
-import { Link } from "react-router";
-
 import { mergeHomepageSections } from "../../config/homepageSections";
 import useExperience from "../../hooks/useExperience";
 import useSiteSettings from "../../hooks/useSiteSettings";
@@ -8,16 +6,18 @@ import Container from "../layout/Container";
 import Section from "../layout/Section";
 import styles from "./ExperienceSection.module.css";
 
+import PublicSectionHeader from "../layout/PublicSectionHeader";
+import PublicCTAButton from "../layout/PublicCTAButton";
 const SITE_URL = "https://rakeshnexify.com";
 
 const defaultSectionContent = {
-  eyebrow: "Professional Experience",
-  heading: "Work, freelance and business experience",
+  eyebrow: "",
+  heading: "",
   description:
-    "Explore the professional roles, responsibilities, achievements and technologies that shaped my practical development experience.",
+    "",
   ctaButton: {
-    label: "View Complete Experience",
-    url: "/experience",
+    label: "",
+    url: "",
   },
 };
 
@@ -197,7 +197,7 @@ function splitHeading(value) {
   if (words.length <= 1) {
     return {
       prefix: "",
-      accent: words[0] || "Experience",
+      accent: words[0] || "",
     };
   }
 
@@ -335,38 +335,6 @@ function CareerTechTopographyBackdrop() {
 
       <div className={styles.elevationHalo} />
     </div>
-  );
-}
-
-function DynamicActionLink({ url, children, className = "" }) {
-  const safeUrl = getSafePublicUrl(url);
-
-  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
-    return (
-      <a
-        href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-        <span className="sr-only"> opens in a new tab</span>
-      </a>
-    );
-  }
-
-  if (safeUrl.startsWith("/")) {
-    return (
-      <Link to={safeUrl} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={safeUrl} className={className}>
-      {children}
-    </a>
   );
 }
 
@@ -707,15 +675,9 @@ function ExperienceSection() {
   const sectionContent = settings?.experienceSection || {};
   const owner = settings?.owner || {};
 
-  const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
-  const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
-  const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+  const eyebrow = String(sectionContent.eyebrow || "").trim();
+  const heading = String(sectionContent.heading || "").trim();
+  const description = String(sectionContent.description || "").trim();
 
   const configuredCta =
     sectionContent.ctaButton || sectionContent.action || {};
@@ -763,29 +725,25 @@ function ExperienceSection() {
 
       <Container>
         <div className={styles.content}>
-          <header className={styles.intro}>
-            <div className={styles.eyebrowRow}>
-              <span className={styles.eyebrowLine} />
-              <span className={styles.eyebrow}>
-                <BriefcaseIcon />
-                {eyebrow}
-              </span>
-              <span className={styles.eyebrowLine} />
-            </div>
-
-            <h2 className={styles.heading}>
-              {headingParts.prefix && <span>{headingParts.prefix} </span>}
-              <span className={styles.headingAccent}>
-                {headingParts.accent}
-              </span>
-            </h2>
-
-            <span className={styles.headingMark} aria-hidden="true" />
-
-            {description && (
-              <p className={styles.description}>{description}</p>
-            )}
-          </header>
+          <PublicSectionHeader
+            as="header"
+            eyebrow={eyebrow}
+            title={heading}
+            titleContent={
+              <>
+                {headingParts.prefix && (
+                  <span>{headingParts.prefix} </span>
+                )}
+                <span className={styles.headingAccent}>
+                  {headingParts.accent}
+                </span>
+              </>
+            }
+            description={description}
+            className={styles.intro}
+            titleClassName={styles.heading}
+            descriptionClassName={styles.description}
+          />
 
           <p aria-live="polite" className="sr-only">
             {isLoading
@@ -860,24 +818,10 @@ function ExperienceSection() {
 
           {previewExperience.length > 0 && action && (
             <div className={styles.actionWrap}>
-              <DynamicActionLink
+              <PublicCTAButton
                 url={action.url}
-                className={`${styles.actionButton} bg-brand-600 text-white`}
-              >
-                <span>{action.label}</span>
-
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14M14 7l5 5-5 5" />
-                </svg>
-              </DynamicActionLink>
+                label={action.label}
+              />
             </div>
           )}
         </div>

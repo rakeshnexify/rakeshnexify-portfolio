@@ -872,17 +872,7 @@ const siteSettingsSchema = new mongoose.Schema(
 
     caseStudiesSection: {
       type: listingSectionContentSchema,
-      default: () => ({
-        eyebrow: "Case Studies",
-        heading:
-          "Selected projects with the problem, process and measurable results",
-        description:
-          "Explore selected project case studies covering the challenge, solution, technologies, implementation decisions and outcomes behind the finished work.",
-        ctaButton: {
-          label: "View All Case Studies",
-          url: "/case-studies",
-        },
-      }),
+      default: () => ({}),
     },
 
     educationSection: {
@@ -912,16 +902,7 @@ const siteSettingsSchema = new mongoose.Schema(
 
     clientsPartnersSection: {
       type: listingSectionContentSchema,
-      default: () => ({
-        eyebrow: "Clients & Partners",
-        heading: "Trusted clients and business partners",
-        description:
-          "Companies and organizations I have worked with, supported or partnered with.",
-        ctaButton: {
-          label: "View All Clients & Partners",
-          url: "/clients-partners",
-        },
-      }),
+      default: () => ({}),
     },
 
     testimonialsSection: {
@@ -931,16 +912,7 @@ const siteSettingsSchema = new mongoose.Schema(
 
     faqSection: {
       type: listingSectionContentSchema,
-      default: () => ({
-        eyebrow: "Frequently Asked Questions",
-        heading: "Answers to common questions",
-        description:
-          "Find quick answers about development, pricing, timelines, support and working together.",
-        ctaButton: {
-          label: "View All FAQs",
-          url: "/faq",
-        },
-      }),
+      default: () => ({}),
     },
 
     postsSection: {

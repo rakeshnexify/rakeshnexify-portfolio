@@ -1,24 +1,13 @@
 import { useMemo } from "react";
-import { Link } from "react-router";
-
 import useSiteSettings from "../../hooks/useSiteSettings";
 import useTeamMembers from "../../hooks/useTeamMembers";
 import Container from "../layout/Container";
 import Section from "../layout/Section";
 import styles from "./TeamSection.module.css";
 
+import PublicSectionEyebrow from "../layout/PublicSectionEyebrow";
+import PublicCTAButton from "../layout/PublicCTAButton";
 const HOME_TEAM_LIMIT = 5;
-
-const defaultSectionContent = {
-  eyebrow: "Meet My Team",
-  heading: "The People Behind the Work",
-  description:
-    "A focused team bringing practical skills, thoughtful collaboration and care to every digital project.",
-  ctaButton: {
-    label: "Meet The Full Team",
-    url: "/team",
-  },
-};
 
 const accentClasses = [
   styles.accentBlue,
@@ -112,38 +101,6 @@ function createInitials(name) {
   return initials || "TM";
 }
 
-function DynamicActionLink({ url, children, className = "" }) {
-  const safeUrl = getSafePublicUrl(url);
-
-  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
-    return (
-      <a
-        href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-        <span className="sr-only"> opens in a new tab</span>
-      </a>
-    );
-  }
-
-  if (safeUrl.startsWith("/")) {
-    return (
-      <Link to={safeUrl} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={safeUrl} className={className}>
-      {children}
-    </a>
-  );
-}
-
 function TeamIcon() {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
@@ -158,20 +115,6 @@ function TeamIcon() {
         stroke="currentColor"
         strokeWidth="1.7"
         strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function ArrowIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M5 12h13m-5-5 5 5-5 5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );
@@ -217,27 +160,21 @@ function TeamSection() {
   const sectionContent = settings?.teamSection || {};
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim();
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
   const ctaLabel =
-    String(ctaButton.label || "").trim() ||
-    defaultSectionContent.ctaButton.label;
+    String(ctaButton.label || "").trim();
 
   const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href,
-    defaultSectionContent.ctaButton.url,
-  );
+    ctaButton.url || ctaButton.href, "");
 
   const teamMembers = useMemo(() => {
     const sourceTeamMembers = Array.isArray(loadedTeamMembers)
@@ -259,18 +196,13 @@ function TeamSection() {
       <Container>
         <div className={styles.content}>
           <header className={styles.heading}>
-            <div className={styles.eyebrow}>
-              <span className={styles.eyebrowIcon}>
-                <TeamIcon />
-              </span>
-              <span>{eyebrow}</span>
-            </div>
+            <PublicSectionEyebrow eyebrow={eyebrow} />
 
             <h2>{heading}</h2>
 
             {description && <p>{description}</p>}
 
-            <span className={styles.headingAccent} aria-hidden="true" />
+
           </header>
 
           <p aria-live="polite" className="sr-only">
@@ -333,10 +265,10 @@ function TeamSection() {
 
           {previewTeamMembers.length > 0 && (
             <div className={styles.footerAction}>
-              <DynamicActionLink url={ctaUrl} className={styles.teamCta}>
-                {ctaLabel}
-                <ArrowIcon />
-              </DynamicActionLink>
+              <PublicCTAButton
+                url={ctaUrl}
+                label={ctaLabel}
+              />
             </div>
           )}
         </div>

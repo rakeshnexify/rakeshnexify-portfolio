@@ -1,0 +1,126 @@
+.root {
+  --rnx-eyebrow-text: #63a9ff;
+  --rnx-eyebrow-line: #3b82f6;
+  --rnx-eyebrow-accent: #38bdf8;
+  --rnx-eyebrow-side-width: clamp(3.5rem, 5vw, 4.9rem);
+  --rnx-eyebrow-accent-width: clamp(3.7rem, 5vw, 4.7rem);
+  --rnx-eyebrow-gap: clamp(0.78rem, 1.2vw, 1rem);
+
+  box-sizing: border-box;
+  position: relative;
+  z-index: 5;
+  display: flex;
+  width: fit-content;
+  max-width: min(100%, 38rem);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 0;
+  isolation: isolate;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.row {
+  box-sizing: border-box;
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rnx-eyebrow-gap);
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.lineLeft,
+.lineRight {
+  box-sizing: border-box;
+  display: block;
+  width: var(--rnx-eyebrow-side-width);
+  min-width: var(--rnx-eyebrow-side-width);
+  max-width: var(--rnx-eyebrow-side-width);
+  height: 2px;
+  flex: 0 0 var(--rnx-eyebrow-side-width);
+  overflow: visible;
+  color: var(--rnx-eyebrow-line);
+  filter:
+    drop-shadow(0 0 4px rgb(59 130 246 / 0.22))
+    drop-shadow(0 0 10px rgb(56 189 248 / 0.1));
+  opacity: 1;
+  visibility: visible;
+}
+
+.lineRight {
+  transform: scaleX(-1);
+}
+
+.lineStroke {
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.88;
+}
+
+.label {
+  box-sizing: border-box;
+  display: block;
+  max-width: min(72vw, 28rem);
+  margin: 0;
+  padding: 0;
+  color: var(--rnx-eyebrow-text);
+  font-family: inherit;
+  font-size: clamp(0.72rem, 0.9vw, 0.86rem);
+  font-style: normal;
+  font-weight: 760;
+  letter-spacing: 0.145em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.accent {
+  box-sizing: border-box;
+  display: block;
+  width: var(--rnx-eyebrow-accent-width);
+  min-width: var(--rnx-eyebrow-accent-width);
+  max-width: var(--rnx-eyebrow-accent-width);
+  height: 2px;
+  margin: clamp(0.72rem, 0.95vw, 0.9rem) auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(59 130 246 / 0.9),
+      var(--rnx-eyebrow-accent),
+      rgb(59 130 246 / 0.9)
+    );
+  box-shadow:
+    0 0 12px rgb(59 130 246 / 0.2),
+    0 0 22px rgb(56 189 248 / 0.12);
+}
+
+@media (max-width: 767px) {
+  .root {
+    --rnx-eyebrow-side-width: clamp(1.9rem, 8vw, 2.7rem);
+    --rnx-eyebrow-accent-width: 3.7rem;
+    --rnx-eyebrow-gap: 0.65rem;
+  }
+
+  .label {
+    max-width: min(64vw, 16rem);
+    font-size: 0.65rem;
+    letter-spacing: 0.105em;
+    white-space: normal;
+  }
+
+  .accent {
+    margin-top: 0.68rem;
+  }
+}

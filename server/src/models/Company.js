@@ -250,6 +250,27 @@ const companySchema = new mongoose.Schema(
       default: "",
     },
 
+    relationshipStartDate: {
+      type: Date,
+      default: null,
+    },
+
+    relationshipEndDate: {
+      type: Date,
+      default: null,
+      validate: {
+        validator(value) {
+          return (
+            !value ||
+            !this.relationshipStartDate ||
+            value >= this.relationshipStartDate
+          );
+        },
+        message:
+          "Relationship end date cannot be earlier than the relationship start date.",
+      },
+    },
+
     websiteUrl: {
       type: String,
       trim: true,

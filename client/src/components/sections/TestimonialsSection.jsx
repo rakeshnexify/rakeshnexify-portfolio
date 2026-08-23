@@ -1,6 +1,4 @@
 import { useMemo } from "react";
-import { Link } from "react-router";
-
 import { mergeHomepageSections } from "../../config/homepageSections";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import useTestimonials from "../../hooks/useTestimonials";
@@ -9,18 +7,8 @@ import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import TestimonialCard from "../testimonials/TestimonialCard";
 
+import PublicCTAButton from "../layout/PublicCTAButton";
 const SITE_URL = "https://rakeshnexify.com";
-
-const defaultSectionContent = {
-  eyebrow: "Client Testimonials",
-  heading: "What clients say about working with me",
-  description:
-    "Read feedback from clients and collaborators about the quality, communication and results behind completed projects.",
-  ctaButton: {
-    label: "View All Testimonials",
-    url: "/testimonials",
-  },
-};
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -92,38 +80,6 @@ function isTestimonialsPageDestination(value) {
   }
 }
 
-function DynamicActionLink({ url, children, className = "" }) {
-  const safeUrl = getSafePublicUrl(url);
-
-  if (/^https?:\/\//i.test(safeUrl)) {
-    return (
-      <a
-        href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-        <span className="sr-only"> opens in a new tab</span>
-      </a>
-    );
-  }
-
-  if (safeUrl.startsWith("/")) {
-    return (
-      <Link to={safeUrl} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={safeUrl} className={className}>
-      {children}
-    </a>
-  );
-}
-
 function TestimonialsSection() {
   const {
     testimonials,
@@ -137,27 +93,21 @@ function TestimonialsSection() {
   const sectionContent = settings?.testimonialsSection || {};
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim();
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
   const ctaLabel =
-    String(ctaButton.label || "").trim() ||
-    defaultSectionContent.ctaButton.label;
+    String(ctaButton.label || "").trim();
 
   const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href,
-    defaultSectionContent.ctaButton.url,
-  );
+    ctaButton.url || ctaButton.href, "");
 
   const testimonialsPublicationSection = useMemo(() => {
     return mergeHomepageSections(settings?.sections).find(
@@ -273,12 +223,10 @@ function TestimonialsSection() {
               </p>
             </div>
 
-            <DynamicActionLink
+            <PublicCTAButton
               url={ctaUrl}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700"
-            >
-              {ctaLabel} →
-            </DynamicActionLink>
+              label={ctaLabel}
+            />
           </div>
         )}
       </Container>

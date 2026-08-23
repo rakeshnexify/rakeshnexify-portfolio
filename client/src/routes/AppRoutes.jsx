@@ -27,6 +27,8 @@ import AdminAppointmentDetailPage from "../pages/admin/AdminAppointmentDetailPag
 import AdminAppointmentsPage from "../pages/admin/AdminAppointmentsPage";
 import AdminCertificationAchievementEditorPage from "../pages/admin/AdminCertificationAchievementEditorPage";
 import AdminCertificationAchievementsPage from "../pages/admin/AdminCertificationAchievementsPage";
+import AdminClientPartnerEditorPage from "../pages/admin/AdminClientPartnerEditorPage";
+import AdminClientsPartnersPage from "../pages/admin/AdminClientsPartnersPage";
 import AdminCompaniesPage from "../pages/admin/AdminCompaniesPage";
 import AdminCompanyEditorPage from "../pages/admin/AdminCompanyEditorPage";
 import AdminContactMessagesPage from "../pages/admin/AdminContactMessagesPage";
@@ -584,6 +586,19 @@ function AppRoutes() {
             <Route
               path="/admin/companies/:id/edit"
               element={<AdminCompanyEditorPage mode="edit" />}
+            />
+
+            <Route
+              path="/admin/clients-partners"
+              element={<AdminClientsPartnersPage />}
+            />
+            <Route
+              path="/admin/clients-partners/new"
+              element={<AdminClientPartnerEditorPage mode="create" />}
+            />
+            <Route
+              path="/admin/clients-partners/:id/edit"
+              element={<AdminClientPartnerEditorPage mode="edit" />}
             />
 
             <Route path="/admin/media" element={<AdminMediaPage />} />

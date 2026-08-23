@@ -1,35 +1,28 @@
+import PublicSectionHeader from "./PublicSectionHeader";
+
+function normalizeText(value) {
+  return String(value ?? "").trim();
+}
+
 function SectionHeading({
   eyebrow,
   title,
   description,
   align = "center",
   className = "",
+  titleClassName = "",
+  descriptionClassName = "",
 }) {
-  const alignmentClasses =
-    align === "left"
-      ? "items-start text-left"
-      : "items-center text-center";
-
   return (
-    <div
-      className={`flex flex-col ${alignmentClasses} ${className}`}
-    >
-      {eyebrow && (
-        <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-brand-600">
-          {eyebrow}
-        </p>
-      )}
-
-      <h2 className="max-w-3xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-        {title}
-      </h2>
-
-      {description && (
-        <p className="public-section-heading-description mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-          {description}
-        </p>
-      )}
-    </div>
+    <PublicSectionHeader
+      eyebrow={normalizeText(eyebrow)}
+      title={normalizeText(title)}
+      description={normalizeText(description)}
+      align={align}
+      className={className}
+      titleClassName={`max-w-3xl text-[1.95rem] font-bold tracking-tight text-slate-950 sm:text-[2.35rem] lg:text-[2.75rem] ${titleClassName}`}
+      descriptionClassName={`public-section-heading-description mt-4 max-w-2xl text-[0.98rem] leading-7 text-slate-600 sm:text-base ${descriptionClassName}`}
+    />
   );
 }
 

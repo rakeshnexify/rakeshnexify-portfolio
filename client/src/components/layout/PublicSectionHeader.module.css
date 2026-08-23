@@ -1,0 +1,28 @@
+.root {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+.center {
+  align-items: center;
+  text-align: center;
+}
+
+.left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.eyebrowSlot {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 5;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  overflow: visible;
+}

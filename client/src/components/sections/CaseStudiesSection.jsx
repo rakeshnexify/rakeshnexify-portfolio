@@ -1,5 +1,3 @@
-import { Link } from "react-router";
-
 import useProjects from "../../hooks/useProjects";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
@@ -8,20 +6,7 @@ import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import CaseStudyCard from "../projects/CaseStudyCard";
 
-const defaultSectionContent = {
-  eyebrow: "Case Studies",
-
-  heading: "Selected projects with the problem, process and measurable results",
-
-  description:
-    "Explore selected project case studies covering the challenge, solution, technologies, implementation decisions and outcomes behind the finished work.",
-
-  ctaButton: {
-    label: "View All Case Studies",
-    url: "/case-studies",
-  },
-};
-
+import PublicCTAButton from "../layout/PublicCTAButton";
 const SITE_URL = "https://rakeshnexify.com";
 
 function containsControlCharacters(value) {
@@ -112,37 +97,6 @@ function targetsCaseStudiesPage(value) {
   }
 }
 
-function DynamicActionLink({ url, children, className = "" }) {
-  const safeUrl = getSafePublicUrl(url);
-
-  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
-    return (
-      <a
-        href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-      </a>
-    );
-  }
-
-  if (safeUrl.startsWith("/")) {
-    return (
-      <Link to={safeUrl} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={safeUrl} className={className}>
-      {children}
-    </a>
-  );
-}
-
 function CaseStudiesSection() {
   const {
     projects: loadedCaseStudies,
@@ -160,27 +114,21 @@ function CaseStudiesSection() {
   const registryItem = findSection(settings?.sections, "case-studies");
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim();
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
   const ctaLabel =
-    String(ctaButton.label || "").trim() ||
-    defaultSectionContent.ctaButton.label;
+    String(ctaButton.label || "").trim();
 
   const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href,
-    defaultSectionContent.ctaButton.url,
-  );
+    ctaButton.url || ctaButton.href, "");
 
   const caseStudies = Array.isArray(loadedCaseStudies)
     ? loadedCaseStudies
@@ -294,12 +242,10 @@ function CaseStudiesSection() {
             </div>
 
             {showCta && (
-              <DynamicActionLink
+              <PublicCTAButton
                 url={ctaUrl}
-                className="inline-flex min-h-11 max-w-full shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-brand-700"
-              >
-                {ctaLabel} →
-              </DynamicActionLink>
+                label={ctaLabel}
+              />
             )}
           </div>
         )}

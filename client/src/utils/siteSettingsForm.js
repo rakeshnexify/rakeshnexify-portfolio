@@ -187,11 +187,14 @@ function normalizeListingSection(section = {}) {
   return {
     eyebrow: cleanString(section?.eyebrow),
 
-    heading: cleanString(section?.heading) || cleanString(section?.title),
+    heading: cleanString(section?.heading),
 
     description: cleanString(section?.description),
 
-    ctaButton: normalizeButton(section?.ctaButton || section?.action || {}),
+    ctaButton: {
+      label: cleanString(section?.ctaButton?.label),
+      url: cleanString(section?.ctaButton?.url),
+    },
   };
 }
 
@@ -199,7 +202,7 @@ function normalizeContactSection(section = {}) {
   return {
     eyebrow: cleanString(section?.eyebrow),
 
-    heading: cleanString(section?.heading) || cleanString(section?.title),
+    heading: cleanString(section?.heading),
 
     description: cleanString(section?.description),
 

@@ -1,5 +1,3 @@
-import { Link } from "react-router";
-
 import useServices from "../../hooks/useServices";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
@@ -7,21 +5,8 @@ import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import ServiceCard from "../services/ServiceCard";
 
+import PublicCTAButton from "../layout/PublicCTAButton";
 const HOME_SERVICE_LIMIT = 4;
-
-const defaultSectionContent = {
-  eyebrow: "My Services",
-
-  heading: "Professional digital services for businesses and creators",
-
-  description:
-    "From complete MERN applications to WordPress websites and e-commerce stores, I provide modern development solutions focused on design, usability and long-term growth.",
-
-  ctaButton: {
-    label: "View All Services",
-    url: "/services",
-  },
-};
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -82,37 +67,6 @@ function sortServicesForPreview(firstService, secondService) {
   return Number(firstService?.order || 0) - Number(secondService?.order || 0);
 }
 
-function DynamicActionLink({ url, children, className = "" }) {
-  const safeUrl = getSafePublicUrl(url);
-
-  if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://")) {
-    return (
-      <a
-        href={safeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-      >
-        {children}
-      </a>
-    );
-  }
-
-  if (safeUrl.startsWith("/")) {
-    return (
-      <Link to={safeUrl} className={className}>
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <a href={safeUrl} className={className}>
-      {children}
-    </a>
-  );
-}
-
 function ServicesSection() {
   const { services, isLoading, error } = useServices();
 
@@ -121,27 +75,21 @@ function ServicesSection() {
   const sectionContent = settings?.servicesSection || {};
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim();
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
   const ctaLabel =
-    String(ctaButton.label || "").trim() ||
-    defaultSectionContent.ctaButton.label;
+    String(ctaButton.label || "").trim();
 
   const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href,
-    defaultSectionContent.ctaButton.url,
-  );
+    ctaButton.url || ctaButton.href, "");
 
   const previewServices = [...services]
     .sort(sortServicesForPreview)
@@ -215,27 +163,10 @@ function ServicesSection() {
 
           {previewServices.length > 0 && (
             <div className="public-services-footer">
-              <DynamicActionLink
+              <PublicCTAButton
                 url={ctaUrl}
-                className="public-services-view-all"
-              >
-                <span>{ctaLabel}</span>
-
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  className="size-4"
-                >
-                  <path
-                    d="M4 10h12M11 5l5 5-5 5"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </DynamicActionLink>
+                label={ctaLabel}
+              />
             </div>
           )}
         </div>

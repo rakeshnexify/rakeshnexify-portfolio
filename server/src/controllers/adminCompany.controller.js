@@ -133,6 +133,30 @@ function cleanEnum(value, fieldName, allowedValues) {
   return cleanValue;
 }
 
+function cleanOptionalDate(value, fieldName) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const cleanValue = String(value).trim();
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanValue)) {
+    throw createHttpError(`${fieldName} must use YYYY-MM-DD format.`, 400, {
+      [fieldName]: `${fieldName} must use YYYY-MM-DD format.`,
+    });
+  }
+
+  const parsedDate = new Date(`${cleanValue}T00:00:00.000Z`);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    throw createHttpError(`${fieldName} must be a valid date.`, 400, {
+      [fieldName]: `${fieldName} must be a valid date.`,
+    });
+  }
+
+  return parsedDate;
+}
+
 function cleanFoundedYear(value) {
   if (value === null || value === undefined || value === "") {
     return null;
@@ -288,6 +312,20 @@ function buildCompanyPayload(requestBody = {}) {
 
   if (hasOwnProperty(requestBody, "foundedYear")) {
     payload.foundedYear = cleanFoundedYear(requestBody.foundedYear);
+  }
+
+  if (hasOwnProperty(requestBody, "relationshipStartDate")) {
+    payload.relationshipStartDate = cleanOptionalDate(
+      requestBody.relationshipStartDate,
+      "relationshipStartDate",
+    );
+  }
+
+  if (hasOwnProperty(requestBody, "relationshipEndDate")) {
+    payload.relationshipEndDate = cleanOptionalDate(
+      requestBody.relationshipEndDate,
+      "relationshipEndDate",
+    );
   }
 
   if (hasOwnProperty(requestBody, "businessAreas")) {

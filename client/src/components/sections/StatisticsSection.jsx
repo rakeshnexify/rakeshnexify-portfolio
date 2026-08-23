@@ -6,13 +6,7 @@ import Container from "../layout/Container";
 import Section from "../layout/Section";
 import StatisticCard from "../statistics/StatisticCard";
 
-const defaultSectionContent = {
-  eyebrow: "OUR IMPACT IN NUMBERS",
-  heading: "Building Solutions. Delivering Success.",
-  description:
-    "Numbers that reflect our commitment to quality, innovation, and client satisfaction.",
-};
-
+import PublicSectionEyebrow from "../layout/PublicSectionEyebrow";
 function sortStatistics(firstStatistic, secondStatistic) {
   const firstOrder = Number(firstStatistic?.order);
   const secondOrder = Number(secondStatistic?.order);
@@ -48,16 +42,13 @@ function StatisticsSection() {
   const sectionContent = settings?.statisticsSection || {};
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim();
 
   const heading =
-    String(sectionContent.heading || sectionContent.title || "").trim() ||
-    defaultSectionContent.heading;
+    String(sectionContent.heading || "").trim();
 
   const description =
-    String(sectionContent.description || "").trim() ||
-    defaultSectionContent.description;
+    String(sectionContent.description || "").trim();
 
   const statistics = useMemo(() => {
     const sourceStatistics = Array.isArray(loadedStatistics)
@@ -190,11 +181,7 @@ function StatisticsSection() {
       <Container>
         <div className="public-statistics-content">
           <header className="public-statistics-header">
-            <div className="public-statistics-eyebrow">
-              <span aria-hidden="true" />
-              <p>{eyebrow}</p>
-              <span aria-hidden="true" />
-            </div>
+            <PublicSectionEyebrow eyebrow={eyebrow} />
 
             <h2 className="public-statistics-heading">{heading}</h2>
 
@@ -202,10 +189,7 @@ function StatisticsSection() {
               {description}
             </p>
 
-            <span
-              className="public-statistics-heading-accent"
-              aria-hidden="true"
-            />
+
           </header>
 
           <p aria-live="polite" className="sr-only">

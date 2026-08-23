@@ -6,6 +6,7 @@ import Container from "../layout/Container";
 import Section from "../layout/Section";
 import Button from "../ui/Button";
 
+import PublicSectionEyebrow from "../layout/PublicSectionEyebrow";
 const IDENTITY_ROTATION_MS = 3000;
 const WORK_ROTATION_MS = 2600;
 
@@ -509,7 +510,7 @@ function AboutSection() {
           <div className="public-about-copy">
             <div className="public-about-heading-block">
               {aboutEyebrow && (
-                <p className="public-about-eyebrow">{aboutEyebrow}</p>
+                <PublicSectionEyebrow eyebrow={aboutEyebrow} />
               )}
 
               {aboutHeading && (

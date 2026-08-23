@@ -172,6 +172,14 @@ const ADMIN_NAVIGATION_GROUPS = [
         activePrefixes: ["/admin/companies"],
       },
       {
+        key: "clients-partners",
+        label: "Clients & Partners",
+        route: "/admin/clients-partners",
+        icon: "companies",
+        description: "Manage public client and partner relationships",
+        activePrefixes: ["/admin/clients-partners"],
+      },
+      {
         key: "subscribers",
         label: "Newsletter / Subscribers",
         route: "/admin/subscribers",
