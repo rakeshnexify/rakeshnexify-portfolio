@@ -14,6 +14,62 @@ import Button from "../ui/Button";
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
+const IDOMERE_BLOG_NEWS_URL = "https://idomere.com/blog";
+
+function getUnifiedBlogNewsNavigationItems(items) {
+  const sourceItems = Array.isArray(items) ? items : [];
+  const blogIndex = sourceItems.findIndex((item) => item?.key === "blog");
+  const newsIndex = sourceItems.findIndex((item) => item?.key === "news");
+
+  if (blogIndex < 0 && newsIndex < 0) {
+    return sourceItems;
+  }
+
+  const blogItem = blogIndex >= 0 ? sourceItems[blogIndex] : null;
+  const newsItem = newsIndex >= 0 ? sourceItems[newsIndex] : null;
+  const blogLabel = String(blogItem?.label || "").trim();
+  const newsLabel = String(newsItem?.label || "").trim();
+
+  const combinedLabel =
+    blogLabel && blogLabel === newsLabel
+      ? blogLabel
+      : /blog.*news|news.*blog/i.test(blogLabel)
+        ? blogLabel
+        : /blog.*news|news.*blog/i.test(newsLabel)
+          ? newsLabel
+          : `${blogLabel || "Blog"} & ${newsLabel || "News"}`;
+
+  const sourceItem = blogItem || newsItem;
+  const combinedItem = {
+    ...sourceItem,
+    key: "blog-news",
+    label: combinedLabel,
+    href: IDOMERE_BLOG_NEWS_URL,
+    relatedHrefs: [],
+    type: "external",
+    isExternalNavigation: true,
+  };
+
+  const existingIndexes = [blogIndex, newsIndex].filter(
+    (index) => index >= 0,
+  );
+  const firstIndex = Math.min(...existingIndexes);
+
+  return sourceItems.reduce((result, item, index) => {
+    if (index === firstIndex) {
+      result.push(combinedItem);
+      return result;
+    }
+
+    if (item?.key === "blog" || item?.key === "news") {
+      return result;
+    }
+
+    result.push(item);
+    return result;
+  }, []);
+}
+
 function NavbarLink({
   section,
   isActive,
@@ -113,7 +169,10 @@ function Navbar() {
     "RakeshNexify";
 
   const visibleSections = useMemo(
-    () => getNavbarNavigationItems(settings?.sections),
+    () =>
+      getUnifiedBlogNewsNavigationItems(
+        getNavbarNavigationItems(settings?.sections),
+      ),
     [settings?.sections],
   );
 

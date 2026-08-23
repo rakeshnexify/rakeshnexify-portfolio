@@ -290,6 +290,51 @@ function normalizeSections(value) {
     );
 }
 
+function unifyBlogNewsSections(value) {
+  const sections = normalizeSections(value);
+  const blogSection = sections.find((section) => section.key === "blog");
+  const newsSection = sections.find((section) => section.key === "news");
+
+  if (!blogSection || !newsSection) {
+    return sections;
+  }
+
+  const blogLabel = cleanString(blogSection.label) || "Blog";
+  const newsLabel = cleanString(newsSection.label) || "News";
+
+  const combinedLabel =
+    blogLabel === newsLabel
+      ? blogLabel
+      : /blog.*news|news.*blog/i.test(blogLabel)
+        ? blogLabel
+        : /blog.*news|news.*blog/i.test(newsLabel)
+          ? newsLabel
+          : `${blogLabel} & ${newsLabel}`;
+
+  return sections.map((section) => {
+    if (section.key === "blog") {
+      return {
+        ...section,
+        label: combinedLabel,
+      };
+    }
+
+    if (section.key === "news") {
+      return {
+        ...section,
+        label: combinedLabel,
+        isNavigationVisible: false,
+        isFooterNavigationVisible: false,
+        isPageVisible: false,
+        navigationOrder: blogSection.navigationOrder,
+        footerNavigationOrder: blogSection.footerNavigationOrder,
+      };
+    }
+
+    return section;
+  });
+}
+
 function createEmptyHeroQuickLink(order = 1) {
   return {
     label: "",
@@ -894,7 +939,7 @@ function createSiteSettingsPayload(formValues = {}) {
 
     freelancerPlatforms: createPlatformPayload(values.freelancerPlatforms),
 
-    sections: normalizeSections(values.sections).map((section, index) => ({
+    sections: unifyBlogNewsSections(values.sections).map((section, index) => ({
       key: section.key,
 
       label: section.label,

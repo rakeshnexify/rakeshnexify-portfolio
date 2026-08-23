@@ -1,14 +1,18 @@
 import { useMemo } from "react";
+
 import { mergeHomepageSections } from "../../config/homepageSections";
 import usePosts from "../../hooks/usePosts";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
+import PublicCTAButton from "../layout/PublicCTAButton";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
-import PostCard from "../posts/PostCard";
+import HomePostCard from "../posts/HomePostCard";
 
-import PublicCTAButton from "../layout/PublicCTAButton";
+import styles from "./LatestPostsSection.module.css";
+
 const SITE_URL = "https://rakeshnexify.com";
+const HOME_POST_LIMIT = 4;
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -88,75 +92,68 @@ function getSameSitePostListingType(value) {
   return "";
 }
 
-function getDateTimestamp(value) {
-  if (!value) {
-    return 0;
-  }
+function LoadingGrid() {
+  return (
+    <div
+      className={styles.grid}
+      data-count={HOME_POST_LIMIT}
+      aria-label="Loading latest Blog and News posts"
+    >
+      {Array.from({ length: HOME_POST_LIMIT }, (_, index) => (
+        <div
+          key={index}
+          className={styles.skeleton}
+          aria-hidden="true"
+        >
+          <div className={styles.skeletonTop} />
+          <div className={styles.skeletonMedia} />
 
-  const timestamp = new Date(value).getTime();
-
-  return Number.isNaN(timestamp) ? 0 : timestamp;
-}
-
-function sortLatestPosts(firstPost, secondPost) {
-  const publishedDifference =
-    getDateTimestamp(secondPost?.publishedAt) -
-    getDateTimestamp(firstPost?.publishedAt);
-
-  if (publishedDifference !== 0) {
-    return publishedDifference;
-  }
-
-  const createdDifference =
-    getDateTimestamp(secondPost?.createdAt) -
-    getDateTimestamp(firstPost?.createdAt);
-
-  if (createdDifference !== 0) {
-    return createdDifference;
-  }
-
-  const firstKey = String(
-    firstPost?._id || firstPost?.id || firstPost?.slug || "",
+          <div className={styles.skeletonBody}>
+            <div className={styles.skeletonExcerpt} />
+            <div className={styles.skeletonExcerpt} />
+            <div className={styles.skeletonAction} />
+          </div>
+        </div>
+      ))}
+    </div>
   );
-
-  const secondKey = String(
-    secondPost?._id || secondPost?.id || secondPost?.slug || "",
-  );
-
-  return firstKey.localeCompare(secondKey);
 }
 
 function LatestPostsSection() {
-  const { posts, isLoading, error, refreshPosts } = usePosts();
-  const { settings } = useSiteSettings();
+  const {
+    posts,
+    isLoading,
+    error,
+    refreshPosts,
+  } = usePosts({
+    limit: HOME_POST_LIMIT,
+    sort: "latest",
+  });
 
+  const { settings } = useSiteSettings();
   const sectionContent = settings?.postsSection || {};
 
-  const eyebrow =
-    String(sectionContent.eyebrow || "").trim();
-
-  const heading =
-    String(sectionContent.heading || "").trim();
-
-  const description =
-    String(sectionContent.description || "").trim();
+  const eyebrow = String(sectionContent.eyebrow || "").trim();
+  const heading = String(sectionContent.heading || "").trim();
+  const description = String(sectionContent.description || "").trim();
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
-
-  const ctaLabel =
-    String(ctaButton.label || "").trim();
-
+  const ctaLabel = String(ctaButton.label || "").trim();
   const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href, "");
+    ctaButton.url || ctaButton.href,
+    "",
+  );
 
-  const sectionsByKey = useMemo(() => {
-    return new Map(
-      mergeHomepageSections(settings?.sections).map((section) => [
-        section.key,
-        section,
-      ]),
-    );
-  }, [settings?.sections]);
+  const sectionsByKey = useMemo(
+    () =>
+      new Map(
+        mergeHomepageSections(settings?.sections).map((section) => [
+          section.key,
+          section,
+        ]),
+      ),
+    [settings?.sections],
+  );
 
   const isBlogPageVisible =
     sectionsByKey.get("blog")?.isPageVisible !== false;
@@ -164,7 +161,8 @@ function LatestPostsSection() {
   const isNewsPageVisible =
     sectionsByKey.get("news")?.isPageVisible !== false;
 
-  const configuredCtaDestination = getSameSitePostListingType(ctaUrl);
+  const configuredCtaDestination =
+    getSameSitePostListingType(ctaUrl);
 
   const isConfiguredCtaAvailable =
     configuredCtaDestination === "blog"
@@ -173,153 +171,103 @@ function LatestPostsSection() {
         ? isNewsPageVisible
         : true;
 
-  let secondaryPageType = "";
-
-  if (isConfiguredCtaAvailable && configuredCtaDestination === "blog") {
-    secondaryPageType = isNewsPageVisible ? "news" : "";
-  } else if (
-    isConfiguredCtaAvailable &&
-    configuredCtaDestination === "news"
-  ) {
-    secondaryPageType = isBlogPageVisible ? "blog" : "";
-  } else if (!isConfiguredCtaAvailable) {
-    secondaryPageType = isBlogPageVisible
-      ? "blog"
-      : isNewsPageVisible
-        ? "news"
-        : "";
-  }
-
-  const publicPosts = Array.isArray(posts) ? posts : [];
-
-  const previewPosts = useMemo(() => {
-    const sourcePosts = Array.isArray(posts) ? posts : [];
-
-    return [...sourcePosts].sort(sortLatestPosts).slice(0, 4);
-  }, [posts]);
+  const previewPosts = Array.isArray(posts) ? posts : [];
 
   return (
     <Section
       id="posts"
-      className="scroll-mt-20 border-t border-slate-200 bg-white"
+      className={`${styles.section} scroll-mt-20`}
     >
       <Container>
-        <SectionHeading
-          eyebrow={eyebrow}
-          title={heading}
-          description={description}
-        />
+        <div className={styles.content}>
+          <SectionHeading
+            eyebrow={eyebrow}
+            title={heading}
+            description={description}
+          />
 
-        <p aria-live="polite" className="sr-only">
-          {isLoading
-            ? "Loading latest Blog and News posts."
-            : `${publicPosts.length} public Blog and News posts loaded.`}
-        </p>
+          <p aria-live="polite" className="sr-only">
+            {isLoading
+              ? "Loading latest Blog and News posts."
+              : `${previewPosts.length} latest Blog and News posts loaded.`}
+          </p>
 
-        {error && (
-          <div className="mt-8 flex min-w-0 flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="break-words text-sm font-bold text-amber-800">
-                Latest Posts could not be loaded
-              </p>
+          {isLoading && previewPosts.length === 0 && (
+            <LoadingGrid />
+          )}
 
-              <p className="mt-1 break-words text-sm leading-6 text-amber-700">
-                The public Blog and News API could not be reached.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={refreshPosts}
-              disabled={isLoading}
-              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+          {error && previewPosts.length === 0 && (
+            <div
+              className={`${styles.state} ${styles.errorState}`}
+              role="status"
             >
-              {isLoading ? "Retrying..." : "Retry"}
-            </button>
-          </div>
-        )}
-
-        {isLoading && previewPosts.length === 0 && (
-          <div className="mt-10 grid min-w-0 gap-7 [&>*]:min-w-0 lg:grid-cols-2">
-            {[1, 2, 3, 4].map((item) => (
-              <div
-                key={item}
-                className="h-[34rem] animate-pulse rounded-3xl bg-slate-200"
-              />
-            ))}
-          </div>
-        )}
-
-        {!isLoading && !error && previewPosts.length === 0 && (
-          <div className="mt-10 rounded-3xl border border-slate-200 bg-slate-50 px-6 py-12 text-center">
-            <p className="text-lg font-bold text-slate-950">
-              No public Blog or News posts available
-            </p>
-
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              Articles and News will appear here after they are created and
-              published from the Admin Panel.
-            </p>
-          </div>
-        )}
-
-        {previewPosts.length > 0 && (
-          <div className="mt-10 grid min-w-0 gap-7 [&>*]:min-w-0 lg:grid-cols-2">
-            {previewPosts.map((post, index) => (
-              <PostCard
-                key={
-                  post._id ||
-                  post.id ||
-                  post.slug ||
-                  `${post.title}-${index}`
-                }
-                post={post}
-                index={index}
-                linkEnabled={
-                  post.type === "news"
-                    ? isNewsPageVisible
-                    : isBlogPageVisible
-                }
-              />
-            ))}
-          </div>
-        )}
-
-        {previewPosts.length > 0 &&
-          (isConfiguredCtaAvailable || secondaryPageType) && (
-            <div className="mt-8 flex min-w-0 flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <p className="break-words font-bold text-slate-950">
-                  Continue reading the complete Blog and News collections
+              <div>
+                <p className={styles.stateTitle}>
+                  Unable to load posts right now.
                 </p>
-
-                <p className="mt-1 break-words text-sm leading-6 text-slate-600">
-                  The homepage shows a small preview of the latest visible
-                  Posts.
+                <p className={styles.stateCopy}>
+                  Please try again in a moment.
                 </p>
               </div>
 
-              <div className="flex min-w-0 shrink-0 flex-col gap-3 sm:flex-row">
-                {isConfiguredCtaAvailable && (
-                  <PublicCTAButton
-                    url={ctaUrl}
-                    label={ctaLabel}
-                  />
-                )}
-
-                {secondaryPageType && (
-                  <PublicCTAButton
-                    url={`/${secondaryPageType}`}
-                    label={`View ${
-                      secondaryPageType === "news"
-                        ? "News"
-                        : "Blog"
-                    }`}
-                  />
-                )}
-              </div>
+              <button
+                type="button"
+                onClick={refreshPosts}
+                disabled={isLoading}
+                className={styles.retryButton}
+              >
+                {isLoading ? "Trying Again..." : "Try Again"}
+              </button>
             </div>
           )}
+
+          {!isLoading && !error && previewPosts.length === 0 && (
+            <div className={styles.state}>
+              <p className={styles.stateTitle}>
+                No articles published yet.
+              </p>
+              <p className={styles.stateCopy}>
+                Published Blog and News content will appear here automatically.
+              </p>
+            </div>
+          )}
+
+          {previewPosts.length > 0 && (
+            <div
+              className={styles.grid}
+              data-count={Math.min(previewPosts.length, HOME_POST_LIMIT)}
+            >
+              {previewPosts.map((post, index) => (
+                <HomePostCard
+                  key={
+                    post._id ||
+                    post.id ||
+                    post.slug ||
+                    `${post.type}-${index}`
+                  }
+                  post={post}
+                  index={index}
+                  linkEnabled={
+                    post.type === "news"
+                      ? isNewsPageVisible
+                      : isBlogPageVisible
+                  }
+                />
+              ))}
+            </div>
+          )}
+
+          {previewPosts.length > 0 &&
+            isConfiguredCtaAvailable &&
+            ctaLabel && (
+              <div className={styles.cta}>
+                <PublicCTAButton
+                  label={ctaLabel}
+                  url={ctaUrl}
+                />
+              </div>
+            )}
+        </div>
       </Container>
     </Section>
   );

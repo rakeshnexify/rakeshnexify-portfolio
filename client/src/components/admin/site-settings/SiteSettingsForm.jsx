@@ -110,6 +110,27 @@ const footerNavigationSectionKeys = new Set(
     .map((section) => section.key),
 );
 
+const IDOMERE_BLOG_NEWS_URL = "https://idomere.com/blog";
+
+function getCombinedBlogNewsLabel(blogSection, newsSection) {
+  const blogLabel = String(blogSection?.label || "Blog").trim();
+  const newsLabel = String(newsSection?.label || "News").trim();
+
+  if (blogLabel && blogLabel === newsLabel) {
+    return blogLabel;
+  }
+
+  if (/blog.*news|news.*blog/i.test(blogLabel)) {
+    return blogLabel;
+  }
+
+  if (/blog.*news|news.*blog/i.test(newsLabel)) {
+    return newsLabel;
+  }
+
+  return `${blogLabel || "Blog"} & ${newsLabel || "News"}`;
+}
+
 function containsControlCharacters(value) {
   const text = String(value ?? "");
 
@@ -1315,6 +1336,76 @@ function SiteSettingsForm({
     setSubmitError("");
   }
 
+  function handleBlogNewsSectionChange(fieldName, value) {
+    setFormValues((currentValues) => {
+      const blogIndex = currentValues.sections.findIndex(
+        (section) => section.key === "blog",
+      );
+
+      const newsIndex = currentValues.sections.findIndex(
+        (section) => section.key === "news",
+      );
+
+      if (blogIndex < 0 || newsIndex < 0) {
+        return currentValues;
+      }
+
+      return {
+        ...currentValues,
+
+        sections: currentValues.sections.map((section, sectionIndex) => {
+          if (sectionIndex === blogIndex) {
+            return {
+              ...section,
+              [fieldName]: value,
+            };
+          }
+
+          if (sectionIndex !== newsIndex) {
+            return section;
+          }
+
+          if (fieldName === "label") {
+            return {
+              ...section,
+              label: value,
+            };
+          }
+
+          if (
+            fieldName === "navigationOrder" ||
+            fieldName === "footerNavigationOrder"
+          ) {
+            return {
+              ...section,
+              [fieldName]: value,
+            };
+          }
+
+          if (fieldName === "isNavigationVisible") {
+            return {
+              ...section,
+              isNavigationVisible: false,
+            };
+          }
+
+          if (fieldName === "isFooterNavigationVisible") {
+            return {
+              ...section,
+              isFooterNavigationVisible: false,
+            };
+          }
+
+          return section;
+        }),
+      };
+    });
+
+    clearFieldErrors("sections");
+
+    setSubmitError("");
+  }
+
   function handleMoveSection(index, direction) {
     setFormValues((currentValues) => {
       const homepageIndexes = currentValues.sections
@@ -2388,26 +2479,54 @@ function SiteSettingsForm({
 
         <div className="space-y-5">
           {formValues.sections.map((section, index) => {
+            if (section.key === "news") {
+              return null;
+            }
+
+            const isBlogNewsSection = section.key === "blog";
+            const newsIndex = formValues.sections.findIndex(
+              (candidate) => candidate.key === "news",
+            );
+            const newsSection =
+              newsIndex >= 0 ? formValues.sections[newsIndex] : null;
+
+            const combinedBlogNewsLabel = isBlogNewsSection
+              ? getCombinedBlogNewsLabel(section, newsSection)
+              : "";
+
+            const updateSectionField = (fieldName, value) => {
+              if (isBlogNewsSection) {
+                handleBlogNewsSectionChange(fieldName, value);
+                return;
+              }
+
+              handleSectionChange(index, fieldName, value);
+            };
+
             const hasHomepageSection = homepageSectionKeys.has(section.key);
             const hasNavigationItem = navigationSectionKeys.has(section.key);
             const hasFooterNavigationItem = footerNavigationSectionKeys.has(
               section.key,
             );
-            const hasDedicatedPage = dedicatedPageSectionKeys.has(section.key);
+            const hasDedicatedPage =
+              !isBlogNewsSection &&
+              dedicatedPageSectionKeys.has(section.key);
             const homepagePosition = homepageSectionIndexes.indexOf(index);
 
             const capabilityLabel =
-              section.key === "companies"
-                ? "Navigation Menu"
-                : hasHomepageSection && hasDedicatedPage
-                  ? "Homepage + Page"
-                  : hasDedicatedPage
-                    ? "Public Page"
-                    : hasHomepageSection
-                      ? "Homepage Section"
-                      : hasNavigationItem
-                        ? "Navigation Item"
-                        : "Registry Item";
+              isBlogNewsSection
+                ? "External Content"
+                : section.key === "companies"
+                  ? "Navigation Menu"
+                  : hasHomepageSection && hasDedicatedPage
+                    ? "Homepage + Page"
+                    : hasDedicatedPage
+                      ? "Public Page"
+                      : hasHomepageSection
+                        ? "Homepage Section"
+                        : hasNavigationItem
+                          ? "Navigation Item"
+                          : "Registry Item";
 
             return (
               <div
@@ -2417,13 +2536,15 @@ function SiteSettingsForm({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <p className="break-words text-base font-bold text-slate-950">
-                      {section.label || section.key}
+                      {isBlogNewsSection
+                        ? "Blog & News"
+                        : section.label || section.key}
                     </p>
 
                     <p className="mt-1 break-words text-xs leading-5 text-slate-500">
                       Section key:{" "}
                       <span className="font-semibold text-slate-700">
-                        {section.key}
+                        {isBlogNewsSection ? "blog-news" : section.key}
                       </span>
                     </p>
 
@@ -2433,6 +2554,14 @@ function SiteSettingsForm({
                         visibility and Navbar order here. Manage submenu company
                         names, website URLs, status, relationship and display
                         order in Company Menu.
+                      </p>
+                    )}
+
+                    {isBlogNewsSection && (
+                      <p className="mt-2 max-w-2xl text-xs leading-5 text-slate-500">
+                        Portfolio Blog & News is a showcase only. Navbar and
+                        card actions send visitors to the live Idomere content
+                        experience at {IDOMERE_BLOG_NEWS_URL}.
                       </p>
                     )}
                   </div>
@@ -2453,7 +2582,7 @@ function SiteSettingsForm({
                     id={`settings-section-key-${index}`}
                     name={`sections.${index}.key`}
                     label="Section key"
-                    value={section.key}
+                    value={isBlogNewsSection ? "blog-news" : section.key}
                     onChange={() => {}}
                     error={getFieldError(`sections.${index}.key`)}
                     disabled={isSubmitting}
@@ -2471,9 +2600,13 @@ function SiteSettingsForm({
                     <input
                       id={`settings-section-label-${index}`}
                       type="text"
-                      value={section.label}
+                      value={
+                        isBlogNewsSection
+                          ? combinedBlogNewsLabel
+                          : section.label
+                      }
                       onChange={(event) =>
-                        handleSectionChange(index, "label", event.target.value)
+                        updateSectionField("label", event.target.value)
                       }
                       disabled={isSubmitting}
                       maxLength={100}
@@ -2504,8 +2637,7 @@ function SiteSettingsForm({
                           step="1"
                           value={section.order}
                           onChange={(event) =>
-                            handleSectionChange(
-                              index,
+                            updateSectionField(
                               "order",
                               event.target.value,
                             )
@@ -2551,8 +2683,7 @@ function SiteSettingsForm({
                           step="1"
                           value={section.navigationOrder}
                           onChange={(event) =>
-                            handleSectionChange(
-                              index,
+                            updateSectionField(
                               "navigationOrder",
                               event.target.value,
                             )
@@ -2600,8 +2731,7 @@ function SiteSettingsForm({
                           step="1"
                           value={section.footerNavigationOrder}
                           onChange={(event) =>
-                            handleSectionChange(
-                              index,
+                            updateSectionField(
                               "footerNavigationOrder",
                               event.target.value,
                             )
@@ -2639,8 +2769,7 @@ function SiteSettingsForm({
                         type="checkbox"
                         checked={section.isVisible !== false}
                         onChange={(event) =>
-                          handleSectionChange(
-                            index,
+                          updateSectionField(
                             "isVisible",
                             event.target.checked,
                           )
@@ -2680,8 +2809,7 @@ function SiteSettingsForm({
                         type="checkbox"
                         checked={section.isNavigationVisible !== false}
                         onChange={(event) =>
-                          handleSectionChange(
-                            index,
+                          updateSectionField(
                             "isNavigationVisible",
                             event.target.checked,
                           )
@@ -2722,8 +2850,7 @@ function SiteSettingsForm({
                         type="checkbox"
                         checked={section.isFooterNavigationVisible !== false}
                         onChange={(event) =>
-                          handleSectionChange(
-                            index,
+                          updateSectionField(
                             "isFooterNavigationVisible",
                             event.target.checked,
                           )
@@ -2758,14 +2885,25 @@ function SiteSettingsForm({
                     </div>
                   )}
 
-                  {hasDedicatedPage ? (
+                  {isBlogNewsSection ? (
+                    <div className="flex min-h-16 items-center rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3">
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-cyan-900">
+                          Idomere destination
+                        </span>
+
+                        <span className="mt-1 block break-all text-xs leading-5 text-cyan-700">
+                          {IDOMERE_BLOG_NEWS_URL}
+                        </span>
+                      </span>
+                    </div>
+                  ) : hasDedicatedPage ? (
                     <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
                       <input
                         type="checkbox"
                         checked={section.isPageVisible !== false}
                         onChange={(event) =>
-                          handleSectionChange(
-                            index,
+                          updateSectionField(
                             "isPageVisible",
                             event.target.checked,
                           )
@@ -2802,9 +2940,11 @@ function SiteSettingsForm({
 
                 <div className="mt-5 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-xs leading-5 text-slate-500">
-                    {hasHomepageSection
-                      ? "Move buttons change only real homepage section order. Navbar and Footer orders remain independent."
-                      : "This page-only item does not participate in homepage ordering."}
+                    {isBlogNewsSection
+                      ? "One Admin control manages the portfolio Blog & News navigation entry. The live content experience stays on Idomere."
+                      : hasHomepageSection
+                        ? "Move buttons change only real homepage section order. Navbar and Footer orders remain independent."
+                        : "This page-only item does not participate in homepage ordering."}
                   </p>
 
                   {hasHomepageSection && (

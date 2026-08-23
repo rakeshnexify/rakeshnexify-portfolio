@@ -2,6 +2,8 @@ import { createApiUrl } from "../config/apiConfig";
 
 const POSTS_PATH = "/api/posts";
 const POST_TYPES = ["blog", "news"];
+const POST_SORT_OPTIONS = ["latest", "oldest", "featured"];
+const MAX_PAGE_LIMIT = 48;
 
 function createFilterError(message, fieldName, fieldMessage = message) {
   const error = new TypeError(message);
@@ -71,6 +73,59 @@ function normalizeBooleanFilter(value, fieldName) {
   return value;
 }
 
+function normalizePositiveIntegerFilter(
+  value,
+  fieldName,
+  {
+    maxValue = Number.MAX_SAFE_INTEGER,
+  } = {},
+) {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const numericValue =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && /^\d+$/.test(value.trim())
+        ? Number(value)
+        : Number.NaN;
+
+  if (
+    !Number.isSafeInteger(numericValue) ||
+    numericValue < 1 ||
+    numericValue > maxValue
+  ) {
+    throw createFilterError(
+      `${fieldName} must be between 1 and ${maxValue}.`,
+      fieldName,
+      `${fieldName} must be between 1 and ${maxValue}.`,
+    );
+  }
+
+  return numericValue;
+}
+
+function normalizeSortFilter(value) {
+  const cleanValue = normalizeOptionalStringFilter(value, "sort");
+
+  if (cleanValue === undefined) {
+    return undefined;
+  }
+
+  const normalizedSort = cleanValue.toLowerCase();
+
+  if (!POST_SORT_OPTIONS.includes(normalizedSort)) {
+    throw createFilterError(
+      "Post sort must be latest, oldest or featured.",
+      "sort",
+      "Select latest, oldest or featured.",
+    );
+  }
+
+  return normalizedSort;
+}
+
 async function readResponseData(response) {
   const responseText = await response.text();
 
@@ -104,6 +159,87 @@ function createPostsApiError(responseData, response, fallbackMessage) {
   return error;
 }
 
+function normalizePagination(value, fallbackTotal = 0) {
+  if (!isPlainObject(value)) {
+    return {
+      page: 1,
+      limit: fallbackTotal,
+      total: fallbackTotal,
+      totalPages: fallbackTotal > 0 ? 1 : 0,
+      hasPreviousPage: false,
+      hasNextPage: false,
+      isPaginated: false,
+    };
+  }
+
+  return {
+    page: Number(value.page || 1),
+    limit: Number(value.limit || 0),
+    total: Number(value.total || fallbackTotal),
+    totalPages: Number(value.totalPages || 0),
+    hasPreviousPage: Boolean(value.hasPreviousPage),
+    hasNextPage: Boolean(value.hasNextPage),
+    isPaginated: Boolean(value.isPaginated),
+  };
+}
+
+function normalizeFacets(value) {
+  const source = isPlainObject(value) ? value : {};
+  const typeSource = isPlainObject(source.types) ? source.types : {};
+
+  const categories = Array.isArray(source.categories)
+    ? source.categories
+        .map((category) => {
+          if (!isPlainObject(category)) {
+            return null;
+          }
+
+          const label = String(category.label || "").trim();
+          const valueKey = String(category.value || "").trim();
+
+          if (!label || !valueKey) {
+            return null;
+          }
+
+          return {
+            value: valueKey,
+            label,
+            count: Number(category.count || 0),
+          };
+        })
+        .filter(Boolean)
+    : [];
+
+  return {
+    total: Number(source.total || 0),
+    types: {
+      all: Number(typeSource.all || 0),
+      blog: Number(typeSource.blog || 0),
+      news: Number(typeSource.news || 0),
+    },
+    categories,
+  };
+}
+
+function normalizePostContext(value) {
+  const source = isPlainObject(value) ? value : {};
+
+  return {
+    recentPosts: Array.isArray(source.recentPosts)
+      ? source.recentPosts
+      : [],
+    relatedPosts: Array.isArray(source.relatedPosts)
+      ? source.relatedPosts
+      : [],
+    previousPost: isPlainObject(source.previousPost)
+      ? source.previousPost
+      : null,
+    nextPost: isPlainObject(source.nextPost)
+      ? source.nextPost
+      : null,
+  };
+}
+
 function assertPublicPostsListResponse(responseData) {
   if (
     !isPlainObject(responseData) ||
@@ -114,6 +250,19 @@ function assertPublicPostsListResponse(responseData) {
   }
 
   return responseData.data;
+}
+
+function assertPublicPostsResultResponse(responseData) {
+  const data = assertPublicPostsListResponse(responseData);
+  const total = Number(responseData.total ?? data.length);
+
+  return {
+    data,
+    count: Number(responseData.count ?? data.length),
+    total,
+    pagination: normalizePagination(responseData.pagination, total),
+    facets: normalizeFacets(responseData.facets),
+  };
 }
 
 function assertPublicPostDetailResponse(responseData) {
@@ -128,6 +277,13 @@ function assertPublicPostDetailResponse(responseData) {
   return responseData.data;
 }
 
+function assertPublicPostResultResponse(responseData) {
+  return {
+    post: assertPublicPostDetailResponse(responseData),
+    context: normalizePostContext(responseData.context),
+  };
+}
+
 function buildPostsQuery(filters = {}) {
   const query = new URLSearchParams();
 
@@ -136,6 +292,14 @@ function buildPostsQuery(filters = {}) {
   const category = normalizeOptionalStringFilter(filters.category, "category");
   const tag = normalizeOptionalStringFilter(filters.tag, "tag");
   const featured = normalizeBooleanFilter(filters.featured, "featured");
+  const page = normalizePositiveIntegerFilter(filters.page, "page", {
+    maxValue: 100000,
+  });
+  const limit = normalizePositiveIntegerFilter(filters.limit, "limit", {
+    maxValue: MAX_PAGE_LIMIT,
+  });
+  const sort = normalizeSortFilter(filters.sort);
+  const facets = normalizeBooleanFilter(filters.facets, "facets");
 
   if (search !== undefined) {
     query.set("search", search);
@@ -157,12 +321,28 @@ function buildPostsQuery(filters = {}) {
     query.set("featured", String(featured));
   }
 
+  if (page !== undefined) {
+    query.set("page", String(page));
+  }
+
+  if (limit !== undefined) {
+    query.set("limit", String(limit));
+  }
+
+  if (sort !== undefined) {
+    query.set("sort", sort);
+  }
+
+  if (facets !== undefined) {
+    query.set("facets", String(facets));
+  }
+
   const queryString = query.toString();
 
   return queryString ? `?${queryString}` : "";
 }
 
-async function fetchPublicPosts(filters = {}, { signal } = {}) {
+async function requestPublicPosts(filters = {}, { signal } = {}) {
   const queryString = buildPostsQuery(filters);
 
   const response = await fetch(createApiUrl(`${POSTS_PATH}${queryString}`), {
@@ -185,7 +365,19 @@ async function fetchPublicPosts(filters = {}, { signal } = {}) {
     );
   }
 
-  return assertPublicPostsListResponse(responseData);
+  return responseData;
+}
+
+async function fetchPublicPostsResult(filters = {}, options = {}) {
+  const responseData = await requestPublicPosts(filters, options);
+
+  return assertPublicPostsResultResponse(responseData);
+}
+
+async function fetchPublicPosts(filters = {}, options = {}) {
+  const result = await fetchPublicPostsResult(filters, options);
+
+  return result.data;
 }
 
 function normalizePostSlug(value) {
@@ -202,11 +394,20 @@ function normalizePostSlug(value) {
   return slug;
 }
 
-async function fetchPublicPostBySlug(slugValue, { signal } = {}) {
+async function requestPublicPostBySlug(
+  slugValue,
+  {
+    signal,
+    includeContext = false,
+  } = {},
+) {
   const slug = normalizePostSlug(slugValue);
+  const contextQuery = includeContext ? "?context=true" : "";
 
   const response = await fetch(
-    createApiUrl(`${POSTS_PATH}/${encodeURIComponent(slug)}`),
+    createApiUrl(
+      `${POSTS_PATH}/${encodeURIComponent(slug)}${contextQuery}`,
+    ),
     {
       method: "GET",
 
@@ -228,18 +429,51 @@ async function fetchPublicPostBySlug(slugValue, { signal } = {}) {
     );
   }
 
+  return responseData;
+}
+
+async function fetchPublicPostResultBySlug(slugValue, options = {}) {
+  const responseData = await requestPublicPostBySlug(slugValue, {
+    ...options,
+    includeContext:
+      options.includeContext === undefined
+        ? true
+        : Boolean(options.includeContext),
+  });
+
+  return assertPublicPostResultResponse(responseData);
+}
+
+async function fetchPublicPostBySlug(slugValue, options = {}) {
+  const responseData = await requestPublicPostBySlug(slugValue, {
+    ...options,
+    includeContext: false,
+  });
+
   return assertPublicPostDetailResponse(responseData);
 }
 
 export {
+  MAX_PAGE_LIMIT,
+  POSTS_PATH,
+  POST_SORT_OPTIONS,
   POST_TYPES,
   assertPublicPostDetailResponse,
+  assertPublicPostResultResponse,
   assertPublicPostsListResponse,
+  assertPublicPostsResultResponse,
   buildPostsQuery,
   fetchPublicPostBySlug,
+  fetchPublicPostResultBySlug,
   fetchPublicPosts,
+  fetchPublicPostsResult,
   normalizeBooleanFilter,
+  normalizeFacets,
   normalizeOptionalStringFilter,
+  normalizePagination,
+  normalizePositiveIntegerFilter,
+  normalizePostContext,
   normalizePostSlug,
   normalizePostTypeFilter,
+  normalizeSortFilter,
 };

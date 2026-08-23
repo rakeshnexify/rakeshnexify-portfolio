@@ -14,6 +14,87 @@ import CompanyNavigationMenu from "../navigation/CompanyNavigationMenu";
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
+const IDOMERE_BLOG_NEWS_URL = "https://idomere.com/blog";
+
+function getUnifiedBlogNewsNavigationItems(items) {
+  const sourceItems = Array.isArray(items) ? items : [];
+  const blogIndex = sourceItems.findIndex((item) => item?.key === "blog");
+  const newsIndex = sourceItems.findIndex((item) => item?.key === "news");
+
+  if (blogIndex < 0 && newsIndex < 0) {
+    return sourceItems;
+  }
+
+  const blogItem = blogIndex >= 0 ? sourceItems[blogIndex] : null;
+  const newsItem = newsIndex >= 0 ? sourceItems[newsIndex] : null;
+  const blogLabel = String(blogItem?.label || "").trim();
+  const newsLabel = String(newsItem?.label || "").trim();
+
+  const combinedLabel =
+    blogLabel && blogLabel === newsLabel
+      ? blogLabel
+      : /blog.*news|news.*blog/i.test(blogLabel)
+        ? blogLabel
+        : /blog.*news|news.*blog/i.test(newsLabel)
+          ? newsLabel
+          : `${blogLabel || "Blog"} & ${newsLabel || "News"}`;
+
+  const sourceItem = blogItem || newsItem;
+  const combinedItem = {
+    ...sourceItem,
+    key: "blog-news",
+    label: combinedLabel,
+    href: IDOMERE_BLOG_NEWS_URL,
+    relatedHrefs: [],
+    type: "external",
+    isExternalNavigation: true,
+  };
+
+  const existingIndexes = [blogIndex, newsIndex].filter(
+    (index) => index >= 0,
+  );
+  const firstIndex = Math.min(...existingIndexes);
+
+  return sourceItems.reduce((result, item, index) => {
+    if (index === firstIndex) {
+      result.push(combinedItem);
+      return result;
+    }
+
+    if (item?.key === "blog" || item?.key === "news") {
+      return result;
+    }
+
+    result.push(item);
+    return result;
+  }, []);
+}
+
+function isUnifiedNavigationItemActive(item, pathname, hash) {
+  if (item?.key !== "blog-news") {
+    return isPublicNavigationItemActive(item, pathname, hash);
+  }
+
+  const relatedHrefs = Array.isArray(item?.relatedHrefs)
+    ? item.relatedHrefs
+    : [];
+
+  return relatedHrefs.some((href) => {
+    const hrefPath = String(href || "")
+      .split("#")[0]
+      .replace(/\/+$/, "");
+
+    if (!hrefPath) {
+      return false;
+    }
+
+    return (
+      pathname === hrefPath ||
+      pathname.startsWith(`${hrefPath}/`)
+    );
+  });
+}
+
 function PublicNavigationLink({
   item,
   isActive,
@@ -43,11 +124,14 @@ function PublicNavigationLink({
     return (
       <a
         href={item.href}
+        target="_blank"
+        rel="noopener noreferrer"
         onClick={onNavigate}
-        title={item.label}
+        title={`${item.label} - opens on Idomere in a new tab`}
         className={`${baseClasses} ${stateClasses}`}
       >
         {item.label}
+        <span className="sr-only"> opens on Idomere in a new tab</span>
       </a>
     );
   }
@@ -84,7 +168,10 @@ function PublicPageHeader() {
     "RakeshNexify";
 
   const navigationItems = useMemo(
-    () => getNavbarNavigationItems(settings?.sections),
+    () =>
+      getUnifiedBlogNewsNavigationItems(
+        getNavbarNavigationItems(settings?.sections),
+      ),
     [settings?.sections],
   );
 
@@ -111,7 +198,7 @@ function PublicPageHeader() {
   const overflowNavigationItems = desktopNavigationLayout.overflowItems;
 
   const isOverflowItemActive = overflowNavigationItems.some((item) =>
-    isPublicNavigationItemActive(item, pathname, hash),
+    isUnifiedNavigationItemActive(item, pathname, hash),
   );
 
   function closeMobileMenu() {
@@ -248,7 +335,7 @@ function PublicPageHeader() {
                     <PublicNavigationLink
                       key={item.key}
                       item={item}
-                      isActive={isPublicNavigationItemActive(
+                      isActive={isUnifiedNavigationItemActive(
                         item,
                         pathname,
                         hash,
@@ -308,7 +395,7 @@ function PublicPageHeader() {
                             <PublicNavigationLink
                               key={item.key}
                               item={item}
-                              isActive={isPublicNavigationItemActive(
+                              isActive={isUnifiedNavigationItemActive(
                                 item,
                                 pathname,
                                 hash,
@@ -489,7 +576,7 @@ function PublicPageHeader() {
                             <PublicNavigationLink
                               key={item.key}
                               item={item}
-                              isActive={isPublicNavigationItemActive(
+                              isActive={isUnifiedNavigationItemActive(
                                 item,
                                 pathname,
                                 hash,

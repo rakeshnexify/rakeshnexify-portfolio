@@ -6,9 +6,10 @@ import {
   useState,
 } from "react";
 
-import { fetchPublicPosts } from "../services/postsApi";
+import { fetchPublicPostsResult } from "../services/postsApi";
 
 const POST_TYPES = ["blog", "news"];
+const POST_SORT_OPTIONS = ["latest", "oldest", "featured"];
 
 function getTimestamp(value) {
   const timestamp = new Date(value || 0).getTime();
@@ -48,6 +49,28 @@ function normalizeBooleanFilterForHook(value) {
   }
 
   return value;
+}
+
+function normalizePositiveIntegerFilterForHook(value) {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  return value;
+}
+
+function normalizeSortFilterForHook(value) {
+  const cleanValue = normalizeStringFilterForHook(value);
+
+  if (cleanValue === undefined || typeof cleanValue !== "string") {
+    return cleanValue;
+  }
+
+  const normalizedSort = cleanValue.toLowerCase();
+
+  return POST_SORT_OPTIONS.includes(normalizedSort)
+    ? normalizedSort
+    : cleanValue;
 }
 
 function sortPosts(posts) {
@@ -93,6 +116,30 @@ function getErrorMessage(error, fallbackMessage) {
   return error instanceof Error ? error.message : fallbackMessage;
 }
 
+function createEmptyPagination() {
+  return {
+    page: 1,
+    limit: 0,
+    total: 0,
+    totalPages: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+    isPaginated: false,
+  };
+}
+
+function createEmptyFacets() {
+  return {
+    total: 0,
+    types: {
+      all: 0,
+      blog: 0,
+      news: 0,
+    },
+    categories: [],
+  };
+}
+
 export default function usePosts(filters = {}) {
   const normalizedFilters = useMemo(
     () => ({
@@ -101,26 +148,37 @@ export default function usePosts(filters = {}) {
       category: normalizeStringFilterForHook(filters.category),
       tag: normalizeStringFilterForHook(filters.tag),
       featured: normalizeBooleanFilterForHook(filters.featured),
+      page: normalizePositiveIntegerFilterForHook(filters.page),
+      limit: normalizePositiveIntegerFilterForHook(filters.limit),
+      sort: normalizeSortFilterForHook(filters.sort),
+      facets: normalizeBooleanFilterForHook(filters.facets),
     }),
     [
       filters.category,
+      filters.facets,
       filters.featured,
+      filters.limit,
+      filters.page,
       filters.search,
+      filters.sort,
       filters.tag,
       filters.type,
     ],
   );
 
   const [posts, setPosts] = useState([]);
+  const [pagination, setPagination] = useState(createEmptyPagination);
+  const [facets, setFacets] = useState(createEmptyFacets);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const activeRequestRef = useRef({
     controller: null,
     requestId: 0,
   });
 
-  const loadPosts = useCallback(async () => {
+  useEffect(() => {
     const previousController = activeRequestRef.current.controller;
 
     previousController?.abort();
@@ -133,76 +191,99 @@ export default function usePosts(filters = {}) {
       requestId,
     };
 
-    setIsLoading(true);
-    setError("");
+    let isDisposed = false;
 
-    try {
-      const databasePosts = await fetchPublicPosts(normalizedFilters, {
-        signal: controller.signal,
-      });
+    Promise.resolve()
+      .then(() => {
+        if (isDisposed || controller.signal.aborted) {
+          return null;
+        }
 
-      if (
-        controller.signal.aborted ||
-        activeRequestRef.current.requestId !== requestId
-      ) {
-        return;
-      }
+        setIsLoading(true);
+        setError("");
 
-      setPosts(sortPosts(databasePosts));
-      setError("");
-    } catch (requestError) {
-      if (
-        controller.signal.aborted ||
-        requestError?.name === "AbortError" ||
-        activeRequestRef.current.requestId !== requestId
-      ) {
-        return;
-      }
+        return fetchPublicPostsResult(normalizedFilters, {
+          signal: controller.signal,
+        });
+      })
+      .then((result) => {
+        if (
+          !result ||
+          isDisposed ||
+          controller.signal.aborted ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
 
-      console.error("Posts load failed:", requestError);
+        const nextPosts = Array.isArray(result.data) ? result.data : [];
 
-      setPosts([]);
+        setPosts(
+          normalizedFilters.sort ? nextPosts : sortPosts(nextPosts),
+        );
+        setPagination(result.pagination || createEmptyPagination());
+        setFacets(result.facets || createEmptyFacets());
+        setError("");
+      })
+      .catch((requestError) => {
+        if (
+          isDisposed ||
+          controller.signal.aborted ||
+          requestError?.name === "AbortError" ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
 
-      setError(
-        getErrorMessage(requestError, "Posts could not be loaded."),
-      );
-    } finally {
-      if (
-        !controller.signal.aborted &&
-        activeRequestRef.current.requestId === requestId
-      ) {
+        console.error("Posts load failed:", requestError);
+
+        setPosts([]);
+        setPagination(createEmptyPagination());
+        setFacets(createEmptyFacets());
+        setError(
+          getErrorMessage(requestError, "Posts could not be loaded."),
+        );
+      })
+      .finally(() => {
+        if (
+          isDisposed ||
+          controller.signal.aborted ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
+
         activeRequestRef.current = {
           controller: null,
           requestId,
         };
 
         setIsLoading(false);
-      }
-    }
-  }, [normalizedFilters]);
-
-  useEffect(() => {
-    loadPosts();
+      });
 
     return () => {
-      const currentRequest = activeRequestRef.current;
+      isDisposed = true;
+      controller.abort();
 
-      currentRequest.controller?.abort();
-
-      activeRequestRef.current = {
-        controller: null,
-        requestId: currentRequest.requestId + 1,
-      };
+      if (activeRequestRef.current.requestId === requestId) {
+        activeRequestRef.current = {
+          controller: null,
+          requestId: requestId + 1,
+        };
+      }
     };
-  }, [loadPosts]);
+  }, [normalizedFilters, refreshKey]);
 
-  const refreshPosts = useCallback(async () => {
-    await loadPosts();
-  }, [loadPosts]);
+  const refreshPosts = useCallback(() => {
+    setRefreshKey((currentKey) => currentKey + 1);
+  }, []);
 
   return {
     posts,
     count: posts.length,
+    total: pagination.total,
+    pagination,
+    facets,
     isLoading,
     error,
     refreshPosts,
@@ -211,6 +292,8 @@ export default function usePosts(filters = {}) {
 
 export {
   normalizeBooleanFilterForHook,
+  normalizePositiveIntegerFilterForHook,
+  normalizeSortFilterForHook,
   normalizeStringFilterForHook,
   normalizeTypeFilterForHook,
   sortPosts,
