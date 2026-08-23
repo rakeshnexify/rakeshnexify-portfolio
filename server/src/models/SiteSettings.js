@@ -333,6 +333,98 @@ const listingSectionContentSchema = new mongoose.Schema(
   },
 );
 
+
+const testimonialTrustedClientSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      trim: true,
+      maxlength: 120,
+      required: [true, "Trusted client name is required."],
+    },
+
+    logoUrl: {
+      type: String,
+      trim: true,
+      maxlength: 1000,
+      default: "",
+    },
+
+    logoAlt: {
+      type: String,
+      trim: true,
+      maxlength: 180,
+      default: "",
+    },
+
+    isVisible: {
+      type: Boolean,
+      default: true,
+    },
+
+    order: {
+      type: Number,
+      min: [0, "Trusted client order cannot be negative."],
+      default: 0,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const testimonialSectionContentSchema = new mongoose.Schema(
+  {
+    eyebrow: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      default: "",
+    },
+
+    heading: {
+      type: String,
+      trim: true,
+      maxlength: 200,
+      default: "",
+    },
+
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 1200,
+      default: "",
+    },
+
+    ctaButton: {
+      type: buttonSchema,
+      default: () => ({}),
+    },
+
+    trustedHeading: {
+      type: String,
+      trim: true,
+      maxlength: 140,
+      default: "",
+    },
+
+    trustedDescription: {
+      type: String,
+      trim: true,
+      maxlength: 220,
+      default: "",
+    },
+
+    trustedClients: {
+      type: [testimonialTrustedClientSchema],
+      default: [],
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
 const contactSectionContentSchema = new mongoose.Schema(
   {
     eyebrow: {
@@ -906,7 +998,7 @@ const siteSettingsSchema = new mongoose.Schema(
     },
 
     testimonialsSection: {
-      type: listingSectionContentSchema,
+      type: testimonialSectionContentSchema,
       default: () => ({}),
     },
 

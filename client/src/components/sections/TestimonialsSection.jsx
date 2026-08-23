@@ -1,14 +1,28 @@
-import { useMemo } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import { mergeHomepageSections } from "../../config/homepageSections";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import useTestimonials from "../../hooks/useTestimonials";
 import Container from "../layout/Container";
+import PublicCTAButton from "../layout/PublicCTAButton";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
-import TestimonialCard from "../testimonials/TestimonialCard";
+import HomeTestimonialCard from "../testimonials/HomeTestimonialCard";
 
-import PublicCTAButton from "../layout/PublicCTAButton";
+import "../testimonials/HomeTestimonialCard.module.css";
+import styles from "./TestimonialsSection.module.css";
+
 const SITE_URL = "https://rakeshnexify.com";
+
+function cleanText(value) {
+  return String(value ?? "").trim();
+}
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -57,6 +71,17 @@ function getSafePublicUrl(value, fallbackUrl = "/testimonials") {
   return fallbackUrl;
 }
 
+function createInitials(value) {
+  const initials = cleanText(value)
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase();
+
+  return initials || "CP";
+}
+
 function isTestimonialsPageDestination(value) {
   const url = String(value || "").trim();
 
@@ -67,7 +92,6 @@ function isTestimonialsPageDestination(value) {
   try {
     const siteUrl = new URL(SITE_URL);
     const destinationUrl = new URL(url, siteUrl);
-
     const normalizedPathname =
       destinationUrl.pathname.replace(/\/+$/, "") || "/";
 
@@ -80,6 +104,38 @@ function isTestimonialsPageDestination(value) {
   }
 }
 
+function ArrowIcon({ direction }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
+      <path
+        d={
+          direction === "left"
+            ? "M16 10H4.5M9 5.5 4.5 10 9 14.5"
+            : "M4 10h11.5M11 5.5 15.5 10 11 14.5"
+        }
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TrustIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+      <path
+        d="m8.1 12.9 2.1 2.1 5.7-6m-8.7-3.4 1.1-1.1a2.3 2.3 0 0 1 3.2 0l.5.5.5-.5a2.3 2.3 0 0 1 3.2 0l1.1 1.1a2.3 2.3 0 0 1 0 3.2l-.5.5.5.5a2.3 2.3 0 0 1 0 3.2l-4.8 4.8-4.8-4.8a2.3 2.3 0 0 1 0-3.2l.5-.5-.5-.5a2.3 2.3 0 0 1 0-3.2Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function TestimonialsSection() {
   const {
     testimonials,
@@ -89,6 +145,10 @@ function TestimonialsSection() {
   } = useTestimonials();
 
   const { settings } = useSiteSettings();
+  const sliderRef = useRef(null);
+  const scrollFrameRef = useRef(null);
+  const [slidesPerView, setSlidesPerView] = useState(3);
+  const [activePage, setActivePage] = useState(0);
 
   const sectionContent = settings?.testimonialsSection || {};
 
@@ -100,6 +160,12 @@ function TestimonialsSection() {
 
   const description =
     String(sectionContent.description || "").trim();
+
+  const trustedHeading =
+    String(sectionContent.trustedHeading || "").trim();
+
+  const trustedDescription =
+    String(sectionContent.trustedDescription || "").trim();
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
@@ -124,111 +190,339 @@ function TestimonialsSection() {
     ? testimonials
     : [];
 
-  const previewTestimonials = publicTestimonials.slice(0, 3);
+  const trustedPreview = useMemo(() => {
+    const sourceClients = Array.isArray(sectionContent.trustedClients)
+      ? sectionContent.trustedClients
+      : [];
+
+    return sourceClients
+      .filter((client) => client?.isVisible !== false)
+      .sort((firstClient, secondClient) => {
+        const orderDifference =
+          Number(firstClient?.order || 0) -
+          Number(secondClient?.order || 0);
+
+        if (orderDifference !== 0) {
+          return orderDifference;
+        }
+
+        return cleanText(firstClient?.name).localeCompare(
+          cleanText(secondClient?.name),
+          undefined,
+          { sensitivity: "base" },
+        );
+      })
+      .slice(0, 6);
+  }, [sectionContent.trustedClients]);
+  const pageCount = Math.max(
+    1,
+    publicTestimonials.length - slidesPerView + 1,
+  );
+  const effectiveActivePage = Math.min(
+    activePage,
+    Math.max(0, pageCount - 1),
+  );
+
+  useEffect(() => {
+    function syncSlidesPerView() {
+      const viewportWidth = window.innerWidth;
+      const nextSlidesPerView =
+        viewportWidth >= 1100 ? 3 : viewportWidth >= 700 ? 2 : 1;
+
+      setSlidesPerView(nextSlidesPerView);
+    }
+
+    syncSlidesPerView();
+    window.addEventListener("resize", syncSlidesPerView);
+
+    return () => {
+      window.removeEventListener("resize", syncSlidesPerView);
+    };
+  }, []);
+
+  const getSlides = useCallback(() => {
+    const slider = sliderRef.current;
+
+    if (!slider) {
+      return [];
+    }
+
+    return Array.from(
+      slider.querySelectorAll("[data-testimonial-slide]"),
+    );
+  }, []);
+
+  const scrollToPage = useCallback(
+    (pageIndex) => {
+      const slider = sliderRef.current;
+      const slides = getSlides();
+      const safePageIndex = Math.max(
+        0,
+        Math.min(pageIndex, pageCount - 1),
+      );
+      const targetSlide = slides[safePageIndex];
+
+      if (!slider || !targetSlide) {
+        return;
+      }
+
+      slider.scrollTo({
+        left: targetSlide.offsetLeft,
+        behavior: "smooth",
+      });
+
+      setActivePage(safePageIndex);
+    },
+    [getSlides, pageCount],
+  );
+
+  const syncActivePageFromScroll = useCallback(() => {
+    const slider = sliderRef.current;
+    const slides = getSlides();
+
+    if (!slider || slides.length === 0) {
+      return;
+    }
+
+    let nearestPage = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    for (let pageIndex = 0; pageIndex < pageCount; pageIndex += 1) {
+      const slide = slides[pageIndex];
+
+      if (!slide) {
+        continue;
+      }
+
+      const distance = Math.abs(slide.offsetLeft - slider.scrollLeft);
+
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestPage = pageIndex;
+      }
+    }
+
+    setActivePage(nearestPage);
+  }, [getSlides, pageCount]);
+
+  const handleSliderScroll = useCallback(() => {
+    if (scrollFrameRef.current) {
+      cancelAnimationFrame(scrollFrameRef.current);
+    }
+
+    scrollFrameRef.current = requestAnimationFrame(
+      syncActivePageFromScroll,
+    );
+  }, [syncActivePageFromScroll]);
+
+  useEffect(() => {
+    return () => {
+      if (scrollFrameRef.current) {
+        cancelAnimationFrame(scrollFrameRef.current);
+      }
+    };
+  }, []);
 
   return (
     <Section
       id="testimonials"
-      className="scroll-mt-20 border-t border-slate-200 bg-slate-50"
+      className={`${styles.section} scroll-mt-20`}
     >
       <Container>
-        <SectionHeading
-          eyebrow={eyebrow}
-          title={heading}
-          description={description}
-        />
+        <div className={styles.content}>
+          <SectionHeading
+            eyebrow={eyebrow}
+            title={heading}
+            description={description}
+          />
 
-        <p aria-live="polite" className="sr-only">
-          {isLoading
-            ? "Loading Testimonials."
-            : `${publicTestimonials.length} Testimonials loaded.`}
-        </p>
+          <p aria-live="polite" className="sr-only">
+            {isLoading
+              ? "Loading Testimonials."
+              : `${publicTestimonials.length} Testimonials loaded.`}
+          </p>
 
-        {error && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-amber-800">
-                Testimonials could not be loaded
+          {error && (
+            <div className={`${styles.state} ${styles.errorState}`}>
+              <div>
+                <p className={styles.stateTitle}>
+                  Testimonials could not be loaded
+                </p>
+                <p className={styles.stateCopy}>{error}</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={refreshTestimonials}
+                disabled={isLoading}
+                className={styles.retryButton}
+              >
+                {isLoading ? "Retrying..." : "Retry Testimonials"}
+              </button>
+            </div>
+          )}
+
+          {isLoading && publicTestimonials.length === 0 && (
+            <div className={styles.sliderShell}>
+              <div className={styles.loadingTrack}>
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className={styles.skeletonCard} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!isLoading && !error && publicTestimonials.length === 0 && (
+            <div className={styles.state}>
+              <p className={styles.stateTitle}>
+                No public Testimonials available
               </p>
-
-              <p className="mt-1 break-words text-sm leading-6 text-amber-700">
-                {error}
+              <p className={styles.stateCopy}>
+                Testimonials will appear here after they are created and
+                published from the Admin Panel.
               </p>
             </div>
+          )}
 
-            <button
-              type="button"
-              onClick={refreshTestimonials}
-              disabled={isLoading}
-              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-amber-300 bg-white px-4 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isLoading ? "Retrying..." : "Retry Testimonials"}
-            </button>
-          </div>
-        )}
+          {publicTestimonials.length > 0 && (
+            <div className={styles.sliderShell}>
+              {pageCount > 1 && (
+                <button
+                  type="button"
+                  className={`${styles.arrowButton} ${styles.arrowLeft}`}
+                  onClick={() => scrollToPage(effectiveActivePage - 1)}
+                  disabled={effectiveActivePage === 0}
+                  aria-label="Previous Testimonials"
+                >
+                  <ArrowIcon direction="left" />
+                </button>
+              )}
 
-        {isLoading && publicTestimonials.length === 0 && (
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {[1, 2, 3].map((item) => (
               <div
-                key={item}
-                className="h-80 animate-pulse rounded-3xl bg-slate-200"
-              />
-            ))}
-          </div>
-        )}
+                ref={sliderRef}
+                className={styles.slider}
+                onScroll={handleSliderScroll}
+                tabIndex={0}
+                aria-label="Client Testimonials carousel"
+              >
+                {publicTestimonials.map((testimonial, index) => (
+                  <div
+                    key={
+                      testimonial._id ||
+                      testimonial.id ||
+                      `${testimonial.clientName}-${index}`
+                    }
+                    className={styles.slide}
+                    data-testimonial-slide
+                  >
+                    <HomeTestimonialCard testimonial={testimonial} />
+                  </div>
+                ))}
+              </div>
 
-        {!isLoading && !error && publicTestimonials.length === 0 && (
-          <div className="mt-10 rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-            <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-2xl font-black text-brand-600">
-              0
+              {pageCount > 1 && (
+                <button
+                  type="button"
+                  className={`${styles.arrowButton} ${styles.arrowRight}`}
+                  onClick={() => scrollToPage(effectiveActivePage + 1)}
+                  disabled={effectiveActivePage === pageCount - 1}
+                  aria-label="Next Testimonials"
+                >
+                  <ArrowIcon direction="right" />
+                </button>
+              )}
+
             </div>
+          )}
 
-            <p className="mt-6 text-lg font-bold text-slate-950">
-              No public Testimonials available
-            </p>
+          {publicTestimonials.length > 0 && (
+            <nav
+              className={styles.paginationRow}
+              aria-label="Testimonials carousel positions"
+            >
+              {Array.from({ length: pageCount }, (_, pageIndex) => (
+                <button
+                  key={pageIndex}
+                  type="button"
+                  className={styles.paginationDot}
+                  data-active={
+                    pageIndex === effectiveActivePage ? "true" : "false"
+                  }
+                  onClick={() => scrollToPage(pageIndex)}
+                  aria-label={`Go to Testimonials position ${pageIndex + 1}`}
+                  aria-current={
+                    pageIndex === effectiveActivePage ? "true" : undefined
+                  }
+                >
+                    <span
+                      className={styles.paginationDotCore}
+                      aria-hidden="true"
+                    />
+                  </button>
+              ))}
+            </nav>
+          )}
 
-            <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-              Testimonials will appear here after they are created and
-              published from the Admin Panel.
-            </p>
-          </div>
-        )}
+          {trustedPreview.length > 0 && (
+            <div className={styles.trustStrip}>
+              <div className={styles.trustSummary}>
+                <span className={styles.trustIcon}>
+                  <TrustIcon />
+                </span>
 
-        {previewTestimonials.length > 0 && (
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {previewTestimonials.map((testimonial, index) => (
-              <TestimonialCard
-                key={
-                  testimonial._id ||
-                  testimonial.id ||
-                  `${testimonial.clientName}-${index}`
-                }
-                testimonial={testimonial}
-                compact
-              />
-            ))}
-          </div>
-        )}
+                <span>
+                  <strong>
+                    {trustedHeading || "Trusted showcase clients"}
+                  </strong>
+                  {trustedDescription && (
+                    <small>{trustedDescription}</small>
+                  )}
+                </span>
+              </div>
 
-        {previewTestimonials.length > 0 && shouldShowCta && (
-          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="font-bold text-slate-950">
-                Read more client feedback
-              </p>
+              <div className={styles.trustLogos}>
+                {trustedPreview.map((client, index) => {
+                  const name = cleanText(client?.name) || "Client";
+                  const logoUrl = cleanText(client?.logoUrl);
+                  const logoAlt =
+                    cleanText(client?.logoAlt) || `${name} logo`;
 
-              <p className="mt-1 text-sm leading-6 text-slate-600">
-                Explore every published Testimonial and rating.
-              </p>
+                  return (
+                    <div
+                      key={`${name}-${index}`}
+                      className={styles.companyItem}
+                    >
+                      <span className={styles.companyLogo}>
+                        {logoUrl ? (
+                          <img
+                            src={logoUrl}
+                            alt={logoAlt}
+                            loading="lazy"
+                            onError={(event) => {
+                              event.currentTarget.hidden = true;
+                            }}
+                          />
+                        ) : (
+                          <span>{createInitials(name)}</span>
+                        )}
+                      </span>
+                      <span className={styles.companyName}>{name}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
+          )}
 
-            <PublicCTAButton
-              url={ctaUrl}
-              label={ctaLabel}
-            />
-          </div>
-        )}
+          {publicTestimonials.length > 0 && shouldShowCta && ctaLabel && (
+            <div className={styles.cta}>
+              <PublicCTAButton
+                url={ctaUrl}
+                label={ctaLabel}
+              />
+            </div>
+          )}
+        </div>
       </Container>
     </Section>
   );

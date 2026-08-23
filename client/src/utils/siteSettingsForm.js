@@ -198,6 +198,46 @@ function normalizeListingSection(section = {}) {
   };
 }
 
+function normalizeTestimonialsTrustedClients(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const seenNames = new Set();
+
+  return value
+    .map((client, index) => {
+      const name = cleanString(client?.name);
+      const normalizedName = name.toLowerCase();
+
+      if (!name || seenNames.has(normalizedName)) {
+        return null;
+      }
+
+      seenNames.add(normalizedName);
+
+      return {
+        name,
+        logoUrl: cleanString(client?.logoUrl),
+        logoAlt: cleanString(client?.logoAlt),
+        isVisible: client?.isVisible !== false,
+        order: index + 1,
+      };
+    })
+    .filter(Boolean);
+}
+
+function normalizeTestimonialsSection(section = {}) {
+  return {
+    ...normalizeListingSection(section),
+    trustedHeading: cleanString(section?.trustedHeading),
+    trustedDescription: cleanString(section?.trustedDescription),
+    trustedClients: normalizeTestimonialsTrustedClients(
+      section?.trustedClients,
+    ),
+  };
+}
+
 function normalizeContactSection(section = {}) {
   return {
     eyebrow: cleanString(section?.eyebrow),
@@ -443,6 +483,16 @@ function normalizeAboutIdentityRoles(value) {
     );
 }
 
+function createEmptyTestimonialTrustedClient(order = 1) {
+  return {
+    name: "",
+    logoUrl: "",
+    logoAlt: "",
+    isVisible: true,
+    order,
+  };
+}
+
 function createEmptyPlatform(order = 1) {
   return {
     name: "",
@@ -644,7 +694,7 @@ function createSiteSettingsFormValues(settings = {}) {
       settings?.clientsPartnersSection,
     ),
 
-    testimonialsSection: normalizeListingSection(
+    testimonialsSection: normalizeTestimonialsSection(
       settings?.testimonialsSection,
     ),
 
@@ -773,6 +823,29 @@ function createListingSectionPayload(section) {
   };
 }
 
+function createTestimonialsSectionPayload(section) {
+  const normalizedSection = normalizeTestimonialsSection(section);
+
+  return {
+    eyebrow: normalizedSection.eyebrow,
+    heading: normalizedSection.heading,
+    description: normalizedSection.description,
+    ctaButton: {
+      label: normalizedSection.ctaButton.label,
+      url: normalizedSection.ctaButton.url,
+    },
+    trustedHeading: normalizedSection.trustedHeading,
+    trustedDescription: normalizedSection.trustedDescription,
+    trustedClients: normalizedSection.trustedClients.map((client, index) => ({
+      name: client.name,
+      logoUrl: client.logoUrl,
+      logoAlt: client.logoAlt,
+      isVisible: client.isVisible !== false,
+      order: index + 1,
+    })),
+  };
+}
+
 function createSiteSettingsPayload(formValues = {}) {
   const values = createSiteSettingsFormValues(formValues);
 
@@ -867,7 +940,7 @@ function createSiteSettingsPayload(formValues = {}) {
       values.clientsPartnersSection,
     ),
 
-    testimonialsSection: createListingSectionPayload(
+    testimonialsSection: createTestimonialsSectionPayload(
       values.testimonialsSection,
     ),
 
@@ -994,6 +1067,7 @@ export {
   createEmptyHeroQuickLink,
   createEmptyLegalLink,
   createEmptyPlatform,
+  createEmptyTestimonialTrustedClient,
   createKeywordsArray,
   createSiteSettingsFormValues,
   createSiteSettingsPayload,

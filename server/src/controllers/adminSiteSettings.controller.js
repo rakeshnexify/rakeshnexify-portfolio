@@ -12,6 +12,7 @@ const MAX_ABOUT_IDENTITY_ROLES = 30;
 const MAX_ABOUT_WORK_ITEMS = 100;
 const MAX_HERO_QUICK_LINKS = 30;
 const MAX_LEGAL_LINKS = 20;
+const MAX_TESTIMONIAL_TRUSTED_CLIENTS = 12;
 const MAX_SECTION_ORDER = 10000;
 
 const sectionAllowedFields = new Set([
@@ -92,6 +93,12 @@ const buttonStringFields = ["label", "url"];
 const aboutStringFields = ["eyebrow", "heading", "description"];
 
 const listingSectionStringFields = ["eyebrow", "heading", "description"];
+
+const testimonialSectionStringFields = [
+  ...listingSectionStringFields,
+  "trustedHeading",
+  "trustedDescription",
+];
 
 const contactSectionStringFields = [
   "eyebrow",
@@ -740,10 +747,84 @@ function appendAboutPayload(payload, aboutValue) {
   }
 }
 
+function cleanTestimonialTrustedClients(value) {
+  if (!Array.isArray(value)) {
+    throw createHttpError(
+      "testimonialsSection.trustedClients must be an array.",
+      400,
+      {
+        "testimonialsSection.trustedClients":
+          "Trusted showcase clients must be provided as a list.",
+      },
+    );
+  }
+
+  if (value.length > MAX_TESTIMONIAL_TRUSTED_CLIENTS) {
+    throw createHttpError(
+      `A maximum of ${MAX_TESTIMONIAL_TRUSTED_CLIENTS} trusted showcase clients is allowed.`,
+      400,
+      {
+        "testimonialsSection.trustedClients":
+          `Add no more than ${MAX_TESTIMONIAL_TRUSTED_CLIENTS} showcase clients.`,
+      },
+    );
+  }
+
+  const usedNames = new Set();
+
+  return value.map((rawClient, index) => {
+    const fieldPrefix = `testimonialsSection.trustedClients.${index}`;
+    const client = ensureObject(rawClient, fieldPrefix);
+    const name = cleanString(client.name);
+
+    if (!name) {
+      throw createHttpError(
+        "Trusted showcase client name is required.",
+        400,
+        {
+          [`${fieldPrefix}.name`]: "Client / brand name is required.",
+        },
+      );
+    }
+
+    const normalizedName = name.toLowerCase();
+
+    if (usedNames.has(normalizedName)) {
+      throw createHttpError(
+        `The trusted showcase client "${name}" is already added.`,
+        400,
+        {
+          [`${fieldPrefix}.name`]: `The client / brand "${name}" is already added.`,
+        },
+      );
+    }
+
+    usedNames.add(normalizedName);
+
+    return {
+      name,
+      logoUrl: client.logoUrl
+        ? cleanHttpUrl(client.logoUrl, `${fieldPrefix}.logoUrl`)
+        : "",
+      logoAlt: cleanString(client.logoAlt),
+      isVisible: hasOwnProperty(client, "isVisible")
+        ? cleanStrictBoolean(client.isVisible, `${fieldPrefix}.isVisible`)
+        : true,
+      order: hasOwnProperty(client, "order")
+        ? cleanOrder(client.order, `${fieldPrefix}.order`)
+        : index + 1,
+    };
+  });
+}
+
 function appendListingSectionPayload(payload, sectionValue, fieldName) {
   const section = ensureObject(sectionValue, fieldName);
+  const stringFields =
+    fieldName === "testimonialsSection"
+      ? testimonialSectionStringFields
+      : listingSectionStringFields;
 
-  appendStringFields(payload, section, fieldName, listingSectionStringFields);
+  appendStringFields(payload, section, fieldName, stringFields);
 
   if (hasOwnProperty(section, "ctaButton")) {
     appendPublicButtonPayload(
@@ -751,6 +832,14 @@ function appendListingSectionPayload(payload, sectionValue, fieldName) {
       section.ctaButton,
       `${fieldName}.ctaButton`,
     );
+  }
+
+  if (
+    fieldName === "testimonialsSection" &&
+    hasOwnProperty(section, "trustedClients")
+  ) {
+    payload["testimonialsSection.trustedClients"] =
+      cleanTestimonialTrustedClients(section.trustedClients);
   }
 }
 

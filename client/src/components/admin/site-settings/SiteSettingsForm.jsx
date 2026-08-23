@@ -13,6 +13,7 @@ import AboutWorkItemsEditor from "./AboutWorkItemsEditor";
 import HeroQuickLinksEditor from "./HeroQuickLinksEditor";
 import LegalLinksEditor from "./LegalLinksEditor";
 import PlatformSettingsEditor from "./PlatformSettingsEditor";
+import TestimonialsTrustedClientsEditor from "./TestimonialsTrustedClientsEditor";
 
 const inputClasses =
   "mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
@@ -31,6 +32,8 @@ const MAX_ABOUT_WORK_ITEMS = 100;
 const MAX_HERO_QUICK_LINKS = 30;
 
 const MAX_LEGAL_LINKS = 20;
+
+const MAX_TESTIMONIAL_TRUSTED_CLIENTS = 12;
 
 const MAX_SECTION_ORDER = 10000;
 
@@ -474,6 +477,60 @@ function validateLegalLinks(formValues, errors) {
   });
 }
 
+function validateTestimonialsTrustedClients(formValues, errors) {
+  const trustedClients =
+    formValues?.testimonialsSection?.trustedClients;
+
+  if (!Array.isArray(trustedClients)) {
+    errors["testimonialsSection.trustedClients"] =
+      "Showcase clients must be provided as a list.";
+    return;
+  }
+
+  if (trustedClients.length > MAX_TESTIMONIAL_TRUSTED_CLIENTS) {
+    errors["testimonialsSection.trustedClients"] =
+      `A maximum of ${MAX_TESTIMONIAL_TRUSTED_CLIENTS} showcase clients is allowed.`;
+  }
+
+  const usedNames = new Set();
+
+  trustedClients.forEach((client, index) => {
+    const fieldPrefix =
+      `testimonialsSection.trustedClients.${index}`;
+    const name = String(client?.name || "").trim();
+
+    if (!name) {
+      errors[`${fieldPrefix}.name`] =
+        "Client / brand name is required.";
+    } else if (name.length > 120) {
+      errors[`${fieldPrefix}.name`] =
+        "Client / brand name cannot exceed 120 characters.";
+    } else {
+      const normalizedName = name.toLowerCase();
+
+      if (usedNames.has(normalizedName)) {
+        errors[`${fieldPrefix}.name`] =
+          `The client / brand "${name}" is already added.`;
+      } else {
+        usedNames.add(normalizedName);
+      }
+    }
+
+    if (
+      String(client?.logoUrl || "").trim() &&
+      !isSafeHttpUrl(client?.logoUrl)
+    ) {
+      errors[`${fieldPrefix}.logoUrl`] =
+        "Enter a complete http:// or https:// logo URL.";
+    }
+
+    if (String(client?.logoAlt || "").trim().length > 180) {
+      errors[`${fieldPrefix}.logoAlt`] =
+        "Logo alt text cannot exceed 180 characters.";
+    }
+  });
+}
+
 function validateDynamicContentUrls(formValues, errors) {
   const urlFields = [
     {
@@ -675,6 +732,12 @@ function prepareInitialValues(initialValues = {}) {
       ctaButton: {
         ...normalizedValues.testimonialsSection.ctaButton,
       },
+
+      trustedClients: normalizedValues.testimonialsSection.trustedClients.map(
+        (client) => ({
+          ...client,
+        }),
+      ),
     },
 
     faqSection: {
@@ -872,6 +935,8 @@ function validateSiteSettingsForm(formValues) {
   });
 
   validateLegalLinks(formValues, errors);
+
+  validateTestimonialsTrustedClients(formValues, errors);
 
   validateDynamicContentUrls(formValues, errors);
 
@@ -1298,6 +1363,26 @@ function SiteSettingsForm({
 
     clearFieldErrorGroup("footer.legalLinks");
 
+    setSubmitError("");
+  }
+
+  function handleTestimonialsTrustedClientsChange(nextClients) {
+    const trustedClients = Array.isArray(nextClients) ? nextClients : [];
+
+    setFormValues((currentValues) => ({
+      ...currentValues,
+
+      testimonialsSection: {
+        ...currentValues.testimonialsSection,
+
+        trustedClients: trustedClients.map((client, index) => ({
+          ...client,
+          order: index + 1,
+        })),
+      },
+    }));
+
+    clearFieldErrorGroup("testimonialsSection.trustedClients");
     setSubmitError("");
   }
 
@@ -2044,6 +2129,55 @@ function SiteSettingsForm({
         onChange={handleFieldChange}
         getFieldError={getFieldError}
       />
+
+      <SettingsCard
+        isVisible={isPanelActive("listing-sections")}
+        title="Testimonials Showcase Clients"
+        description="Manage independent showcase clients/brands displayed in the Testimonials trust strip. These do not use or modify Clients & Partners records."
+      >
+        <div className="grid gap-5">
+          <div className="grid gap-5 lg:grid-cols-2">
+            <TextInput
+              id="settings-testimonials-trusted-heading"
+              name="testimonialsSection.trustedHeading"
+              label="Trust strip heading"
+              value={formValues.testimonialsSection.trustedHeading}
+              onChange={handleFieldChange}
+              error={getFieldError(
+                "testimonialsSection.trustedHeading",
+                "testimonialsSection",
+              )}
+              disabled={isSubmitting}
+              placeholder="Trusted by 50+ clients"
+              maxLength={140}
+            />
+
+            <TextInput
+              id="settings-testimonials-trusted-description"
+              name="testimonialsSection.trustedDescription"
+              label="Trust strip description"
+              value={formValues.testimonialsSection.trustedDescription}
+              onChange={handleFieldChange}
+              error={getFieldError(
+                "testimonialsSection.trustedDescription",
+                "testimonialsSection",
+              )}
+              disabled={isSubmitting}
+              placeholder="from around the world"
+              maxLength={220}
+            />
+          </div>
+
+          <TestimonialsTrustedClientsEditor
+            clients={formValues.testimonialsSection.trustedClients}
+            disabled={isSubmitting}
+            accessToken={accessToken}
+            onUnauthorized={onMediaUnauthorized}
+            onChange={handleTestimonialsTrustedClientsChange}
+            getFieldError={getFieldError}
+          />
+        </div>
+      </SettingsCard>
 
       <ListingSectionSettingsCard
         isVisible={isPanelActive("listing-sections")}
