@@ -247,7 +247,7 @@ function TeamSection() {
           )}
 
           {previewTeamMembers.length > 0 && (
-            <div className={styles.memberGrid}>
+            <div className={`${styles.memberGrid} rnx-auto-center-team`}>
               {previewTeamMembers.map((member, index) => (
                 <HomeTeamCard
                   key={

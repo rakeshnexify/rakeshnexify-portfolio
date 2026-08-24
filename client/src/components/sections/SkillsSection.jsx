@@ -198,7 +198,7 @@ function SkillsSection() {
 
           {visibleSkills.length > 0 && (
             <div
-              className="public-skills-grid"
+              className="public-skills-grid rnx-auto-center-skills"
               aria-label="Professional skills"
             >
               {visibleSkills.map((skill, index) => (

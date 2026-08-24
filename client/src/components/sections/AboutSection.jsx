@@ -217,6 +217,37 @@ function usePrefersReducedMotion() {
   return prefersReducedMotion;
 }
 
+function useIsMobileViewport() {
+  const [isMobileViewport, setIsMobileViewport] = useState(() => {
+    return (
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(max-width: 767px)").matches
+    );
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    function syncViewport() {
+      setIsMobileViewport(mediaQuery.matches);
+    }
+
+    syncViewport();
+    mediaQuery.addEventListener?.("change", syncViewport);
+
+    return () => {
+      mediaQuery.removeEventListener?.("change", syncViewport);
+    };
+  }, []);
+
+  return isMobileViewport;
+}
+
 function PlatformIconGrid({
   title,
   profiles,
@@ -312,9 +343,12 @@ function AboutWorkLink({
   );
 }
 
+const SHOW_ABOUT_PLATFORM_PROFILES = false;
+
 function AboutSection() {
   const { settings } = useSiteSettings();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const isMobileViewport = useIsMobileViewport();
 
   const about = useMemo(
     () => settings?.about || {},
@@ -356,7 +390,11 @@ function AboutSection() {
   const [workIndex, setWorkIndex] = useState(0);
 
   useEffect(() => {
-    if (prefersReducedMotion || identityRoles.length <= 1) {
+    if (
+      isMobileViewport ||
+      prefersReducedMotion ||
+      identityRoles.length <= 1
+    ) {
       return undefined;
     }
 
@@ -367,11 +405,15 @@ function AboutSection() {
     }, IDENTITY_ROTATION_MS);
 
     return () => window.clearInterval(intervalId);
-  }, [identityRoles, prefersReducedMotion]);
+  }, [identityRoles, isMobileViewport, prefersReducedMotion]);
 
 
   useEffect(() => {
-    if (prefersReducedMotion || workItems.length <= 1) {
+    if (
+      isMobileViewport ||
+      prefersReducedMotion ||
+      workItems.length <= 1
+    ) {
       return undefined;
     }
 
@@ -382,7 +424,7 @@ function AboutSection() {
     }, WORK_ROTATION_MS);
 
     return () => window.clearInterval(intervalId);
-  }, [prefersReducedMotion, workItems]);
+  }, [isMobileViewport, prefersReducedMotion, workItems]);
 
 
   function openResume() {
@@ -591,17 +633,21 @@ function AboutSection() {
                 {(socialProfiles.length > 0 ||
                   freelancerProfiles.length > 0) && (
                   <div className="public-about-platform-groups">
-                    <PlatformIconGrid
+                    {SHOW_ABOUT_PLATFORM_PROFILES && (
+                      <PlatformIconGrid
                       title="Social Media"
                       profiles={socialProfiles}
                       variant="social"
-                    />
+                      />
+                    )}
 
-                    <PlatformIconGrid
+                    {SHOW_ABOUT_PLATFORM_PROFILES && (
+                      <PlatformIconGrid
                       title="Freelancing"
                       profiles={freelancerProfiles}
                       variant="freelance"
-                    />
+                      />
+                    )}
                   </div>
                 )}
               </div>
