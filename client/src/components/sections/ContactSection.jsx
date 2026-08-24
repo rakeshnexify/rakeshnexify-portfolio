@@ -1,24 +1,23 @@
+import { useState } from "react";
+
 import siteData from "../../data/siteData";
 import useSiteSettings from "../../hooks/useSiteSettings";
 import Container from "../layout/Container";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import ContactForm from "./contact/ContactForm";
+import styles from "./ContactSection.module.css";
 
 const defaultSectionContent = {
   eyebrow: "Contact Me",
-
-  heading: "Let us discuss your next digital project",
-
-  description:
-    "Share your requirements for a business website, MERN application, WordPress website, e-commerce store or long-term development support.",
-
-  enquiryEyebrow: "Project Enquiries",
-
-  enquiryHeading: "Ready to build something useful?",
-
-  enquiryDescription:
-    "Explain your idea, required features, preferred technology and expected timeline. I will review the project details and reply through an available contact method.",
+  formHeading: "Send a Message",
+  formDescription: "Share the project details and I will get back to you.",
+  socialHeading: "Connect With Me",
+  socialDescription: "Find me on social media.",
+  freelancerHeading: "Freelancer Profiles",
+  freelancerDescription: "Hire me on trusted platforms.",
+  submitLabel: "Send Message",
+  privacyNote: "Your information is safe and secure. I respect your privacy.",
 };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -83,21 +82,13 @@ function getSafePhoneHref(value) {
 
   const cleanedPhone = phone.replace(/[^\d+]/g, "");
 
-  if (!cleanedPhone) {
-    return "";
-  }
-
-  return `tel:${cleanedPhone}`;
+  return cleanedPhone ? `tel:${cleanedPhone}` : "";
 }
 
 function getSafeWhatsAppHref(value) {
   const whatsappNumber = String(value || "").replace(/\D/g, "");
 
-  if (!whatsappNumber) {
-    return "";
-  }
-
-  return `https://wa.me/${whatsappNumber}`;
+  return whatsappNumber ? `https://wa.me/${whatsappNumber}` : "";
 }
 
 function sortByOrder(firstPlatform, secondPlatform) {
@@ -120,78 +111,125 @@ function getVisiblePlatforms(settingsPlatforms, fallbackPlatforms = []) {
     .sort(sortByOrder);
 }
 
-function ContactDetail({ label, value, href, icon }) {
+function getOptionalContent(value, fallbackValue = "") {
+  if (value === undefined || value === null) {
+    return fallbackValue;
+  }
+
+  return String(value).trim();
+}
+
+function MailIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+      <path d="M4 6h16v12H4z" />
+      <path d="m4 7 8 6 8-6" />
+    </svg>
+  );
+}
+
+function PhoneIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+      <path d="M6.5 4h3l1.5 4-2 1.5a15 15 0 0 0 5.5 5.5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10 19.5 4.5 14 4.5 6c0-1.1.9-2 2-2Z" />
+    </svg>
+  );
+}
+
+function WhatsAppIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+      <path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.4-4A8 8 0 1 1 20 11.5Z" />
+      <path d="M9 8.5c.5 2.5 2 4 4.5 4.8" />
+    </svg>
+  );
+}
+
+function LocationIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+      <path d="M20 10c0 5-8 10-8 10S4 15 4 10a8 8 0 1 1 16 0Z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
+function ContactMethod({ kind, label, value, href, icon }) {
   if (!value) {
     return null;
   }
 
   const content = (
     <>
-      <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
+      <span className={styles.methodIcon} aria-hidden="true">
         {icon}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="break-words text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
-          {label}
-        </p>
-
-        <p className="mt-1 break-words text-sm font-semibold text-slate-900">
-          {value}
-        </p>
-      </div>
+      </span>
+      <span className={styles.methodValue}>{value}</span>
     </>
   );
 
   if (!href) {
     return (
-      <div className="flex min-w-0 items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <div className={styles.method} data-kind={kind} aria-label={`${label}: ${value}`}>
         {content}
       </div>
     );
   }
 
-  const isExternalLink =
-    href.startsWith("http://") || href.startsWith("https://");
+  const isExternal = href.startsWith("http://") || href.startsWith("https://");
 
   return (
     <a
       href={href}
-      target={isExternalLink ? "_blank" : undefined}
-      rel={isExternalLink ? "noopener noreferrer" : undefined}
-      className="flex min-w-0 items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-brand-200 hover:bg-brand-50/50"
+      className={styles.method}
+      data-kind={kind}
+      aria-label={`${label}: ${value}`}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
     >
       {content}
     </a>
   );
 }
 
+function createInitial(value) {
+  return String(value || "P").trim().charAt(0).toUpperCase() || "P";
+}
+
+function PlatformIcon({ platform }) {
+  const iconUrl = getSafeExternalUrl(platform?.iconUrl);
+  const [hasImageError, setHasImageError] = useState(false);
+
+  if (iconUrl && !hasImageError) {
+    return (
+      <img
+        src={iconUrl}
+        alt=""
+        loading="lazy"
+        onError={() => setHasImageError(true)}
+      />
+    );
+  }
+
+  return <span>{createInitial(platform?.name)}</span>;
+}
+
 function PlatformLink({ platform }) {
   const name = String(platform?.name || "Platform").trim() || "Platform";
-
-  const username = String(platform?.username || "").trim();
-
   const safeUrl = getSafeExternalUrl(platform?.url);
 
   const content = (
     <>
-      <span className="max-w-full break-words font-semibold">{name}</span>
-
-      {username && (
-        <span className="mt-0.5 max-w-full truncate text-xs font-medium opacity-70">
-          {username}
-        </span>
-      )}
+      <span className={styles.platformIcon} aria-hidden="true">
+        <PlatformIcon platform={platform} />
+      </span>
+      <span className={styles.platformName}>{name}</span>
     </>
   );
 
   if (!safeUrl) {
     return (
-      <span
-        title={`${name} profile link will be added soon`}
-        aria-disabled="true"
-        className="inline-flex min-w-0 max-w-full cursor-not-allowed flex-col items-start rounded-xl border border-slate-200 bg-slate-100 px-4 py-2.5 text-sm text-slate-400"
-      >
+      <span className={styles.platformLink} data-disabled="true" aria-disabled="true">
         {content}
       </span>
     );
@@ -202,268 +240,189 @@ function PlatformLink({ platform }) {
       href={safeUrl}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`Open ${name}${username ? ` profile for ${username}` : ""}`}
-      className="inline-flex min-w-0 max-w-full flex-col items-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 transition hover:border-brand-600 hover:text-brand-600"
+      className={styles.platformLink}
+      aria-label={`Open ${name} profile in a new tab`}
     >
       {content}
     </a>
   );
 }
 
-function PlatformGroup({ groupKey, title, platforms }) {
+function PlatformPanel({ title, description, platforms, kind }) {
   if (!Array.isArray(platforms) || platforms.length === 0) {
     return null;
   }
 
   return (
-    <div className="min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
-      <p className="break-words text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-        {title}
-      </p>
+    <section className={styles.platformPanel} data-kind={kind}>
+      {(title || description) && (
+        <header className={styles.platformHeader}>
+          {title && <h3>{title}</h3>}
+          {description && <p>{description}</p>}
+        </header>
+      )}
 
-      <div className="mt-5 flex min-w-0 flex-wrap gap-3">
+      <div className={styles.platformGrid}>
         {platforms.map((platform, index) => {
-          const platformName = String(platform?.name || "platform").trim();
-
-          const platformUrl = String(platform?.url || "").trim();
-
-          const platformUsername = String(platform?.username || "").trim();
-
-          const platformKey =
+          const key =
             platform?._id ||
             platform?.id ||
             platform?.key ||
-            `${groupKey}-${platformName}-${platformUrl}-${platformUsername}-${index}`;
+            `${kind}-${platform?.name || "platform"}-${index}`;
 
-          return <PlatformLink key={platformKey} platform={platform} />;
+          return <PlatformLink key={key} platform={platform} />;
         })}
       </div>
-    </div>
+    </section>
   );
 }
 
 function ContactSection() {
   const { settings } = useSiteSettings();
-
   const contact = settings?.contact || siteData.contact || {};
-
   const sectionContent = settings?.contactSection || {};
 
   const eyebrow =
-    String(sectionContent.eyebrow || "").trim() ||
-    defaultSectionContent.eyebrow;
+    String(sectionContent.eyebrow || "").trim() || defaultSectionContent.eyebrow;
+  const heading = String(sectionContent.heading || "").trim();
+  const description = String(sectionContent.description || "").trim();
 
-  const heading =
-    String(sectionContent.heading || "").trim();
-
-  const description =
-    String(sectionContent.description || "").trim();
-
-  const enquiryEyebrow =
-    String(sectionContent.enquiryEyebrow || "").trim() ||
-    defaultSectionContent.enquiryEyebrow;
-
-  const enquiryHeading =
-    String(sectionContent.enquiryHeading || "").trim() ||
-    defaultSectionContent.enquiryHeading;
-
-  const enquiryDescription =
-    String(sectionContent.enquiryDescription || "").trim() ||
-    defaultSectionContent.enquiryDescription;
+  const formHeading = getOptionalContent(
+    sectionContent.formHeading,
+    defaultSectionContent.formHeading,
+  );
+  const formDescription = getOptionalContent(
+    sectionContent.formDescription,
+    defaultSectionContent.formDescription,
+  );
+  const socialHeading = getOptionalContent(
+    sectionContent.socialHeading,
+    defaultSectionContent.socialHeading,
+  );
+  const socialDescription = getOptionalContent(
+    sectionContent.socialDescription,
+    defaultSectionContent.socialDescription,
+  );
+  const freelancerHeading = getOptionalContent(
+    sectionContent.freelancerHeading,
+    defaultSectionContent.freelancerHeading,
+  );
+  const freelancerDescription = getOptionalContent(
+    sectionContent.freelancerDescription,
+    defaultSectionContent.freelancerDescription,
+  );
+  const submitLabel =
+    getOptionalContent(sectionContent.submitLabel, defaultSectionContent.submitLabel) ||
+    defaultSectionContent.submitLabel;
+  const privacyNote = getOptionalContent(
+    sectionContent.privacyNote,
+    defaultSectionContent.privacyNote,
+  );
 
   const socialPlatforms = getVisiblePlatforms(
     settings?.socialPlatforms,
     siteData.socialPlatforms || [],
   );
-
-  const developerPlatforms = getVisiblePlatforms(
-    settings?.developerPlatforms,
-    siteData.developerPlatforms || [],
-  );
-
   const freelancerPlatforms = getVisiblePlatforms(
     settings?.freelancerPlatforms,
     siteData.freelancerPlatforms || [],
   );
 
-  const platformGroups = [
-    {
-      key: "social",
-      title: "Social Media",
-      platforms: socialPlatforms,
-    },
-    {
-      key: "developer",
-      title: "Developer Profiles",
-      platforms: developerPlatforms,
-    },
-    {
-      key: "freelancer",
-      title: "Freelancer Profiles",
-      platforms: freelancerPlatforms,
-    },
-  ].filter((group) => group.platforms.length > 0);
-
   const email = String(contact.email || "").trim();
-
   const phone = String(contact.phone || "").trim();
-
   const whatsapp = String(contact.whatsapp || "").trim();
-
   const location = String(contact.location || "").trim();
 
-  const availability =
-    String(contact.availability || "").trim() ||
-    "Available for freelance and business projects";
+  const methods = [
+    {
+      key: "email",
+      kind: "email",
+      label: "Email",
+      value: email,
+      href: getSafeEmailHref(email),
+      icon: <MailIcon />,
+    },
+    {
+      key: "phone",
+      kind: "phone",
+      label: "Phone",
+      value: phone,
+      href: getSafePhoneHref(phone),
+      icon: <PhoneIcon />,
+    },
+    {
+      key: "whatsapp",
+      kind: "whatsapp",
+      label: "WhatsApp",
+      value: whatsapp,
+      href: getSafeWhatsAppHref(whatsapp),
+      icon: <WhatsAppIcon />,
+    },
+    {
+      key: "location",
+      kind: "location",
+      label: "Location",
+      value: location,
+      href: "",
+      icon: <LocationIcon />,
+    },
+  ].filter((method) => method.value);
 
-  const emailHref = getSafeEmailHref(email);
-
-  const phoneHref = getSafePhoneHref(phone);
-
-  const whatsappHref = getSafeWhatsAppHref(whatsapp);
+  const hasSidePanels = socialPlatforms.length > 0 || freelancerPlatforms.length > 0;
 
   return (
-    <Section
-      id="contact"
-      className="scroll-mt-20 overflow-x-hidden border-t border-slate-200 bg-white"
-    >
+    <Section id="contact" className={styles.section}>
       <Container>
-        <div className="min-w-0">
+        <div className={styles.inner}>
           <SectionHeading
             eyebrow={eyebrow}
             title={heading}
             description={description}
           />
 
-          <div className="mt-12 grid min-w-0 gap-8 [&>*]:min-w-0 lg:grid-cols-[0.9fr_1.1fr]">
-            <div className="min-w-0 space-y-6">
-              <div className="min-w-0 rounded-3xl bg-slate-950 p-6 text-white shadow-xl shadow-slate-200/70 sm:p-8">
-                <p className="break-words text-sm font-bold uppercase tracking-[0.18em] text-brand-400">
-                  {enquiryEyebrow}
-                </p>
-
-                <h3 className="mt-3 break-words text-3xl font-bold tracking-tight">
-                  {enquiryHeading}
-                </h3>
-
-                <p className="mt-4 break-words leading-7 text-slate-400">
-                  {enquiryDescription}
-                </p>
-
-                <div className="mt-7 flex min-w-0 items-start gap-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4">
-                  <span className="mt-1 size-3 shrink-0 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/40" />
-
-                  <p className="min-w-0 break-words text-sm font-semibold leading-6 text-emerald-300">
-                    {availability}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid min-w-0 gap-4 [&>*]:min-w-0 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                <ContactDetail
-                  label="Email"
-                  value={email}
-                  href={emailHref}
-                  icon={
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="size-5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                    >
-                      <path d="M4 6h16v12H4z" />
-                      <path d="m4 7 8 6 8-6" />
-                    </svg>
-                  }
-                />
-
-                <ContactDetail
-                  label="Phone"
-                  value={phone}
-                  href={phoneHref}
-                  icon={
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="size-5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                    >
-                      <path d="M6.5 4h3l1.5 4-2 1.5a15 15 0 0 0 5.5 5.5l1.5-2 4 1.5v3c0 1.1-.9 2-2 2C10 19.5 4.5 14 4.5 6c0-1.1.9-2 2-2Z" />
-                    </svg>
-                  }
-                />
-
-                <ContactDetail
-                  label="WhatsApp"
-                  value={whatsapp}
-                  href={whatsappHref}
-                  icon={
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="size-5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.4-4A8 8 0 1 1 20 11.5Z" />
-                      <path d="M9 8.5c.5 2.5 2 4 4.5 4.8" />
-                    </svg>
-                  }
-                />
-
-                <ContactDetail
-                  label="Location"
-                  value={location}
-                  icon={
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      className="size-5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20 10c0 5-8 10-8 10S4 15 4 10a8 8 0 1 1 16 0Z" />
-                      <circle cx="12" cy="10" r="2.5" />
-                    </svg>
-                  }
-                />
-              </div>
-            </div>
-
-            <ContactForm />
-          </div>
-
-          {platformGroups.length > 0 && (
-            <div
-              className={`mt-12 grid min-w-0 gap-6 [&>*]:min-w-0 ${
-                platformGroups.length === 1
-                  ? "lg:grid-cols-1"
-                  : platformGroups.length === 2
-                    ? "lg:grid-cols-2"
-                    : "lg:grid-cols-3"
-              }`}
-            >
-              {platformGroups.map((group) => (
-                <PlatformGroup
-                  key={group.key}
-                  groupKey={group.key}
-                  title={group.title}
-                  platforms={group.platforms}
-                />
+          {methods.length > 0 && (
+            <div className={styles.methods}>
+              {methods.map((method) => (
+                <ContactMethod key={method.key} {...method} />
               ))}
             </div>
           )}
+
+          <div
+            className={styles.workspace}
+            data-single-column={hasSidePanels ? "false" : "true"}
+          >
+            <section className={styles.formPanel}>
+              {(formHeading || formDescription) && (
+                <header className={styles.formHeader}>
+                  {formHeading && <h3>{formHeading}</h3>}
+                  {formDescription && <p>{formDescription}</p>}
+                </header>
+              )}
+
+              <ContactForm submitLabel={submitLabel} />
+            </section>
+
+            {hasSidePanels && (
+              <div className={styles.sideColumn}>
+                <PlatformPanel
+                  kind="social"
+                  title={socialHeading}
+                  description={socialDescription}
+                  platforms={socialPlatforms}
+                />
+
+                <PlatformPanel
+                  kind="freelancer"
+                  title={freelancerHeading}
+                  description={freelancerDescription}
+                  platforms={freelancerPlatforms}
+                />
+              </div>
+            )}
+          </div>
+
+          {privacyNote && <p className={styles.privacyNote}>{privacyNote}</p>}
         </div>
       </Container>
     </Section>

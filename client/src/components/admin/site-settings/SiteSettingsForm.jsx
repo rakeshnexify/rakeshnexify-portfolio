@@ -2204,7 +2204,7 @@ function SiteSettingsForm({
       <SettingsCard
         isVisible={isPanelActive("contact")}
         title="Contact Section Content"
-        description="Manage the public Contact section heading and project-enquiry card content."
+        description="Manage every visible Contact section text: heading, form copy, social/freelancer copy, submit label and privacy note."
       >
         <div className="grid gap-5">
           <TextInput
@@ -2248,50 +2248,136 @@ function SiteSettingsForm({
           />
 
           <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <TextInput
-              id="settings-contact-enquiry-eyebrow"
-              name="contactSection.enquiryEyebrow"
-              label="Enquiry-card eyebrow"
-              value={formValues.contactSection.enquiryEyebrow}
-              onChange={handleFieldChange}
-              error={getFieldError(
-                "contactSection.enquiryEyebrow",
-                "contactSection",
-              )}
-              disabled={isSubmitting}
-              placeholder="Project Enquiries"
-              maxLength={100}
-            />
+            <div className="grid gap-5 lg:grid-cols-2">
+              <TextInput
+                id="settings-contact-form-heading"
+                name="contactSection.formHeading"
+                label="Form heading"
+                value={formValues.contactSection.formHeading}
+                onChange={handleFieldChange}
+                error={getFieldError(
+                  "contactSection.formHeading",
+                  "contactSection",
+                )}
+                disabled={isSubmitting}
+                placeholder="Send a Message"
+                maxLength={160}
+              />
 
-            <TextInput
-              id="settings-contact-enquiry-heading"
-              name="contactSection.enquiryHeading"
-              label="Enquiry-card heading"
-              value={formValues.contactSection.enquiryHeading}
-              onChange={handleFieldChange}
-              error={getFieldError(
-                "contactSection.enquiryHeading",
-                "contactSection",
-              )}
-              disabled={isSubmitting}
-              placeholder="Ready to build something useful?"
-              maxLength={200}
-            />
+              <TextInput
+                id="settings-contact-submit-label"
+                name="contactSection.submitLabel"
+                label="Submit button label"
+                value={formValues.contactSection.submitLabel}
+                onChange={handleFieldChange}
+                error={getFieldError(
+                  "contactSection.submitLabel",
+                  "contactSection",
+                )}
+                disabled={isSubmitting}
+                placeholder="Send Message"
+                maxLength={80}
+              />
+            </div>
 
             <TextareaInput
-              id="settings-contact-enquiry-description"
-              name="contactSection.enquiryDescription"
-              label="Enquiry-card description"
-              value={formValues.contactSection.enquiryDescription}
+              id="settings-contact-form-description"
+              name="contactSection.formDescription"
+              label="Form description"
+              value={formValues.contactSection.formDescription}
               onChange={handleFieldChange}
               error={getFieldError(
-                "contactSection.enquiryDescription",
+                "contactSection.formDescription",
                 "contactSection",
               )}
               disabled={isSubmitting}
-              rows={6}
-              maxLength={1500}
-              placeholder="Explain which project details the client should provide."
+              rows={3}
+              maxLength={320}
+              placeholder="Share the project details and I will get back to you."
+            />
+
+            <div className="grid gap-5 lg:grid-cols-2">
+              <div className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-4">
+                <TextInput
+                  id="settings-contact-social-heading"
+                  name="contactSection.socialHeading"
+                  label="Social heading"
+                  value={formValues.contactSection.socialHeading}
+                  onChange={handleFieldChange}
+                  error={getFieldError(
+                    "contactSection.socialHeading",
+                    "contactSection",
+                  )}
+                  disabled={isSubmitting}
+                  placeholder="Connect With Me"
+                  maxLength={120}
+                />
+
+                <TextareaInput
+                  id="settings-contact-social-description"
+                  name="contactSection.socialDescription"
+                  label="Social description"
+                  value={formValues.contactSection.socialDescription}
+                  onChange={handleFieldChange}
+                  error={getFieldError(
+                    "contactSection.socialDescription",
+                    "contactSection",
+                  )}
+                  disabled={isSubmitting}
+                  rows={3}
+                  maxLength={220}
+                  placeholder="Find me on social media."
+                />
+              </div>
+
+              <div className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-4">
+                <TextInput
+                  id="settings-contact-freelancer-heading"
+                  name="contactSection.freelancerHeading"
+                  label="Freelancer heading"
+                  value={formValues.contactSection.freelancerHeading}
+                  onChange={handleFieldChange}
+                  error={getFieldError(
+                    "contactSection.freelancerHeading",
+                    "contactSection",
+                  )}
+                  disabled={isSubmitting}
+                  placeholder="Freelancer Profiles"
+                  maxLength={120}
+                />
+
+                <TextareaInput
+                  id="settings-contact-freelancer-description"
+                  name="contactSection.freelancerDescription"
+                  label="Freelancer description"
+                  value={formValues.contactSection.freelancerDescription}
+                  onChange={handleFieldChange}
+                  error={getFieldError(
+                    "contactSection.freelancerDescription",
+                    "contactSection",
+                  )}
+                  disabled={isSubmitting}
+                  rows={3}
+                  maxLength={220}
+                  placeholder="Hire me on trusted platforms."
+                />
+              </div>
+            </div>
+
+            <TextareaInput
+              id="settings-contact-privacy-note"
+              name="contactSection.privacyNote"
+              label="Privacy note"
+              value={formValues.contactSection.privacyNote}
+              onChange={handleFieldChange}
+              error={getFieldError(
+                "contactSection.privacyNote",
+                "contactSection",
+              )}
+              disabled={isSubmitting}
+              rows={2}
+              maxLength={300}
+              placeholder="Your information is safe and secure. I respect your privacy."
             />
           </div>
         </div>

@@ -107,6 +107,14 @@ const contactSectionStringFields = [
   "enquiryEyebrow",
   "enquiryHeading",
   "enquiryDescription",
+  "formHeading",
+  "formDescription",
+  "socialHeading",
+  "socialDescription",
+  "freelancerHeading",
+  "freelancerDescription",
+  "submitLabel",
+  "privacyNote",
 ];
 
 const contactStringFields = [

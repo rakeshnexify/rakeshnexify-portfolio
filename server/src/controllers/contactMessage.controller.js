@@ -1,5 +1,4 @@
 import ContactMessage from "../models/ContactMessage.js";
-import Service from "../models/Service.js";
 
 function formatValidationErrors(error) {
   return Object.fromEntries(
@@ -18,25 +17,7 @@ function cleanEmail(value) {
   return cleanString(value).toLowerCase();
 }
 
-function cleanServiceSlug(value) {
-  return cleanString(value)
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
-function sendFieldError(res, fieldName, fieldMessage) {
-  return res.status(400).json({
-    success: false,
-
-    message: "Please correct the invalid or missing form fields.",
-
-    errors: {
-      [fieldName]: fieldMessage,
-    },
-  });
-}
 
 function sendHoneypotSuccess(res) {
   return res.status(201).json({
@@ -70,39 +51,14 @@ async function createContactMessage(req, res, next) {
 
     const phone = cleanString(requestBody.phone);
 
-    const serviceSlug = cleanServiceSlug(requestBody.service);
-
     const subject = cleanString(requestBody.subject);
 
     const message = cleanString(requestBody.message);
-
-    if (!serviceSlug) {
-      return sendFieldError(res, "service", "Please select a service.");
-    }
-
-    const selectedService = await Service.findOne({
-      slug: serviceSlug,
-      isVisible: true,
-    })
-      .select("title slug")
-      .lean();
-
-    if (!selectedService) {
-      return sendFieldError(
-        res,
-        "service",
-        "The selected service is unavailable. Please choose another service.",
-      );
-    }
 
     const savedMessage = await ContactMessage.create({
       name,
       email,
       phone,
-
-      service: selectedService.slug,
-
-      serviceTitle: selectedService.title,
 
       subject,
       message,

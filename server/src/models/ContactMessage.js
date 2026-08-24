@@ -33,15 +33,10 @@ const contactMessageSchema = new mongoose.Schema(
 
     service: {
       type: String,
-      required: [true, "Please select a service."],
       trim: true,
       lowercase: true,
-      minlength: [2, "Service slug must contain at least 2 characters."],
       maxlength: [160, "Service slug cannot exceed 160 characters."],
-      match: [
-        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-        "Service slug must contain lowercase letters, numbers and hyphens only.",
-      ],
+      default: "",
     },
 
     serviceTitle: {

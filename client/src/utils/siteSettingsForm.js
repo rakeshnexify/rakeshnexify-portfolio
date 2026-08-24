@@ -238,6 +238,14 @@ function normalizeTestimonialsSection(section = {}) {
   };
 }
 
+function getContactContentValue(section, fieldName, fallbackValue) {
+  if (section?.[fieldName] === undefined || section?.[fieldName] === null) {
+    return fallbackValue;
+  }
+
+  return cleanString(section[fieldName]);
+}
+
 function normalizeContactSection(section = {}) {
   return {
     eyebrow: cleanString(section?.eyebrow),
@@ -251,6 +259,54 @@ function normalizeContactSection(section = {}) {
     enquiryHeading: cleanString(section?.enquiryHeading),
 
     enquiryDescription: cleanString(section?.enquiryDescription),
+
+    formHeading: getContactContentValue(
+      section,
+      "formHeading",
+      "Send a Message",
+    ),
+
+    formDescription: getContactContentValue(
+      section,
+      "formDescription",
+      "Share the project details and I will get back to you.",
+    ),
+
+    socialHeading: getContactContentValue(
+      section,
+      "socialHeading",
+      "Connect With Me",
+    ),
+
+    socialDescription: getContactContentValue(
+      section,
+      "socialDescription",
+      "Find me on social media.",
+    ),
+
+    freelancerHeading: getContactContentValue(
+      section,
+      "freelancerHeading",
+      "Freelancer Profiles",
+    ),
+
+    freelancerDescription: getContactContentValue(
+      section,
+      "freelancerDescription",
+      "Hire me on trusted platforms.",
+    ),
+
+    submitLabel: getContactContentValue(
+      section,
+      "submitLabel",
+      "Send Message",
+    ),
+
+    privacyNote: getContactContentValue(
+      section,
+      "privacyNote",
+      "Your information is safe and secure. I respect your privacy.",
+    ),
   };
 }
 
@@ -960,6 +1016,22 @@ function createSiteSettingsPayload(formValues = {}) {
       enquiryHeading: values.contactSection.enquiryHeading,
 
       enquiryDescription: values.contactSection.enquiryDescription,
+
+      formHeading: values.contactSection.formHeading,
+
+      formDescription: values.contactSection.formDescription,
+
+      socialHeading: values.contactSection.socialHeading,
+
+      socialDescription: values.contactSection.socialDescription,
+
+      freelancerHeading: values.contactSection.freelancerHeading,
+
+      freelancerDescription: values.contactSection.freelancerDescription,
+
+      submitLabel: values.contactSection.submitLabel,
+
+      privacyNote: values.contactSection.privacyNote,
     },
 
     contact: {

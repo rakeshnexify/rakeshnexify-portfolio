@@ -468,6 +468,62 @@ const contactSectionContentSchema = new mongoose.Schema(
       maxlength: 1500,
       default: "",
     },
+
+    formHeading: {
+      type: String,
+      trim: true,
+      maxlength: 160,
+      default: "Send a Message",
+    },
+
+    formDescription: {
+      type: String,
+      trim: true,
+      maxlength: 320,
+      default: "Share the project details and I will get back to you.",
+    },
+
+    socialHeading: {
+      type: String,
+      trim: true,
+      maxlength: 120,
+      default: "Connect With Me",
+    },
+
+    socialDescription: {
+      type: String,
+      trim: true,
+      maxlength: 220,
+      default: "Find me on social media.",
+    },
+
+    freelancerHeading: {
+      type: String,
+      trim: true,
+      maxlength: 120,
+      default: "Freelancer Profiles",
+    },
+
+    freelancerDescription: {
+      type: String,
+      trim: true,
+      maxlength: 220,
+      default: "Hire me on trusted platforms.",
+    },
+
+    submitLabel: {
+      type: String,
+      trim: true,
+      maxlength: 80,
+      default: "Send Message",
+    },
+
+    privacyNote: {
+      type: String,
+      trim: true,
+      maxlength: 300,
+      default: "Your information is safe and secure. I respect your privacy.",
+    },
   },
   {
     _id: false,
