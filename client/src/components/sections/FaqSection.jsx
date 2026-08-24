@@ -5,8 +5,6 @@ import useSiteSettings from "../../hooks/useSiteSettings";
 import FaqAccordion from "../faqs/FaqAccordion";
 import Container from "../layout/Container";
 import Section from "../layout/Section";
-import SectionHeading from "../layout/SectionHeading";
-
 import PublicCTAButton from "../layout/PublicCTAButton";
 const SITE_URL = "https://rakeshnexify.com";
 
@@ -74,7 +72,7 @@ function isFaqPageDestination(value) {
 }
 
 function FaqSection() {
-  const { faqs, isLoading, error, refreshFaqs } = useFaqs();
+  const { faqs, isLoading, error, refreshFaqs } = useFaqs({ featured: true });
   const { settings } = useSiteSettings();
 
   const sectionContent = settings?.faqSection || {};
@@ -87,6 +85,10 @@ function FaqSection() {
 
   const description =
     String(sectionContent.description || "").trim();
+
+  const displayEyebrow = eyebrow || "FAQ";
+  const displayHeading = heading || "Frequently Asked Questions";
+  const headingMatch = displayHeading.match(/^(.*?)(\s+Questions)$/i);
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
 
@@ -115,14 +117,34 @@ function FaqSection() {
   return (
     <Section
       id="faq"
-      className="scroll-mt-20 border-t border-slate-200 bg-white"
+      className="public-faq-section scroll-mt-20"
     >
       <Container>
-        <SectionHeading
-          eyebrow={eyebrow}
-          title={heading}
-          description={description}
-        />
+        <div className="public-faq-heading">
+          <div className="public-faq-eyebrow">
+            <span className="public-faq-eyebrow-dot" aria-hidden="true" />
+            <span>{displayEyebrow}</span>
+          </div>
+
+          <h2 className="public-faq-title">
+            {headingMatch ? (
+              <>
+                <span>{headingMatch[1]}</span>
+                <span className="public-faq-title-accent">
+                  {headingMatch[2]}
+                </span>
+              </>
+            ) : (
+              displayHeading
+            )}
+          </h2>
+
+          {description && (
+            <p className="public-faq-description">{description}</p>
+          )}
+
+          <span className="public-faq-heading-line" aria-hidden="true" />
+        </div>
 
         <p aria-live="polite" className="sr-only">
           {isLoading ? "Loading FAQs." : `${publicFaqs.length} FAQs loaded.`}
@@ -162,17 +184,18 @@ function FaqSection() {
         )}
 
         {!isLoading && !error && (
-          <div className="mx-auto mt-10 max-w-4xl">
+          <div className="public-faq-home-shell">
             <FaqAccordion
               faqs={previewFaqs}
               compact
+              homePreview
               emptyMessage="No public FAQs are available yet."
             />
           </div>
         )}
 
         {previewFaqs.length > 0 && shouldShowCta && (
-          <div className="mx-auto mt-8 flex max-w-4xl flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="public-faq-cta-wrap">
             <div>
               <p className="font-bold text-slate-950">
                 Need more answers?

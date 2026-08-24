@@ -1,10 +1,41 @@
-function FaqAccordionItem({ faq, compact = false }) {
+function FaqAccordionItem({
+  faq,
+  compact = false,
+  homePreview = false,
+  index = 0,
+}) {
   const question = String(faq?.question || "").trim();
   const answer = String(faq?.answer || "").trim();
   const category = String(faq?.category || "").trim();
 
   if (!question || !answer) {
     return null;
+  }
+
+  if (homePreview) {
+    return (
+      <details
+        className="public-faq-item"
+        defaultOpen={index === 2}
+      >
+        <summary className="public-faq-summary">
+          <span className="public-faq-question-icon" aria-hidden="true">
+            ?
+          </span>
+
+          <span className="public-faq-question">{question}</span>
+
+          <span className="public-faq-toggle" aria-hidden="true">
+            <span className="public-faq-toggle-plus">+</span>
+            <span className="public-faq-toggle-minus">&minus;</span>
+          </span>
+        </summary>
+
+        <div className="public-faq-answer">
+          <p>{answer}</p>
+        </div>
+      </details>
+    );
   }
 
   return (
@@ -61,34 +92,55 @@ function FaqAccordion({
   faqs = [],
   compact = false,
   emptyMessage = "No FAQs available.",
+  homePreview = false,
 }) {
   const items = Array.isArray(faqs) ? faqs : [];
 
   if (items.length === 0) {
     return (
-      <div className="rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm">
-        <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-2xl font-black text-brand-600">
+      <div
+        className={
+          homePreview
+            ? "public-faq-empty"
+            : "rounded-3xl border border-slate-200 bg-white px-6 py-12 text-center shadow-sm"
+        }
+      >
+        <div
+          className={
+            homePreview
+              ? "public-faq-empty-icon"
+              : "mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-2xl font-black text-brand-600"
+          }
+        >
           ?
         </div>
 
-        <p className="mt-5 font-bold text-slate-950">{emptyMessage}</p>
+        <p
+          className={
+            homePreview
+              ? "public-faq-empty-copy"
+              : "mt-5 font-bold text-slate-950"
+          }
+        >
+          {emptyMessage}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className={homePreview ? "public-faq-accordion" : "space-y-4"}>
       {items.map((faq, index) => (
         <FaqAccordionItem
           key={faq?._id || `${faq?.question || "faq"}-${index}`}
           faq={faq}
           compact={compact}
+          homePreview={homePreview}
+          index={index}
         />
       ))}
     </div>
   );
 }
-
-export { FaqAccordionItem };
 
 export default FaqAccordion;

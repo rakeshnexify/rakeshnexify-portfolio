@@ -21,6 +21,7 @@ function NewsletterSignupForm({
   variant = "dark",
   className = "",
   consentMode = "checkbox",
+  compact = false,
 }) {
   const instanceId = useId();
 
@@ -318,21 +319,37 @@ function NewsletterSignupForm({
     }
   }
 
-  const inputClasses = isLight
-    ? "min-h-11 min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
-    : "min-h-11 min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm text-white outline-none placeholder:text-slate-600 disabled:cursor-not-allowed disabled:opacity-60";
+  const inputClasses = compact
+    ? isLight
+      ? "min-h-9 min-w-0 flex-1 bg-transparent px-3 py-2 text-xs text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
+      : "min-h-9 min-w-0 flex-1 bg-transparent px-3 py-2 text-xs text-white outline-none placeholder:text-slate-600 disabled:cursor-not-allowed disabled:opacity-60"
+    : isLight
+      ? "min-h-11 min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
+      : "min-h-11 min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm text-white outline-none placeholder:text-slate-600 disabled:cursor-not-allowed disabled:opacity-60";
 
-  const inputGroupClasses = isLight
-    ? `flex min-w-0 overflow-hidden rounded-xl border bg-white transition focus-within:ring-4 ${
-        fieldErrors.email
-          ? "border-red-300 focus-within:border-red-400 focus-within:ring-red-100"
-          : "border-slate-300 focus-within:border-brand-500 focus-within:ring-brand-500/10"
-      }`
-    : `flex min-w-0 overflow-hidden rounded-xl border bg-slate-950 transition focus-within:ring-4 ${
-        fieldErrors.email
-          ? "border-red-500/70 focus-within:border-red-400 focus-within:ring-red-500/10"
-          : "border-slate-700 focus-within:border-brand-500 focus-within:ring-brand-500/10"
-      }`;
+  const inputGroupClasses = compact
+    ? isLight
+      ? `flex min-w-0 overflow-hidden rounded-lg border bg-white/90 transition focus-within:ring-2 ${
+          fieldErrors.email
+            ? "border-red-300 focus-within:border-red-400 focus-within:ring-red-100"
+            : "border-slate-300 focus-within:border-brand-500 focus-within:ring-brand-500/10"
+        }`
+      : `flex min-w-0 overflow-hidden rounded-lg border bg-slate-950/80 transition focus-within:ring-2 ${
+          fieldErrors.email
+            ? "border-red-500/70 focus-within:border-red-400 focus-within:ring-red-500/10"
+            : "border-slate-700 focus-within:border-brand-500 focus-within:ring-brand-500/10"
+        }`
+    : isLight
+      ? `flex min-w-0 overflow-hidden rounded-xl border bg-white transition focus-within:ring-4 ${
+          fieldErrors.email
+            ? "border-red-300 focus-within:border-red-400 focus-within:ring-red-100"
+            : "border-slate-300 focus-within:border-brand-500 focus-within:ring-brand-500/10"
+        }`
+      : `flex min-w-0 overflow-hidden rounded-xl border bg-slate-950 transition focus-within:ring-4 ${
+          fieldErrors.email
+            ? "border-red-500/70 focus-within:border-red-400 focus-within:ring-red-500/10"
+            : "border-slate-700 focus-within:border-brand-500 focus-within:ring-brand-500/10"
+        }`;
 
   const consentClasses = isLight
     ? "flex cursor-pointer items-start gap-2 text-left text-xs leading-5 text-slate-500"
@@ -345,6 +362,12 @@ function NewsletterSignupForm({
   const errorClasses = isLight
     ? "text-xs font-semibold text-red-600"
     : "text-xs font-semibold text-red-300";
+
+  const submitClasses = compact
+    ? isLight
+      ? "inline-flex min-h-9 shrink-0 items-center justify-center border-l border-blue-700 bg-blue-600 px-3.5 py-2 text-xs font-extrabold !text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] transition hover:bg-blue-700 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-300/45 disabled:cursor-not-allowed disabled:opacity-60"
+      : "inline-flex min-h-9 shrink-0 items-center justify-center border-l border-brand-700 bg-brand-600 px-3.5 py-2 text-xs font-bold !text-white transition hover:bg-brand-700 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-300/40 disabled:cursor-not-allowed disabled:opacity-60"
+    : "inline-flex min-h-11 shrink-0 items-center justify-center border-l border-brand-700 bg-brand-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-brand-300/40 disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
     <form
@@ -409,7 +432,7 @@ function NewsletterSignupForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center border-l border-brand-700 bg-brand-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-brand-300/40 disabled:cursor-not-allowed disabled:opacity-60"
+            className={submitClasses}
           >
             {isSubmitting
               ? "Subscribing..."
@@ -420,7 +443,7 @@ function NewsletterSignupForm({
         {fieldErrors.email ? (
           <p
             id={emailErrorId}
-            className={`mt-1 ${errorClasses}`}
+            className={`${compact ? "mt-0.5" : "mt-1"} ${errorClasses}`}
           >
             {fieldErrors.email}
           </p>
@@ -428,7 +451,13 @@ function NewsletterSignupForm({
       </div>
 
       {usesImplicitConsent ? (
-        <p className="newsletter-implicit-consent">
+        <p
+          className={
+            compact
+              ? "newsletter-implicit-consent mt-1 text-[10px] leading-4"
+              : "newsletter-implicit-consent"
+          }
+        >
           By subscribing, you agree to updates.
         </p>
       ) : (
@@ -483,7 +512,7 @@ function NewsletterSignupForm({
 
       <div
         aria-live="polite"
-        className="mt-2 min-h-4"
+        className={compact ? "mt-1 min-h-3" : "mt-2 min-h-4"}
       >
         {successMessage ? (
           <p className={successClasses}>
