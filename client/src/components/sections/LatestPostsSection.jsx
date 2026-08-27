@@ -13,6 +13,8 @@ import styles from "./LatestPostsSection.module.css";
 
 const SITE_URL = "https://rakeshnexify.com";
 const HOME_POST_LIMIT = 4;
+const COMPANY_BLOG_NEWS_URL =
+  "https://idomere.com/blog-news";
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -92,6 +94,19 @@ function getSameSitePostListingType(value) {
   return "";
 }
 
+function resolveCompanyBlogNewsUrl(value) {
+  const safeUrl = getSafePublicUrl(value, "");
+
+  if (
+    !safeUrl ||
+    Boolean(getSameSitePostListingType(safeUrl))
+  ) {
+    return COMPANY_BLOG_NEWS_URL;
+  }
+
+  return safeUrl;
+}
+
 function LoadingGrid() {
   return (
     <div
@@ -139,9 +154,8 @@ function LatestPostsSection() {
 
   const ctaButton = sectionContent.ctaButton || sectionContent.action || {};
   const ctaLabel = String(ctaButton.label || "").trim();
-  const ctaUrl = getSafePublicUrl(
+  const ctaUrl = resolveCompanyBlogNewsUrl(
     ctaButton.url || ctaButton.href,
-    "",
   );
 
   const sectionsByKey = useMemo(

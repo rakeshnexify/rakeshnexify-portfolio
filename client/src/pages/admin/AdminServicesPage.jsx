@@ -302,90 +302,98 @@ function AdminServicesPage() {
   const canDeleteServices = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <main className="admin-catalog-page min-h-screen">
+      <section className="mx-auto w-full max-w-[1560px] px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-              <span className="uppercase tracking-[0.14em] text-brand-700">
-                Services & Sales
-              </span>
+            <p className="admin-catalog-eyebrow text-[10px] font-bold uppercase tracking-[0.16em]">
+              Services & Sales
+            </p>
 
-              <span aria-hidden="true" className="text-slate-300">
-                /
-              </span>
-
-              <span className="text-slate-500">Content management</span>
-            </div>
-
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">
               Services
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Manage the Services displayed across the public portfolio,
-              including visibility, featured state and ordering.
+            <p className="mt-1 max-w-2xl text-xs leading-5">
+              Manage public Services, visibility, featured state and order.
             </p>
           </div>
 
-          <Link
-            to="/admin/services/new"
-            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-          >
-            Add Service
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="admin-catalog-count-pill rounded-lg px-3 py-2 text-[11px] font-semibold">
+              {isLoading
+                ? "Loading..."
+                : `${resultCount} Service${resultCount === 1 ? "" : "s"}`}
+            </span>
+
+            <Link
+              className="admin-catalog-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+              to="/admin/services/new"
+            >
+              Add Service
+            </Link>
+          </div>
         </header>
 
         <form
+          className="admin-catalog-toolbar mt-4 rounded-xl p-3"
           onSubmit={handleFilterSubmit}
-          className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px_220px_auto] lg:items-end">
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.5fr)_170px_170px_auto]">
             <div>
-              <label htmlFor="service-search" className={labelClassName}>
+              <label
+                className={`${labelClassName} sr-only`}
+                htmlFor="service-search"
+              >
                 Search
               </label>
 
               <input
+                className={`${inputClassName} admin-catalog-input !mt-0 !min-h-10 !rounded-lg`}
                 id="service-search"
                 name="search"
+                onChange={handleFilterChange}
+                placeholder="Search title, slug or description..."
                 type="search"
                 value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Title, slug or description"
-                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
             <div>
-              <label htmlFor="service-visibility" className={labelClassName}>
+              <label
+                className={`${labelClassName} sr-only`}
+                htmlFor="service-visibility"
+              >
                 Visibility
               </label>
 
               <select
+                className={`${inputClassName} admin-catalog-input !mt-0 !min-h-10 !rounded-lg`}
                 id="service-visibility"
                 name="visibility"
-                value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.visibility}
               >
-                <option value="all">All Services</option>
+                <option value="all">All visibility</option>
                 <option value="visible">Visible</option>
                 <option value="hidden">Hidden</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="service-featured" className={labelClassName}>
-                Featured state
+              <label
+                className={`${labelClassName} sr-only`}
+                htmlFor="service-featured"
+              >
+                Featured
               </label>
 
               <select
+                className={`${inputClassName} admin-catalog-input !mt-0 !min-h-10 !rounded-lg`}
                 id="service-featured"
                 name="featured"
-                value={formFilters.featured}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.featured}
               >
                 <option value="all">All states</option>
                 <option value="featured">Featured</option>
@@ -395,16 +403,18 @@ function AdminServicesPage() {
 
             <div className="flex gap-2">
               <button
+                className="admin-catalog-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+                disabled={isLoading || Boolean(actionServiceId)}
                 type="submit"
-                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 lg:flex-none"
               >
                 Apply
               </button>
 
               <button
-                type="button"
+                className="admin-catalog-secondary-button inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-xs font-semibold"
+                disabled={isLoading || Boolean(actionServiceId)}
                 onClick={handleClearFilters}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                type="button"
               >
                 Clear
               </button>
@@ -412,88 +422,76 @@ function AdminServicesPage() {
           </div>
         </form>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-bold text-slate-700">
-              {isLoading
-                ? "Loading Services..."
-                : `${resultCount} Service${resultCount === 1 ? "" : "s"}`}
-            </p>
-
-            {!isLoading ? (
-              <p className="mt-0.5 text-xs text-slate-500">
-                Matching the currently applied filters.
-              </p>
-            ) : null}
-          </div>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold">
+            {isLoading
+              ? "Loading Services..."
+              : `${resultCount} result${resultCount === 1 ? "" : "s"}`}
+          </p>
 
           <button
-            type="button"
-            onClick={handleRefresh}
+            className="admin-catalog-secondary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[11px] font-semibold"
             disabled={isLoading || Boolean(actionServiceId)}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={handleRefresh}
+            type="button"
           >
-            {isLoading ? "Refreshing..." : "Refresh"}
+            Refresh
           </button>
         </div>
 
         <div aria-live="polite">
           {successMessage ? (
             <div
+              className="admin-catalog-success mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
               role="status"
-              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3"
             >
-              <p className="text-sm font-semibold leading-6 text-emerald-800">
-                {successMessage}
-              </p>
+              {successMessage}
+            </div>
+          ) : null}
+
+          {error ? (
+            <div
+              className="admin-catalog-error mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
+              role="alert"
+            >
+              {error}
+
+              <button
+                className="ml-2 font-bold underline underline-offset-2"
+                onClick={handleRefresh}
+                type="button"
+              >
+                Try again
+              </button>
             </div>
           ) : null}
         </div>
 
-        {error ? (
-          <div
-            role="alert"
-            className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"
-          >
-            <p className="text-sm font-semibold leading-6 text-red-700">
-              {error}
-            </p>
-
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className="mt-3 min-h-10 text-sm font-bold text-red-700 underline underline-offset-4"
-            >
-              Try again
-            </button>
-          </div>
-        ) : null}
-
         {isLoading ? (
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
+          <div className="mt-3 space-y-2" role="status">
+            <span className="sr-only">Loading Services...</span>
+
+            {[1, 2, 3, 4, 5].map((placeholder) => (
               <div
+                className="admin-catalog-skeleton h-[86px] rounded-xl"
                 key={placeholder}
-                className="h-72 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
         ) : null}
 
         {!isLoading && !error && services.length === 0 ? (
-          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <p className="text-base font-black text-slate-950">
-              No Services found
-            </p>
+          <div className="admin-catalog-empty mt-3 rounded-xl px-5 py-9 text-center">
+            <h2 className="text-base font-bold">No Services found</h2>
 
-            <p className="mt-1.5 text-sm leading-6 text-slate-500">
-              Try changing the filters or add a new Service.
+            <p className="mt-1 text-xs">
+              Change the filters or add a new Service.
             </p>
           </div>
         ) : null}
 
         {!isLoading && services.length > 0 ? (
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-3 space-y-2">
             {services.map((service) => {
               const isActionPending = actionServiceId === service._id;
               const technologies = Array.isArray(service.technologies)
@@ -502,130 +500,132 @@ function AdminServicesPage() {
 
               return (
                 <article
+                  className="admin-catalog-row min-w-0 rounded-xl"
                   key={service._id}
-                  className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-                      Order {service.order ?? 0}
-                    </span>
-
-                    <div className="flex flex-wrap justify-end gap-2">
-                      {service.isFeatured ? (
-                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
-                          Featured
-                        </span>
-                      ) : null}
-
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                          service.isVisible
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {service.isVisible ? "Visible" : "Hidden"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 min-w-0">
-                    <h2 className="break-words text-lg font-black tracking-tight text-slate-950">
-                      {service.title}
-                    </h2>
-
-                    <p className="mt-1.5 break-all text-xs font-semibold text-brand-700">
-                      {service.slug}
-                    </p>
-
-                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
-                      {service.shortDescription}
-                    </p>
-                  </div>
-
-                  {technologies.length > 0 ? (
-                    <div className="mt-4 flex flex-wrap gap-1.5">
-                      {technologies.slice(0, 4).map((technology) => (
+                  <div className="grid min-w-0 gap-3 p-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                         <span
-                          key={`${service._id}-${technology}`}
-                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600"
+                          className={`admin-catalog-badge rounded-md px-2 py-1 text-[9px] font-bold ${
+                            service.isVisible ? "is-visible" : "is-hidden"
+                          }`}
                         >
-                          {technology}
+                          {service.isVisible ? "Visible" : "Hidden"}
                         </span>
-                      ))}
 
-                      {technologies.length > 4 ? (
-                        <span className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
-                          +{technologies.length - 4} more
+                        {service.isFeatured ? (
+                          <span className="admin-catalog-badge is-featured rounded-md px-2 py-1 text-[9px] font-bold">
+                            Featured
+                          </span>
+                        ) : null}
+
+                        <span className="admin-catalog-badge rounded-md px-2 py-1 text-[9px] font-bold">
+                          Order {service.order ?? 0}
                         </span>
-                      ) : null}
-                    </div>
-                  ) : null}
 
-                  <div className="mt-auto pt-5">
-                    <div className="border-t border-slate-100 pt-4">
-                      <p className="text-xs text-slate-400">
-                        Updated {formatDate(service.updatedAt)}
+                        <span className="admin-catalog-meta text-[9px]">
+                          Updated {formatDate(service.updatedAt)}
+                        </span>
+                      </div>
+
+                      <div className="mt-1.5 flex min-w-0 flex-wrap items-baseline gap-x-2">
+                        <h2 className="truncate text-sm font-bold">
+                          {service.title}
+                        </h2>
+
+                        <span className="admin-catalog-slug max-w-64 truncate text-[10px]">
+                          {service.slug}
+                        </span>
+                      </div>
+
+                      <p className="mt-1 line-clamp-1 text-[10px] leading-4">
+                        {service.shortDescription}
                       </p>
 
-                      <div className="mt-4 grid grid-cols-2 gap-2">
-                        <Link
-                          to={`/admin/services/${service._id}/edit`}
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-3 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-                        >
-                          Edit
-                        </Link>
+                      {technologies.length > 0 ? (
+                        <div className="mt-1.5 flex min-w-0 flex-wrap gap-1">
+                          {technologies.slice(0, 3).map((technology) => (
+                            <span
+                              className="admin-catalog-tag rounded-md px-1.5 py-0.5 text-[9px]"
+                              key={`${service._id}-${technology}`}
+                            >
+                              {technology}
+                            </span>
+                          ))}
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggleVisibility(service)}
-                          disabled={Boolean(actionServiceId)}
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
-                            service.isVisible
-                              ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                              : "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
-                          }`}
-                        >
-                          {isActionPending
-                            ? "Working..."
-                            : service.isVisible
-                              ? "Hide"
-                              : "Show"}
-                        </button>
+                          {technologies.length > 3 ? (
+                            <span className="admin-catalog-tag rounded-md px-1.5 py-0.5 text-[9px]">
+                              +{technologies.length - 3}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggleFeatured(service)}
-                          disabled={Boolean(actionServiceId)}
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
-                            service.isFeatured
-                              ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                              : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                          }`}
-                        >
-                          {isActionPending
-                            ? "Working..."
-                            : service.isFeatured
-                              ? "Make Standard"
-                              : "Make Featured"}
-                        </button>
+                    <div className="flex shrink-0 items-center justify-end gap-2">
+                      <Link
+                        className="admin-catalog-primary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[10px] font-bold"
+                        to={`/admin/services/${service._id}/edit`}
+                      >
+                        Edit
+                      </Link>
 
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteService(service)}
-                          disabled={
-                            Boolean(actionServiceId) || !canDeleteServices
-                          }
-                          title={
-                            canDeleteServices
-                              ? "Permanently delete Service"
-                              : "Your role cannot permanently delete Services"
-                          }
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-3 text-sm font-bold text-red-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      <details className="admin-catalog-actions relative">
+                        <summary
+                          aria-label={`More actions for ${service.title}`}
+                          className="admin-catalog-secondary-button inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-base font-bold"
+                          title="More actions"
                         >
-                          {isActionPending ? "Working..." : "Delete"}
-                        </button>
-                      </div>
+                          …
+                        </summary>
+
+                        <div className="admin-catalog-action-menu absolute right-0 top-[calc(100%+0.4rem)] z-30 w-44 rounded-xl p-1.5">
+                          <button
+                            className="admin-catalog-menu-action"
+                            disabled={Boolean(actionServiceId)}
+                            onClick={() => handleToggleVisibility(service)}
+                            type="button"
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : service.isVisible
+                                ? "Hide from public"
+                                : "Show on public"}
+                          </button>
+
+                          <button
+                            className="admin-catalog-menu-action"
+                            disabled={Boolean(actionServiceId)}
+                            onClick={() => handleToggleFeatured(service)}
+                            type="button"
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : service.isFeatured
+                                ? "Make standard"
+                                : "Make featured"}
+                          </button>
+
+                          <div className="admin-catalog-menu-divider my-1" />
+
+                          <button
+                            className="admin-catalog-menu-action is-danger"
+                            disabled={
+                              Boolean(actionServiceId) || !canDeleteServices
+                            }
+                            onClick={() => handleDeleteService(service)}
+                            title={
+                              canDeleteServices
+                                ? "Permanently delete Service"
+                                : "Your role cannot permanently delete Services"
+                            }
+                            type="button"
+                          >
+                            {isActionPending ? "Working..." : "Delete"}
+                          </button>
+                        </div>
+                      </details>
                     </div>
                   </div>
                 </article>

@@ -45,11 +45,7 @@ const availabilityStyles = {
   "on-leave": "bg-blue-50 text-blue-700",
 };
 
-const inputClassName =
-  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none";
 
-const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
 
 function createApiFilters(filters) {
   const apiFilters = {
@@ -388,461 +384,308 @@ function AdminTeamMembersPage() {
 
   const canDeleteTeamMembers = ["super-admin", "admin"].includes(admin?.role);
 
+
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-              Team
+    <main className="admin-catalog-page rnx-admin-team-compact-v467 min-h-screen">
+      <section className="mx-auto w-full max-w-[1560px] px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="admin-catalog-eyebrow text-[10px] font-bold uppercase tracking-[0.16em]">
+              People
             </p>
-
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-              Team Members
-            </h1>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Manage Team profiles, professional roles, availability,
-              publication state and featured priority.
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">Team Members</h1>
+            <p className="mt-1 max-w-2xl text-xs leading-5">
+              Manage Team profiles, roles, availability, visibility and display priority.
             </p>
           </div>
 
-          <Link
-            to="/admin/team/new"
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-          >
-            Add Team Member
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="admin-catalog-count-pill rounded-lg px-3 py-2 text-[11px] font-semibold">
+              {isLoading ? "Loading..." : `${resultCount} Member${resultCount === 1 ? "" : "s"}`}
+            </span>
+            <Link
+              className="admin-catalog-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+              to="/admin/team/new"
+            >
+              Add Team Member
+            </Link>
+          </div>
         </header>
 
-        <form
-          onSubmit={handleFilterSubmit}
-          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
-        >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div>
-              <label
-                htmlFor="team-member-search"
-                className={labelClassName}
+        <form className="admin-catalog-toolbar mt-4 rounded-xl p-3" onSubmit={handleFilterSubmit}>
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.5fr)_180px_180px_auto]">
+            <input
+              className="admin-catalog-input !mt-0 !min-h-10 !rounded-lg w-full px-3 text-sm"
+              id="team-member-search"
+              name="search"
+              onChange={handleFilterChange}
+              placeholder="Search name, role, position, skill or tool..."
+              type="search"
+              value={formFilters.search}
+              aria-label="Search Team members"
+            />
+            <select
+              className="admin-catalog-input !mt-0 !min-h-10 !rounded-lg w-full px-3 text-sm"
+              id="team-member-visibility"
+              name="visibility"
+              onChange={handleFilterChange}
+              value={formFilters.visibility}
+              aria-label="Public visibility"
+            >
+              <option value="all">All visibility</option>
+              <option value="visible">Visible</option>
+              <option value="hidden">Hidden</option>
+            </select>
+            <select
+              className="admin-catalog-input !mt-0 !min-h-10 !rounded-lg w-full px-3 text-sm"
+              id="team-member-status"
+              name="status"
+              onChange={handleFilterChange}
+              value={formFilters.status}
+              aria-label="Member status"
+            >
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="former">Former Member</option>
+              <option value="archived">Archived</option>
+            </select>
+            <div className="flex gap-2">
+              <button
+                className="admin-catalog-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+                disabled={isLoading || Boolean(actionTeamMemberId)}
+                type="submit"
               >
-                Search
-              </label>
-
-              <input
-                id="team-member-search"
-                name="search"
-                type="search"
-                value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Name, role, position, skill or tool"
-                className={inputClassName}
-              />
+                Apply
+              </button>
+              <button
+                className="admin-catalog-secondary-button inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-xs font-semibold"
+                disabled={isLoading || Boolean(actionTeamMemberId)}
+                onClick={handleClearFilters}
+                type="button"
+              >
+                Clear
+              </button>
             </div>
+          </div>
 
-            <div>
-              <label
-                htmlFor="team-member-professional-role"
-                className={labelClassName}
-              >
-                Professional role
-              </label>
-
+          <details className="mt-2">
+            <summary className="admin-catalog-secondary-button inline-flex min-h-8 cursor-pointer list-none items-center rounded-lg px-3 text-[11px] font-semibold [&::-webkit-details-marker]:hidden">
+              More Filters
+            </summary>
+            <div className="mt-2 grid gap-2 border-t border-slate-200 pt-2 dark:border-slate-800 md:grid-cols-3">
               <input
+                className="admin-catalog-input !mt-0 !min-h-9 !rounded-lg w-full px-3 text-xs"
                 id="team-member-professional-role"
                 name="professionalRole"
+                onChange={handleFilterChange}
+                placeholder="Professional role..."
                 type="text"
                 value={formFilters.professionalRole}
-                onChange={handleFilterChange}
-                placeholder="MERN Stack Developer"
-                className={inputClassName}
+                aria-label="Professional role"
               />
-            </div>
-
-            <div>
-              <label
-                htmlFor="team-member-status"
-                className={labelClassName}
-              >
-                Member status
-              </label>
-
               <select
-                id="team-member-status"
-                name="status"
-                value={formFilters.status}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="">All statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="former">Former Member</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="team-member-availability"
-                className={labelClassName}
-              >
-                Availability
-              </label>
-
-              <select
+                className="admin-catalog-input !mt-0 !min-h-9 !rounded-lg w-full px-3 text-xs"
                 id="team-member-availability"
                 name="availabilityStatus"
-                value={formFilters.availabilityStatus}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.availabilityStatus}
+                aria-label="Availability"
               >
-                <option value="">All availability statuses</option>
+                <option value="">All availability</option>
                 <option value="available">Available</option>
                 <option value="limited">Limited Availability</option>
                 <option value="unavailable">Unavailable</option>
                 <option value="on-leave">On Leave</option>
               </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="team-member-visibility"
-                className={labelClassName}
-              >
-                Public visibility
-              </label>
-
               <select
-                id="team-member-visibility"
-                name="visibility"
-                value={formFilters.visibility}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All Team members</option>
-                <option value="visible">Visible</option>
-                <option value="hidden">Hidden</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="team-member-featured"
-                className={labelClassName}
-              >
-                Display type
-              </label>
-
-              <select
+                className="admin-catalog-input !mt-0 !min-h-9 !rounded-lg w-full px-3 text-xs"
                 id="team-member-featured"
                 name="featured"
-                value={formFilters.featured}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.featured}
+                aria-label="Display type"
               >
-                <option value="all">All Team members</option>
+                <option value="all">All display types</option>
                 <option value="featured">Featured</option>
                 <option value="standard">Standard</option>
               </select>
             </div>
-          </div>
-
-          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-            >
-              Clear
-            </button>
-
-            <button
-              type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-            >
-              Apply Filters
-            </button>
-          </div>
+          </details>
         </form>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-800">
-              {isLoading
-                ? "Loading Team members..."
-                : `${resultCount} Team member${resultCount === 1 ? "" : "s"}`}
-            </p>
-
-            {!isLoading && (
-              <p className="mt-1 text-xs text-slate-500">
-                Showing the records matching the applied filters.
-              </p>
-            )}
-          </div>
-
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold">
+            {isLoading ? "Loading Team members..." : `${resultCount} result${resultCount === 1 ? "" : "s"}`}
+          </p>
           <button
-            type="button"
+            className="admin-catalog-secondary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[11px] font-semibold"
+            disabled={isLoading || Boolean(actionTeamMemberId)}
             onClick={handleRefresh}
-            disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+            type="button"
           >
             Refresh
           </button>
         </div>
 
         <div aria-live="polite">
-          {successMessage && (
-            <div
-              role="status"
-              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
-            >
+          {successMessage ? (
+            <div className="admin-catalog-success mt-3 rounded-lg px-3 py-2 text-xs font-semibold" role="status">
               {successMessage}
             </div>
-          )}
-
-          {error && (
-            <div
-              role="alert"
-              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
-            >
+          ) : null}
+          {error ? (
+            <div className="admin-catalog-error mt-3 rounded-lg px-3 py-2 text-xs font-semibold" role="alert">
               {error}
+              <button className="ml-2 font-bold underline underline-offset-2" onClick={handleRefresh} type="button">
+                Try again
+              </button>
             </div>
-          )}
+          ) : null}
         </div>
 
-        {isLoading && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-          >
+        {isLoading ? (
+          <div className="mt-3 space-y-2" role="status">
             <span className="sr-only">Loading Team members...</span>
-
-            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
-              <div
-                key={placeholder}
-                className="h-[30rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
-              />
+            {[1, 2, 3, 4, 5].map((placeholder) => (
+              <div className="admin-catalog-skeleton h-[92px] rounded-xl" key={placeholder} />
             ))}
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && !error && teamMembers.length === 0 && (
-          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
-            <p className="text-base font-bold text-slate-950">
-              No Team members found
-            </p>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Change the filters or create the first Team member.
-            </p>
+        {!isLoading && !error && teamMembers.length === 0 ? (
+          <div className="admin-catalog-empty mt-3 rounded-xl px-5 py-9 text-center">
+            <h2 className="text-base font-bold">No Team members found</h2>
+            <p className="mt-1 text-xs">Change the filters or add a new Team member.</p>
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && teamMembers.length > 0 && (
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {!isLoading && teamMembers.length > 0 ? (
+          <div className="mt-3 space-y-2">
             {teamMembers.map((teamMember) => {
-              const skills = Array.isArray(teamMember.skills)
-                ? teamMember.skills
-                : [];
-
+              const skills = Array.isArray(teamMember.skills) ? teamMember.skills : [];
               const memberStatusLabel =
-                memberStatusLabels[teamMember.status] ||
-                teamMember.status ||
-                "Team Member";
-
+                memberStatusLabels[teamMember.status] || teamMember.status || "Team Member";
               const memberStatusStyle =
                 memberStatusStyles[teamMember.status] ||
-                "bg-slate-100 text-slate-700";
-
+                "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
               const availabilityLabel =
                 availabilityLabels[teamMember.availabilityStatus] ||
                 teamMember.availabilityStatus ||
                 "Not specified";
-
               const availabilityStyle =
                 availabilityStyles[teamMember.availabilityStatus] ||
-                "bg-slate-100 text-slate-700";
-
-              const isActionPending =
-                actionTeamMemberId === teamMember._id;
+                "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+              const isActionPending = actionTeamMemberId === teamMember._id;
 
               return (
-                <article
-                  key={teamMember._id}
-                  className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex min-w-0 items-start gap-3">
-                      <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-slate-950 text-sm font-bold text-white">
-                        <span>{getInitials(teamMember.name)}</span>
-
-                        {teamMember.profileImageUrl && (
-                          <img
-                            src={teamMember.profileImageUrl}
-                            alt={
-                              teamMember.profileImageAlt ||
-                              `${teamMember.name} profile`
-                            }
-                            className="absolute inset-0 size-full object-cover"
-                            onError={(event) => {
-                              event.currentTarget.hidden = true;
-                            }}
-                          />
-                        )}
+                <article className="admin-catalog-row min-w-0 rounded-xl" key={teamMember._id}>
+                  <div className="grid min-w-0 gap-3 p-3 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center">
+                    <div className="size-12 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800">
+                      <div className="flex h-full w-full items-center justify-center text-xs font-black text-slate-600 dark:text-slate-300">
+                        {getInitials(teamMember.name)}
                       </div>
-
-                      <div className="min-w-0">
-                        <h2 className="break-words text-lg font-bold text-slate-950">
-                          {teamMember.name}
-                        </h2>
-
-                        <p className="mt-1 break-words text-sm font-semibold text-brand-700">
-                          {teamMember.professionalRole}
-                        </p>
-
-                        {teamMember.teamPosition && (
-                          <p className="mt-1 break-words text-sm text-slate-500">
-                            {teamMember.teamPosition}
-                          </p>
-                        )}
-                      </div>
+                      {teamMember.profileImageUrl ? (
+                        <img
+                          alt={teamMember.profileImageAlt || `${teamMember.name} profile`}
+                          className="relative -mt-12 h-full w-full object-cover"
+                          onError={(event) => {
+                            event.currentTarget.hidden = true;
+                          }}
+                          src={teamMember.profileImageUrl}
+                        />
+                      ) : null}
                     </div>
 
-                    <div className="flex shrink-0 flex-col items-end gap-2">
-                      {teamMember.isFeatured && (
-                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
-                          Featured
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1">
+                        <span className={`rounded-md px-2 py-1 text-[9px] font-bold ${memberStatusStyle}`}>
+                          {memberStatusLabel}
                         </span>
-                      )}
-
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                          teamMember.isVisible
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {teamMember.isVisible ? "Visible" : "Hidden"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span
-                      className={`rounded-lg px-2.5 py-1 text-xs font-bold ${memberStatusStyle}`}
-                    >
-                      {memberStatusLabel}
-                    </span>
-
-                    <span
-                      className={`rounded-lg px-2.5 py-1 text-xs font-bold ${availabilityStyle}`}
-                    >
-                      {availabilityLabel}
-                    </span>
-
-                    <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-                      Order {teamMember.order ?? 0}
-                    </span>
-                  </div>
-
-                  <p className="mt-4 line-clamp-3 break-words text-sm leading-6 text-slate-600">
-                    {teamMember.shortIntroduction ||
-                      "No short introduction has been added."}
-                  </p>
-
-                  <div className="mt-5">
-                    <p className={labelClassName}>Main skills</p>
-
-                    {skills.length > 0 ? (
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {skills.slice(0, 5).map((skill) => (
-                          <span
-                            key={skill}
-                            className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-
-                        {skills.length > 5 && (
-                          <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                            +{skills.length - 5}
-                          </span>
-                        )}
+                        <span className={`admin-catalog-badge rounded-md px-2 py-1 text-[9px] font-bold ${teamMember.isVisible ? "is-visible" : "is-hidden"}`}>
+                          {teamMember.isVisible ? "Visible" : "Hidden"}
+                        </span>
+                        {teamMember.isFeatured ? (
+                          <span className="admin-catalog-badge is-featured rounded-md px-2 py-1 text-[9px] font-bold">Featured</span>
+                        ) : null}
+                        <span className={`rounded-md px-2 py-1 text-[9px] font-bold ${availabilityStyle}`}>
+                          {availabilityLabel}
+                        </span>
+                        <span className="admin-catalog-badge rounded-md px-2 py-1 text-[9px] font-bold">
+                          Order {teamMember.order ?? 0}
+                        </span>
+                        <span className="admin-catalog-meta text-[9px]">
+                          Updated {formatDate(teamMember.updatedAt)}
+                        </span>
                       </div>
-                    ) : (
-                      <p className="mt-2 text-sm text-slate-500">
-                        No skills added
+
+                      <div className="mt-1.5 flex min-w-0 flex-wrap items-baseline gap-x-2">
+                        <h2 className="truncate text-sm font-bold">{teamMember.name}</h2>
+                        <span className="admin-catalog-slug max-w-72 truncate text-[10px]">
+                          {teamMember.professionalRole}
+                          {teamMember.teamPosition ? ` / ${teamMember.teamPosition}` : ""}
+                        </span>
+                      </div>
+
+                      <p className="mt-1 line-clamp-1 text-[10px] leading-4">
+                        {teamMember.shortIntroduction || "No short introduction has been added."}
                       </p>
-                    )}
-                  </div>
 
-                  <dl className="mt-5 border-t border-slate-100 pt-4 text-sm">
-                    <div className="flex items-center justify-between gap-4">
-                      <dt className="text-slate-500">Updated</dt>
-
-                      <dd className="font-semibold text-slate-700">
-                        {formatDate(teamMember.updatedAt)}
-                      </dd>
+                      {skills.length > 0 ? (
+                        <div className="mt-1.5 flex min-w-0 flex-wrap gap-1">
+                          {skills.slice(0, 3).map((skill) => (
+                            <span className="admin-catalog-tag rounded-md px-1.5 py-0.5 text-[9px]" key={`${teamMember._id}-${skill}`}>
+                              {skill}
+                            </span>
+                          ))}
+                          {skills.length > 3 ? (
+                            <span className="admin-catalog-tag rounded-md px-1.5 py-0.5 text-[9px]">+{skills.length - 3}</span>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </div>
-                  </dl>
 
-                  <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
-                    <Link
-                      to={`/admin/team/${teamMember._id}/edit`}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-                    >
-                      Edit
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleVisibility(teamMember)}
-                      disabled={actionTeamMemberId !== ""}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                    >
-                      {isActionPending
-                        ? "Working..."
-                        : teamMember.isVisible
-                          ? "Hide"
-                          : "Show"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleFeatured(teamMember)}
-                      disabled={actionTeamMemberId !== ""}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                    >
-                      {isActionPending
-                        ? "Working..."
-                        : teamMember.isFeatured
-                          ? "Make Standard"
-                          : "Make Featured"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteTeamMember(teamMember)}
-                      disabled={
-                        actionTeamMemberId !== "" || !canDeleteTeamMembers
-                      }
-                      title={
-                        canDeleteTeamMembers
-                          ? "Permanently delete Team member"
-                          : "Your role cannot permanently delete Team members"
-                      }
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                    >
-                      {isActionPending ? "Working..." : "Delete"}
-                    </button>
+                    <div className="flex shrink-0 items-center justify-end gap-2">
+                      <Link
+                        className="admin-catalog-primary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[10px] font-bold"
+                        to={`/admin/team/${teamMember._id}/edit`}
+                      >
+                        Edit
+                      </Link>
+                      <details className="admin-catalog-actions relative">
+                        <summary
+                          aria-label={`More actions for ${teamMember.name}`}
+                          className="admin-catalog-secondary-button inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-base font-bold [&::-webkit-details-marker]:hidden"
+                          title="More actions"
+                        >
+                          ...
+                        </summary>
+                        <div className="admin-catalog-action-menu absolute right-0 top-[calc(100%+0.4rem)] z-30 w-44 rounded-xl p-1.5">
+                          <button className="admin-catalog-menu-action" disabled={Boolean(actionTeamMemberId)} onClick={() => handleToggleVisibility(teamMember)} type="button">
+                            {isActionPending ? "Working..." : teamMember.isVisible ? "Hide from public" : "Show on public"}
+                          </button>
+                          <button className="admin-catalog-menu-action" disabled={Boolean(actionTeamMemberId)} onClick={() => handleToggleFeatured(teamMember)} type="button">
+                            {isActionPending ? "Working..." : teamMember.isFeatured ? "Make standard" : "Make featured"}
+                          </button>
+                          <div className="admin-catalog-menu-divider my-1" />
+                          <button
+                            className="admin-catalog-menu-action is-danger"
+                            disabled={Boolean(actionTeamMemberId) || !canDeleteTeamMembers}
+                            onClick={() => handleDeleteTeamMember(teamMember)}
+                            title={canDeleteTeamMembers ? "Permanently delete Team member" : "Your role cannot permanently delete Team members"}
+                            type="button"
+                          >
+                            {isActionPending ? "Working..." : "Delete"}
+                          </button>
+                        </div>
+                      </details>
+                    </div>
                   </div>
                 </article>
               );
             })}
           </div>
-        )}
+        ) : null}
       </section>
     </main>
   );

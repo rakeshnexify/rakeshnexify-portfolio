@@ -268,93 +268,73 @@ function AdminServiceOrdersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <main className="min-h-screen bg-[#08111e] text-slate-200">
+      <section className="mx-auto w-full max-w-[1560px] px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-              <span className="uppercase tracking-[0.14em] text-brand-700">
-                Sales
-              </span>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-400">
+              Sales
+            </p>
 
-              <span aria-hidden="true" className="text-slate-300">
-                /
-              </span>
-
-              <span className="text-slate-500">
-                Order management
-              </span>
-            </div>
-
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-50">
               Service Orders
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Review customer orders, selected Services, packages,
-              designs, pricing snapshots and current order status.
+            <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
+              Review customer orders, packages, pricing and workflow status.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoading ? "Refreshing..." : "Refresh"}
-          </button>
+          <div className="flex items-center gap-2">
+            <span className="rounded-lg border border-[#1d2b3d] bg-[#0c1624] px-3 py-2 text-[11px] font-semibold text-slate-300">
+              {isLoading
+                ? "Loading..."
+                : `${total} Order${total === 1 ? "" : "s"}`}
+            </span>
+
+            <button
+              className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#27384e] bg-[#101c2c] px-3 text-xs font-semibold text-slate-300 transition hover:border-[#38506d] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading}
+              onClick={handleRefresh}
+              type="button"
+            >
+              {isLoading ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
         </header>
 
         <form
+          className="mt-4 rounded-xl border border-[#1d2b3d] bg-[#0c1624] p-3"
           onSubmit={handleSubmit}
-          className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div>
-            <h2 className="text-base font-black text-slate-950">
-              Filters
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Narrow orders by customer details, workflow status,
-              package group or Service.
-            </p>
-          </div>
-
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="md:col-span-2">
-              <label
-                htmlFor="service-order-search"
-                className={labelClassName}
-              >
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.5fr)_170px_220px_auto]">
+            <div>
+              <label className="sr-only" htmlFor="service-order-search">
                 Search
               </label>
 
               <input
+                className={`${inputClassName} !mt-0 !min-h-10 !rounded-lg`}
                 id="service-order-search"
                 name="search"
+                onChange={handleFilterChange}
+                placeholder="Order number, customer or email..."
                 type="search"
                 value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Order number, customer or email"
-                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="service-order-status"
-                className={labelClassName}
-              >
+              <label className="sr-only" htmlFor="service-order-status">
                 Status
               </label>
 
               <select
+                className={`${inputClassName} !mt-0 !min-h-10 !rounded-lg`}
                 id="service-order-status"
                 name="status"
-                value={formFilters.status}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.status}
               >
                 {statuses.map(([value, label]) => (
                   <option key={value || "all"} value={value}>
@@ -365,40 +345,16 @@ function AdminServiceOrdersPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="service-order-group"
-                className={labelClassName}
-              >
-                Group
-              </label>
-
-              <select
-                id="service-order-group"
-                name="group"
-                value={formFilters.group}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="">All groups</option>
-                <option value="development">Development</option>
-                <option value="management">Management</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="service-order-service"
-                className={labelClassName}
-              >
+              <label className="sr-only" htmlFor="service-order-service">
                 Service
               </label>
 
               <select
+                className={`${inputClassName} !mt-0 !min-h-10 !rounded-lg`}
                 id="service-order-service"
                 name="service"
-                value={formFilters.service}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.service}
               >
                 <option value="">All Services</option>
 
@@ -409,53 +365,74 @@ function AdminServiceOrdersPage() {
                 ))}
               </select>
             </div>
+
+            <div className="flex gap-2">
+              <button
+                className="inline-flex min-h-10 items-center justify-center rounded-lg border border-blue-500 bg-blue-600 px-4 text-xs font-bold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isLoading}
+                type="submit"
+              >
+                Apply
+              </button>
+
+              <button
+                className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#27384e] bg-[#101c2c] px-3 text-xs font-semibold text-slate-300 transition hover:border-[#38506d] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isLoading}
+                onClick={handleClear}
+                type="button"
+              >
+                Clear
+              </button>
+            </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={handleClear}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-            >
-              Clear
-            </button>
+          <details className="mt-2 rounded-lg border border-[#1d2b3d] bg-[#0a1422]">
+            <summary className="cursor-pointer list-none px-3 py-2 text-[11px] font-semibold text-slate-400">
+              More Filters
+            </summary>
 
-            <button
-              type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
-            >
-              Apply Filters
-            </button>
-          </div>
+            <div className="border-t border-[#1d2b3d] px-3 py-3 sm:max-w-xs">
+              <label
+                className={`${labelClassName} !text-[10px]`}
+                htmlFor="service-order-group"
+              >
+                Package Group
+              </label>
+
+              <select
+                className={`${inputClassName} !mt-1.5 !min-h-10 !rounded-lg`}
+                id="service-order-group"
+                name="group"
+                onChange={handleFilterChange}
+                value={formFilters.group}
+              >
+                <option value="">All groups</option>
+                <option value="development">Development</option>
+                <option value="management">Management</option>
+              </select>
+            </div>
+          </details>
         </form>
 
-        <div className="mt-4">
-          <p className="text-sm font-bold text-slate-700">
+        <div className="mt-3">
+          <p className="text-[11px] font-semibold text-slate-400">
             {isLoading
               ? "Loading Service Orders..."
-              : `${total} order${total === 1 ? "" : "s"}`}
+              : `${total} result${total === 1 ? "" : "s"} · Page ${page}/${Math.max(1, pages)}`}
           </p>
-
-          {!isLoading ? (
-            <p className="mt-0.5 text-xs text-slate-500">
-              Page {page} of {Math.max(1, pages)}
-            </p>
-          ) : null}
         </div>
 
         {error ? (
           <div
+            className="mt-3 rounded-lg border border-rose-500/20 bg-rose-950/20 px-3 py-2 text-xs font-semibold text-rose-300"
             role="alert"
-            className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"
           >
-            <p className="text-sm font-semibold leading-6 text-red-700">
-              {error}
-            </p>
+            {error}
 
             <button
-              type="button"
+              className="ml-2 font-bold underline underline-offset-2"
               onClick={handleRefresh}
-              className="mt-3 min-h-10 text-sm font-bold text-red-700 underline underline-offset-4"
+              type="button"
             >
               Try again
             </button>
@@ -463,119 +440,114 @@ function AdminServiceOrdersPage() {
         ) : null}
 
         {isLoading ? (
-          <div className="mt-4 space-y-3">
-            {[1, 2, 3, 4].map((placeholder) => (
+          <div
+            aria-live="polite"
+            className="mt-3 space-y-2"
+            role="status"
+          >
+            <span className="sr-only">Loading Service Orders...</span>
+
+            {[1, 2, 3, 4, 5].map((placeholder) => (
               <div
+                className="h-[86px] animate-pulse rounded-xl border border-[#1d2b3d] bg-[#0c1624] motion-reduce:animate-none"
                 key={placeholder}
-                className="h-44 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
         ) : null}
 
         {!isLoading && !error && orders.length === 0 ? (
-          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <p className="text-base font-black text-slate-950">
+          <div className="mt-3 rounded-xl border border-dashed border-[#26384f] bg-[#0a1422] px-5 py-9 text-center">
+            <h2 className="text-base font-bold text-slate-50">
               No Service Orders found
-            </p>
+            </h2>
 
-            <p className="mt-1.5 text-sm leading-6 text-slate-500">
+            <p className="mt-1 text-xs text-slate-400">
               Change the filters to view a different set of orders.
             </p>
           </div>
         ) : null}
 
         {!isLoading && orders.length > 0 ? (
-          <div className="mt-4 space-y-3">
+          <div className="mt-3 space-y-2">
             {orders.map((order) => (
               <article
+                className="min-w-0 rounded-xl border border-[#1d2b3d] bg-[#0c1624] shadow-sm transition hover:border-[#2c405b]"
                 key={order._id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
               >
-                <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="break-all text-sm font-black text-slate-950">
+                <div className="grid min-w-0 gap-3 p-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                  <div className="min-w-0">
+                    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                      <span className="break-all text-[10px] font-bold text-blue-300">
                         {order.orderNumber}
                       </span>
 
                       <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold capitalize ${statusClasses(
+                        className={`rounded-md px-2 py-1 text-[9px] font-bold capitalize ${statusClasses(
                           order.status,
                         )}`}
                       >
                         {order.status?.replace("-", " ") || "Order"}
                       </span>
+
+                      <span className="text-[9px] text-slate-500">
+                        {formatDate(order.createdAt)}
+                      </span>
                     </div>
 
-                    <h2 className="mt-3 break-words text-lg font-black tracking-tight text-slate-950">
-                      {order.customerName}
-                    </h2>
+                    <div className="mt-1.5 flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <h2 className="truncate text-sm font-bold text-slate-50">
+                        {order.customerName}
+                      </h2>
 
-                    <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-500">
-                      <span className="break-all">
+                      <span className="max-w-64 truncate text-[10px] text-slate-400">
                         {order.customerEmail || "Email not provided"}
                       </span>
 
-                      <span aria-hidden="true" className="text-slate-300">
-                        ·
-                      </span>
-
-                      <span className="break-all">
+                      <span className="max-w-48 truncate text-[10px] text-slate-400">
                         {order.customerPhone || "Phone not provided"}
                       </span>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-700">
-                      <span>
+                    <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-slate-400">
+                      <span className="max-w-52 truncate font-semibold text-slate-300">
                         {order.serviceSnapshot?.title ||
                           "Service not available"}
                       </span>
 
-                      <span aria-hidden="true" className="text-slate-300">
-                        →
-                      </span>
+                      <span aria-hidden="true">→</span>
 
-                      <span>
+                      <span className="max-w-52 truncate font-semibold text-slate-300">
                         {order.packageSnapshot?.name ||
                           "Package not available"}
                       </span>
 
                       {order.designSnapshot?.name ? (
                         <>
-                          <span
-                            aria-hidden="true"
-                            className="text-slate-300"
-                          >
-                            →
-                          </span>
+                          <span aria-hidden="true">→</span>
 
-                          <span>{order.designSnapshot.name}</span>
+                          <span className="max-w-48 truncate font-semibold text-slate-300">
+                            {order.designSnapshot.name}
+                          </span>
                         </>
                       ) : null}
                     </div>
                   </div>
 
-                  <div className="grid shrink-0 gap-2 sm:grid-cols-3 lg:min-w-[31rem]">
-                    <div className="rounded-xl bg-slate-50 px-3.5 py-3">
-                      <p className={labelClassName}>Price</p>
+                  <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                    <div className="rounded-lg border border-[#23364e] bg-[#0a1422] px-3 py-2">
+                      <span className="block text-[9px] font-semibold text-slate-500">
+                        Price
+                      </span>
 
-                      <p className="mt-1.5 break-words text-sm font-black text-slate-800">
+                      <span className="mt-0.5 block text-xs font-bold text-slate-100">
                         {formatPrice(order.packageSnapshot)}
-                      </p>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-50 px-3.5 py-3">
-                      <p className={labelClassName}>Created</p>
-
-                      <p className="mt-1.5 text-xs font-bold leading-5 text-slate-700">
-                        {formatDate(order.createdAt)}
-                      </p>
+                      </span>
                     </div>
 
                     <Link
+                      className="inline-flex min-h-10 items-center justify-center rounded-lg border border-blue-500 bg-blue-600 px-4 text-xs font-bold text-white transition hover:bg-blue-500"
                       to={`/admin/service-orders/${order._id}`}
-                      className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
                     >
                       Open Order
                     </Link>
@@ -589,45 +561,37 @@ function AdminServiceOrdersPage() {
         {!isLoading && !error && pages > 1 ? (
           <nav
             aria-label="Service Order pagination"
-            className="mt-5 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#1d2b3d] bg-[#0c1624] p-2.5"
           >
-            <div>
-              <p className="text-sm font-bold text-slate-700">
-                Page {page} of {pages}
-              </p>
+            <button
+              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-[#27384e] bg-[#101c2c] px-3 text-xs font-semibold text-slate-300 transition hover:border-[#38506d] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={page <= 1}
+              onClick={() =>
+                setPage((currentPage) =>
+                  Math.max(1, currentPage - 1),
+                )
+              }
+              type="button"
+            >
+              Previous
+            </button>
 
-              <p className="mt-0.5 text-xs text-slate-500">
-                {total} total order{total === 1 ? "" : "s"}
-              </p>
-            </div>
+            <span className="text-[11px] font-semibold text-slate-400">
+              {page} / {pages} · {total} total
+            </span>
 
-            <div className="grid grid-cols-2 gap-2 sm:flex">
-              <button
-                type="button"
-                onClick={() =>
-                  setPage((currentPage) =>
-                    Math.max(1, currentPage - 1),
-                  )
-                }
-                disabled={page <= 1}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Previous
-              </button>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setPage((currentPage) =>
-                    Math.min(pages, currentPage + 1),
-                  )
-                }
-                disabled={page >= pages}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Next
-              </button>
-            </div>
+            <button
+              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-blue-500 bg-blue-600 px-3 text-xs font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={page >= pages}
+              onClick={() =>
+                setPage((currentPage) =>
+                  Math.min(pages, currentPage + 1),
+                )
+              }
+              type="button"
+            >
+              Next
+            </button>
           </nav>
         ) : null}
       </section>

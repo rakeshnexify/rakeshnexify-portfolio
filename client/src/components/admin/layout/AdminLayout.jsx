@@ -1,11 +1,11 @@
 import { useCallback, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router";
+
 import useAdminAuth from "../../../hooks/useAdminAuth";
 import { useAdminSidebarState } from "../../../hooks/useAdminSidebarState";
 import AdminMobileDrawer from "./AdminMobileDrawer";
 import AdminSidebar from "./AdminSidebar";
 import AdminTopbar from "./AdminTopbar";
-import AdminThemeToggle from "./AdminThemeToggle";
 
 function AdminLayout() {
   const navigate = useNavigate();
@@ -60,10 +60,7 @@ function AdminLayout() {
   }, [logout, navigate]);
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-slate-100 text-slate-900">
-      <div className="hidden lg:block">
-        <AdminThemeToggle className="fixed right-5 top-5 z-40" />
-      </div>
+    <div className="admin-reference-shell min-h-screen overflow-x-clip">
       <AdminSidebar
         admin={admin}
         isPinned={isPinned}
@@ -76,11 +73,21 @@ function AdminLayout() {
         onTogglePinned={togglePinned}
       />
 
-      <AdminTopbar
-        admin={admin}
-        onLogout={handleLogout}
-        onOpenNavigation={handleOpenMobileNavigation}
-      />
+      <div
+        className={`min-w-0 transition-[padding-left] duration-200 ease-out motion-reduce:transition-none lg:min-h-screen ${
+          isPinned ? "lg:pl-[220px]" : "lg:pl-[72px]"
+        }`}
+      >
+        <AdminTopbar
+          admin={admin}
+          onLogout={handleLogout}
+          onOpenNavigation={handleOpenMobileNavigation}
+        />
+
+        <div className="min-w-0">
+          <Outlet />
+        </div>
+      </div>
 
       <AdminMobileDrawer
         admin={admin}
@@ -89,16 +96,6 @@ function AdminLayout() {
         onLogout={handleLogout}
         returnFocusRef={mobileTriggerRef}
       />
-
-      <div
-        className={`min-w-0 transition-[padding-left] duration-200 ease-out motion-reduce:transition-none lg:min-h-screen ${
-          isPinned ? "lg:pl-64" : "lg:pl-[72px]"
-        }`}
-      >
-        <div className="min-w-0">
-          <Outlet />
-        </div>
-      </div>
     </div>
   );
 }

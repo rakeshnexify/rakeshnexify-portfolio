@@ -28,13 +28,9 @@ const DEFAULT_FILTERS = {
   status: "",
 };
 
-const PAGE_LIMIT = 10;
 
 const inputClassName =
-  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-colors duration-150 motion-reduce:transition-none focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:bg-slate-100";
-
-const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.08em] text-slate-500";
+  "min-h-8 w-full rounded-lg border border-[#223147] bg-[#091522] px-2.5 text-[10px] text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none sm:min-h-9 sm:px-3";
 
 function normalizeText(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -64,10 +60,10 @@ function SubscriberStatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex min-h-7 items-center rounded-lg px-2.5 py-1 text-xs font-bold ${
+      className={`inline-flex min-h-5 items-center rounded-md border px-1.5 text-[8px] font-bold ${
         isActive
-          ? "bg-emerald-50 text-emerald-700"
-          : "bg-slate-100 text-slate-600"
+          ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-300"
+          : "border-slate-600 bg-slate-800 text-slate-400"
       }`}
     >
       {isActive ? "Active" : "Unsubscribed"}
@@ -86,6 +82,8 @@ function AdminSubscribersPage() {
   const [appliedFilters, setAppliedFilters] = useState(DEFAULT_FILTERS);
 
   const [page, setPage] = useState(1);
+
+  const [pageLimit, setPageLimit] = useState(20);
 
   const [pendingActionId, setPendingActionId] = useState("");
 
@@ -110,9 +108,9 @@ function AdminSubscribersPage() {
     () => ({
       ...appliedFilters,
       page,
-      limit: PAGE_LIMIT,
+      limit: pageLimit,
     }),
-    [appliedFilters, page],
+    [appliedFilters, page, pageLimit],
   );
 
   const {
@@ -256,465 +254,333 @@ function AdminSubscribersPage() {
   const safePage = Math.min(Math.max(1, Number(page) || 1), safePages);
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <main className="min-h-screen bg-[#08111e] text-slate-200">
+      <section className="mx-auto w-full max-w-[1560px] px-3 py-4 sm:px-5 lg:px-6">
+        <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-              <span className="uppercase tracking-[0.14em] text-brand-700">
-                CRM
-              </span>
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-blue-400">
+              Newsletter
+            </p>
 
-              <span aria-hidden="true" className="text-slate-300">
-                /
-              </span>
-
-              <span className="text-slate-500">Newsletter management</span>
-            </div>
-
-            <h1 className="mt-2 break-words text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-50 sm:text-2xl">
               Newsletter / Subscribers
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Review newsletter Subscribers, filter subscription state,
-              unsubscribe active records and perform restricted permanent
-              deletion when required.
+            <p className="mt-0.5 hidden max-w-2xl text-[10px] leading-4 text-slate-500 sm:block">
+              Manage active subscriptions, consent history and unsubscribes.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={refresh}
-            disabled={isLoading || Boolean(pendingActionId)}
-            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoading ? "Refreshing..." : "Refresh"}
-          </button>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="rounded-md border border-[#1d2b3d] bg-[#0c1624] px-2.5 py-1.5 text-[9px] font-semibold text-slate-400">
+              {total} total
+            </span>
+
+            <button
+              className="inline-flex min-h-8 items-center justify-center rounded-md border border-[#27384e] bg-[#101c2c] px-2.5 text-[9px] font-semibold text-slate-300 transition hover:border-[#38506d] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading || Boolean(pendingActionId)}
+              onClick={refresh}
+              type="button"
+            >
+              {isLoading ? "..." : "Refresh"}
+            </button>
+          </div>
         </header>
 
-        <section
-          aria-labelledby="subscriber-filters-heading"
-          className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+        <form
+          className="mt-2.5 rounded-lg border border-[#1d2b3d] bg-[#0c1624] p-2 sm:mt-3 sm:p-2.5"
+          onSubmit={handleApplyFilters}
         >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_150px_120px_auto] sm:items-center">
             <div>
-              <h2
-                id="subscriber-filters-heading"
-                className="text-base font-black text-slate-950"
-              >
-                Filters
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Search by normalized email or narrow the list by subscription
-                status.
-              </p>
-            </div>
-
-            {hasActiveFilters ? (
-              <span className="inline-flex w-fit rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700">
-                Filters applied
-              </span>
-            ) : null}
-          </div>
-
-          <form
-            onSubmit={handleApplyFilters}
-            className="mt-4 grid gap-4 md:grid-cols-[minmax(0,1fr)_220px_auto] md:items-end"
-          >
-            <div>
-              <label htmlFor="subscriber-search" className={labelClassName}>
+              <label className="sr-only" htmlFor="subscriber-search">
                 Search email
               </label>
 
               <input
+                className={inputClassName}
                 id="subscriber-search"
                 name="search"
+                onChange={handleFilterChange}
+                placeholder="Search subscriber email..."
                 type="search"
                 value={draftFilters.search}
-                onChange={handleFilterChange}
-                placeholder="name@example.com"
-                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
-            <div>
-              <label htmlFor="subscriber-status" className={labelClassName}>
-                Status
-              </label>
+            <div className="grid grid-cols-2 gap-2 sm:contents">
+              <div>
+                <label className="sr-only" htmlFor="subscriber-status">
+                  Status
+                </label>
 
-              <select
-                id="subscriber-status"
-                name="status"
-                value={draftFilters.status}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                {SUBSCRIBER_STATUSES.map((status) => (
-                  <option
-                    key={status.value || "all"}
-                    value={status.value}
-                  >
-                    {status.label}
-                  </option>
-                ))}
-              </select>
+                <select
+                  className={inputClassName}
+                  id="subscriber-status"
+                  name="status"
+                  onChange={handleFilterChange}
+                  value={draftFilters.status}
+                >
+                  {SUBSCRIBER_STATUSES.map((status) => (
+                    <option
+                      key={status.value || "all"}
+                      value={status.value}
+                    >
+                      {status.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="sr-only" htmlFor="subscriber-limit">
+                  Subscribers per page
+                </label>
+
+                <select
+                  className={inputClassName}
+                  id="subscriber-limit"
+                  onChange={(event) => {
+                    setPageLimit(Number(event.target.value) || 20);
+                    setPage(1);
+                  }}
+                  value={pageLimit}
+                >
+                  <option value="20">20 / page</option>
+                  <option value="50">50 / page</option>
+                  <option value="100">100 / page</option>
+                </select>
+              </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <button
+                className="inline-flex min-h-9 flex-1 items-center justify-center rounded-lg border border-blue-500 bg-blue-600 px-3 text-[9px] font-bold text-white transition hover:bg-blue-500 sm:flex-none"
                 type="submit"
-                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 md:flex-none"
               >
                 Apply
               </button>
 
               <button
-                type="button"
+                className="inline-flex min-h-9 flex-1 items-center justify-center rounded-lg border border-[#27384e] bg-[#101c2c] px-3 text-[9px] font-semibold text-slate-300 transition hover:border-[#38506d] hover:text-white sm:flex-none"
                 onClick={handleClearFilters}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                type="button"
               >
                 Clear
               </button>
             </div>
-          </form>
-        </section>
-
-        <section
-          aria-labelledby="subscriber-results-heading"
-          className="mt-5"
-        >
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2
-                id="subscriber-results-heading"
-                className="text-base font-black text-slate-950"
-              >
-                Subscribers
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                {isLoading
-                  ? "Loading Subscribers..."
-                  : `${total} Subscriber${total === 1 ? "" : "s"} found`}
-              </p>
-            </div>
-
-            {!isLoading && safePages > 1 ? (
-              <p className="text-xs font-semibold text-slate-500">
-                Page {safePage} of {safePages}
-              </p>
-            ) : null}
           </div>
+        </form>
 
-          <div aria-live="polite" className="mt-4">
-            {actionMessage ? (
-              <div
-                role="status"
-                className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold leading-6 text-emerald-800"
-              >
-                {actionMessage}
-              </div>
-            ) : null}
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[9px] font-semibold text-slate-500">
+            {isLoading
+              ? "Loading Subscribers..."
+              : `${subscribers.length} shown · ${total} matching · ${safePage}/${safePages}`}
+          </p>
 
-            {actionError ? (
-              <div
-                role="alert"
-                className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-700"
-              >
-                {actionError}
-              </div>
-            ) : null}
-          </div>
-
-          {error ? (
-            <div
-              role="alert"
-              className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700"
-            >
-              <p className="font-bold">Unable to load Subscribers.</p>
-
-              <p className="mt-1">{error.message}</p>
-
-              <button
-                type="button"
-                onClick={refresh}
-                className="mt-3 min-h-10 font-bold underline underline-offset-4"
-              >
-                Try again
-              </button>
-            </div>
+          {hasActiveFilters ? (
+            <span className="text-[9px] font-semibold text-blue-300">
+              Filters active
+            </span>
           ) : null}
+        </div>
 
-          {!error && !isLoading && subscribers.length === 0 ? (
-            <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-              <h3 className="text-base font-black text-slate-950">
-                No Subscribers found
-              </h3>
-
-              <p className="mx-auto mt-1.5 max-w-xl text-sm leading-6 text-slate-500">
-                {hasActiveFilters
-                  ? "Try changing or clearing the current filters."
-                  : "New public newsletter subscriptions will appear here."}
-              </p>
-            </div>
-          ) : null}
-
-          {isLoading && subscribers.length === 0 ? (
+        <div aria-live="polite">
+          {actionMessage ? (
             <div
+              className="mt-2 rounded-md border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-2 text-[9px] font-semibold text-emerald-300"
               role="status"
-              className="mt-4 rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm font-semibold text-slate-500"
             >
-              Loading Subscribers...
+              {actionMessage}
             </div>
           ) : null}
 
-          {subscribers.length > 0 ? (
-            <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="hidden overflow-x-auto lg:block">
-                <table className="min-w-full divide-y divide-slate-200">
-                  <thead className="bg-slate-50/80">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
-                      >
-                        Email
-                      </th>
+          {actionError ? (
+            <div
+              className="mt-2 rounded-md border border-rose-500/20 bg-rose-950/20 px-2.5 py-2 text-[9px] font-semibold text-rose-300"
+              role="alert"
+            >
+              {actionError}
+            </div>
+          ) : null}
+        </div>
 
-                      <th
-                        scope="col"
-                        className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
-                      >
-                        Status
-                      </th>
+        {error ? (
+          <div
+            className="mt-2 rounded-md border border-rose-500/20 bg-rose-950/20 px-2.5 py-2 text-[9px] text-rose-300"
+            role="alert"
+          >
+            Unable to load Subscribers. {error.message}
 
-                      <th
-                        scope="col"
-                        className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
-                      >
-                        Subscribed
-                      </th>
+            <button
+              className="ml-2 font-bold underline underline-offset-2"
+              onClick={refresh}
+              type="button"
+            >
+              Retry
+            </button>
+          </div>
+        ) : null}
 
-                      <th
-                        scope="col"
-                        className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
-                      >
-                        Consent
-                      </th>
+        {!error && !isLoading && subscribers.length === 0 ? (
+          <div className="mt-2 rounded-lg border border-dashed border-[#26384f] bg-[#0a1422] px-4 py-7 text-center">
+            <p className="text-sm font-bold text-slate-100">
+              No Subscribers found
+            </p>
 
-                      <th
-                        scope="col"
-                        className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
-                      >
-                        Unsubscribed
-                      </th>
+            <p className="mt-1 text-[9px] text-slate-500">
+              {hasActiveFilters
+                ? "Change or clear the current filters."
+                : "New newsletter subscriptions will appear here."}
+            </p>
+          </div>
+        ) : null}
 
-                      <th
-                        scope="col"
-                        className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
-                      >
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
+        {isLoading && subscribers.length === 0 ? (
+          <div
+            aria-live="polite"
+            className="mt-2 space-y-1"
+            role="status"
+          >
+            <span className="sr-only">Loading Subscribers...</span>
 
-                  <tbody className="divide-y divide-slate-100">
-                    {subscribers.map((subscriber) => {
-                      const isPending =
-                        pendingActionId === subscriber._id;
+            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
+              <div
+                className="h-[54px] animate-pulse rounded-lg border border-[#1d2b3d] bg-[#0c1624] motion-reduce:animate-none"
+                key={placeholder}
+              />
+            ))}
+          </div>
+        ) : null}
 
-                      return (
-                        <tr
-                          key={subscriber._id}
-                          className="transition-colors duration-150 motion-reduce:transition-none hover:bg-slate-50/70"
+        {subscribers.length > 0 ? (
+          <div className="mt-2 grid grid-cols-1 gap-1.5 xl:grid-cols-2">
+            {subscribers.map((subscriber) => {
+              const isPending = pendingActionId === subscriber._id;
+
+              return (
+                <article
+                  className="h-full min-w-0 rounded-lg border border-[#1d2b3d] bg-[#0c1624] transition hover:border-[#2c405b]"
+                  key={subscriber._id}
+                >
+                  <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 px-2 py-1.5 sm:gap-2 sm:px-2.5 sm:py-2 xl:min-h-[58px]">
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                        <SubscriberStatusBadge status={subscriber.status} />
+
+                        <a
+                          className="max-w-full truncate text-[10px] font-bold text-blue-200 transition hover:text-blue-100 sm:max-w-[30rem] xl:max-w-[20rem]"
+                          href={`mailto:${subscriber.email}`}
                         >
-                          <td className="px-5 py-4 align-middle">
-                            <a
-                              href={`mailto:${subscriber.email}`}
-                              className="break-all text-sm font-bold text-brand-700 transition-colors duration-150 motion-reduce:transition-none hover:text-brand-800"
-                            >
-                              {subscriber.email}
-                            </a>
-                          </td>
-
-                          <td className="px-5 py-4 align-middle">
-                            <SubscriberStatusBadge
-                              status={subscriber.status}
-                            />
-                          </td>
-
-                          <td className="whitespace-nowrap px-5 py-4 align-middle text-sm text-slate-600">
-                            {formatDateTime(subscriber.subscribedAt)}
-                          </td>
-
-                          <td className="whitespace-nowrap px-5 py-4 align-middle text-sm text-slate-600">
-                            {formatDateTime(subscriber.consentedAt)}
-                          </td>
-
-                          <td className="whitespace-nowrap px-5 py-4 align-middle text-sm text-slate-600">
-                            {formatDateTime(subscriber.unsubscribedAt)}
-                          </td>
-
-                          <td className="px-5 py-4 align-middle">
-                            <div className="flex justify-end gap-2">
-                              {subscriber.status === "active" ? (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleUnsubscribe(subscriber)
-                                  }
-                                  disabled={Boolean(pendingActionId)}
-                                  className="inline-flex min-h-9 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 px-3 text-xs font-bold text-amber-800 transition-colors duration-150 motion-reduce:transition-none hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                  {isPending ? "Working..." : "Unsubscribe"}
-                                </button>
-                              ) : null}
-
-                              {canDelete ? (
-                                <button
-                                  type="button"
-                                  onClick={() => handleDelete(subscriber)}
-                                  disabled={Boolean(pendingActionId)}
-                                  className="inline-flex min-h-9 items-center justify-center rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                  {isPending ? "Working..." : "Delete"}
-                                </button>
-                              ) : null}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="grid gap-3 p-3 sm:p-4 lg:hidden">
-                {subscribers.map((subscriber) => {
-                  const isPending =
-                    pendingActionId === subscriber._id;
-
-                  return (
-                    <article
-                      key={subscriber._id}
-                      className="rounded-xl border border-slate-200 bg-white p-4"
-                    >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="min-w-0">
-                          <a
-                            href={`mailto:${subscriber.email}`}
-                            className="break-all text-sm font-black text-brand-700 transition-colors duration-150 motion-reduce:transition-none hover:text-brand-800"
-                          >
-                            {subscriber.email}
-                          </a>
-
-                          <div className="mt-2">
-                            <SubscriberStatusBadge
-                              status={subscriber.status}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          {subscriber.status === "active" ? (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleUnsubscribe(subscriber)
-                              }
-                              disabled={Boolean(pendingActionId)}
-                              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 px-3 text-xs font-bold text-amber-800 transition-colors duration-150 motion-reduce:transition-none hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              {isPending ? "Working..." : "Unsubscribe"}
-                            </button>
-                          ) : null}
-
-                          {canDelete ? (
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(subscriber)}
-                              disabled={Boolean(pendingActionId)}
-                              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              {isPending ? "Working..." : "Delete"}
-                            </button>
-                          ) : null}
-                        </div>
+                          {subscriber.email}
+                        </a>
                       </div>
 
-                      <dl className="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-3">
-                        <div>
-                          <dt className={labelClassName}>Subscribed</dt>
+                      <div className="mt-0.5 flex min-w-0 items-center gap-x-2 overflow-x-auto whitespace-nowrap text-[8px] text-slate-500 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        <span className="shrink-0">
+                          Subscribed {formatDateTime(subscriber.subscribedAt)}
+                        </span>
 
-                          <dd className="mt-1.5 text-sm leading-6 text-slate-700">
-                            {formatDateTime(subscriber.subscribedAt)}
-                          </dd>
-                        </div>
+                        <span className="shrink-0">
+                          Consent {formatDateTime(subscriber.consentedAt)}
+                        </span>
 
-                        <div>
-                          <dt className={labelClassName}>Consent</dt>
-
-                          <dd className="mt-1.5 text-sm leading-6 text-slate-700">
-                            {formatDateTime(subscriber.consentedAt)}
-                          </dd>
-                        </div>
-
-                        <div>
-                          <dt className={labelClassName}>Unsubscribed</dt>
-
-                          <dd className="mt-1.5 text-sm leading-6 text-slate-700">
+                        {subscriber.unsubscribedAt ? (
+                          <span className="shrink-0">
+                            Unsubscribed{" "}
                             {formatDateTime(subscriber.unsubscribedAt)}
-                          </dd>
-                        </div>
-                      </dl>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
 
-          {!error && safePages > 1 ? (
-            <nav
-              aria-label="Subscriber pagination"
-              className="mt-5 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
+                    <div className="flex shrink-0 items-center justify-end gap-1.5">
+                      {subscriber.status === "active" ? (
+                        <button
+                          className="inline-flex min-h-7 items-center justify-center rounded-md border border-amber-500/25 bg-amber-500/10 px-2 text-[8px] font-bold text-amber-300 transition hover:bg-amber-500/15 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-8 sm:px-2.5 sm:text-[9px]"
+                          disabled={Boolean(pendingActionId)}
+                          onClick={() => handleUnsubscribe(subscriber)}
+                          type="button"
+                        >
+                          {isPending ? (
+                            "..."
+                          ) : (
+                            <>
+                              <span className="sm:hidden">Unsub</span>
+                              <span className="hidden sm:inline">Unsubscribe</span>
+                            </>
+                          )}
+                        </button>
+                      ) : null}
+
+                      {canDelete ? (
+                        <details className="relative">
+                          <summary
+                            aria-label={`More actions for ${subscriber.email}`}
+                            className="inline-flex size-7 cursor-pointer list-none items-center justify-center rounded-md border border-[#27384e] bg-[#101c2c] text-xs font-bold text-slate-300 transition hover:border-[#38506d] hover:text-white sm:size-8 sm:text-sm"
+                            title="More actions"
+                          >
+                            …
+                          </summary>
+
+                          <div className="absolute right-0 top-[calc(100%+0.35rem)] z-30 w-40 rounded-lg border border-[#27384e] bg-[#0d1725] p-1.5 shadow-2xl">
+                            <button
+                              className="rnx-admin-delete-action flex min-h-8 w-full items-center rounded-md px-2 text-left text-[9px] font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
+                              disabled={Boolean(pendingActionId)}
+                              onClick={() => handleDelete(subscriber)}
+                              type="button"
+                            >
+                              {isPending ? "Working..." : "Delete Subscriber"}
+                            </button>
+                          </div>
+                        </details>
+                      ) : null}
+                    </div>
+                  </div>
+
+                </article>
+              );
+            })}
+          </div>
+        ) : null}
+
+        {!error && safePages > 1 ? (
+          <nav
+            aria-label="Subscriber pagination"
+            className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[#1d2b3d] bg-[#0c1624] p-2"
+          >
+            <button
+              className="inline-flex min-h-8 items-center justify-center rounded-md border border-[#27384e] bg-[#101c2c] px-2.5 text-[9px] font-semibold text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={isLoading || safePage <= 1}
+              onClick={() =>
+                setPage((currentPage) =>
+                  Math.max(1, currentPage - 1),
+                )
+              }
+              type="button"
             >
-              <p className="text-center text-sm font-semibold text-slate-600 sm:text-left">
-                Page {safePage} of {safePages}
-              </p>
+              Previous
+            </button>
 
-              <div className="grid grid-cols-2 gap-2 sm:flex">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setPage((currentPage) =>
-                      Math.max(1, currentPage - 1),
-                    )
-                  }
-                  disabled={isLoading || safePage <= 1}
-                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Previous
-                </button>
+            <span className="text-[9px] font-semibold text-slate-500">
+              {safePage} / {safePages} · {total} matching
+            </span>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setPage((currentPage) =>
-                      Math.min(safePages, currentPage + 1),
-                    )
-                  }
-                  disabled={isLoading || safePage >= safePages}
-                  className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </nav>
-          ) : null}
-        </section>
+            <button
+              className="inline-flex min-h-8 items-center justify-center rounded-md border border-blue-500 bg-blue-600 px-2.5 text-[9px] font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={isLoading || safePage >= safePages}
+              onClick={() =>
+                setPage((currentPage) =>
+                  Math.min(safePages, currentPage + 1),
+                )
+              }
+              type="button"
+            >
+              Next
+            </button>
+          </nav>
+        ) : null}
       </section>
     </main>
   );

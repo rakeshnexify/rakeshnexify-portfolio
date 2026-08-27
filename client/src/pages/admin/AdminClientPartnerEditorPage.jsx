@@ -183,32 +183,33 @@ function AdminClientPartnerEditorPage({ mode = "create" }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 dark:bg-slate-950">
-      <section className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <Link
-          to="/admin/clients-partners"
-          className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 dark:text-slate-300"
-        >
-          <span aria-hidden="true">&larr;</span>
-          Clients & Partners
-        </Link>
+    <main className="rnx-admin-screenshot-light-page rnx-admin-clients-standard-v458 rnx-admin-client-partner-mobile-v461 min-h-screen bg-slate-100 dark:bg-slate-950">
+      <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-6 sm:py-5 lg:px-8">
+        <header>
+          <Link
+            to="/admin/clients-partners"
+            className="inline-flex min-h-7 items-center gap-1.5 text-[11px] font-semibold text-slate-500 transition hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 dark:text-slate-400"
+          >
+            <span aria-hidden="true">&larr;</span>
+            Clients & Partners
+          </Link>
 
-        <header className="mt-3">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+          <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-600">
             Relationships
           </p>
-          <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+
+          <h1 className="mt-1 break-words text-[22px] font-bold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
             {isEditMode
-              ? `Edit ${company?.name || "client / partner"}`
-              : "Add client / partner"}
+              ? `Edit ${company?.name || "Client / Partner"}`
+              : "Add Client / Partner"}
           </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Manage the public relationship card and Home preview priority
-            without changing the separate Companies navigation menu.
+
+          <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            Manage the public profile, relationship details and display settings.
           </p>
         </header>
 
-        <div className="mt-6">
+        <div className="mt-3 sm:mt-4">
           <ClientPartnerForm
             key={isEditMode ? company?._id : "new-client-partner"}
             initialValues={company || {}}

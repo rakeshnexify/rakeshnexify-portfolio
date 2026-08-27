@@ -7,6 +7,7 @@ import ServiceCard from "../services/ServiceCard";
 
 import PublicCTAButton from "../layout/PublicCTAButton";
 const HOME_SERVICE_LIMIT = 4;
+const COMPANY_SERVICES_URL = "https://idomere.com/services";
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -88,8 +89,15 @@ function ServicesSection() {
   const ctaLabel =
     String(ctaButton.label || "").trim();
 
-  const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href, "");
+  const configuredCtaUrl = getSafePublicUrl(
+    ctaButton.url || ctaButton.href,
+    COMPANY_SERVICES_URL,
+  );
+
+  const ctaUrl =
+    configuredCtaUrl === "/services"
+      ? COMPANY_SERVICES_URL
+      : configuredCtaUrl;
 
   const previewServices = [...services]
     .sort(sortServicesForPreview)

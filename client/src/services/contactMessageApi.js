@@ -92,6 +92,21 @@ async function submitContactMessage(messageData) {
       throw createResponseError(response, responseData);
     }
 
+    const savedMessageId = String(responseData?.data?.id || "").trim();
+
+    if (responseData?.success !== true || !savedMessageId) {
+      const confirmationError = new Error(
+        "The server responded, but your message could not be confirmed as saved. Please reload the page and try again.",
+      );
+
+      confirmationError.name = "ContactMessageApiError";
+      confirmationError.code = "SUBMISSION_NOT_CONFIRMED";
+      confirmationError.status = response.status;
+      confirmationError.fieldErrors = {};
+
+      throw confirmationError;
+    }
+
     return responseData;
   } catch (error) {
     if (error?.name === "AbortError") {

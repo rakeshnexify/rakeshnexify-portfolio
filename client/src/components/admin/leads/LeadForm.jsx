@@ -4,13 +4,22 @@ import {
   leadStatusOptions,
 } from "../../../utils/leadForm";
 
+const inputClassName =
+  "mt-1 min-h-9 w-full rounded-lg border border-[#24364d] bg-[#091522] px-3 text-[11px] text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none";
+
+const labelClassName =
+  "text-[9px] font-bold uppercase tracking-[0.09em] text-slate-500";
+
+const sectionClassName =
+  "rounded-xl border border-[#1d2b3d] bg-[#0c1624] p-3 shadow-sm sm:p-3.5";
+
 function FieldError({ id, message }) {
   if (!message) {
     return null;
   }
 
   return (
-    <p id={id} role="alert" className="mt-2 text-sm font-semibold text-red-600">
+    <p id={id} role="alert" className="mt-1 text-[9px] font-semibold text-rose-300">
       {message}
     </p>
   );
@@ -49,221 +58,204 @@ function LeadForm({
   }
 
   const isLost = form.status === "lost";
-
   const hasServiceOptions = serviceOptions.length > 0;
-
   const hasAdminOptions = adminOptions.length > 0;
 
+  const advancedFields = [
+    "lastContactedAt",
+    "order",
+    "serviceSlug",
+    "serviceTitle",
+    "lostReason",
+  ];
+
+  const advancedErrorCount = advancedFields.filter(
+    (fieldName) => Boolean(fieldErrors[fieldName]),
+  ).length;
+
   return (
-    <form onSubmit={onSubmit} noValidate className="space-y-8">
-      {sourceContactMessage && (
-        <section className="rounded-2xl border border-blue-200 bg-blue-50 p-5">
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-blue-700">
-            Contact Message Lead
-          </p>
+    <form onSubmit={onSubmit} noValidate className="space-y-3">
+      {sourceContactMessage ? (
+        <section className="rounded-lg border border-blue-500/20 bg-blue-500/10 px-3 py-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-blue-300">
+              Contact Message Lead
+            </span>
 
-          <p className="mt-2 text-sm leading-6 text-blue-800">
-            This Lead was created from the enquiry
-            {sourceContactMessage.subject
-              ? ` “${sourceContactMessage.subject}”`
-              : ""}
-            . The original Contact Message remains separate from the CRM Lead.
-          </p>
+            <span className="max-w-full truncate text-[10px] text-slate-400">
+              {sourceContactMessage.subject ||
+                "Created from a Contact Message enquiry"}
+            </span>
+          </div>
         </section>
-      )}
+      ) : null}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-            Lead Information
-          </p>
+      <section className={sectionClassName}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-blue-400">
+              Lead
+            </p>
 
-          <h2 className="mt-2 text-xl font-bold text-slate-950">
-            Contact and opportunity details
-          </h2>
+            <h2 className="mt-0.5 text-sm font-bold text-slate-100">
+              Contact & opportunity
+            </h2>
+          </div>
+
+          <span className="text-[9px] text-slate-600">
+            * required
+          </span>
         </div>
 
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <div className="mt-3 grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
           <div>
-            <label
-              htmlFor="lead-name"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Lead name <span className="text-red-600">*</span>
+            <label className={labelClassName} htmlFor="lead-name">
+              Lead name <span className="text-rose-400">*</span>
             </label>
 
             <input
+              aria-describedby={getDescribedBy("name")}
+              aria-invalid={Boolean(fieldErrors.name)}
+              className={inputClassName}
               id="lead-name"
+              maxLength={100}
               name="name"
+              onChange={handleChange}
+              required
               type="text"
               value={form.name}
-              onChange={handleChange}
-              maxLength={100}
-              required
-              aria-invalid={Boolean(fieldErrors.name)}
-              aria-describedby={getDescribedBy("name")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
             />
 
             <FieldError id="lead-name-error" message={fieldErrors.name} />
           </div>
 
           <div>
-            <label
-              htmlFor="lead-company"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label className={labelClassName} htmlFor="lead-company">
               Company / Organization
             </label>
 
             <input
+              aria-describedby={getDescribedBy("company")}
+              aria-invalid={Boolean(fieldErrors.company)}
+              className={inputClassName}
               id="lead-company"
+              maxLength={160}
               name="company"
+              onChange={handleChange}
               type="text"
               value={form.company}
-              onChange={handleChange}
-              maxLength={160}
-              aria-invalid={Boolean(fieldErrors.company)}
-              aria-describedby={getDescribedBy("company")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
             />
 
             <FieldError id="lead-company-error" message={fieldErrors.company} />
           </div>
 
           <div>
-            <label
-              htmlFor="lead-email"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Email
+            <label className={labelClassName} htmlFor="lead-source">
+              Source
             </label>
 
             <input
-              id="lead-email"
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              maxLength={150}
-              autoComplete="email"
-              aria-invalid={Boolean(fieldErrors.email)}
-              aria-describedby={getDescribedBy("email")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            />
-
-            <FieldError id="lead-email-error" message={fieldErrors.email} />
-          </div>
-
-          <div>
-            <label
-              htmlFor="lead-phone"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Phone
-            </label>
-
-            <input
-              id="lead-phone"
-              name="phone"
-              type="tel"
-              value={form.phone}
-              onChange={handleChange}
-              maxLength={30}
-              autoComplete="tel"
-              aria-invalid={Boolean(fieldErrors.phone)}
-              aria-describedby={getDescribedBy("phone")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            />
-
-            <FieldError id="lead-phone-error" message={fieldErrors.phone} />
-          </div>
-
-          <div>
-            <label
-              htmlFor="lead-source"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Lead source
-            </label>
-
-            <input
+              aria-describedby={getDescribedBy("source")}
+              aria-invalid={Boolean(fieldErrors.source)}
+              className={inputClassName}
               id="lead-source"
+              maxLength={100}
               name="source"
+              onChange={handleChange}
+              placeholder="manual"
               type="text"
               value={form.source}
-              onChange={handleChange}
-              maxLength={100}
-              placeholder="manual"
-              aria-invalid={Boolean(fieldErrors.source)}
-              aria-describedby={getDescribedBy("source")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
             />
 
             <FieldError id="lead-source-error" message={fieldErrors.source} />
           </div>
 
           <div>
-            <label
-              htmlFor="lead-subject"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Opportunity subject <span className="text-red-600">*</span>
+            <label className={labelClassName} htmlFor="lead-email">
+              Email
             </label>
 
             <input
+              aria-describedby={getDescribedBy("email")}
+              aria-invalid={Boolean(fieldErrors.email)}
+              autoComplete="email"
+              className={inputClassName}
+              id="lead-email"
+              maxLength={150}
+              name="email"
+              onChange={handleChange}
+              type="email"
+              value={form.email}
+            />
+
+            <FieldError id="lead-email-error" message={fieldErrors.email} />
+          </div>
+
+          <div>
+            <label className={labelClassName} htmlFor="lead-phone">
+              Phone
+            </label>
+
+            <input
+              aria-describedby={getDescribedBy("phone")}
+              aria-invalid={Boolean(fieldErrors.phone)}
+              autoComplete="tel"
+              className={inputClassName}
+              id="lead-phone"
+              maxLength={30}
+              name="phone"
+              onChange={handleChange}
+              type="tel"
+              value={form.phone}
+            />
+
+            <FieldError id="lead-phone-error" message={fieldErrors.phone} />
+          </div>
+
+          <div>
+            <label className={labelClassName} htmlFor="lead-subject">
+              Opportunity subject <span className="text-rose-400">*</span>
+            </label>
+
+            <input
+              aria-describedby={getDescribedBy("subject")}
+              aria-invalid={Boolean(fieldErrors.subject)}
+              className={inputClassName}
               id="lead-subject"
+              maxLength={150}
+              minLength={3}
               name="subject"
+              onChange={handleChange}
+              required
               type="text"
               value={form.subject}
-              onChange={handleChange}
-              minLength={3}
-              maxLength={150}
-              required
-              aria-invalid={Boolean(fieldErrors.subject)}
-              aria-describedby={getDescribedBy("subject")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
             />
 
             <FieldError id="lead-subject-error" message={fieldErrors.subject} />
           </div>
 
-          <div className="md:col-span-2">
-            <label
-              htmlFor="lead-requirementSummary"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Requirement summary
-            </label>
+          <div className="sm:col-span-2 xl:col-span-3">
+            <div className="flex items-end justify-between gap-2">
+              <label className={labelClassName} htmlFor="lead-requirementSummary">
+                Requirement summary
+              </label>
 
-            <textarea
-              id="lead-requirementSummary"
-              name="requirementSummary"
-              value={form.requirementSummary}
-              onChange={handleChange}
-              rows={7}
-              maxLength={5000}
-              aria-invalid={Boolean(fieldErrors.requirementSummary)}
-              aria-describedby={getDescribedBy(
-                "requirementSummary",
-                "lead-requirementSummary-help",
-              )}
-              className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            />
-
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-              <p
-                id="lead-requirementSummary-help"
-                className="text-xs text-slate-400"
-              >
-                Project requirement, scope, budget context or other useful CRM
-                details.
-              </p>
-
-              <span className="text-xs text-slate-400">
+              <span className="text-[8px] tabular-nums text-slate-600">
                 {form.requirementSummary.length}/5000
               </span>
             </div>
+
+            <textarea
+              aria-describedby={getDescribedBy("requirementSummary")}
+              aria-invalid={Boolean(fieldErrors.requirementSummary)}
+              className={`${inputClassName} min-h-20 resize-y py-2 leading-4`}
+              id="lead-requirementSummary"
+              maxLength={5000}
+              name="requirementSummary"
+              onChange={handleChange}
+              rows={3}
+              value={form.requirementSummary}
+            />
 
             <FieldError
               id="lead-requirementSummary-error"
@@ -273,34 +265,31 @@ function LeadForm({
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <section className={sectionClassName}>
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-blue-400">
             Pipeline
           </p>
 
-          <h2 className="mt-2 text-xl font-bold text-slate-950">
-            Status, priority and assignment
+          <h2 className="mt-0.5 text-sm font-bold text-slate-100">
+            Status, owner, service & value
           </h2>
         </div>
 
-        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-3 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <div>
-            <label
-              htmlFor="lead-status"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label className={labelClassName} htmlFor="lead-status">
               Status
             </label>
 
             <select
+              aria-describedby={getDescribedBy("status")}
+              aria-invalid={Boolean(fieldErrors.status)}
+              className={inputClassName}
               id="lead-status"
               name="status"
-              value={form.status}
               onChange={handleChange}
-              aria-invalid={Boolean(fieldErrors.status)}
-              aria-describedby={getDescribedBy("status")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+              value={form.status}
             >
               {leadStatusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -313,21 +302,18 @@ function LeadForm({
           </div>
 
           <div>
-            <label
-              htmlFor="lead-priority"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label className={labelClassName} htmlFor="lead-priority">
               Priority
             </label>
 
             <select
+              aria-describedby={getDescribedBy("priority")}
+              aria-invalid={Boolean(fieldErrors.priority)}
+              className={inputClassName}
               id="lead-priority"
               name="priority"
-              value={form.priority}
               onChange={handleChange}
-              aria-invalid={Boolean(fieldErrors.priority)}
-              aria-describedby={getDescribedBy("priority")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+              value={form.priority}
             >
               {leadPriorityOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -343,22 +329,19 @@ function LeadForm({
           </div>
 
           <div>
-            <label
-              htmlFor="lead-assignedTo"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label className={labelClassName} htmlFor="lead-assignedTo">
               Assigned Admin
             </label>
 
             {hasAdminOptions ? (
               <select
+                aria-describedby={getDescribedBy("assignedTo")}
+                aria-invalid={Boolean(fieldErrors.assignedTo)}
+                className={inputClassName}
                 id="lead-assignedTo"
                 name="assignedTo"
-                value={form.assignedTo}
                 onChange={handleChange}
-                aria-invalid={Boolean(fieldErrors.assignedTo)}
-                aria-describedby={getDescribedBy("assignedTo")}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                value={form.assignedTo}
               >
                 <option value="">Unassigned</option>
 
@@ -370,29 +353,16 @@ function LeadForm({
               </select>
             ) : (
               <input
+                aria-describedby={getDescribedBy("assignedTo")}
+                aria-invalid={Boolean(fieldErrors.assignedTo)}
+                className={inputClassName}
                 id="lead-assignedTo"
                 name="assignedTo"
+                onChange={handleChange}
+                placeholder="Admin ObjectId or blank"
                 type="text"
                 value={form.assignedTo}
-                onChange={handleChange}
-                placeholder="Admin ObjectId or leave blank"
-                aria-invalid={Boolean(fieldErrors.assignedTo)}
-                aria-describedby={getDescribedBy(
-                  "assignedTo",
-                  "lead-assignedTo-help",
-                )}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
               />
-            )}
-
-            {!hasAdminOptions && (
-              <p
-                id="lead-assignedTo-help"
-                className="mt-2 text-xs text-slate-400"
-              >
-                Admin selector data is not available yet. Leave blank to keep
-                this Lead unassigned.
-              </p>
             )}
 
             <FieldError
@@ -402,152 +372,19 @@ function LeadForm({
           </div>
 
           <div>
-            <label
-              htmlFor="lead-nextFollowUpAt"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Next follow-up
-            </label>
-
-            <input
-              id="lead-nextFollowUpAt"
-              name="nextFollowUpAt"
-              type="datetime-local"
-              value={form.nextFollowUpAt}
-              onChange={handleChange}
-              aria-invalid={Boolean(fieldErrors.nextFollowUpAt)}
-              aria-describedby={getDescribedBy("nextFollowUpAt")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            />
-
-            <FieldError
-              id="lead-nextFollowUpAt-error"
-              message={fieldErrors.nextFollowUpAt}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="lead-lastContactedAt"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Last contacted
-            </label>
-
-            <input
-              id="lead-lastContactedAt"
-              name="lastContactedAt"
-              type="datetime-local"
-              value={form.lastContactedAt}
-              onChange={handleChange}
-              aria-invalid={Boolean(fieldErrors.lastContactedAt)}
-              aria-describedby={getDescribedBy("lastContactedAt")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            />
-
-            <FieldError
-              id="lead-lastContactedAt-error"
-              message={fieldErrors.lastContactedAt}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="lead-order"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Order
-            </label>
-
-            <input
-              id="lead-order"
-              name="order"
-              type="number"
-              min="0"
-              max="1000000"
-              step="1"
-              value={form.order}
-              onChange={handleChange}
-              aria-invalid={Boolean(fieldErrors.order)}
-              aria-describedby={getDescribedBy("order")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            />
-
-            <FieldError id="lead-order-error" message={fieldErrors.order} />
-          </div>
-
-          {isLost && (
-            <div className="md:col-span-2 xl:col-span-3">
-              <label
-                htmlFor="lead-lostReason"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Lost reason
-              </label>
-
-              <textarea
-                id="lead-lostReason"
-                name="lostReason"
-                value={form.lostReason}
-                onChange={handleChange}
-                rows={4}
-                maxLength={1000}
-                aria-invalid={Boolean(fieldErrors.lostReason)}
-                aria-describedby={getDescribedBy(
-                  "lostReason",
-                  "lead-lostReason-help",
-                )}
-                className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-              />
-
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                <p id="lead-lostReason-help" className="text-xs text-slate-400">
-                  Optional reason why this opportunity was lost.
-                </p>
-
-                <span className="text-xs text-slate-400">
-                  {form.lostReason.length}/1000
-                </span>
-              </div>
-
-              <FieldError
-                id="lead-lostReason-error"
-                message={fieldErrors.lostReason}
-              />
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-            Service and Value
-          </p>
-
-          <h2 className="mt-2 text-xl font-bold text-slate-950">
-            Opportunity classification
-          </h2>
-        </div>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <div>
-            <label
-              htmlFor="lead-service"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label className={labelClassName} htmlFor="lead-service">
               Service
             </label>
 
             {hasServiceOptions ? (
               <select
+                aria-describedby={getDescribedBy("service")}
+                aria-invalid={Boolean(fieldErrors.service)}
+                className={inputClassName}
                 id="lead-service"
                 name="service"
-                value={form.service}
                 onChange={handleChange}
-                aria-invalid={Boolean(fieldErrors.service)}
-                aria-describedby={getDescribedBy("service")}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                value={form.service}
               >
                 <option value="">No linked Service</option>
 
@@ -559,102 +396,37 @@ function LeadForm({
               </select>
             ) : (
               <input
+                aria-describedby={getDescribedBy("service")}
+                aria-invalid={Boolean(fieldErrors.service)}
+                className={inputClassName}
                 id="lead-service"
                 name="service"
+                onChange={handleChange}
+                placeholder="Service ObjectId or blank"
                 type="text"
                 value={form.service}
-                onChange={handleChange}
-                placeholder="Service ObjectId or leave blank"
-                aria-invalid={Boolean(fieldErrors.service)}
-                aria-describedby={getDescribedBy(
-                  "service",
-                  "lead-service-help",
-                )}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
               />
-            )}
-
-            {!hasServiceOptions && (
-              <p id="lead-service-help" className="mt-2 text-xs text-slate-400">
-                Service selector data is not available yet. Leave blank when
-                no Service relation is required.
-              </p>
             )}
 
             <FieldError id="lead-service-error" message={fieldErrors.service} />
           </div>
 
           <div>
-            <label
-              htmlFor="lead-serviceSlug"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Service slug snapshot
-            </label>
-
-            <input
-              id="lead-serviceSlug"
-              name="serviceSlug"
-              type="text"
-              value={form.serviceSlug}
-              onChange={handleChange}
-              maxLength={160}
-              aria-invalid={Boolean(fieldErrors.serviceSlug)}
-              aria-describedby={getDescribedBy("serviceSlug")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            />
-
-            <FieldError
-              id="lead-serviceSlug-error"
-              message={fieldErrors.serviceSlug}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="lead-serviceTitle"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Service title snapshot
-            </label>
-
-            <input
-              id="lead-serviceTitle"
-              name="serviceTitle"
-              type="text"
-              value={form.serviceTitle}
-              onChange={handleChange}
-              maxLength={150}
-              aria-invalid={Boolean(fieldErrors.serviceTitle)}
-              aria-describedby={getDescribedBy("serviceTitle")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
-            />
-
-            <FieldError
-              id="lead-serviceTitle-error"
-              message={fieldErrors.serviceTitle}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="lead-estimatedValue"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label className={labelClassName} htmlFor="lead-estimatedValue">
               Estimated value
             </label>
 
             <input
-              id="lead-estimatedValue"
-              name="estimatedValue"
-              type="number"
-              min="0"
-              step="0.01"
-              value={form.estimatedValue}
-              onChange={handleChange}
-              aria-invalid={Boolean(fieldErrors.estimatedValue)}
               aria-describedby={getDescribedBy("estimatedValue")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+              aria-invalid={Boolean(fieldErrors.estimatedValue)}
+              className={inputClassName}
+              id="lead-estimatedValue"
+              min="0"
+              name="estimatedValue"
+              onChange={handleChange}
+              step="0.01"
+              type="number"
+              value={form.estimatedValue}
             />
 
             <FieldError
@@ -664,24 +436,21 @@ function LeadForm({
           </div>
 
           <div>
-            <label
-              htmlFor="lead-currency"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label className={labelClassName} htmlFor="lead-currency">
               Currency
             </label>
 
             <input
+              aria-describedby={getDescribedBy("currency")}
+              aria-invalid={Boolean(fieldErrors.currency)}
+              className={`${inputClassName} uppercase`}
               id="lead-currency"
-              name="currency"
-              type="text"
-              value={form.currency}
-              onChange={handleChange}
               list="lead-currency-options"
               maxLength={3}
-              aria-invalid={Boolean(fieldErrors.currency)}
-              aria-describedby={getDescribedBy("currency")}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm uppercase text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+              name="currency"
+              onChange={handleChange}
+              type="text"
+              value={form.currency}
             />
 
             <datalist id="lead-currency-options">
@@ -695,28 +464,188 @@ function LeadForm({
               message={fieldErrors.currency}
             />
           </div>
+
+          <div className="sm:col-span-2 lg:col-span-1">
+            <label className={labelClassName} htmlFor="lead-nextFollowUpAt">
+              Next follow-up
+            </label>
+
+            <input
+              aria-describedby={getDescribedBy("nextFollowUpAt")}
+              aria-invalid={Boolean(fieldErrors.nextFollowUpAt)}
+              className={inputClassName}
+              id="lead-nextFollowUpAt"
+              name="nextFollowUpAt"
+              onChange={handleChange}
+              type="datetime-local"
+              value={form.nextFollowUpAt}
+            />
+
+            <FieldError
+              id="lead-nextFollowUpAt-error"
+              message={fieldErrors.nextFollowUpAt}
+            />
+          </div>
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <details
+        className="rounded-xl border border-[#1d2b3d] bg-[#0a1422]"
+        open={advancedErrorCount > 0 ? true : undefined}
+      >
+        <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 px-3 text-[10px] font-bold text-slate-400">
+          <span>More CRM details</span>
+
+          <span className="text-[8px] font-semibold text-slate-600">
+            {advancedErrorCount > 0
+              ? `${advancedErrorCount} field error${advancedErrorCount === 1 ? "" : "s"}`
+              : "Optional / snapshots"}
+          </span>
+        </summary>
+
+        <div className="grid gap-2.5 border-t border-[#1d2b3d] p-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <label className={labelClassName} htmlFor="lead-lastContactedAt">
+              Last contacted
+            </label>
+
+            <input
+              aria-describedby={getDescribedBy("lastContactedAt")}
+              aria-invalid={Boolean(fieldErrors.lastContactedAt)}
+              className={inputClassName}
+              id="lead-lastContactedAt"
+              name="lastContactedAt"
+              onChange={handleChange}
+              type="datetime-local"
+              value={form.lastContactedAt}
+            />
+
+            <FieldError
+              id="lead-lastContactedAt-error"
+              message={fieldErrors.lastContactedAt}
+            />
+          </div>
+
+          <div>
+            <label className={labelClassName} htmlFor="lead-order">
+              Order
+            </label>
+
+            <input
+              aria-describedby={getDescribedBy("order")}
+              aria-invalid={Boolean(fieldErrors.order)}
+              className={inputClassName}
+              id="lead-order"
+              max="1000000"
+              min="0"
+              name="order"
+              onChange={handleChange}
+              step="1"
+              type="number"
+              value={form.order}
+            />
+
+            <FieldError id="lead-order-error" message={fieldErrors.order} />
+          </div>
+
+          <div>
+            <label className={labelClassName} htmlFor="lead-serviceSlug">
+              Service slug snapshot
+            </label>
+
+            <input
+              aria-describedby={getDescribedBy("serviceSlug")}
+              aria-invalid={Boolean(fieldErrors.serviceSlug)}
+              className={inputClassName}
+              id="lead-serviceSlug"
+              maxLength={160}
+              name="serviceSlug"
+              onChange={handleChange}
+              type="text"
+              value={form.serviceSlug}
+            />
+
+            <FieldError
+              id="lead-serviceSlug-error"
+              message={fieldErrors.serviceSlug}
+            />
+          </div>
+
+          <div className="sm:col-span-2 lg:col-span-1">
+            <label className={labelClassName} htmlFor="lead-serviceTitle">
+              Service title snapshot
+            </label>
+
+            <input
+              aria-describedby={getDescribedBy("serviceTitle")}
+              aria-invalid={Boolean(fieldErrors.serviceTitle)}
+              className={inputClassName}
+              id="lead-serviceTitle"
+              maxLength={150}
+              name="serviceTitle"
+              onChange={handleChange}
+              type="text"
+              value={form.serviceTitle}
+            />
+
+            <FieldError
+              id="lead-serviceTitle-error"
+              message={fieldErrors.serviceTitle}
+            />
+          </div>
+
+          {isLost ? (
+            <div className="sm:col-span-2 lg:col-span-3">
+              <div className="flex items-end justify-between gap-2">
+                <label className={labelClassName} htmlFor="lead-lostReason">
+                  Lost reason
+                </label>
+
+                <span className="text-[8px] tabular-nums text-slate-600">
+                  {form.lostReason.length}/1000
+                </span>
+              </div>
+
+              <textarea
+                aria-describedby={getDescribedBy("lostReason")}
+                aria-invalid={Boolean(fieldErrors.lostReason)}
+                className={`${inputClassName} min-h-16 resize-y py-2 leading-4`}
+                id="lead-lostReason"
+                maxLength={1000}
+                name="lostReason"
+                onChange={handleChange}
+                rows={2}
+                value={form.lostReason}
+              />
+
+              <FieldError
+                id="lead-lostReason-error"
+                message={fieldErrors.lostReason}
+              />
+            </div>
+          ) : null}
+        </div>
+      </details>
+
+      <div className="sticky bottom-2 z-20 flex items-center justify-end gap-2 rounded-xl border border-[#24364d] bg-[#0a1422]/95 p-2 shadow-xl backdrop-blur">
         <button
-          type="button"
-          onClick={onCancel}
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-[#2a3c53] bg-[#101c2c] px-3 text-[10px] font-bold text-slate-300 transition hover:border-[#3a536f] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           disabled={isSubmitting}
-          className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+          onClick={onCancel}
+          type="button"
         >
           Cancel
         </button>
 
         <button
-          type="submit"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-blue-500 bg-blue-600 px-4 text-[10px] font-bold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
           disabled={isSubmitting}
-          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-7 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          type="submit"
         >
           {isSubmitting
             ? isEdit
-              ? "Saving Lead..."
-              : "Creating Lead..."
+              ? "Saving..."
+              : "Creating..."
             : isEdit
               ? "Save Lead"
               : "Create Lead"}

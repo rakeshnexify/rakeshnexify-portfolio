@@ -26,104 +26,121 @@ const publicNavigationDestinations = Object.freeze({
     footer: true,
   },
   skills: {
-    type: "page",
-    href: "/skills",
+    type: "section",
+    href: "/#skills",
+    targetId: "skills",
     navbar: true,
     footer: true,
   },
   services: {
-    type: "page",
-    href: "/services",
-    navbarHref: "https://idomere.com",
+    type: "section",
+    href: "/#services",
+    targetId: "services",
     navbar: true,
     footer: true,
   },
   projects: {
-    type: "page",
-    href: "/projects",
+    type: "section",
+    href: "/#projects",
+    targetId: "projects",
     navbar: true,
     footer: true,
   },
   "case-studies": {
-    type: "page",
-    href: "/case-studies",
+    type: "section",
+    href: "/#case-studies",
+    targetId: "case-studies",
     navbar: true,
     footer: true,
   },
   education: {
-    type: "page",
-    href: "/education",
+    type: "section",
+    href: "/#education",
+    targetId: "education",
     navbar: true,
     footer: true,
   },
   experience: {
-    type: "page",
-    href: "/experience",
+    type: "section",
+    href: "/#experience",
+    targetId: "experience",
     navbar: true,
     footer: true,
   },
   achievements: {
-    type: "page",
-    href: "/achievements",
+    type: "section",
+    href: "/#achievements",
+    targetId: "achievements",
     navbar: true,
     footer: true,
   },
   team: {
-    type: "page",
-    href: "/team",
+    type: "section",
+    href: "/#team",
+    targetId: "team",
     navbar: true,
     footer: true,
   },
   companies: {
     type: "menu",
     href: "",
-    navbar: true,
+    navbar: false,
     footer: false,
   },
   "clients-partners": {
-    type: "page",
-    href: "/clients-partners",
+    type: "section",
+    href: "/#clients-partners",
+    targetId: "clients-partners",
     navbar: true,
     footer: true,
   },
+  posts: {
+    type: "section",
+    href: "/#posts",
+    targetId: "posts",
+    navbar: true,
+    footer: false,
+  },
   testimonials: {
-    type: "page",
-    href: "/testimonials",
+    type: "section",
+    href: "/#testimonials",
+    targetId: "testimonials",
     navbar: true,
     footer: true,
   },
   faq: {
-    type: "page",
-    href: "/faq",
+    type: "section",
+    href: "/#faq",
+    targetId: "faq",
     navbar: true,
     footer: true,
   },
   contact: {
-    type: "section",
-    href: "/#contact",
-    targetId: "contact",
+    type: "page",
+    href: "/contact",
     navbar: true,
     footer: true,
   },
   blog: {
     type: "page",
     href: "/blog",
-    navbar: true,
+    navbar: false,
     footer: true,
   },
   news: {
     type: "page",
     href: "/news",
-    navbar: true,
+    navbar: false,
     footer: true,
   },
   consultation: {
     type: "page",
     href: "/consultation",
-    navbar: true,
+    navbar: false,
     footer: true,
   },
 });
+
 
 const defaultSectionByKey = Object.fromEntries(
   homepageSectionDefinitions.map((section) => [section.key, section]),
@@ -225,18 +242,6 @@ function createPublicNavigationItems(settingsSections) {
   );
 }
 
-function sortByNavigationOrder(firstItem, secondItem) {
-  const orderDifference = firstItem.navigationOrder - secondItem.navigationOrder;
-
-  if (orderDifference !== 0) {
-    return orderDifference;
-  }
-
-  return (
-    (defaultSectionByKey[firstItem.key]?.navigationOrder || 0) -
-    (defaultSectionByKey[secondItem.key]?.navigationOrder || 0)
-  );
-}
 
 function createPinnedNavigationLayout(
   items,
@@ -282,6 +287,19 @@ function createPinnedNavigationLayout(
   };
 }
 
+function sortByNavigationOrder(firstItem, secondItem) {
+  const orderDifference =
+    firstItem.navigationOrder - secondItem.navigationOrder;
+
+  if (orderDifference !== 0) {
+    return orderDifference;
+  }
+
+  return (
+    (defaultSectionByKey[firstItem.key]?.navigationOrder || 0) -
+    (defaultSectionByKey[secondItem.key]?.navigationOrder || 0)
+  );
+}
 function sortByFooterNavigationOrder(firstItem, secondItem) {
   const orderDifference =
     firstItem.footerNavigationOrder - secondItem.footerNavigationOrder;
@@ -301,6 +319,7 @@ function getNavbarNavigationItems(settingsSections) {
     .filter(
       (item) =>
         item.navbarCapable &&
+        (item.type === "section" || item.key === "contact") &&
         item.isNavigationVisible !== false &&
         item.isDestinationAvailable !== false,
     )

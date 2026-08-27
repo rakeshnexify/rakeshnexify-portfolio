@@ -453,67 +453,71 @@ function AdminTestimonialsPage() {
   const canDeleteTestimonials = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+    <main className="admin-testimonials-compact-page min-h-screen">
+      <section className="mx-auto w-full max-w-[1560px] px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="admin-testimonials-eyebrow text-[10px] font-bold uppercase tracking-[0.16em]">
               Social Proof
             </p>
 
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">
               Testimonials
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Manage client reviews, ratings, profile media, related Projects,
-              publication state and display priority.
+            <p className="mt-1 max-w-2xl text-xs leading-5">
+              Manage client reviews, ratings, visibility and featured priority.
             </p>
           </div>
 
-          <Link
-            to="/admin/testimonials/new"
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-          >
-            Add Testimonial
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="admin-testimonials-count-pill rounded-lg px-3 py-2 text-[11px] font-semibold">
+              {isLoading
+                ? "Loading..."
+                : `${resultCount} Testimonial${resultCount === 1 ? "" : "s"}`}
+            </span>
+
+            <Link
+              className="admin-testimonials-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+              to="/admin/testimonials/new"
+            >
+              Add Testimonial
+            </Link>
+          </div>
         </header>
 
         <form
+          className="admin-testimonials-toolbar mt-4 rounded-xl p-3"
           onSubmit={handleFilterSubmit}
-          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(250px,1.5fr)_150px_150px_auto]">
             <div>
-              <label htmlFor="testimonial-search" className={labelClassName}>
-                Search
+              <label className="sr-only" htmlFor="testimonial-search">
+                Search Testimonials
               </label>
 
               <input
+                className={`${inputClassName} admin-testimonials-input !mt-0 !min-h-10 !rounded-lg`}
                 id="testimonial-search"
                 name="search"
+                onChange={handleFilterChange}
+                placeholder="Search client, company or review..."
                 type="search"
                 value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Client, company or review"
-                className={inputClassName}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="testimonial-rating-filter"
-                className={labelClassName}
-              >
+              <label className="sr-only" htmlFor="testimonial-rating-filter">
                 Rating
               </label>
 
               <select
+                className={`${inputClassName} admin-testimonials-input !mt-0 !min-h-10 !rounded-lg`}
                 id="testimonial-rating-filter"
                 name="rating"
-                value={formFilters.rating}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.rating}
               >
                 <option value="">All ratings</option>
                 <option value="5">5 stars</option>
@@ -525,19 +529,16 @@ function AdminTestimonialsPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="testimonial-visibility-filter"
-                className={labelClassName}
-              >
+              <label className="sr-only" htmlFor="testimonial-visibility-filter">
                 Visibility
               </label>
 
               <select
+                className={`${inputClassName} admin-testimonials-input !mt-0 !min-h-10 !rounded-lg`}
                 id="testimonial-visibility-filter"
                 name="visibility"
-                value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.visibility}
               >
                 <option value="all">All visibility</option>
                 <option value="visible">Visible</option>
@@ -545,327 +546,315 @@ function AdminTestimonialsPage() {
               </select>
             </div>
 
-            <div>
-              <label
-                htmlFor="testimonial-featured-filter"
-                className={labelClassName}
+            <div className="flex gap-2">
+              <button
+                className="admin-testimonials-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+                disabled={isLoading || Boolean(actionTestimonialId)}
+                type="submit"
               >
-                Display type
-              </label>
+                Apply
+              </button>
 
-              <select
-                id="testimonial-featured-filter"
-                name="featured"
-                value={formFilters.featured}
-                onChange={handleFilterChange}
-                className={inputClassName}
+              <button
+                aria-label="Clear Testimonial filters"
+                className="admin-testimonials-secondary-button inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-xs font-semibold"
+                disabled={isLoading || Boolean(actionTestimonialId)}
+                onClick={handleClearFilters}
+                title="Clear filters"
+                type="button"
               >
-                <option value="all">All records</option>
-                <option value="featured">Featured</option>
-                <option value="standard">Standard</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="testimonial-project-filter"
-                className={labelClassName}
-              >
-                Related Project
-              </label>
-
-              <select
-                id="testimonial-project-filter"
-                name="relatedProject"
-                value={formFilters.relatedProject}
-                onChange={handleFilterChange}
-                disabled={Boolean(projectOptionsError)}
-                className={inputClassName}
-              >
-                <option value="">All Projects</option>
-
-                {projectOptions.map((project) => (
-                  <option key={project._id} value={project._id}>
-                    {getProjectLabel(project)}
-                  </option>
-                ))}
-              </select>
+                Clear
+              </button>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              disabled={isLoading || Boolean(actionTestimonialId)}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-            >
-              Clear
-            </button>
+          <details className="admin-testimonials-more mt-2 rounded-lg">
+            <summary className="cursor-pointer list-none px-3 py-2 text-[11px] font-semibold">
+              More Filters
+            </summary>
 
-            <button
-              type="submit"
-              disabled={isLoading || Boolean(actionTestimonialId)}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-            >
-              Apply Filters
-            </button>
-          </div>
+            <div className="grid gap-3 border-t px-3 py-3 md:grid-cols-2">
+              <div>
+                <label
+                  className={`${labelClassName} !text-[10px]`}
+                  htmlFor="testimonial-featured-filter"
+                >
+                  Featured
+                </label>
 
-          {projectOptionsError && (
+                <select
+                  className={`${inputClassName} admin-testimonials-input !mt-1.5 !min-h-10 !rounded-lg`}
+                  id="testimonial-featured-filter"
+                  name="featured"
+                  onChange={handleFilterChange}
+                  value={formFilters.featured}
+                >
+                  <option value="all">All records</option>
+                  <option value="featured">Featured</option>
+                  <option value="standard">Standard</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  className={`${labelClassName} !text-[10px]`}
+                  htmlFor="testimonial-project-filter"
+                >
+                  Related Project
+                </label>
+
+                <select
+                  className={`${inputClassName} admin-testimonials-input !mt-1.5 !min-h-10 !rounded-lg`}
+                  disabled={Boolean(projectOptionsError)}
+                  id="testimonial-project-filter"
+                  name="relatedProject"
+                  onChange={handleFilterChange}
+                  value={formFilters.relatedProject}
+                >
+                  <option value="">All Projects</option>
+
+                  {projectOptions.map((project) => (
+                    <option key={project._id} value={project._id}>
+                      {getProjectLabel(project)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </details>
+
+          {projectOptionsError ? (
             <div
+              className="admin-testimonials-warning mt-2 rounded-lg px-3 py-2 text-[11px] font-semibold"
               role="status"
-              className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800"
             >
               Related Project filter unavailable: {projectOptionsError}
             </div>
-          )}
+          ) : null}
         </form>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-800">
-              {isLoading
-                ? "Loading Testimonials..."
-                : `${resultCount} Testimonial${resultCount === 1 ? "" : "s"}`}
-            </p>
-
-            {!isLoading && (
-              <p className="mt-1 text-xs text-slate-500">
-                Showing the records matching the applied filters.
-              </p>
-            )}
-          </div>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold">
+            {isLoading
+              ? "Loading Testimonials..."
+              : `${resultCount} result${resultCount === 1 ? "" : "s"}`}
+          </p>
 
           <button
-            type="button"
-            onClick={handleRefresh}
+            className="admin-testimonials-secondary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[11px] font-semibold"
             disabled={isLoading || Boolean(actionTestimonialId)}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+            onClick={handleRefresh}
+            type="button"
           >
             Refresh
           </button>
         </div>
 
         <div aria-live="polite">
-          {successMessage && (
+          {successMessage ? (
             <div
+              className="admin-testimonials-success mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
               role="status"
-              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
             >
               {successMessage}
             </div>
-          )}
+          ) : null}
 
-          {error && (
+          {error ? (
             <div
+              className="admin-testimonials-error mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
               role="alert"
-              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
             >
               {error}
             </div>
-          )}
+          ) : null}
         </div>
 
-        {isLoading && (
+        {isLoading ? (
           <div
-            role="status"
             aria-live="polite"
-            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+            className="mt-3 space-y-2"
+            role="status"
           >
             <span className="sr-only">Loading Testimonials...</span>
 
-            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
+            {[1, 2, 3, 4, 5].map((placeholder) => (
               <div
+                className="admin-testimonials-skeleton h-[94px] rounded-xl motion-reduce:animate-none"
                 key={placeholder}
-                className="h-[28rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && !error && testimonials.length === 0 && (
-          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
-            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-brand-50 text-xl text-brand-600">
-              ★
-            </div>
+        {!isLoading && !error && testimonials.length === 0 ? (
+          <div className="admin-testimonials-empty mt-3 rounded-xl px-5 py-9 text-center">
+            <h2 className="text-base font-bold">No Testimonials found</h2>
 
-            <h2 className="mt-4 text-base font-bold text-slate-950">
-              No Testimonials found
-            </h2>
-
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-1 text-xs">
               Change the filters or create the first Testimonial.
             </p>
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && testimonials.length > 0 && (
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {!isLoading && testimonials.length > 0 ? (
+          <div className="mt-3 space-y-2">
             {testimonials.map((testimonial) => {
               const isActionPending =
                 actionTestimonialId === testimonial._id;
 
               return (
                 <article
+                  className="admin-testimonials-row min-w-0 rounded-xl"
                   key={testimonial._id}
-                  className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex min-w-0 items-start gap-3">
-                      <div className="relative grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-brand-100 text-sm font-bold text-brand-700">
-                        <span>{createInitials(testimonial.clientName)}</span>
+                  <div className="grid min-w-0 grid-cols-[44px_minmax(0,1fr)] gap-3 p-3 md:grid-cols-[44px_minmax(0,1fr)_auto] md:items-center">
+                    <div className="admin-testimonials-avatar relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl text-[11px] font-bold">
+                      <span>{createInitials(testimonial.clientName)}</span>
 
-                        {testimonial.profileImageUrl && (
-                          <img
-                            src={testimonial.profileImageUrl}
-                            alt={
-                              testimonial.profileImageAlt ||
-                              `${testimonial.clientName} profile`
-                            }
-                            className="absolute inset-0 size-full object-cover"
-                            onError={(event) => {
-                              event.currentTarget.hidden = true;
-                            }}
-                          />
-                        )}
-                      </div>
+                      {testimonial.profileImageUrl ? (
+                        <img
+                          alt={
+                            testimonial.profileImageAlt ||
+                            `${testimonial.clientName} profile`
+                          }
+                          className="absolute inset-0 size-full object-cover"
+                          onError={(event) => {
+                            event.currentTarget.hidden = true;
+                          }}
+                          src={testimonial.profileImageUrl}
+                        />
+                      ) : null}
+                    </div>
 
-                      <div className="min-w-0">
-                        <h2 className="break-words text-lg font-bold text-slate-950">
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                        <h2 className="mr-1 truncate text-sm font-bold">
                           {testimonial.clientName}
                         </h2>
 
-                        {(testimonial.clientRole ||
-                          testimonial.companyName) && (
-                          <p className="mt-1 break-words text-sm text-slate-500">
-                            {[
-                              testimonial.clientRole,
-                              testimonial.companyName,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex shrink-0 flex-col items-end gap-2">
-                      {testimonial.isFeatured && (
-                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
-                          Featured
+                        <span
+                          className={`admin-testimonials-badge rounded-md px-2 py-1 text-[9px] font-bold ${
+                            testimonial.isVisible ? "is-visible" : "is-hidden"
+                          }`}
+                        >
+                          {testimonial.isVisible ? "Visible" : "Hidden"}
                         </span>
-                      )}
 
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                          testimonial.isVisible
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
+                        {testimonial.isFeatured ? (
+                          <span className="admin-testimonials-badge is-featured rounded-md px-2 py-1 text-[9px] font-bold">
+                            Featured
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {(testimonial.clientRole || testimonial.companyName) ? (
+                        <p className="mt-0.5 truncate text-[10px]">
+                          {[testimonial.clientRole, testimonial.companyName]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                      ) : null}
+
+                      <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
+                        <span
+                          aria-label={`${testimonial.rating} out of 5 stars`}
+                          className="admin-testimonials-rating tracking-[0.08em]"
+                        >
+                          {"★".repeat(testimonial.rating)}
+                          <span aria-hidden="true">
+                            {"★".repeat(5 - testimonial.rating)}
+                          </span>
+                        </span>
+
+                        <span className="max-w-56 truncate">
+                          {getRelatedProjectLabel(testimonial.relatedProject)}
+                        </span>
+
+                        <span>Order {testimonial.order ?? 0}</span>
+
+                        <span>
+                          Updated {formatUpdatedDate(testimonial.updatedAt)}
+                        </span>
+                      </div>
+
+                      <p className="mt-1 line-clamp-1 text-[10px] leading-4">
+                        “{testimonial.reviewText}”
+                      </p>
+                    </div>
+
+                    <div className="col-span-2 flex shrink-0 items-center justify-end gap-2 md:col-span-1">
+                      <Link
+                        className="admin-testimonials-primary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[10px] font-bold"
+                        to={`/admin/testimonials/${testimonial._id}/edit`}
                       >
-                        {testimonial.isVisible ? "Visible" : "Hidden"}
-                      </span>
+                        Edit
+                      </Link>
+
+                      <details className="admin-testimonials-actions relative">
+                        <summary
+                          aria-label={`More actions for ${testimonial.clientName}`}
+                          className="admin-testimonials-secondary-button inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-base font-bold"
+                          title="More actions"
+                        >
+                          …
+                        </summary>
+
+                        <div className="admin-testimonials-action-menu absolute right-0 top-[calc(100%+0.4rem)] z-30 w-44 rounded-xl p-1.5">
+                          <button
+                            className="admin-testimonials-menu-action"
+                            disabled={isLoading || Boolean(actionTestimonialId)}
+                            onClick={() => handleToggleVisibility(testimonial)}
+                            type="button"
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : testimonial.isVisible
+                                ? "Hide from public"
+                                : "Show on public"}
+                          </button>
+
+                          <button
+                            className="admin-testimonials-menu-action"
+                            disabled={isLoading || Boolean(actionTestimonialId)}
+                            onClick={() => handleToggleFeatured(testimonial)}
+                            type="button"
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : testimonial.isFeatured
+                                ? "Make standard"
+                                : "Make featured"}
+                          </button>
+
+                          <div className="admin-testimonials-menu-divider my-1" />
+
+                          <button
+                            className="admin-testimonials-menu-action is-danger"
+                            disabled={
+                              isLoading ||
+                              Boolean(actionTestimonialId) ||
+                              !canDeleteTestimonials
+                            }
+                            onClick={() => handleDeleteTestimonial(testimonial)}
+                            title={
+                              canDeleteTestimonials
+                                ? "Permanently delete Testimonial"
+                                : "Your role cannot permanently delete Testimonials"
+                            }
+                            type="button"
+                          >
+                            {isActionPending ? "Working..." : "Delete"}
+                          </button>
+                        </div>
+                      </details>
                     </div>
-                  </div>
-
-                  <p
-                    className="mt-4 text-sm tracking-[0.08em] text-amber-500"
-                    aria-label={`${testimonial.rating} out of 5 stars`}
-                  >
-                    {"★".repeat(testimonial.rating)}
-                    <span aria-hidden="true" className="text-slate-200">
-                      {"★".repeat(5 - testimonial.rating)}
-                    </span>
-                  </p>
-
-                  <p className="mt-4 line-clamp-5 break-words text-sm leading-6 text-slate-600">
-                    “{testimonial.reviewText}”
-                  </p>
-
-                  <dl className="mt-5 divide-y divide-slate-100 border-y border-slate-100 text-sm">
-                    <div className="flex items-start justify-between gap-4 py-3">
-                      <dt className="text-slate-500">Related Project</dt>
-
-                      <dd className="max-w-[65%] break-words text-right font-semibold text-slate-800">
-                        {getRelatedProjectLabel(testimonial.relatedProject)}
-                      </dd>
-                    </div>
-
-                    <div className="flex items-start justify-between gap-4 py-3">
-                      <dt className="text-slate-500">Display order</dt>
-
-                      <dd className="font-semibold text-slate-800">
-                        {testimonial.order ?? 0}
-                      </dd>
-                    </div>
-
-                    <div className="flex items-start justify-between gap-4 py-3">
-                      <dt className="text-slate-500">Updated</dt>
-
-                      <dd className="font-semibold text-slate-700">
-                        {formatUpdatedDate(testimonial.updatedAt)}
-                      </dd>
-                    </div>
-                  </dl>
-
-                  <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
-                    <Link
-                      to={`/admin/testimonials/${testimonial._id}/edit`}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-                    >
-                      Edit
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleVisibility(testimonial)}
-                      disabled={isLoading || Boolean(actionTestimonialId)}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                    >
-                      {isActionPending
-                        ? "Working..."
-                        : testimonial.isVisible
-                          ? "Hide"
-                          : "Show"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleFeatured(testimonial)}
-                      disabled={isLoading || Boolean(actionTestimonialId)}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                    >
-                      {isActionPending
-                        ? "Working..."
-                        : testimonial.isFeatured
-                          ? "Make Standard"
-                          : "Make Featured"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteTestimonial(testimonial)}
-                      disabled={
-                        isLoading ||
-                        Boolean(actionTestimonialId) ||
-                        !canDeleteTestimonials
-                      }
-                      title={
-                        canDeleteTestimonials
-                          ? "Permanently delete Testimonial"
-                          : "Your role cannot permanently delete Testimonials"
-                      }
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                    >
-                      {isActionPending ? "Working..." : "Delete"}
-                    </button>
                   </div>
                 </article>
               );
             })}
           </div>
-        )}
+        ) : null}
       </section>
     </main>
   );

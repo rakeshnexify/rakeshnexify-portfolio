@@ -448,6 +448,21 @@ const contactSectionContentSchema = new mongoose.Schema(
       default: "",
     },
 
+    showServicesOnContactPage: {
+      type: Boolean,
+      default: true,
+    },
+
+    showFaqOnContactPage: {
+      type: Boolean,
+      default: true,
+    },
+
+    showTestimonialsOnContactPage: {
+      type: Boolean,
+      default: true,
+    },
+
     enquiryEyebrow: {
       type: String,
       trim: true,

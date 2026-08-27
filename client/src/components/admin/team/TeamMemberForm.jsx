@@ -10,10 +10,10 @@ import {
 } from "../../../utils/teamMemberForm";
 
 const inputClasses =
-  "mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm";
 
 const textareaClasses =
-  "mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm";
 
 function validateTeamMemberForm(formValues) {
   const errors = {};
@@ -59,7 +59,7 @@ function TeamMemberFieldError({ message }) {
     return null;
   }
 
-  return <p className="mt-2 text-sm font-medium text-red-600">{message}</p>;
+  return <p className="mt-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{message}</p>;
 }
 
 function TeamMemberForm({
@@ -252,37 +252,36 @@ function TeamMemberForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate className="rnx-admin-team-form-v468 space-y-2">
       {submitError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
         >
           {submitError}
         </div>
       )}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
             Identity
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
             Basic Team Member Information
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Add the member name, professional role, Team position and public
-            introduction.
+          <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+            Core identity, role and public profile copy.
           </p>
         </div>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2 xl:grid-cols-4">
           <div>
             <label
               htmlFor="team-member-name"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Full Name <span className="text-red-600">*</span>
             </label>
@@ -307,7 +306,7 @@ function TeamMemberForm({
           <div>
             <label
               htmlFor="team-member-slug"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               URL Slug <span className="text-red-600">*</span>
             </label>
@@ -325,7 +324,7 @@ function TeamMemberForm({
               className={inputClasses}
             />
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
               Automatically generated from the name until manually edited.
             </p>
 
@@ -335,7 +334,7 @@ function TeamMemberForm({
           <div>
             <label
               htmlFor="team-member-professional-role"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Professional Role <span className="text-red-600">*</span>
             </label>
@@ -359,7 +358,7 @@ function TeamMemberForm({
           <div>
             <label
               htmlFor="team-member-position"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Team Position
             </label>
@@ -383,7 +382,7 @@ function TeamMemberForm({
           <div className="md:col-span-2">
             <label
               htmlFor="team-member-short-introduction"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Short Introduction <span className="text-red-600">*</span>
             </label>
@@ -395,13 +394,13 @@ function TeamMemberForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               maxLength={400}
-              rows={4}
+              rows={2}
               placeholder="Write a concise introduction for Team cards and listing pages."
               aria-invalid={Boolean(getFieldError("shortIntroduction"))}
               className={textareaClasses}
             />
 
-            <div className="mt-2 flex justify-between gap-4 text-xs text-slate-500">
+            <div className="mt-0.5 flex justify-between gap-3 text-[10px] text-slate-500 dark:text-slate-400">
               <span>Minimum 10 characters</span>
 
               <span>
@@ -417,7 +416,7 @@ function TeamMemberForm({
           <div className="md:col-span-2">
             <label
               htmlFor="team-member-biography"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Full Biography
             </label>
@@ -429,13 +428,13 @@ function TeamMemberForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               maxLength={10000}
-              rows={10}
+              rows={2}
               placeholder="Add experience, responsibilities, expertise and professional background."
               aria-invalid={Boolean(getFieldError("biography"))}
               className={textareaClasses}
             />
 
-            <div className="mt-2 text-right text-xs text-slate-500">
+            <div className="mt-0.5 text-right text-[10px] text-slate-500 dark:text-slate-400">
               {String(formValues.biography || "").length}/10000
             </div>
 
@@ -444,18 +443,19 @@ function TeamMemberForm({
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <div className="space-y-2 xl:columns-2 xl:space-y-0 xl:[column-gap:0.5rem]">
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3 xl:mb-2 xl:break-inside-avoid">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
             Profile Media
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
             Profile and Cover Images
           </h2>
         </div>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2">
           <MediaField
             id="team-member-profile-image-url"
             name="profileImageUrl"
@@ -466,7 +466,7 @@ function TeamMemberForm({
             allowedTypes={["image", "svg"]}
             pickerTitle="Choose Team Member Profile Image"
             placeholder="https://example.com/profile.jpg"
-            helpText="Paste an external profile image URL or choose an image/SVG from the Media Library. Media alt text fills the profile alt field only when it is currently empty."
+            helpText="Paste a URL or choose the profile image from Media Library."
             error={getFieldError("profileImageUrl")}
             disabled={isSubmitting}
             onUnauthorized={onMediaUnauthorized}
@@ -475,7 +475,7 @@ function TeamMemberForm({
           <div>
             <label
               htmlFor="team-member-profile-image-alt"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Profile Image Alt Text
             </label>
@@ -507,7 +507,7 @@ function TeamMemberForm({
               allowedTypes={["image", "svg"]}
               pickerTitle="Choose Team Member Cover Image"
               placeholder="https://example.com/team-cover.jpg"
-              helpText="Paste an external cover image URL or choose an image/SVG from the Media Library."
+              helpText="Paste a URL or choose the cover image from Media Library."
               error={getFieldError("coverImageUrl")}
               disabled={isSubmitting}
               onUnauthorized={onMediaUnauthorized}
@@ -516,12 +516,12 @@ function TeamMemberForm({
 
           {formValues.profileImageUrl && (
             <div className="md:col-span-2">
-              <p className="text-sm font-semibold text-slate-700">
+              <p className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
                 Profile Preview
               </p>
 
-              <div className="mt-3 flex items-center gap-4 rounded-2xl bg-slate-50 p-4">
-                <div className="size-24 overflow-hidden rounded-2xl border border-slate-200 bg-slate-200">
+              <div className="mt-1.5 flex items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+                <div className="size-11 overflow-hidden rounded-lg border border-slate-200 bg-slate-200 dark:border-slate-700 dark:bg-slate-800 sm:size-12">
                   <img
                     src={formValues.profileImageUrl}
                     alt={
@@ -533,11 +533,11 @@ function TeamMemberForm({
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate font-bold text-slate-950">
+                  <p className="truncate text-xs font-bold text-slate-950 dark:text-white">
                     {formValues.name || "Team Member"}
                   </p>
 
-                  <p className="mt-1 truncate text-sm text-brand-600">
+                  <p className="mt-0.5 truncate text-[10px] text-brand-600 dark:text-brand-300">
                     {formValues.professionalRole || "Professional role"}
                   </p>
                 </div>
@@ -547,27 +547,26 @@ function TeamMemberForm({
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3 xl:mb-2 xl:break-inside-avoid">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
             Expertise
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
             Skills and Development Tools
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Enter one skill or tool per line. Comma-separated values are also
-            supported.
+          <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+            One item per line; comma-separated values also work.
           </p>
         </div>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2">
           <div>
             <label
               htmlFor="team-member-skills"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Main Skills
             </label>
@@ -578,7 +577,7 @@ function TeamMemberForm({
               value={formValues.skills}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              rows={8}
+              rows={2}
               placeholder={`JavaScript
 React
 Node.js
@@ -587,8 +586,8 @@ MongoDB`}
               className={textareaClasses}
             />
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              These skills can appear on Team cards and member detail pages.
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+              Shown on Team cards and profile pages.
             </p>
 
             <TeamMemberFieldError message={getFieldError("skills")} />
@@ -597,7 +596,7 @@ MongoDB`}
           <div>
             <label
               htmlFor="team-member-tools"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Tools and Technologies
             </label>
@@ -608,7 +607,7 @@ MongoDB`}
               value={formValues.tools}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              rows={8}
+              rows={2}
               placeholder={`VS Code
 Git
 GitHub
@@ -618,8 +617,8 @@ Figma`}
               className={textareaClasses}
             />
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Add software, frameworks, platforms and professional tools.
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+              Frameworks, software and professional tools.
             </p>
 
             <TeamMemberFieldError message={getFieldError("tools")} />
@@ -627,26 +626,26 @@ Figma`}
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3 xl:mb-2 xl:break-inside-avoid">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
             Contact Information
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
             Contact and Portfolio Links
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Add only the contact details that may be used for this Team member.
+          <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+            Optional public contact and portfolio links.
           </p>
         </div>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2">
           <div>
             <label
               htmlFor="team-member-email"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Email Address
             </label>
@@ -671,7 +670,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-phone"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Phone Number
             </label>
@@ -696,7 +695,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-website-url"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Personal Website URL
             </label>
@@ -720,7 +719,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-portfolio-url"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Portfolio URL
             </label>
@@ -743,26 +742,26 @@ Figma`}
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3 xl:mb-2 xl:break-inside-avoid">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
             Social Profiles
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
             Professional and Social Links
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Use complete profile URLs beginning with https://.
+          <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+            Optional professional and social profile links.
           </p>
         </div>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2">
           <div>
             <label
               htmlFor="team-member-github-url"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               GitHub URL
             </label>
@@ -790,7 +789,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-linkedin-url"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               LinkedIn URL
             </label>
@@ -818,7 +817,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-facebook-url"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Facebook URL
             </label>
@@ -846,7 +845,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-instagram-url"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Instagram URL
             </label>
@@ -874,7 +873,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-youtube-url"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               YouTube URL
             </label>
@@ -902,7 +901,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-x-url"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               X Profile URL
             </label>
@@ -927,27 +926,26 @@ Figma`}
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3 xl:mb-2 xl:break-inside-avoid">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
             Portfolio Relationships
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
             Related Projects, Companies and Services
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Connect this Team member with the portfolio content they contribute
-            to. Hold Ctrl on Windows to select multiple items.
+          <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+            Link related portfolio records. Hold Ctrl to select multiple.
           </p>
         </div>
 
-        <div className="mt-7 grid gap-6 lg:grid-cols-3">
+        <div className="mt-3 grid gap-3 lg:grid-cols-3">
           <div>
             <label
               htmlFor="team-member-related-projects"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Related Projects
             </label>
@@ -956,12 +954,12 @@ Figma`}
               id="team-member-related-projects"
               name="relatedProjects"
               multiple
-              size={7}
+              size={2}
               value={formValues.relatedProjects}
               onChange={handleRelationshipChange}
               disabled={isSubmitting}
               aria-invalid={Boolean(getFieldError("relatedProjects"))}
-              className={`${inputClasses} py-3`}
+              className={`${inputClasses} py-1.5 sm:py-2`}
             >
               {projectOptions.map((project) => {
                 const projectId = project?._id || project?.id;
@@ -979,7 +977,7 @@ Figma`}
             </select>
 
             {projectOptions.length === 0 && (
-              <p className="mt-2 text-xs leading-5 text-slate-500">
+              <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
                 No project options are currently available.
               </p>
             )}
@@ -990,7 +988,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-related-companies"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Related Companies
             </label>
@@ -999,12 +997,12 @@ Figma`}
               id="team-member-related-companies"
               name="relatedCompanies"
               multiple
-              size={7}
+              size={2}
               value={formValues.relatedCompanies}
               onChange={handleRelationshipChange}
               disabled={isSubmitting}
               aria-invalid={Boolean(getFieldError("relatedCompanies"))}
-              className={`${inputClasses} py-3`}
+              className={`${inputClasses} py-1.5 sm:py-2`}
             >
               {companyOptions.map((company) => {
                 const companyId = company?._id || company?.id;
@@ -1022,7 +1020,7 @@ Figma`}
             </select>
 
             {companyOptions.length === 0 && (
-              <p className="mt-2 text-xs leading-5 text-slate-500">
+              <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
                 No company options are currently available.
               </p>
             )}
@@ -1033,7 +1031,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-related-services"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Related Services
             </label>
@@ -1042,12 +1040,12 @@ Figma`}
               id="team-member-related-services"
               name="relatedServices"
               multiple
-              size={7}
+              size={2}
               value={formValues.relatedServices}
               onChange={handleRelationshipChange}
               disabled={isSubmitting}
               aria-invalid={Boolean(getFieldError("relatedServices"))}
-              className={`${inputClasses} py-3`}
+              className={`${inputClasses} py-1.5 sm:py-2`}
             >
               {serviceOptions.map((service) => {
                 const serviceId = service?._id || service?.id;
@@ -1065,7 +1063,7 @@ Figma`}
             </select>
 
             {serviceOptions.length === 0 && (
-              <p className="mt-2 text-xs leading-5 text-slate-500">
+              <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
                 No service options are currently available.
               </p>
             )}
@@ -1075,26 +1073,26 @@ Figma`}
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3 xl:mb-2 xl:break-inside-avoid">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
             Search Engine Optimisation
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
             Team Member SEO
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Configure metadata for the public Team member detail page.
+          <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+            Optional search and social-sharing metadata.
           </p>
         </div>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2">
           <div className="md:col-span-2">
             <label
               htmlFor="team-member-seo-title"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               SEO Title
             </label>
@@ -1112,7 +1110,7 @@ Figma`}
               className={inputClasses}
             />
 
-            <div className="mt-2 flex justify-between gap-4 text-xs text-slate-500">
+            <div className="mt-0.5 flex justify-between gap-3 text-[10px] text-slate-500 dark:text-slate-400">
               <span>Recommended maximum: 60–70 characters</span>
 
               <span>{String(formValues.seoTitle || "").length}/70</span>
@@ -1126,7 +1124,7 @@ Figma`}
           <div className="md:col-span-2">
             <label
               htmlFor="team-member-seo-description"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               SEO Description
             </label>
@@ -1138,7 +1136,7 @@ Figma`}
               onChange={handleInputChange}
               disabled={isSubmitting}
               maxLength={180}
-              rows={4}
+              rows={2}
               placeholder="Write a concise description of this Team member and their expertise."
               aria-invalid={Boolean(
                 getFieldError("seoDescription", "seo.description"),
@@ -1146,7 +1144,7 @@ Figma`}
               className={textareaClasses}
             />
 
-            <div className="mt-2 flex justify-between gap-4 text-xs text-slate-500">
+            <div className="mt-0.5 flex justify-between gap-3 text-[10px] text-slate-500 dark:text-slate-400">
               <span>Recommended maximum: 150–180 characters</span>
 
               <span>{String(formValues.seoDescription || "").length}/180</span>
@@ -1160,7 +1158,7 @@ Figma`}
           <div>
             <label
               htmlFor="team-member-seo-keywords"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               SEO Keywords
             </label>
@@ -1171,7 +1169,7 @@ Figma`}
               value={formValues.seoKeywords}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              rows={6}
+              rows={2}
               placeholder={`mern developer
 react developer
 node.js developer`}
@@ -1181,7 +1179,7 @@ node.js developer`}
               className={textareaClasses}
             />
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
               Enter one keyword per line or separate keywords with commas.
             </p>
 
@@ -1207,23 +1205,24 @@ node.js developer`}
           />
         </div>
       </section>
+      </div>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
         <div>
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
             Publishing Controls
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
             Status, Availability and Visibility
           </h2>
         </div>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2 xl:grid-cols-4">
           <div>
             <label
               htmlFor="team-member-status"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Member Status
             </label>
@@ -1248,7 +1247,7 @@ node.js developer`}
           <div>
             <label
               htmlFor="team-member-availability-status"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Availability Status
             </label>
@@ -1275,7 +1274,7 @@ node.js developer`}
           <div>
             <label
               htmlFor="team-member-order"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Display Order
             </label>
@@ -1296,44 +1295,44 @@ node.js developer`}
             <TeamMemberFieldError message={getFieldError("order")} />
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <label className="flex cursor-pointer items-start gap-3">
+          <div className="space-y-1.5 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+            <label className="flex cursor-pointer items-start gap-2.5">
               <input
                 name="isVisible"
                 type="checkbox"
                 checked={formValues.isVisible}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
               />
 
               <span>
-                <span className="block font-semibold text-slate-800">
+                <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
                   Publicly Visible
                 </span>
 
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
+                <span className="mt-0.5 block text-[10px] leading-4 text-slate-500 dark:text-slate-400">
                   Display this member on public Team pages and sections.
                 </span>
               </span>
             </label>
 
-            <label className="flex cursor-pointer items-start gap-3">
+            <label className="flex cursor-pointer items-start gap-2.5">
               <input
                 name="isFeatured"
                 type="checkbox"
                 checked={formValues.isFeatured}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
               />
 
               <span>
-                <span className="block font-semibold text-slate-800">
+                <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
                   Featured Team Member
                 </span>
 
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
+                <span className="mt-0.5 block text-[10px] leading-4 text-slate-500 dark:text-slate-400">
                   Prioritise this profile in featured Team displays.
                 </span>
               </span>
@@ -1342,10 +1341,10 @@ node.js developer`}
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-end">
+      <div className="flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-end sm:p-3">
         <Link
           to="/admin/team"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
         >
           Cancel
         </Link>
@@ -1353,7 +1352,7 @@ node.js developer`}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-7 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-xs font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? "Saving Team Member..." : submitLabel}
         </button>

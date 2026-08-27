@@ -156,7 +156,6 @@ function ContactForm({ submitLabel = "Send Message" }) {
       phone: cleanString(formData.get("phone")),
       subject: cleanString(formData.get("subject")),
       message: cleanString(formData.get("message")),
-      website: cleanString(formData.get("website")),
     };
 
     const validationErrors = validateMessageData(messageData);
@@ -210,17 +209,6 @@ function ContactForm({ submitLabel = "Send Message" }) {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} noValidate className={styles.form}>
-      <div className={styles.honeypot} aria-hidden="true">
-        <label htmlFor="contact-website">Leave this field empty</label>
-        <input
-          id="contact-website"
-          name="website"
-          type="text"
-          tabIndex={-1}
-          autoComplete="off"
-          inputMode="none"
-        />
-      </div>
 
       <div className={styles.grid}>
         <fieldset className={styles.fieldWrap}>

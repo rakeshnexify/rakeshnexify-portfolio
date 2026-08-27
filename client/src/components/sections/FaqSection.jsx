@@ -7,6 +7,7 @@ import Container from "../layout/Container";
 import Section from "../layout/Section";
 import PublicCTAButton from "../layout/PublicCTAButton";
 const SITE_URL = "https://rakeshnexify.com";
+const COMPANY_FAQ_URL = "https://idomere.com/faq";
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -71,6 +72,19 @@ function isFaqPageDestination(value) {
   }
 }
 
+function resolveCompanyFaqUrl(value) {
+  const safeUrl = getSafePublicUrl(value, "");
+
+  if (
+    !safeUrl ||
+    isFaqPageDestination(safeUrl)
+  ) {
+    return COMPANY_FAQ_URL;
+  }
+
+  return safeUrl;
+}
+
 function FaqSection() {
   const { faqs, isLoading, error, refreshFaqs } = useFaqs({ featured: true });
   const { settings } = useSiteSettings();
@@ -95,8 +109,9 @@ function FaqSection() {
   const ctaLabel =
     String(ctaButton.label || "").trim();
 
-  const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href, "");
+  const ctaUrl = resolveCompanyFaqUrl(
+    ctaButton.url || ctaButton.href,
+  );
 
   const faqPublicationSection = useMemo(
     () =>

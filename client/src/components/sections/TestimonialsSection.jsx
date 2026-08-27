@@ -19,6 +19,8 @@ import "../testimonials/HomeTestimonialCard.module.css";
 import styles from "./TestimonialsSection.module.css";
 
 const SITE_URL = "https://rakeshnexify.com";
+const COMPANY_TESTIMONIALS_URL =
+  "https://idomere.com/testimonials";
 
 function cleanText(value) {
   return String(value ?? "").trim();
@@ -104,6 +106,19 @@ function isTestimonialsPageDestination(value) {
   }
 }
 
+function resolveCompanyTestimonialsUrl(value) {
+  const safeUrl = getSafePublicUrl(value, "");
+
+  if (
+    !safeUrl ||
+    isTestimonialsPageDestination(safeUrl)
+  ) {
+    return COMPANY_TESTIMONIALS_URL;
+  }
+
+  return safeUrl;
+}
+
 function ArrowIcon({ direction }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 20 20" fill="none">
@@ -172,8 +187,9 @@ function TestimonialsSection() {
   const ctaLabel =
     String(ctaButton.label || "").trim();
 
-  const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href, "");
+  const ctaUrl = resolveCompanyTestimonialsUrl(
+    ctaButton.url || ctaButton.href,
+  );
 
   const testimonialsPublicationSection = useMemo(() => {
     return mergeHomepageSections(settings?.sections).find(

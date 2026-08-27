@@ -28,24 +28,18 @@ const statusLabels = {
 };
 
 const statusClasses = {
-  new: "border-blue-200 bg-blue-50 text-blue-700",
-  read: "border-amber-200 bg-amber-50 text-amber-700",
-  replied: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  archived: "border-slate-300 bg-slate-100 text-slate-600",
+  new: "border-blue-500/25 bg-blue-500/10 text-blue-300",
+  read: "border-amber-500/25 bg-amber-500/10 text-amber-300",
+  replied: "border-emerald-500/25 bg-emerald-500/10 text-emerald-300",
+  archived: "border-slate-600 bg-slate-800 text-slate-400",
 };
 
-const statusCardClasses = {
-  new: "border-blue-200 bg-blue-50 text-blue-800",
-  read: "border-amber-200 bg-amber-50 text-amber-800",
-  replied: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  archived: "border-slate-300 bg-slate-100 text-slate-700",
-};
 
 const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
+  "text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400";
 
 const inputClassName =
-  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 motion-reduce:transition-none";
+  "mt-1.5 min-h-10 w-full rounded-lg border border-[#223147] bg-[#0a1422] px-3 text-xs text-slate-200 outline-none transition-colors placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none";
 
 function createApiFilters(filters) {
   return {
@@ -208,6 +202,28 @@ function AdminContactMessagesPage() {
       controller.abort();
     };
   }, [accessToken, apiFilters, logout, navigate, refreshKey]);
+
+  useEffect(() => {
+    function refreshWhenTabBecomesVisible() {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+
+      setRefreshKey((currentKey) => currentKey + 1);
+    }
+
+    document.addEventListener(
+      "visibilitychange",
+      refreshWhenTabBecomesVisible,
+    );
+
+    return () => {
+      document.removeEventListener(
+        "visibilitychange",
+        refreshWhenTabBecomesVisible,
+      );
+    };
+  }, []);
 
   function handleAuthenticationError(requestError) {
     if (requestError?.status !== 401) {
@@ -528,42 +544,61 @@ function AdminContactMessagesPage() {
   const currentPage = Number(appliedFilters.page) || 1;
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <header>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-            Enquiry Management
-          </p>
+    <main className="min-h-screen bg-[#08111e] text-slate-200">
+      <section className="mx-auto w-full max-w-[1640px] px-3 py-4 sm:px-5 lg:px-6">
+        <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-blue-400">
+              Enquiries
+            </p>
 
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-            Contact Messages
-          </h1>
+            <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-50 sm:text-2xl">
+              Contact Messages
+            </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            Review incoming enquiries, manage their progress, keep private
-            follow-up notes and convert qualified conversations into CRM Leads.
-          </p>
+            <p className="mt-0.5 text-[11px] leading-4 text-slate-400">
+              High-volume inbox for enquiries, follow-ups and Lead conversion.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="rounded-md border border-[#1d2b3d] bg-[#0c1624] px-2.5 py-1.5 text-[10px] font-semibold text-slate-400">
+              {totalMessages} total
+            </span>
+
+            <button
+              className="inline-flex min-h-8 items-center justify-center rounded-md border border-[#27384e] bg-[#101c2c] px-2.5 text-[10px] font-semibold text-slate-300 transition hover:border-[#38506d] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading}
+              onClick={handleRefresh}
+              type="button"
+            >
+              {isLoading ? "..." : "Refresh"}
+            </button>
+          </div>
         </header>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div
+          aria-label="Contact message status filters"
+          className="mt-3 flex flex-wrap gap-1.5"
+        >
           {Object.keys(statusLabels).map((status) => {
             const isActive = appliedFilters.status === status;
 
             return (
               <button
-                key={status}
-                type="button"
-                onClick={() => handleStatusCardClick(status)}
                 aria-pressed={isActive}
-                className={`rounded-2xl border p-4 text-left transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none ${
-                  statusCardClasses[status]
-                } ${isActive ? "ring-2 ring-brand-500 ring-offset-2" : ""}`}
+                className={`inline-flex min-h-7 items-center gap-1.5 rounded-md border px-2 text-[9px] font-bold transition ${
+                  isActive
+                    ? "border-blue-500/50 bg-blue-500/15 text-blue-200"
+                    : "border-[#26364b] bg-[#0c1624] text-slate-400 hover:border-[#38506d] hover:text-slate-200"
+                }`}
+                key={status}
+                onClick={() => handleStatusCardClick(status)}
+                type="button"
               >
-                <span className="text-xs font-bold uppercase tracking-[0.12em]">
-                  {statusLabels[status]}
-                </span>
+                <span>{statusLabels[status]}</span>
 
-                <span className="mt-2 block text-2xl font-bold">
+                <span className="rnx-admin-status-count rounded px-1.5 py-0.5 tabular-nums">
                   {statusCounts[status] || 0}
                 </span>
               </button>
@@ -572,43 +607,37 @@ function AdminContactMessagesPage() {
         </div>
 
         <form
+          className="mt-3 rounded-lg border border-[#1d2b3d] bg-[#0c1624] p-2.5"
           onSubmit={handleFilterSubmit}
-          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(300px,1.7fr)_150px_135px_auto]">
             <div>
-              <label
-                htmlFor="contact-message-search"
-                className={labelClassName}
-              >
+              <label className="sr-only" htmlFor="contact-message-search">
                 Search
               </label>
 
               <input
+                className={`${inputClassName} !mt-0`}
                 id="contact-message-search"
                 name="search"
+                onChange={handleFilterChange}
+                placeholder="Search name, email, phone, subject or message..."
                 type="search"
                 value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Name, email, phone, subject or message"
-                className={inputClassName}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="contact-status-filter"
-                className={labelClassName}
-              >
+              <label className="sr-only" htmlFor="contact-status-filter">
                 Status
               </label>
 
               <select
+                className={`${inputClassName} !mt-0`}
                 id="contact-status-filter"
                 name="status"
-                value={formFilters.status}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.status}
               >
                 <option value="">All statuses</option>
                 <option value="new">New</option>
@@ -619,184 +648,182 @@ function AdminContactMessagesPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="contact-service-filter"
-                className={labelClassName}
-              >
-                Service
-              </label>
-
-              <input
-                id="contact-service-filter"
-                name="service"
-                type="text"
-                value={formFilters.service}
-                onChange={handleFilterChange}
-                placeholder="Frontend Development"
-                className={inputClassName}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="contact-source-filter"
-                className={labelClassName}
-              >
-                Source
-              </label>
-
-              <input
-                id="contact-source-filter"
-                name="source"
-                type="text"
-                value={formFilters.source}
-                onChange={handleFilterChange}
-                placeholder="portfolio-website"
-                className={inputClassName}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="contact-sort-filter" className={labelClassName}>
-                Sort order
-              </label>
-
-              <select
-                id="contact-sort-filter"
-                name="sort"
-                value={formFilters.sort}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="newest">Newest first</option>
-                <option value="oldest">Oldest first</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="contact-limit-filter" className={labelClassName}>
+              <label className="sr-only" htmlFor="contact-limit-filter">
                 Per page
               </label>
 
               <select
+                className={`${inputClassName} !mt-0`}
                 id="contact-limit-filter"
                 name="limit"
-                value={formFilters.limit}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.limit}
               >
-                <option value="10">10 messages</option>
-                <option value="20">20 messages</option>
-                <option value="50">50 messages</option>
-                <option value="100">100 messages</option>
+                <option value="10">10 / page</option>
+                <option value="20">20 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
               </select>
+            </div>
+
+            <div className="flex gap-1.5">
+              <button
+                className="inline-flex min-h-10 items-center justify-center rounded-lg border border-blue-500 bg-blue-600 px-3.5 text-[10px] font-bold text-white transition hover:bg-blue-500"
+                type="submit"
+              >
+                Apply
+              </button>
+
+              <button
+                className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[#27384e] bg-[#101c2c] px-3 text-[10px] font-semibold text-slate-300 transition hover:border-[#38506d] hover:text-white"
+                onClick={handleClearFilters}
+                type="button"
+              >
+                Clear
+              </button>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-            >
-              Clear
-            </button>
+          <details className="mt-1.5 rounded-md border border-[#1d2b3d] bg-[#0a1422]">
+            <summary className="cursor-pointer list-none px-2.5 py-1.5 text-[9px] font-semibold text-slate-500">
+              More Filters
+            </summary>
 
-            <button
-              type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-            >
-              Apply Filters
-            </button>
-          </div>
+            <div className="grid gap-2 border-t border-[#1d2b3d] px-2.5 py-2.5 md:grid-cols-3">
+              <div>
+                <label
+                  className={labelClassName}
+                  htmlFor="contact-service-filter"
+                >
+                  Service
+                </label>
+
+                <input
+                  className={inputClassName}
+                  id="contact-service-filter"
+                  name="service"
+                  onChange={handleFilterChange}
+                  placeholder="Service"
+                  type="text"
+                  value={formFilters.service}
+                />
+              </div>
+
+              <div>
+                <label
+                  className={labelClassName}
+                  htmlFor="contact-source-filter"
+                >
+                  Source
+                </label>
+
+                <input
+                  className={inputClassName}
+                  id="contact-source-filter"
+                  name="source"
+                  onChange={handleFilterChange}
+                  placeholder="portfolio-website"
+                  type="text"
+                  value={formFilters.source}
+                />
+              </div>
+
+              <div>
+                <label
+                  className={labelClassName}
+                  htmlFor="contact-sort-filter"
+                >
+                  Sort
+                </label>
+
+                <select
+                  className={inputClassName}
+                  id="contact-sort-filter"
+                  name="sort"
+                  onChange={handleFilterChange}
+                  value={formFilters.sort}
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                </select>
+              </div>
+            </div>
+          </details>
         </form>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-800">
-              {isLoading
-                ? "Loading contact messages..."
-                : `${resultCount} message${resultCount === 1 ? "" : "s"} shown`}
-            </p>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[9px] font-semibold text-slate-500">
+            {isLoading
+              ? "Loading messages..."
+              : `${resultCount} shown · ${totalMessages} matching · ${currentPage}/${totalPages}`}
+          </p>
 
-            {!isLoading && (
-              <p className="mt-1 text-xs text-slate-500">
-                {totalMessages} matching result
-                {totalMessages === 1 ? "" : "s"} · Page {currentPage} of{" "}
-                {totalPages}
-              </p>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
-          >
-            Refresh
-          </button>
+          {appliedFilters.status ? (
+            <span className="text-[9px] font-semibold text-blue-300">
+              {statusLabels[appliedFilters.status] || appliedFilters.status}
+            </span>
+          ) : null}
         </div>
 
         <div aria-live="polite">
-          {successMessage && (
+          {successMessage ? (
             <div
+              className="mt-2 rounded-md border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-2 text-[10px] font-semibold text-emerald-300"
               role="status"
-              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
             >
               {successMessage}
             </div>
-          )}
+          ) : null}
 
-          {error && (
+          {error ? (
             <div
+              className="mt-2 rounded-md border border-rose-500/20 bg-rose-950/20 px-2.5 py-2 text-[10px] text-rose-300"
               role="alert"
-              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
             >
-              <p className="font-medium leading-6">{error}</p>
+              {error}
 
               <button
-                type="button"
+                className="ml-2 font-bold underline underline-offset-2"
                 onClick={handleRefresh}
-                className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 motion-reduce:transition-none"
+                type="button"
               >
-                Try Again
+                Retry
               </button>
             </div>
-          )}
+          ) : null}
         </div>
 
-        {isLoading && (
+        {isLoading ? (
           <div
-            role="status"
             aria-live="polite"
-            className="mt-5 space-y-4"
+            className="mt-2 space-y-1"
+            role="status"
           >
             <span className="sr-only">Loading contact messages...</span>
 
-            {[1, 2, 3, 4].map((placeholder) => (
+            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
               <div
+                className="h-[62px] animate-pulse rounded-lg border border-[#1d2b3d] bg-[#0c1624] motion-reduce:animate-none"
                 key={placeholder}
-                className="h-64 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && !error && messages.length === 0 && (
-          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
-            <p className="text-base font-bold text-slate-950">
+        {!isLoading && !error && messages.length === 0 ? (
+          <div className="mt-2 rounded-lg border border-dashed border-[#26384f] bg-[#0a1422] px-4 py-7 text-center">
+            <p className="text-sm font-bold text-slate-100">
               No contact messages found
             </p>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Change or clear the current filters to look for other enquiries.
+            <p className="mt-1 text-[10px] text-slate-500">
+              Change or clear the current filters.
             </p>
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && messages.length > 0 && (
-          <div className="mt-5 space-y-4">
+        {!isLoading && messages.length > 0 ? (
+          <div className="mt-2 grid grid-cols-1 gap-1.5 lg:grid-cols-2">
             {messages.map((message) => {
               const isExpanded = expandedMessageId === message._id;
 
@@ -812,321 +839,281 @@ function AdminContactMessagesPage() {
 
               return (
                 <article
+                  className={`min-w-0 rounded-lg border border-[#1d2b3d] bg-[#0c1624] transition hover:border-[#2c405b] ${
+                    isExpanded ? "lg:col-span-2" : ""
+                  }`}
                   key={message._id}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <div className="p-4 sm:p-5">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="flex min-w-0 items-start gap-3">
-                        <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-sm font-bold text-brand-700">
-                          {createInitials(message.name)}
-                        </div>
-
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h2 className="break-words text-base font-bold text-slate-950 sm:text-lg">
-                              {message.name}
-                            </h2>
-
-                            <span
-                              className={`rounded-lg border px-2.5 py-1 text-xs font-bold ${
-                                statusClasses[message.status] ||
-                                "border-slate-200 bg-slate-100 text-slate-600"
-                              }`}
-                            >
-                              {statusLabel}
-                            </span>
-                          </div>
-
-                          <p className="mt-1 break-words text-sm font-semibold text-brand-700">
-                            {message.subject}
-                          </p>
-
-                          <p className="mt-1 text-sm text-slate-500">
-                            {message.serviceTitle ||
-                              message.service ||
-                              "Service not specified"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="shrink-0 text-sm lg:text-right">
-                        <p className="font-semibold text-slate-700">
-                          {formatDateTime(message.createdAt)}
-                        </p>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          {message.source || "portfolio-website"}
-                        </p>
-                      </div>
+                  <div className="grid min-w-0 grid-cols-[32px_minmax(0,1fr)_auto] items-start gap-2 px-2.5 py-2">
+                    <div className="grid size-8 shrink-0 place-items-center rounded-md border border-[#26384f] bg-[#132238] text-[9px] font-bold text-blue-200">
+                      {createInitials(message.name)}
                     </div>
 
-                    <dl className="mt-4 grid gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-3">
-                      <div className="min-w-0 bg-slate-50 p-3.5">
-                        <dt className={labelClassName}>Email</dt>
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                        <span
+                          className={`rounded border px-1.5 py-0.5 text-[8px] font-bold ${
+                            statusClasses[message.status] ||
+                            "border-slate-600 bg-slate-800 text-slate-400"
+                          }`}
+                        >
+                          {statusLabel}
+                        </span>
 
-                        <dd className="mt-1.5 min-w-0">
+                        <h2 className="max-w-[22rem] truncate text-[11px] font-bold text-slate-100">
+                          {message.subject}
+                        </h2>
+
+                        <span className="max-w-32 truncate text-[9px] font-semibold text-slate-400">
+                          {message.name}
+                        </span>
+
+                        <span className="ml-auto hidden shrink-0 text-[8px] text-slate-600 xl:inline">
+                          {formatDateTime(message.createdAt)}
+                        </span>
+                      </div>
+
+                      <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-[8px] text-slate-500">
+                        <a
+                          className="max-w-36 truncate hover:text-blue-300"
+                          href={`mailto:${message.email}`}
+                        >
+                          {message.email}
+                        </a>
+
+                        {message.phone ? (
                           <a
-                            href={`mailto:${message.email}`}
-                            className="break-all text-sm font-semibold text-slate-700 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+                            className="max-w-32 truncate hover:text-slate-300"
+                            href={`tel:${message.phone}`}
                           >
-                            {message.email}
+                            {message.phone}
                           </a>
-                        </dd>
+                        ) : null}
+
+                        <span className="max-w-32 truncate">
+                          {message.serviceTitle ||
+                            message.service ||
+                            "No service"}
+                        </span>
+
+                        <span className="max-w-32 truncate">
+                          {message.source || "portfolio-website"}
+                        </span>
+
+                        <span className="xl:hidden">
+                          {formatDateTime(message.createdAt)}
+                        </span>
                       </div>
 
-                      <div className="min-w-0 bg-slate-50 p-3.5">
-                        <dt className={labelClassName}>Phone</dt>
-
-                        <dd className="mt-1.5 min-w-0">
-                          {message.phone ? (
-                            <a
-                              href={`tel:${message.phone}`}
-                              className="break-all text-sm font-semibold text-slate-700 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-                            >
-                              {message.phone}
-                            </a>
-                          ) : (
-                            <span className="text-sm font-medium text-slate-500">
-                              Not provided
-                            </span>
-                          )}
-                        </dd>
-                      </div>
-
-                      <div className="min-w-0 bg-slate-50 p-3.5 sm:col-span-2 lg:col-span-1">
-                        <dt className={labelClassName}>Service slug</dt>
-
-                        <dd className="mt-1.5 break-all text-sm font-semibold text-slate-700">
-                          {message.service || "Not specified"}
-                        </dd>
-                      </div>
-                    </dl>
-
-                    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <p
-                        className={`whitespace-pre-wrap break-words text-sm leading-6 text-slate-700 ${
-                          isExpanded ? "" : "line-clamp-3"
-                        }`}
-                      >
+                      <p className="mt-0.5 line-clamp-1 text-[9px] leading-3.5 text-slate-400">
                         {message.message}
                       </p>
-
-                      <button
-                        type="button"
-                        aria-expanded={isExpanded}
-                        aria-controls={messagePanelId}
-                        onClick={() =>
-                          setExpandedMessageId(isExpanded ? "" : message._id)
-                        }
-                        className="mt-3 text-sm font-bold text-brand-700 transition-colors hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-                      >
-                        {isExpanded ? "Show Less" : "View Full Message"}
-                      </button>
                     </div>
 
-                    {isExpanded && (
-                      <div
-                        id={messagePanelId}
-                        className="mt-4 grid gap-4 xl:grid-cols-2"
-                      >
-                        <section className="rounded-xl border border-slate-200 p-4">
-                          <div>
-                            <label
-                              htmlFor={`message-status-${message._id}`}
-                              className={labelClassName}
-                            >
-                              Message status
-                            </label>
+                    <button
+                      aria-controls={messagePanelId}
+                      aria-expanded={isExpanded}
+                      className="inline-flex min-h-7 shrink-0 items-center justify-center rounded-md border border-[#27384e] bg-[#101c2c] px-2 text-[9px] font-bold text-slate-300 transition hover:border-blue-500/50 hover:text-white"
+                      onClick={() =>
+                        setExpandedMessageId(isExpanded ? "" : message._id)
+                      }
+                      type="button"
+                    >
+                      {isExpanded ? "Close" : "Open"}
+                    </button>
+                  </div>
 
-                            <select
-                              id={`message-status-${message._id}`}
-                              value={message.status}
-                              onChange={(event) =>
-                                handleStatusChange(message, event.target.value)
-                              }
-                              disabled={Boolean(actionKey)}
-                              className={inputClassName}
-                            >
-                              <option value="new">New</option>
-                              <option value="read">Read</option>
-                              <option value="replied">Replied</option>
-                              <option value="archived">Archived</option>
-                            </select>
+                  {isExpanded ? (
+                    <div
+                      className="border-t border-[#1d2b3d] px-2.5 pb-2.5 pt-2"
+                      id={messagePanelId}
+                    >
+                      <div className="grid gap-2 xl:grid-cols-[minmax(0,1.5fr)_minmax(300px,0.8fr)]">
+                        <section className="min-w-0 rounded-lg border border-[#1d2b3d] bg-[#09131f] p-2.5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                              Full Message
+                            </p>
+
+                            <span className="text-[8px] text-slate-600">
+                              {formatDateTime(message.createdAt)}
+                            </span>
                           </div>
 
-                          {isStatusAction && (
-                            <p
-                              role="status"
-                              className="mt-3 text-sm font-semibold text-brand-700"
-                            >
-                              Updating status...
-                            </p>
-                          )}
+                          <p className="mt-2 whitespace-pre-wrap break-words text-[11px] leading-5 text-slate-300">
+                            {message.message}
+                          </p>
 
-                          <dl className="mt-4 divide-y divide-slate-100 border-y border-slate-100 text-sm">
-                            <div className="flex items-center justify-between gap-4 py-2.5">
-                              <dt className="text-slate-500">Read</dt>
-                              <dd className="text-right font-semibold text-slate-700">
-                                {formatDateTime(message.readAt)}
-                              </dd>
-                            </div>
-
-                            <div className="flex items-center justify-between gap-4 py-2.5">
-                              <dt className="text-slate-500">Replied</dt>
-                              <dd className="text-right font-semibold text-slate-700">
-                                {formatDateTime(message.repliedAt)}
-                              </dd>
-                            </div>
-
-                            <div className="flex items-center justify-between gap-4 py-2.5">
-                              <dt className="text-slate-500">Archived</dt>
-                              <dd className="text-right font-semibold text-slate-700">
-                                {formatDateTime(message.archivedAt)}
-                              </dd>
-                            </div>
-
-                            <div className="flex items-center justify-between gap-4 py-2.5">
-                              <dt className="text-slate-500">
-                                Last status update
-                              </dt>
-                              <dd className="text-right font-semibold text-slate-700">
-                                {formatDateTime(message.statusUpdatedAt)}
-                              </dd>
-                            </div>
-                          </dl>
-                        </section>
-
-                        <section className="rounded-xl border border-slate-200 p-4">
-                          <label
-                            htmlFor={`message-note-${message._id}`}
-                            className={labelClassName}
-                          >
-                            Private admin note
-                          </label>
-
-                          <textarea
-                            id={`message-note-${message._id}`}
-                            value={noteDrafts[message._id] || ""}
-                            onChange={(event) =>
-                              handleNoteChange(message._id, event.target.value)
-                            }
-                            rows="6"
-                            maxLength={3000}
-                            placeholder="Add private follow-up details, pricing notes or other important information."
-                            className="mt-2 min-h-36 w-full resize-y rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-sm leading-6 text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 motion-reduce:transition-none"
-                          />
-
-                          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                            <span className="text-xs text-slate-500">
-                              {(noteDrafts[message._id] || "").length}/3000
+                          <div className="mt-2 grid gap-1.5 text-[9px] text-slate-500 sm:grid-cols-2 lg:grid-cols-4">
+                            <span>
+                              Read: {formatDateTime(message.readAt)}
                             </span>
 
+                            <span>
+                              Replied: {formatDateTime(message.repliedAt)}
+                            </span>
+
+                            <span>
+                              Archived: {formatDateTime(message.archivedAt)}
+                            </span>
+
+                            <span>
+                              Updated: {formatDateTime(message.statusUpdatedAt)}
+                            </span>
+                          </div>
+                        </section>
+
+                        <section className="rounded-lg border border-[#1d2b3d] bg-[#09131f] p-2.5">
+                          <div className="grid gap-2 sm:grid-cols-[150px_minmax(0,1fr)] xl:grid-cols-1">
+                            <div>
+                              <label
+                                className={labelClassName}
+                                htmlFor={`message-status-${message._id}`}
+                              >
+                                Status
+                              </label>
+
+                              <select
+                                className={inputClassName}
+                                disabled={Boolean(actionKey)}
+                                id={`message-status-${message._id}`}
+                                onChange={(event) =>
+                                  handleStatusChange(
+                                    message,
+                                    event.target.value,
+                                  )
+                                }
+                                value={message.status}
+                              >
+                                <option value="new">New</option>
+                                <option value="read">Read</option>
+                                <option value="replied">Replied</option>
+                                <option value="archived">Archived</option>
+                              </select>
+
+                              {isStatusAction ? (
+                                <p
+                                  className="mt-1 text-[9px] font-semibold text-blue-300"
+                                  role="status"
+                                >
+                                  Updating...
+                                </p>
+                              ) : null}
+                            </div>
+
+                            <div>
+                              <label
+                                className={labelClassName}
+                                htmlFor={`message-note-${message._id}`}
+                              >
+                                Private Note
+                              </label>
+
+                              <textarea
+                                className={`${inputClassName} min-h-20 resize-y py-2 leading-4`}
+                                id={`message-note-${message._id}`}
+                                maxLength={3000}
+                                onChange={(event) =>
+                                  handleNoteChange(
+                                    message._id,
+                                    event.target.value,
+                                  )
+                                }
+                                placeholder="Private follow-up note..."
+                                rows="3"
+                                value={noteDrafts[message._id] || ""}
+                              />
+
+                              <div className="mt-1 flex items-center justify-between gap-2">
+                                <span className="text-[8px] text-slate-600">
+                                  {(noteDrafts[message._id] || "").length}/3000
+                                </span>
+
+                                <button
+                                  className="inline-flex min-h-7 items-center justify-center rounded-md border border-[#27384e] bg-[#101c2c] px-2 text-[9px] font-bold text-slate-300 hover:text-white disabled:opacity-50"
+                                  disabled={Boolean(actionKey)}
+                                  onClick={() => handleSaveNote(message)}
+                                  type="button"
+                                >
+                                  {isNoteAction ? "Saving..." : "Save Note"}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-2 flex flex-wrap justify-end gap-1.5 border-t border-[#1d2b3d] pt-2">
                             <button
+                              className="inline-flex min-h-7 items-center justify-center rounded-md border border-blue-500/30 bg-blue-500/10 px-2.5 text-[9px] font-bold text-blue-200 transition hover:bg-blue-500/15 disabled:cursor-not-allowed disabled:opacity-40"
+                              disabled={
+                                Boolean(actionKey) || !canConvertMessages
+                              }
+                              onClick={() => handleConvertToLead(message)}
+                              title={
+                                canConvertMessages
+                                  ? "Convert this Contact Message to a CRM Lead"
+                                  : "Your role cannot convert Contact Messages to Leads"
+                              }
                               type="button"
-                              onClick={() => handleSaveNote(message)}
-                              disabled={Boolean(actionKey)}
-                              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-800 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
                             >
-                              {isNoteAction ? "Saving..." : "Save Admin Note"}
+                              {isConvertAction
+                                ? "Converting..."
+                                : "Convert to Lead"}
+                            </button>
+
+                            <button
+                              className="rnx-admin-delete-action inline-flex min-h-7 items-center justify-center rounded-md border px-2.5 text-[9px] font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
+                              disabled={
+                                Boolean(actionKey) || !canDeleteMessages
+                              }
+                              onClick={() => handleDeleteMessage(message)}
+                              title={
+                                canDeleteMessages
+                                  ? "Permanently delete contact message"
+                                  : "Your role cannot permanently delete contact messages"
+                              }
+                              type="button"
+                            >
+                              {isDeleteAction ? "Deleting..." : "Delete"}
                             </button>
                           </div>
                         </section>
-
-                        <section className="flex flex-col gap-3 rounded-xl border border-brand-200 bg-brand-50 p-4 sm:flex-row sm:items-center sm:justify-between xl:col-span-2">
-                          <div>
-                            <h3 className="font-bold text-brand-900">
-                              CRM Lead conversion
-                            </h3>
-
-                            <p className="mt-1 max-w-3xl text-sm leading-6 text-brand-700">
-                              Create a CRM Lead from this enquiry while keeping
-                              the original Contact Message unchanged.
-                            </p>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => handleConvertToLead(message)}
-                            disabled={Boolean(actionKey) || !canConvertMessages}
-                            title={
-                              canConvertMessages
-                                ? "Convert this Contact Message to a CRM Lead"
-                                : "Your role cannot convert Contact Messages to Leads"
-                            }
-                            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                          >
-                            {isConvertAction
-                              ? "Converting..."
-                              : "Convert to Lead"}
-                          </button>
-                        </section>
-
-                        <section className="flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50/70 p-4 sm:flex-row sm:items-center sm:justify-between xl:col-span-2">
-                          <div>
-                            <h3 className="font-bold text-red-800">
-                              Permanent deletion
-                            </h3>
-
-                            <p className="mt-1 max-w-3xl text-sm leading-6 text-red-700">
-                              Permanently deleting this enquiry cannot be
-                              undone.
-                            </p>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteMessage(message)}
-                            disabled={Boolean(actionKey) || !canDeleteMessages}
-                            title={
-                              canDeleteMessages
-                                ? "Permanently delete contact message"
-                                : "Your role cannot permanently delete contact messages"
-                            }
-                            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl border border-red-200 bg-white px-5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                          >
-                            {isDeleteAction ? "Deleting..." : "Delete Message"}
-                          </button>
-                        </section>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  ) : null}
                 </article>
               );
             })}
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && !error && totalPages > 1 && (
+        {!isLoading && !error && totalPages > 1 ? (
           <nav
             aria-label="Contact messages pagination"
-            className="mt-6 flex flex-col items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row"
+            className="mt-3 flex items-center justify-between gap-2 rounded-lg border border-[#1d2b3d] bg-[#0c1624] p-2"
           >
-            <p className="text-sm font-semibold text-slate-600">
-              Page {currentPage} of {totalPages}
-            </p>
+            <button
+              className="inline-flex min-h-8 items-center justify-center rounded-md border border-[#27384e] bg-[#101c2c] px-2.5 text-[9px] font-semibold text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={currentPage <= 1}
+              onClick={() => handlePageChange(currentPage - 1)}
+              type="button"
+            >
+              Previous
+            </button>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
-              >
-                Previous
-              </button>
+            <span className="text-[9px] font-semibold text-slate-500">
+              {currentPage} / {totalPages} · {totalMessages} results
+            </span>
 
-              <button
-                type="button"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
-              >
-                Next
-              </button>
-            </div>
+            <button
+              className="inline-flex min-h-8 items-center justify-center rounded-md border border-blue-500 bg-blue-600 px-2.5 text-[9px] font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={currentPage >= totalPages}
+              onClick={() => handlePageChange(currentPage + 1)}
+              type="button"
+            >
+              Next
+            </button>
           </nav>
-        )}
+        ) : null}
       </section>
     </main>
   );

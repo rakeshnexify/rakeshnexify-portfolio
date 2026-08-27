@@ -10,7 +10,7 @@ import {
   getNavbarNavigationItems,
 } from "../../utils/publicNavigation";
 import CompanyNavigationMenu from "../navigation/CompanyNavigationMenu";
-import Button from "../ui/Button";
+
 import Logo from "../ui/Logo";
 import Container from "./Container";
 
@@ -195,7 +195,7 @@ function Navbar() {
   );
 
   const desktopNavigationLayout = useMemo(
-    () => createPinnedNavigationLayout(navigationSections, 4),
+    () => createPinnedNavigationLayout(navigationSections, navigationSections.length),
     [navigationSections],
   );
   const tabletNavigationLayout = useMemo(
@@ -516,7 +516,7 @@ function Navbar() {
 
             {navigationSections.length > 0 && (
               <nav
-                className="hidden min-w-0 items-center gap-3 lg:flex xl:gap-4"
+                className="rnx-public-desktop-nav hidden min-w-0 flex-1 items-center gap-4 overflow-x-auto lg:flex xl:gap-5"
                 aria-label="Main navigation"
               >
                 {desktopNavigationSections.map((section) =>
@@ -638,24 +638,12 @@ function Navbar() {
               </button>
 
             {contactSection && (
-              <div className="hidden shrink-0 lg:block">
-                <Button
-                  size="small"
-                  onClick={() =>
-                    goToHomepageSection(
-                      contactSection.targetId,
-                      contactSection.key,
-                    )
-                  }
-                  className={
-                    activeSectionKey === "contact"
-                      ? "ring-4 ring-brand-500/15"
-                      : ""
-                  }
-                >
-                  {contactSection.label}
-                </Button>
-              </div>
+              <Link
+                to={contactSection.href}
+                className="hidden min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 lg:inline-flex"
+              >
+                {contactSection.label}
+              </Link>
             )}
 
             <div className="flex shrink-0 items-center gap-1">
@@ -783,17 +771,13 @@ function Navbar() {
                           )}
 
                           {contactSection && (
-                            <Button
-                              className="mt-3 w-full max-w-full"
-                              onClick={() =>
-                                goToHomepageSection(
-                                  contactSection.targetId,
-                                  contactSection.key,
-                                )
-                              }
+                            <Link
+                              to={contactSection.href}
+                              onClick={closeMobileMenu}
+                              className="mt-3 inline-flex min-h-11 w-full max-w-full items-center justify-center rounded-xl bg-brand-600 px-5 text-center text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20"
                             >
                               {contactSection.label}
-                            </Button>
+                            </Link>
                           )}
                         </div>
                       </nav>

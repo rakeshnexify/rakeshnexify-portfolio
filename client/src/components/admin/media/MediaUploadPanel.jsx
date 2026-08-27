@@ -208,321 +208,300 @@ function MediaUploadPanel({
   }
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-      <div>
-        <p className="text-sm font-bold uppercase tracking-[0.18em] text-brand-600">
-          Upload Media
-        </p>
+    <details className="admin-media-upload overflow-hidden rounded-xl">
+      <summary className="admin-media-upload-summary flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 px-4 py-3">
+        <div className="min-w-0">
+          <span className="block text-sm font-bold">
+            Upload Media
+          </span>
 
-        <h2 className="mt-2 text-2xl font-black text-slate-950">
-          Add a new asset
-        </h2>
-
-        <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">
-          Supported: JPG, PNG, WebP, AVIF, SVG, PDF, MP3, WAV, OGG, M4A, MP4 and
-          WebM.
-        </p>
-      </div>
-
-      {!canUpload && (
-        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-semibold text-amber-800">
-          Your Admin role can view Media but cannot upload or edit assets.
+          <span className="mt-0.5 block truncate text-[11px]">
+            Images, SVG, PDF, audio and video
+          </span>
         </div>
-      )}
 
-      <form onSubmit={handleSubmit} className="mt-6">
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={`rounded-2xl border-2 border-dashed p-6 text-center transition ${
-            isDragging
-              ? "border-brand-500 bg-brand-50"
-              : "border-slate-300 bg-slate-50"
-          }`}
+        <span
+          aria-hidden="true"
+          className="admin-media-upload-plus flex size-8 shrink-0 items-center justify-center rounded-lg text-lg font-medium"
         >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={MEDIA_UPLOAD_ACCEPT}
-            disabled={!canUpload || isUploading}
-            onChange={handleFileInputChange}
-            className="sr-only"
-          />
+          +
+        </span>
+      </summary>
 
-          <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-brand-100 text-2xl font-black text-brand-700">
-            +
+      <div className="admin-media-upload-body border-t px-4 py-4">
+        {!canUpload ? (
+          <div className="admin-media-warning rounded-lg px-3 py-2 text-xs font-semibold">
+            Your Admin role can view Media but cannot upload or edit assets.
           </div>
+        ) : null}
 
-          <p className="mt-4 font-bold text-slate-950">
-            Drop a file here or choose from your device
-          </p>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Images 10 MB · SVG 5 MB · PDF 20 MB · Audio 50 MB · Video 100 MB
-          </p>
-
-          <button
-            type="button"
-            disabled={!canUpload || isUploading}
-            onClick={() => fileInputRef.current?.click()}
-            className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Choose File
-          </button>
-
-          {selectedFile && (
-            <div className="mx-auto mt-5 max-w-xl rounded-xl border border-slate-200 bg-white px-4 py-3 text-left">
-              <p className="break-all text-sm font-semibold text-slate-800">
-                {selectedFile.name}
-              </p>
-
-              <p className="mt-1 text-xs text-slate-500">
-                {formatFileSize(selectedFile.size)}
-              </p>
-            </div>
-          )}
-
-          {fieldErrors.file && (
-            <p className="mt-3 text-sm font-semibold text-red-600">
-              {fieldErrors.file}
-            </p>
-          )}
-        </div>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="media-upload-title"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Title
-            </label>
-
-            <input
-              id="media-upload-title"
-              name="title"
-              value={values.title}
-              onChange={handleValueChange}
-              disabled={!canUpload || isUploading}
-              maxLength={180}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            {fieldErrors.title && (
-              <p className="mt-2 text-sm font-semibold text-red-600">
-                {fieldErrors.title}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="media-upload-folder"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Folder
-            </label>
-
-            <input
-              id="media-upload-folder"
-              name="folder"
-              value={values.folder}
-              onChange={handleValueChange}
-              disabled={!canUpload || isUploading}
-              placeholder="projects/covers"
-              maxLength={200}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            {fieldErrors.folder && (
-              <p className="mt-2 text-sm font-semibold text-red-600">
-                {fieldErrors.folder}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="media-upload-alt"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Alternative Text
-            </label>
-
-            <input
-              id="media-upload-alt"
-              name="altText"
-              value={values.altText}
-              onChange={handleValueChange}
-              disabled={!canUpload || isUploading || values.isDecorative}
-              maxLength={300}
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            {fieldErrors.altText && (
-              <p className="mt-2 text-sm font-semibold text-red-600">
-                {fieldErrors.altText}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="media-upload-tags"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Tags
-            </label>
-
-            <input
-              id="media-upload-tags"
-              name="tagsText"
-              value={values.tagsText}
-              onChange={handleValueChange}
-              disabled={!canUpload || isUploading}
-              placeholder="portfolio, project, cover"
-              className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            {fieldErrors.tags && (
-              <p className="mt-2 text-sm font-semibold text-red-600">
-                {fieldErrors.tags}
-              </p>
-            )}
-          </div>
-
-          <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:col-span-2">
-            <input
-              name="isDecorative"
-              type="checkbox"
-              checked={values.isDecorative}
-              onChange={handleValueChange}
-              disabled={!canUpload || isUploading}
-              className="mt-1 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-            />
-
-            <span>
-              <span className="block text-sm font-semibold text-slate-800">
-                Decorative image
-              </span>
-
-              <span className="mt-1 block text-xs leading-5 text-slate-500">
-                Use only when the image adds no meaningful information.
-              </span>
-            </span>
-          </label>
-
-          <div className="md:col-span-2">
-            <label
-              htmlFor="media-upload-caption"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Caption
-            </label>
-
-            <textarea
-              id="media-upload-caption"
-              name="caption"
-              rows={3}
-              value={values.caption}
-              onChange={handleValueChange}
-              disabled={!canUpload || isUploading}
-              maxLength={500}
-              className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            {fieldErrors.caption && (
-              <p className="mt-2 text-sm font-semibold text-red-600">
-                {fieldErrors.caption}
-              </p>
-            )}
-          </div>
-
-          <div className="md:col-span-2">
-            <label
-              htmlFor="media-upload-description"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Description
-            </label>
-
-            <textarea
-              id="media-upload-description"
-              name="description"
-              rows={4}
-              value={values.description}
-              onChange={handleValueChange}
-              disabled={!canUpload || isUploading}
-              maxLength={3000}
-              className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            {fieldErrors.description && (
-              <p className="mt-2 text-sm font-semibold text-red-600">
-                {fieldErrors.description}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {isUploading && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between gap-4 text-sm font-semibold text-slate-700">
-              <span>Uploading...</span>
-              <span>{uploadProgress}%</span>
-            </div>
-
-            <div className="mt-2 h-3 overflow-hidden rounded-full bg-slate-200">
-              <div
-                className="h-full rounded-full bg-brand-600 transition-[width]"
-                style={{
-                  width: `${uploadProgress}%`,
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        {error && (
+        <form className="mt-3" onSubmit={handleSubmit}>
           <div
-            role="alert"
-            className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+            className={`admin-media-dropzone rounded-xl border border-dashed px-4 py-5 text-center ${
+              isDragging ? "is-dragging" : ""
+            }`}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
           >
-            {error}
-          </div>
-        )}
+            <input
+              accept={MEDIA_UPLOAD_ACCEPT}
+              className="sr-only"
+              disabled={!canUpload || isUploading}
+              onChange={handleFileInputChange}
+              ref={fileInputRef}
+              type="file"
+            />
 
-        <div className="mt-6 flex flex-wrap gap-3">
-          <button
-            type="submit"
-            disabled={!canUpload || isUploading}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isUploading ? "Uploading..." : "Upload Media"}
-          </button>
+            <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:text-left">
+              <span
+                aria-hidden="true"
+                className="admin-media-file-mark flex size-10 shrink-0 items-center justify-center rounded-xl text-base font-black"
+              >
+                +
+              </span>
+
+              <div className="min-w-0">
+                <p className="text-sm font-bold">
+                  {selectedFile
+                    ? selectedFile.name
+                    : "Drop file here or choose from device"}
+                </p>
+
+                <p className="mt-0.5 text-[11px]">
+                  {selectedFile
+                    ? formatFileSize(selectedFile.size)
+                    : "Image 10 MB · SVG 5 MB · PDF 20 MB · Audio 50 MB · Video 100 MB"}
+                </p>
+              </div>
+
+              <button
+                className="admin-media-secondary-button mt-2 inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg px-3 text-xs font-semibold sm:ml-auto sm:mt-0"
+                disabled={!canUpload || isUploading}
+                onClick={() => fileInputRef.current?.click()}
+                type="button"
+              >
+                Choose File
+              </button>
+            </div>
+
+            {fieldErrors.file ? (
+              <p className="mt-2 text-xs font-semibold text-rose-400">
+                {fieldErrors.file}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <label className="grid gap-1.5 text-[11px] font-semibold">
+              Title
+              <input
+                className="admin-media-input min-h-10 rounded-lg px-3 text-sm outline-none"
+                disabled={!canUpload || isUploading}
+                id="media-upload-title"
+                maxLength={180}
+                name="title"
+                onChange={handleValueChange}
+                value={values.title}
+              />
+
+              {fieldErrors.title ? (
+                <span className="text-[10px] text-rose-400">
+                  {fieldErrors.title}
+                </span>
+              ) : null}
+            </label>
+
+            <label className="grid gap-1.5 text-[11px] font-semibold">
+              Folder
+              <input
+                className="admin-media-input min-h-10 rounded-lg px-3 text-sm outline-none"
+                disabled={!canUpload || isUploading}
+                id="media-upload-folder"
+                maxLength={200}
+                name="folder"
+                onChange={handleValueChange}
+                placeholder="projects/covers"
+                value={values.folder}
+              />
+
+              {fieldErrors.folder ? (
+                <span className="text-[10px] text-rose-400">
+                  {fieldErrors.folder}
+                </span>
+              ) : null}
+            </label>
+
+            <label className="grid gap-1.5 text-[11px] font-semibold">
+              Alternative Text
+              <input
+                className="admin-media-input min-h-10 rounded-lg px-3 text-sm outline-none"
+                disabled={
+                  !canUpload ||
+                  isUploading ||
+                  values.isDecorative
+                }
+                id="media-upload-alt"
+                maxLength={300}
+                name="altText"
+                onChange={handleValueChange}
+                value={values.altText}
+              />
+
+              {fieldErrors.altText ? (
+                <span className="text-[10px] text-rose-400">
+                  {fieldErrors.altText}
+                </span>
+              ) : null}
+            </label>
+
+            <label className="grid gap-1.5 text-[11px] font-semibold">
+              Tags
+              <input
+                className="admin-media-input min-h-10 rounded-lg px-3 text-sm outline-none"
+                disabled={!canUpload || isUploading}
+                id="media-upload-tags"
+                name="tagsText"
+                onChange={handleValueChange}
+                placeholder="portfolio, cover"
+                value={values.tagsText}
+              />
+
+              {fieldErrors.tags ? (
+                <span className="text-[10px] text-rose-400">
+                  {fieldErrors.tags}
+                </span>
+              ) : null}
+            </label>
+          </div>
+
+          <details className="admin-media-upload-advanced mt-3 rounded-lg">
+            <summary className="cursor-pointer list-none px-3 py-2 text-xs font-semibold">
+              More metadata
+            </summary>
+
+            <div className="grid gap-3 border-t px-3 py-3 md:grid-cols-2">
+              <label className="admin-media-check flex items-start gap-2 rounded-lg px-3 py-2.5 md:col-span-2">
+                <input
+                  checked={values.isDecorative}
+                  className="mt-0.5 size-4"
+                  disabled={!canUpload || isUploading}
+                  name="isDecorative"
+                  onChange={handleValueChange}
+                  type="checkbox"
+                />
+
+                <span>
+                  <span className="block text-xs font-semibold">
+                    Decorative image
+                  </span>
+
+                  <span className="mt-0.5 block text-[10px]">
+                    Use when the image adds no meaningful information.
+                  </span>
+                </span>
+              </label>
+
+              <label className="grid gap-1.5 text-[11px] font-semibold">
+                Caption
+                <textarea
+                  className="admin-media-input min-h-20 rounded-lg px-3 py-2 text-sm outline-none"
+                  disabled={!canUpload || isUploading}
+                  id="media-upload-caption"
+                  maxLength={500}
+                  name="caption"
+                  onChange={handleValueChange}
+                  rows={2}
+                  value={values.caption}
+                />
+
+                {fieldErrors.caption ? (
+                  <span className="text-[10px] text-rose-400">
+                    {fieldErrors.caption}
+                  </span>
+                ) : null}
+              </label>
+
+              <label className="grid gap-1.5 text-[11px] font-semibold">
+                Description
+                <textarea
+                  className="admin-media-input min-h-20 rounded-lg px-3 py-2 text-sm outline-none"
+                  disabled={!canUpload || isUploading}
+                  id="media-upload-description"
+                  maxLength={3000}
+                  name="description"
+                  onChange={handleValueChange}
+                  rows={2}
+                  value={values.description}
+                />
+
+                {fieldErrors.description ? (
+                  <span className="text-[10px] text-rose-400">
+                    {fieldErrors.description}
+                  </span>
+                ) : null}
+              </label>
+            </div>
+          </details>
 
           {isUploading ? (
-            <button
-              type="button"
-              onClick={cancelUpload}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-red-200 bg-red-50 px-5 text-sm font-semibold text-red-700 transition hover:bg-red-100"
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-[11px] font-semibold">
+                <span>Uploading...</span>
+                <span>{uploadProgress}%</span>
+              </div>
+
+              <div className="admin-media-progress mt-1.5 h-1.5 overflow-hidden rounded-full">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${uploadProgress}%`,
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {error ? (
+            <div
+              className="admin-media-error mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
+              role="alert"
             >
-              Cancel Upload
-            </button>
-          ) : (
+              {error}
+            </div>
+          ) : null}
+
+          <div className="mt-4 flex flex-wrap gap-2">
             <button
-              type="button"
-              onClick={resetForm}
-              disabled={!canUpload}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 px-5 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="admin-media-primary-button inline-flex min-h-9 items-center justify-center rounded-lg px-4 text-xs font-bold"
+              disabled={!canUpload || isUploading}
+              type="submit"
             >
-              Reset
+              {isUploading ? "Uploading..." : "Upload"}
             </button>
-          )}
-        </div>
-      </form>
-    </section>
+
+            {isUploading ? (
+              <button
+                className="admin-media-danger-button inline-flex min-h-9 items-center justify-center rounded-lg px-4 text-xs font-semibold"
+                onClick={cancelUpload}
+                type="button"
+              >
+                Cancel
+              </button>
+            ) : (
+              <button
+                className="admin-media-secondary-button inline-flex min-h-9 items-center justify-center rounded-lg px-4 text-xs font-semibold"
+                disabled={!canUpload}
+                onClick={resetForm}
+                type="button"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    </details>
   );
 }
 

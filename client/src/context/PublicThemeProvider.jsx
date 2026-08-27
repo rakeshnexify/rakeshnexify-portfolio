@@ -12,7 +12,7 @@ const PUBLIC_THEME_STORAGE_KEY = "rakeshnexify-public-theme";
 
 function getInitialPublicTheme() {
   if (typeof window === "undefined") {
-    return "light";
+    return "dark";
   }
 
   try {
@@ -25,9 +25,7 @@ function getInitialPublicTheme() {
     // Storage can be unavailable in privacy-restricted browser contexts.
   }
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return "dark";
 }
 
 function PublicThemeProvider({ children }) {

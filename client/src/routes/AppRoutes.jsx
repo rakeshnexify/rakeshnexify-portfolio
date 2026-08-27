@@ -3,24 +3,9 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 
 import AdminLayout from "../components/admin/layout/AdminLayout";
 import PageSeo from "../components/seo/PageSeo";
-import BlogPage from "../pages/BlogPage";
-import CertificationAchievementsPage from "../pages/CertificationAchievementsPage";
-import ClientsPartnersPage from "../pages/ClientsPartnersPage";
-import CaseStudiesPage from "../pages/CaseStudiesPage";
-import EducationPage from "../pages/EducationPage";
-import ConsultationPage from "../pages/ConsultationPage";
-import ExperiencePage from "../pages/ExperiencePage";
-import FaqPage from "../pages/FaqPage";
 import HomePage from "../pages/HomePage";
-import NewsPage from "../pages/NewsPage";
+import ContactPage from "../pages/ContactPage";
 import NotFoundPage from "../pages/NotFoundPage";
-import PostDetailsPage from "../pages/PostDetailsPage";
-import ProjectDetailsPage from "../pages/ProjectDetailsPage";
-import ProjectsPage from "../pages/ProjectsPage";
-import ServicesPage from "../pages/ServicesPage";
-import SkillsPage from "../pages/SkillsPage";
-import TestimonialsPage from "../pages/TestimonialsPage";
-import TeamPage from "../pages/TeamPage";
 import AdminAuditLogDetailPage from "../pages/admin/AdminAuditLogDetailPage";
 import AdminAuditLogsPage from "../pages/admin/AdminAuditLogsPage";
 import AdminAppointmentDetailPage from "../pages/admin/AdminAppointmentDetailPage";
@@ -68,7 +53,6 @@ import AdminTeamMemberEditorPage from "../pages/admin/AdminTeamMemberEditorPage"
 import AdminTeamMembersPage from "../pages/admin/AdminTeamMembersPage";
 
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
-import PublicPageVisibilityRoute from "./PublicPageVisibilityRoute";
 import PublicSiteRoute from "./PublicSiteRoute";
 
 function AdminSeoManager() {
@@ -266,104 +250,47 @@ function AppRoutes() {
       <Routes>
         <Route element={<PublicSiteRoute />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
-          <Route element={<PublicPageVisibilityRoute sectionKey="skills" />}>
-            <Route path="/skills" element={<SkillsPage />} />
-          </Route>
-
-          <Route element={<PublicPageVisibilityRoute sectionKey="services" />}>
-            <Route path="/services" element={<ServicesPage />} />
-          </Route>
+          <Route path="/skills" element={<Navigate to="/#skills" replace />} />
+          <Route path="/services" element={<Navigate to="/#services" replace />} />
+          <Route path="/projects/*" element={<Navigate to="/#projects" replace />} />
+          <Route path="/team" element={<Navigate to="/#team" replace />} />
+          <Route
+            path="/testimonials"
+            element={<Navigate to="/#testimonials" replace />}
+          />
 
           <Route
-            element={<PublicPageVisibilityRoute sectionKey="consultation" />}
-          >
-            <Route path="/consultation" element={<ConsultationPage />} />
-          </Route>
-
-          <Route element={<PublicPageVisibilityRoute sectionKey="education" />}>
-            <Route path="/education" element={<EducationPage />} />
-          </Route>
-
+            path="/education"
+            element={<Navigate to="/#education" replace />}
+          />
           <Route
-            element={<PublicPageVisibilityRoute sectionKey="experience" />}
-          >
-            <Route path="/experience" element={<ExperiencePage />} />
-          </Route>
-
+            path="/experience"
+            element={<Navigate to="/#experience" replace />}
+          />
           <Route
-            element={<PublicPageVisibilityRoute sectionKey="achievements" />}
-          >
-            <Route
-              path="/achievements"
-              element={<CertificationAchievementsPage />}
-            />
-          </Route>
-
-          <Route element={<PublicPageVisibilityRoute sectionKey="blog" />}>
-            <Route path="/blog" element={<BlogPage />} />
-            <Route
-              path="/blog/:slug"
-              element={<PostDetailsPage expectedType="blog" />}
-            />
-          </Route>
-
-          <Route element={<PublicPageVisibilityRoute sectionKey="news" />}>
-            <Route path="/news" element={<NewsPage />} />
-            <Route
-              path="/news/:slug"
-              element={<PostDetailsPage expectedType="news" />}
-            />
-          </Route>
-
-          <Route element={<PublicPageVisibilityRoute sectionKey="projects" />}>
-            <Route path="/projects" element={<ProjectsPage />} />
-          </Route>
-
+            path="/achievements"
+            element={<Navigate to="/#achievements" replace />}
+          />
           <Route
-            element={
-              <PublicPageVisibilityRoute
-                sectionKeys={["projects", "case-studies"]}
-              />
-            }
-          >
-            <Route path="/projects/:slug" element={<ProjectDetailsPage />} />
-          </Route>
-
+            path="/case-studies"
+            element={<Navigate to="/#case-studies" replace />}
+          />
           <Route
-            element={<PublicPageVisibilityRoute sectionKey="case-studies" />}
-          >
-            <Route path="/case-studies" element={<CaseStudiesPage />} />
-          </Route>
-
-          <Route element={<PublicPageVisibilityRoute sectionKey="team" />}>
-            <Route path="/team" element={<TeamPage />} />
-</Route>
-
+            path="/clients-partners"
+            element={<Navigate to="/#clients-partners" replace />}
+          />
+          <Route path="/faq" element={<Navigate to="/#faq" replace />} />
+          <Route path="/blog/*" element={<Navigate to="/#posts" replace />} />
+          <Route path="/news/*" element={<Navigate to="/#posts" replace />} />
           <Route
-            element={
-              <PublicPageVisibilityRoute sectionKey="clients-partners" />
-            }
-          >
-            <Route
-              path="/clients-partners"
-              element={<ClientsPartnersPage />}
-            />
-          </Route>
-
-          <Route
-            element={<PublicPageVisibilityRoute sectionKey="testimonials" />}
-          >
-            <Route path="/testimonials" element={<TestimonialsPage />} />
-          </Route>
-
-          <Route element={<PublicPageVisibilityRoute sectionKey="faq" />}>
-            <Route path="/faq" element={<FaqPage />} />
-          </Route>
+            path="/consultation"
+            element={<Navigate to="/contact" replace />}
+          />
 
           <Route path="*" element={<NotFoundPage />} />
         </Route>
-
         <Route
           path="/admin"
           element={<Navigate to="/admin/dashboard" replace />}

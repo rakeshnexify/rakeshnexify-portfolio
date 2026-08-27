@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { Link } from "react-router";
 
+import { publicNavigationDestinations } from "../../../utils/publicNavigation";
+
 import MediaField from "../media/MediaField";
 
 import {
@@ -47,23 +49,7 @@ const platformGroupFields = [
  * Sirf in sections ke dedicated
  * public listing pages available hain.
  */
-const dedicatedPageSectionKeys = new Set([
-  "statistics",
-  "skills",
-  "services",
-  "projects",
-  "case-studies",
-  "education",
-  "experience",
-  "achievements",
-  "team",
-  "clients-partners",
-  "testimonials",
-  "faq",
-  "blog",
-  "news",
-  "consultation",
-]);
+const dedicatedPageSectionKeys = new Set(["contact"]);
 
 const homepageSectionKeys = new Set([
   "hero",
@@ -84,26 +70,15 @@ const homepageSectionKeys = new Set([
   "contact",
 ]);
 
-const navigationSectionKeys = new Set([
-  "hero",
-  "about",
-  "statistics",
-  "skills",
-  "services",
-  "projects",
-  "case-studies",
-  "education",
-  "experience",
-  "achievements",
-  "team",
-  "companies",
-  "clients-partners",
-  "testimonials",
-  "faq",
-  "contact",
-  "blog",
-  "news",
-]);
+const navigationSectionKeys = new Set(
+  Object.entries(publicNavigationDestinations)
+    .filter(
+      ([key, destination]) =>
+        destination.navbar !== false &&
+        (destination.type === "section" || key === "contact"),
+    )
+    .map(([key]) => key),
+);
 
 const footerNavigationSectionKeys = new Set(
   defaultFormValues.sections
@@ -2207,6 +2182,91 @@ function SiteSettingsForm({
         description="Manage every visible Contact section text: heading, form copy, social/freelancer copy, submit label and privacy note."
       >
         <div className="grid gap-5">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">
+                Contact Page Composition
+              </h3>
+
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Choose which reusable sections appear below the Contact content. Their data stays connected to the existing Services, FAQ and Testimonials CMS sources.
+              </p>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                <input
+                  type="checkbox"
+                  name="contactSection.showServicesOnContactPage"
+                  checked={
+                    formValues.contactSection.showServicesOnContactPage !== false
+                  }
+                  onChange={handleFieldChange}
+                  disabled={isSubmitting}
+                  className="size-4 shrink-0 accent-brand-600"
+                />
+
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-slate-800">
+                    Show Services
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500">
+                    Display Services after Contact.
+                  </span>
+                </span>
+              </label>
+
+              <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                <input
+                  type="checkbox"
+                  name="contactSection.showFaqOnContactPage"
+                  checked={
+                    formValues.contactSection.showFaqOnContactPage !== false
+                  }
+                  onChange={handleFieldChange}
+                  disabled={isSubmitting}
+                  className="size-4 shrink-0 accent-brand-600"
+                />
+
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-slate-800">
+                    Show FAQ
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500">
+                    Display FAQ after Services.
+                  </span>
+                </span>
+              </label>
+
+              <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                <input
+                  type="checkbox"
+                  name="contactSection.showTestimonialsOnContactPage"
+                  checked={
+                    formValues.contactSection.showTestimonialsOnContactPage !==
+                    false
+                  }
+                  onChange={handleFieldChange}
+                  disabled={isSubmitting}
+                  className="size-4 shrink-0 accent-brand-600"
+                />
+
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-slate-800">
+                    Show Testimonials
+                  </span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500">
+                    Display Testimonials after FAQ.
+                  </span>
+                </span>
+              </label>
+            </div>
+
+            <p className="mt-3 text-xs leading-5 text-slate-500">
+              These switches affect only the Contact page. Edit section headings and CTA copy in Listing Sections, and edit the underlying Services, FAQ and Testimonials records in their existing Admin modules.
+            </p>
+          </div>
+
           <TextInput
             id="settings-contact-section-eyebrow"
             name="contactSection.eyebrow"
@@ -2693,7 +2753,7 @@ function SiteSettingsForm({
       <SettingsCard
         isVisible={isPanelActive("navigation")}
         title="Sections, Navbar, Footer & Public Pages"
-        description="Control homepage sections, Navbar items, Footer Quick Links and dedicated public pages independently."
+        description="Control homepage sections, dynamic Home-section Navbar items, Footer Quick Links and the dedicated Contact page."
       >
         <FieldError message={getFieldError("sections")} />
 

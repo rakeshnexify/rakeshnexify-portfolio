@@ -5,14 +5,26 @@ const ADMIN_SIDEBAR_PIN_STORAGE_KEY =
 
 function readStoredPinnedState() {
   if (typeof window === "undefined") {
-    return false;
+    return true;
   }
 
   try {
-    return window.localStorage.getItem(ADMIN_SIDEBAR_PIN_STORAGE_KEY) === "1";
+    const savedValue = window.localStorage.getItem(
+      ADMIN_SIDEBAR_PIN_STORAGE_KEY,
+    );
+
+    if (savedValue === "0") {
+      return false;
+    }
+
+    if (savedValue === "1") {
+      return true;
+    }
   } catch {
-    return false;
+    // Cosmetic preference persistence must never break the Admin shell.
   }
+
+  return true;
 }
 
 function persistPinnedState(isPinned) {
@@ -41,6 +53,7 @@ function useAdminSidebarState() {
           : Boolean(nextValue);
 
       persistPinnedState(resolvedValue);
+
       return resolvedValue;
     });
   }, []);

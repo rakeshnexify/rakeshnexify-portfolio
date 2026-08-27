@@ -8,7 +8,8 @@ import ProjectCard from "../projects/ProjectCard";
 
 import PublicSectionHeader from "../layout/PublicSectionHeader";
 import PublicCTAButton from "../layout/PublicCTAButton";
-const HOME_PROJECT_LIMIT = 4;
+const HOME_PROJECT_LIMIT = 6;
+const COMPANY_PORTFOLIO_URL = "https://idomere.com/portfolio";
 
 function containsControlCharacters(value) {
   const text = String(value ?? "");
@@ -165,8 +166,16 @@ function ProjectsSection() {
   const ctaLabel =
     String(ctaButton.label || "").trim();
 
-  const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href, "");
+  const configuredCtaUrl = getSafePublicUrl(
+    ctaButton.url || ctaButton.href,
+    COMPANY_PORTFOLIO_URL,
+  );
+
+  const ctaUrl =
+    configuredCtaUrl === "/projects" ||
+    configuredCtaUrl === "/portfolio"
+      ? COMPANY_PORTFOLIO_URL
+      : configuredCtaUrl;
 
   const headingParts = getHeadingParts(heading);
 

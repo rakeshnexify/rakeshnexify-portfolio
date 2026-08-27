@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+
 import AdminNavigation from "./AdminNavigation";
 import { AdminIcon } from "./adminIcons";
 
@@ -110,7 +111,6 @@ function AdminMobileDrawer({
       );
 
       document.removeEventListener("keydown", handleKeyDown);
-
       document.body.style.overflow = previousOverflow;
 
       window.setTimeout(() => {
@@ -131,14 +131,13 @@ function AdminMobileDrawer({
   }
 
   const adminName = admin?.name || "Admin";
-  const adminEmail = admin?.email || "";
-  const adminRole = admin?.role || "authenticated";
+  const adminRole = admin?.role || "admin";
 
   return (
     <div className="fixed inset-0 z-[70] lg:hidden">
       <button
         aria-label="Close admin navigation"
-        className="absolute inset-0 cursor-default bg-slate-950/60 backdrop-blur-[2px]"
+        className="admin-reference-drawer-backdrop absolute inset-0 cursor-default"
         onClick={onClose}
         type="button"
       />
@@ -146,45 +145,39 @@ function AdminMobileDrawer({
       <aside
         aria-labelledby="admin-mobile-drawer-title"
         aria-modal="true"
-        className="absolute inset-y-0 left-0 z-[80] flex w-[min(90vw,340px)] flex-col overflow-hidden border-r border-slate-800/90 bg-slate-950 text-slate-100 shadow-2xl shadow-black/40"
+        className="admin-reference-mobile-drawer absolute inset-y-0 left-0 z-[80] flex w-[min(88vw,330px)] flex-col overflow-hidden text-white"
         ref={drawerRef}
         role="dialog"
         tabIndex={-1}
       >
-        <div className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-800/90 px-4">
+        <div className="admin-reference-sidebar-brand flex h-[62px] shrink-0 items-center gap-3 px-4">
           <span
             aria-hidden="true"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-sm font-black tracking-wide text-white shadow-lg shadow-brand-950/30"
+            className="admin-reference-logo flex size-9 shrink-0 items-center justify-center rounded-xl text-[11px] font-black tracking-[0.06em]"
           >
             RN
           </span>
 
-          <div className="min-w-0 flex-1">
-            <p
-              className="truncate text-sm font-bold tracking-tight text-white"
-              id="admin-mobile-drawer-title"
-            >
-              RakeshNexify
-            </p>
-
-            <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
-              Admin CMS
-            </p>
-          </div>
+          <p
+            className="min-w-0 flex-1 truncate text-[15px] font-black tracking-tight"
+            id="admin-mobile-drawer-title"
+          >
+            Rakesh<span className="text-blue-500">Nexify</span>
+          </p>
 
           <button
             aria-label="Close admin navigation"
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-transparent text-slate-400 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-700 hover:bg-white/[0.06] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+            className="admin-reference-icon-button inline-flex size-9 shrink-0 items-center justify-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             onClick={onClose}
             ref={closeButtonRef}
             title="Close navigation"
             type="button"
           >
-            <AdminIcon name="close" size={21} />
+            <AdminIcon name="close" size={18} />
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overscroll-contain overflow-x-hidden overflow-y-auto px-3 py-4 [scrollbar-color:rgb(51_65_85)_transparent] [scrollbar-width:thin]">
+        <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-3 py-2 [scrollbar-color:rgb(49_64_83)_transparent] [scrollbar-width:thin]">
           <AdminNavigation
             isRailExpanded
             onNavigate={onClose}
@@ -192,48 +185,39 @@ function AdminMobileDrawer({
           />
         </div>
 
-        <div className="shrink-0 border-t border-slate-800/90 bg-slate-950/95 p-3">
-          <div className="mb-2.5 flex items-center gap-3 rounded-2xl border border-slate-800/80 bg-white/[0.035] px-3 py-3">
+        <div className="admin-reference-sidebar-footer shrink-0 p-3">
+          <div className="admin-reference-mobile-profile flex items-center gap-3 rounded-xl px-3 py-3">
             <span
               aria-hidden="true"
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800 text-slate-300"
+              className="admin-reference-avatar flex size-9 shrink-0 items-center justify-center rounded-full text-[11px] font-black"
             >
-              <AdminIcon name="account" size={19} />
+              {String(adminName)
+                .trim()
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((part) => part.charAt(0))
+                .join("")
+                .toUpperCase() || "AD"}
             </span>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-slate-100">
+              <p className="truncate text-xs font-bold text-white">
                 {adminName}
               </p>
 
-              <p className="mt-0.5 truncate text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
-                {adminRole}
+              <p className="mt-0.5 truncate text-[10px] capitalize text-slate-400">
+                {adminRole.replace("-", " ")}
               </p>
-
-              {adminEmail ? (
-                <p className="mt-0.5 truncate text-[10px] text-slate-600">
-                  {adminEmail}
-                </p>
-              ) : null}
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <a
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 text-xs font-semibold text-slate-300 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-700 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-              href="/"
-            >
-              <AdminIcon name="external" size={17} />
-              Website
-            </a>
 
             <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 text-xs font-semibold text-slate-300 transition-colors duration-150 motion-reduce:transition-none hover:border-rose-900/60 hover:bg-rose-500/10 hover:text-rose-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+              aria-label="Logout"
+              className="admin-reference-icon-button inline-flex size-9 shrink-0 items-center justify-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
               onClick={onLogout}
+              title="Logout"
               type="button"
             >
               <AdminIcon name="logout" size={17} />
-              Logout
             </button>
           </div>
         </div>

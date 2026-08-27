@@ -191,7 +191,7 @@ function PublicPageHeader() {
   );
 
   const desktopNavigationLayout = useMemo(
-    () => createPinnedNavigationLayout(standardNavigationItems, 4),
+    () => createPinnedNavigationLayout(standardNavigationItems, standardNavigationItems.length),
     [standardNavigationItems],
   );
   const desktopNavigationItems = desktopNavigationLayout.directItems;
@@ -321,7 +321,7 @@ function PublicPageHeader() {
             {standardNavigationItems.length > 0 && (
               <nav
                 aria-label="Main navigation"
-                className="hidden min-w-0 items-center gap-3 lg:flex xl:gap-4"
+                className="rnx-public-desktop-nav hidden min-w-0 flex-1 items-center gap-4 overflow-x-auto lg:flex xl:gap-5"
               >
                 {desktopNavigationItems.map((item) =>
                   item.key === "companies" ? (

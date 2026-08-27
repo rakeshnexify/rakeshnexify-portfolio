@@ -430,11 +430,11 @@ function AdminLeadEditorPage({ mode = "create" }) {
 
   if (isLoading) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-100 px-4">
+      <main className="grid min-h-screen place-items-center bg-[#08111e] px-4 text-slate-300">
         <div className="text-center">
-          <div className="mx-auto size-12 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600 motion-reduce:animate-none" />
+          <div className="mx-auto size-9 animate-spin rounded-full border-2 border-slate-700 border-t-blue-500 motion-reduce:animate-none" />
 
-          <p className="mt-5 text-sm font-semibold text-slate-600">
+          <p className="mt-3 text-[11px] font-semibold text-slate-500">
             Loading Lead editor...
           </p>
         </div>
@@ -444,21 +444,23 @@ function AdminLeadEditorPage({ mode = "create" }) {
 
   if (loadError) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-100 px-4">
-        <div className="w-full max-w-lg rounded-3xl border border-red-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-sm font-bold uppercase tracking-[0.18em] text-red-600">
+      <main className="grid min-h-screen place-items-center bg-[#08111e] px-4">
+        <div className="w-full max-w-md rounded-xl border border-rose-500/20 bg-[#0c1624] p-5 text-center">
+          <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-rose-300">
             Lead Error
           </p>
 
-          <h1 className="mt-3 text-2xl font-bold text-slate-950">
+          <h1 className="mt-1.5 text-lg font-bold text-slate-100">
             Lead editor could not be opened
           </h1>
 
-          <p className="mt-4 leading-7 text-slate-600">{loadError}</p>
+          <p className="mt-2 text-[11px] leading-5 text-slate-400">
+            {loadError}
+          </p>
 
           <Link
+            className="mt-4 inline-flex min-h-9 items-center justify-center rounded-lg border border-blue-500 bg-blue-600 px-4 text-[10px] font-bold text-white transition hover:bg-blue-500"
             to="/admin/leads"
-            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
           >
             Return to Leads
           </Link>
@@ -468,143 +470,129 @@ function AdminLeadEditorPage({ mode = "create" }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <Link
-          to="/admin/leads"
-          className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-        >
-          <span aria-hidden="true">&larr;</span>
-          Leads Management
-        </Link>
+    <main className="min-h-screen bg-[#08111e] text-slate-200">
+      <section className="mx-auto w-full max-w-[1480px] px-3 py-4 sm:px-5 lg:px-6">
+        <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <Link
+              className="inline-flex min-h-7 items-center gap-1.5 text-[9px] font-bold text-slate-500 transition hover:text-blue-300"
+              to="/admin/leads"
+            >
+              <span aria-hidden="true">←</span>
+              Leads / CRM
+            </Link>
 
-        <header className="mt-3">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-            {isEditMode ? "Update Lead" : "Create Lead"}
-          </p>
+            <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.14em] text-blue-400">
+              {isEditMode ? "Update Lead" : "Create Lead"}
+            </p>
 
-          <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-            {isEditMode
-              ? `Edit ${lead?.name || "Lead"}`
-              : "Add a new Lead"}
-          </h1>
+            <h1 className="mt-0.5 truncate text-xl font-bold tracking-tight text-slate-50 sm:text-2xl">
+              {isEditMode
+                ? `Edit ${lead?.name || "Lead"}`
+                : "Add a new Lead"}
+            </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            {isEditMode
-              ? "Update the opportunity pipeline, value, follow-up schedule, assignment and CRM details."
-              : "Create a sales opportunity manually and track it through the CRM pipeline."}
-          </p>
-        </header>
-
-        {submitError && (
-          <div
-            role="alert"
-            className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5"
-          >
-            <p className="text-sm font-semibold leading-6 text-red-700">
-              {submitError}
+            <p className="mt-0.5 hidden max-w-2xl text-[10px] leading-4 text-slate-500 sm:block">
+              {isEditMode
+                ? "Update pipeline, value, follow-up, assignment and CRM details."
+                : "Create a sales opportunity and start tracking it in the CRM."}
             </p>
           </div>
-        )}
 
-        {isEditMode && (
-          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-                Private CRM Notes
-              </p>
+          {isEditMode ? (
+            <div className="flex flex-wrap items-center gap-1.5 text-[9px]">
+              <span className="rounded-md border border-[#26364b] bg-[#0c1624] px-2 py-1 font-semibold text-slate-400">
+                {lead?.status || "Lead"}
+              </span>
 
-              <h2 className="mt-2 text-xl font-bold text-slate-950">
-                Lead follow-up history
-              </h2>
-
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-                Save internal notes for follow-ups, pricing discussions,
-                requirements or sales context. These notes are only available
-                inside the protected Admin CRM.
-              </p>
+              <span className="rounded-md border border-[#26364b] bg-[#0c1624] px-2 py-1 font-semibold text-slate-400">
+                {sortedNotes.length} note{sortedNotes.length === 1 ? "" : "s"}
+              </span>
             </div>
+          ) : null}
+        </header>
 
-            <form onSubmit={handleAddNote} className="mt-6">
-              <label
-                htmlFor="lead-private-note"
-                className="text-sm font-semibold text-slate-700"
+        {submitError ? (
+          <div
+            className="mt-3 rounded-lg border border-rose-500/20 bg-rose-950/20 px-3 py-2 text-[10px] font-semibold text-rose-300"
+            role="alert"
+          >
+            {submitError}
+          </div>
+        ) : null}
+
+        {isEditMode ? (
+          <details className="mt-3 rounded-xl border border-[#1d2b3d] bg-[#0c1624]">
+            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 px-3 text-[10px] font-bold text-slate-400">
+              <span>Private CRM Notes</span>
+
+              <span className="text-[9px] font-semibold text-slate-600">
+                {sortedNotes.length} saved
+              </span>
+            </summary>
+
+            <div className="border-t border-[#1d2b3d] p-3">
+              <form
+                className="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto]"
+                onSubmit={handleAddNote}
               >
-                Add private note
-              </label>
-
-              <textarea
-                id="lead-private-note"
-                value={noteText}
-                onChange={(event) => {
-                  setNoteText(event.target.value);
-                  setNoteError("");
-                }}
-                rows={4}
-                maxLength={3000}
-                aria-invalid={Boolean(noteError)}
-                aria-describedby={
-                  noteError
-                    ? "lead-private-note-help lead-private-note-error"
-                    : "lead-private-note-help"
-                }
-                placeholder="Add follow-up details, quote discussion or other internal CRM context..."
-                className="mt-2 w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 focus-visible:outline-none motion-reduce:transition-none"
-              />
-
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p
-                    id="lead-private-note-help"
-                    className="text-xs text-slate-400"
+                  <label
+                    className="sr-only"
+                    htmlFor="lead-private-note"
                   >
-                    Maximum 3000 characters.
-                  </p>
+                    Add private note
+                  </label>
 
-                  {noteError && (
-                    <p
-                      id="lead-private-note-error"
-                      role="alert"
-                      className="mt-1 text-sm font-semibold text-red-600"
-                    >
-                      {noteError}
-                    </p>
-                  )}
+                  <textarea
+                    aria-describedby={
+                      noteError ? "lead-private-note-error" : undefined
+                    }
+                    aria-invalid={Boolean(noteError)}
+                    className="min-h-16 w-full resize-y rounded-lg border border-[#24364d] bg-[#091522] px-3 py-2 text-[10px] leading-4 text-slate-200 outline-none placeholder:text-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                    id="lead-private-note"
+                    maxLength={3000}
+                    onChange={(event) => {
+                      setNoteText(event.target.value);
+                      setNoteError("");
+                    }}
+                    placeholder="Add private follow-up note..."
+                    rows={2}
+                    value={noteText}
+                  />
+
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    {noteError ? (
+                      <p
+                        className="text-[9px] font-semibold text-rose-300"
+                        id="lead-private-note-error"
+                        role="alert"
+                      >
+                        {noteError}
+                      </p>
+                    ) : (
+                      <span className="text-[8px] text-slate-600">
+                        Internal CRM only
+                      </span>
+                    )}
+
+                    <span className="text-[8px] tabular-nums text-slate-600">
+                      {noteText.length}/3000
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-slate-400">
-                    {noteText.length}/3000
-                  </span>
+                <button
+                  className="inline-flex min-h-9 self-start items-center justify-center rounded-lg border border-[#2b405b] bg-[#101c2c] px-3 text-[9px] font-bold text-slate-300 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50 md:mt-0"
+                  disabled={isAddingNote}
+                  type="submit"
+                >
+                  {isAddingNote ? "Saving..." : "Add Note"}
+                </button>
+              </form>
 
-                  <button
-                    type="submit"
-                    disabled={isAddingNote}
-                    className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
-                  >
-                    {isAddingNote ? "Saving Note..." : "Add Note"}
-                  </button>
-                </div>
-              </div>
-            </form>
-
-            <div className="mt-7 border-t border-slate-200 pt-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-bold text-slate-950">
-                  Saved notes
-                </h3>
-
-                <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
-                  {sortedNotes.length} note(s)
-                </span>
-              </div>
-
-              {sortedNotes.length === 0 ? (
-                <p className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-500">
-                  No private CRM notes have been added yet.
-                </p>
-              ) : (
-                <div className="mt-4 space-y-3">
+              {sortedNotes.length > 0 ? (
+                <div className="mt-2 max-h-60 space-y-1.5 overflow-y-auto pr-1">
                   {sortedNotes.map((note, index) => {
                     const noteCreator =
                       note?.createdBy?.name ||
@@ -613,43 +601,47 @@ function AdminLeadEditorPage({ mode = "create" }) {
 
                     return (
                       <article
+                        className="rounded-lg border border-[#1d2b3d] bg-[#09131f] px-2.5 py-2"
                         key={note?._id || `${note?.createdAt || "note"}-${index}`}
-                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <p className="text-sm font-bold text-slate-800">
+                          <p className="text-[9px] font-bold text-slate-300">
                             {noteCreator}
                           </p>
 
-                          <time className="text-xs font-medium text-slate-400">
+                          <time className="text-[8px] text-slate-600">
                             {formatNoteDate(note?.createdAt)}
                           </time>
                         </div>
 
-                        <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-slate-600">
+                        <p className="mt-1 whitespace-pre-wrap break-words text-[9px] leading-4 text-slate-400">
                           {note?.text || ""}
                         </p>
                       </article>
                     );
                   })}
                 </div>
+              ) : (
+                <p className="mt-2 rounded-lg border border-dashed border-[#26364b] px-3 py-2 text-[9px] text-slate-600">
+                  No private CRM notes yet.
+                </p>
               )}
             </div>
-          </section>
-        )}
+          </details>
+        ) : null}
 
-        <div className="mt-6">
+        <div className="mt-3">
           <LeadForm
-            form={form}
-            fieldErrors={fieldErrors}
-            isSubmitting={isSubmitting}
-            isEdit={isEditMode}
-            serviceOptions={serviceOptions}
             adminOptions={adminOptions}
-            sourceContactMessage={lead?.sourceContactMessage || null}
+            fieldErrors={fieldErrors}
+            form={form}
+            isEdit={isEditMode}
+            isSubmitting={isSubmitting}
+            onCancel={handleCancel}
             onChange={handleFieldChange}
             onSubmit={handleSubmit}
-            onCancel={handleCancel}
+            serviceOptions={serviceOptions}
+            sourceContactMessage={lead?.sourceContactMessage || null}
           />
         </div>
       </section>

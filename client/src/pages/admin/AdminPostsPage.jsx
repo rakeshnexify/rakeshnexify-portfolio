@@ -351,64 +351,71 @@ function AdminPostsPage() {
   const canDeletePosts = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+    <main className="admin-posts-compact-page min-h-screen">
+      <section className="mx-auto w-full max-w-[1560px] px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="admin-posts-eyebrow text-[10px] font-bold uppercase tracking-[0.16em]">
               Publishing
             </p>
 
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">
               Blog & News
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Manage Blog and News Posts, publishing metadata, categories,
-              tags, related Projects and public display priority.
+            <p className="mt-1 max-w-2xl text-xs leading-5">
+              Manage Blog and News content, visibility and featured priority.
             </p>
           </div>
 
-          <Link
-            to="/admin/posts/new"
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-          >
-            Add Post
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="admin-posts-count-pill rounded-lg px-3 py-2 text-[11px] font-semibold">
+              {isLoading
+                ? "Loading..."
+                : `${resultCount} Post${resultCount === 1 ? "" : "s"}`}
+            </span>
+
+            <Link
+              className="admin-posts-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+              to="/admin/posts/new"
+            >
+              Add Post
+            </Link>
+          </div>
         </header>
 
         <form
+          className="admin-posts-toolbar mt-4 rounded-xl p-3"
           onSubmit={handleFilterSubmit}
-          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(250px,1.5fr)_150px_150px_auto]">
             <div>
-              <label htmlFor="post-search" className={labelClassName}>
+              <label className="sr-only" htmlFor="post-search">
                 Search
               </label>
 
               <input
+                className={`${inputClassName} admin-posts-input !mt-0 !min-h-10 !rounded-lg`}
                 id="post-search"
                 name="search"
+                onChange={handleFilterChange}
+                placeholder="Search title, slug, content or author..."
                 type="search"
                 value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Title, slug, content or author"
-                className={inputClassName}
               />
             </div>
 
             <div>
-              <label htmlFor="post-type-filter" className={labelClassName}>
+              <label className="sr-only" htmlFor="post-type-filter">
                 Type
               </label>
 
               <select
+                className={`${inputClassName} admin-posts-input !mt-0 !min-h-10 !rounded-lg`}
                 id="post-type-filter"
                 name="type"
-                value={formFilters.type}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.type}
               >
                 <option value="">Blog & News</option>
                 <option value="blog">Blog only</option>
@@ -417,51 +424,16 @@ function AdminPostsPage() {
             </div>
 
             <div>
-              <label htmlFor="post-category-filter" className={labelClassName}>
-                Category
-              </label>
-
-              <input
-                id="post-category-filter"
-                name="category"
-                type="text"
-                value={formFilters.category}
-                onChange={handleFilterChange}
-                placeholder="Exact category"
-                className={inputClassName}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="post-tag-filter" className={labelClassName}>
-                Tag
-              </label>
-
-              <input
-                id="post-tag-filter"
-                name="tag"
-                type="text"
-                value={formFilters.tag}
-                onChange={handleFilterChange}
-                placeholder="Exact tag"
-                className={inputClassName}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="post-visibility-filter"
-                className={labelClassName}
-              >
+              <label className="sr-only" htmlFor="post-visibility-filter">
                 Visibility
               </label>
 
               <select
+                className={`${inputClassName} admin-posts-input !mt-0 !min-h-10 !rounded-lg`}
                 id="post-visibility-filter"
                 name="visibility"
-                value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.visibility}
               >
                 <option value="all">All visibility</option>
                 <option value="visible">Visible</option>
@@ -469,331 +441,344 @@ function AdminPostsPage() {
               </select>
             </div>
 
-            <div>
-              <label
-                htmlFor="post-featured-filter"
-                className={labelClassName}
+            <div className="flex gap-2">
+              <button
+                className="admin-posts-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+                disabled={isLoading || Boolean(actionPostId)}
+                type="submit"
               >
-                Display type
-              </label>
+                Apply
+              </button>
 
-              <select
-                id="post-featured-filter"
-                name="featured"
-                value={formFilters.featured}
-                onChange={handleFilterChange}
-                className={inputClassName}
+              <button
+                aria-label="Clear Blog and News filters"
+                className="admin-posts-secondary-button inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-xs font-semibold"
+                disabled={isLoading || Boolean(actionPostId)}
+                onClick={handleClearFilters}
+                title="Clear filters"
+                type="button"
               >
-                <option value="all">All records</option>
-                <option value="featured">Featured</option>
-                <option value="standard">Standard</option>
-              </select>
+                Clear
+              </button>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              disabled={isLoading || Boolean(actionPostId)}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-            >
-              Clear
-            </button>
+          <details className="admin-posts-more mt-2 rounded-lg">
+            <summary className="cursor-pointer list-none px-3 py-2 text-[11px] font-semibold">
+              More Filters
+            </summary>
 
-            <button
-              type="submit"
-              disabled={isLoading || Boolean(actionPostId)}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-            >
-              Apply Filters
-            </button>
-          </div>
+            <div className="grid gap-3 border-t px-3 py-3 md:grid-cols-3">
+              <div>
+                <label
+                  className={`${labelClassName} !text-[10px]`}
+                  htmlFor="post-category-filter"
+                >
+                  Category
+                </label>
+
+                <input
+                  className={`${inputClassName} admin-posts-input !mt-1.5 !min-h-10 !rounded-lg`}
+                  id="post-category-filter"
+                  name="category"
+                  onChange={handleFilterChange}
+                  placeholder="Exact category"
+                  type="text"
+                  value={formFilters.category}
+                />
+              </div>
+
+              <div>
+                <label
+                  className={`${labelClassName} !text-[10px]`}
+                  htmlFor="post-tag-filter"
+                >
+                  Tag
+                </label>
+
+                <input
+                  className={`${inputClassName} admin-posts-input !mt-1.5 !min-h-10 !rounded-lg`}
+                  id="post-tag-filter"
+                  name="tag"
+                  onChange={handleFilterChange}
+                  placeholder="Exact tag"
+                  type="text"
+                  value={formFilters.tag}
+                />
+              </div>
+
+              <div>
+                <label
+                  className={`${labelClassName} !text-[10px]`}
+                  htmlFor="post-featured-filter"
+                >
+                  Featured
+                </label>
+
+                <select
+                  className={`${inputClassName} admin-posts-input !mt-1.5 !min-h-10 !rounded-lg`}
+                  id="post-featured-filter"
+                  name="featured"
+                  onChange={handleFilterChange}
+                  value={formFilters.featured}
+                >
+                  <option value="all">All records</option>
+                  <option value="featured">Featured</option>
+                  <option value="standard">Standard</option>
+                </select>
+              </div>
+            </div>
+          </details>
         </form>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-800">
-              {isLoading
-                ? "Loading Posts..."
-                : `${resultCount} Post${resultCount === 1 ? "" : "s"}`}
-            </p>
-
-            {!isLoading && (
-              <p className="mt-1 text-xs text-slate-500">
-                Showing Blog and News records matching the applied filters.
-              </p>
-            )}
-          </div>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold">
+            {isLoading
+              ? "Loading Posts..."
+              : `${resultCount} result${resultCount === 1 ? "" : "s"}`}
+          </p>
 
           <button
-            type="button"
-            onClick={handleRefresh}
+            className="admin-posts-secondary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[11px] font-semibold"
             disabled={isLoading || Boolean(actionPostId)}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+            onClick={handleRefresh}
+            type="button"
           >
             Refresh
           </button>
         </div>
 
         <div aria-live="polite">
-          {successMessage && (
+          {successMessage ? (
             <div
+              className="admin-posts-success mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
               role="status"
-              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
             >
               {successMessage}
             </div>
-          )}
+          ) : null}
 
-          {error && (
+          {error ? (
             <div
+              className="admin-posts-error mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
               role="alert"
-              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
             >
               {error}
             </div>
-          )}
+          ) : null}
         </div>
 
-        {isLoading && (
+        {isLoading ? (
           <div
-            role="status"
             aria-live="polite"
-            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+            className="mt-3 space-y-2"
+            role="status"
           >
             <span className="sr-only">Loading Posts...</span>
 
-            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
+            {[1, 2, 3, 4, 5].map((placeholder) => (
               <div
+                className="admin-posts-skeleton h-[92px] rounded-xl motion-reduce:animate-none"
                 key={placeholder}
-                className="h-[31rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && !error && posts.length === 0 && (
-          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
-            <div className="mx-auto grid size-12 place-items-center rounded-xl bg-brand-50 text-lg font-bold text-brand-600">
-              P
-            </div>
+        {!isLoading && !error && posts.length === 0 ? (
+          <div className="admin-posts-empty mt-3 rounded-xl px-5 py-9 text-center">
+            <h2 className="text-base font-bold">No Posts found</h2>
 
-            <h2 className="mt-4 text-base font-bold text-slate-950">
-              No Posts found
-            </h2>
-
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-1 text-xs">
               Change the filters or create the first Blog or News Post.
             </p>
           </div>
-        )}
+        ) : null}
 
-        {!isLoading && posts.length > 0 && (
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {!isLoading && posts.length > 0 ? (
+          <div className="mt-3 space-y-2">
             {posts.map((post) => {
               const isActionPending = actionPostId === post._id;
-
+              const tags = Array.isArray(post.tags) ? post.tags : [];
               const relatedProjectCount = Array.isArray(post.relatedProjects)
                 ? post.relatedProjects.length
                 : 0;
 
-              const tags = Array.isArray(post.tags) ? post.tags : [];
-
               return (
                 <article
+                  className="admin-posts-row min-w-0 rounded-xl"
                   key={post._id}
-                  className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <div className="relative aspect-[16/9] overflow-hidden bg-slate-950">
-                    <div className="grid size-full place-items-center text-3xl font-bold text-white/75">
-                      {createPostInitial(post.type)}
+                  <div className="grid min-w-0 grid-cols-[76px_minmax(0,1fr)] gap-3 p-3 md:grid-cols-[86px_minmax(0,1fr)_auto] md:items-center">
+                    <div className="admin-posts-thumb relative h-[64px] overflow-hidden rounded-lg">
+                      <div className="grid size-full place-items-center text-lg font-bold">
+                        {createPostInitial(post.type)}
+                      </div>
+
+                      {post.featuredImageUrl ? (
+                        <img
+                          alt={
+                            post.featuredImageAlt ||
+                            `${post.title} featured image`
+                          }
+                          className="absolute inset-0 size-full object-cover"
+                          loading="lazy"
+                          onError={(event) => {
+                            event.currentTarget.hidden = true;
+                          }}
+                          src={post.featuredImageUrl}
+                        />
+                      ) : null}
                     </div>
 
-                    {post.featuredImageUrl && (
-                      <img
-                        src={post.featuredImageUrl}
-                        alt={
-                          post.featuredImageAlt ||
-                          `${post.title} featured image`
-                        }
-                        loading="lazy"
-                        onError={(event) => {
-                          event.currentTarget.hidden = true;
-                        }}
-                        className="absolute inset-0 size-full object-cover"
-                      />
-                    )}
-
-                    <div className="absolute inset-x-0 top-0 flex flex-wrap gap-2 p-4">
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                          post.type === "news"
-                            ? "bg-sky-50 text-sky-800"
-                            : "bg-violet-50 text-violet-800"
-                        }`}
-                      >
-                        {formatPostType(post.type)}
-                      </span>
-
-                      {post.isFeatured && (
-                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">
-                          Featured
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                        <span
+                          className="admin-posts-badge rounded-md px-2 py-1 text-[9px] font-bold"
+                          data-type={post.type}
+                        >
+                          {formatPostType(post.type)}
                         </span>
-                      )}
 
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                          post.isVisible
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {post.isVisible ? "Visible" : "Hidden"}
-                      </span>
-                    </div>
-                  </div>
+                        <span
+                          className={`admin-posts-badge rounded-md px-2 py-1 text-[9px] font-bold ${
+                            post.isVisible ? "is-visible" : "is-hidden"
+                          }`}
+                        >
+                          {post.isVisible ? "Visible" : "Hidden"}
+                        </span>
 
-                  <div className="flex flex-1 flex-col p-5">
-                    <h2 className="break-words text-lg font-bold leading-7 text-slate-950">
-                      {post.title}
-                    </h2>
+                        {post.isFeatured ? (
+                          <span className="admin-posts-badge is-featured rounded-md px-2 py-1 text-[9px] font-bold">
+                            Featured
+                          </span>
+                        ) : null}
+                      </div>
 
-                    <p className="mt-1 break-all text-xs font-medium text-slate-400">
-                      /{post.slug}
-                    </p>
+                      <h2 className="mt-1.5 truncate text-sm font-bold">
+                        {post.title}
+                      </h2>
 
-                    {post.excerpt && (
-                      <p className="mt-4 line-clamp-4 break-words text-sm leading-6 text-slate-600">
-                        {post.excerpt}
-                      </p>
-                    )}
+                      <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
+                        <span className="max-w-52 truncate">
+                          /{post.slug}
+                        </span>
 
-                    {(post.category || tags.length > 0) && (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {post.category && (
-                          <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                        {post.category ? (
+                          <span className="truncate">
                             {post.category}
                           </span>
-                        )}
+                        ) : null}
 
-                        {tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700"
-                          >
-                            #{tag}
+                        <span>{formatDate(post.publishedAt)}</span>
+
+                        <span>{post.readingTime ?? 1} min</span>
+
+                        {relatedProjectCount > 0 ? (
+                          <span>
+                            {relatedProjectCount} related
                           </span>
-                        ))}
-
-                        {tags.length > 3 && (
-                          <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                            +{tags.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    <dl className="mt-5 divide-y divide-slate-100 border-y border-slate-100 text-sm">
-                      <div className="flex items-start justify-between gap-4 py-3">
-                        <dt className="text-slate-500">Author</dt>
-
-                        <dd className="max-w-[65%] break-words text-right font-semibold text-slate-800">
-                          {post.authorName}
-                        </dd>
+                        ) : null}
                       </div>
 
-                      <div className="flex items-start justify-between gap-4 py-3">
-                        <dt className="text-slate-500">Published</dt>
+                      {post.excerpt ? (
+                        <p className="mt-1 line-clamp-1 text-[10px] leading-4">
+                          {post.excerpt}
+                        </p>
+                      ) : null}
 
-                        <dd className="text-right font-semibold text-slate-700">
-                          {formatDate(post.publishedAt)}
-                        </dd>
-                      </div>
+                      {tags.length > 0 ? (
+                        <div className="mt-1.5 flex min-w-0 flex-wrap gap-1">
+                          {tags.slice(0, 2).map((tag) => (
+                            <span
+                              className="admin-posts-tag rounded-md px-1.5 py-0.5 text-[9px]"
+                              key={tag}
+                            >
+                              #{tag}
+                            </span>
+                          ))}
 
-                      <div className="flex items-start justify-between gap-4 py-3">
-                        <dt className="text-slate-500">Reading time</dt>
+                          {tags.length > 2 ? (
+                            <span className="admin-posts-tag rounded-md px-1.5 py-0.5 text-[9px]">
+                              +{tags.length - 2}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
 
-                        <dd className="font-semibold text-slate-800">
-                          {post.readingTime ?? 1} min
-                        </dd>
-                      </div>
-
-                      <div className="flex items-start justify-between gap-4 py-3">
-                        <dt className="text-slate-500">Related Projects</dt>
-
-                        <dd className="font-semibold text-slate-800">
-                          {relatedProjectCount}
-                        </dd>
-                      </div>
-
-                      <div className="flex items-start justify-between gap-4 py-3">
-                        <dt className="text-slate-500">Display order</dt>
-
-                        <dd className="font-semibold text-slate-800">
-                          {post.order ?? 0}
-                        </dd>
-                      </div>
-                    </dl>
-
-                    <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
+                    <div className="col-span-2 flex shrink-0 items-center justify-end gap-2 md:col-span-1">
                       <Link
+                        className="admin-posts-primary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[10px] font-bold"
                         to={`/admin/posts/${post._id}/edit`}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
                       >
                         Edit
                       </Link>
 
-                      <button
-                        type="button"
-                        onClick={() => handleToggleVisibility(post)}
-                        disabled={isLoading || Boolean(actionPostId)}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : post.isVisible
-                            ? "Hide"
-                            : "Show"}
-                      </button>
+                      <details className="admin-posts-actions relative">
+                        <summary
+                          aria-label={`More actions for ${post.title}`}
+                          className="admin-posts-secondary-button inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-base font-bold"
+                          title="More actions"
+                        >
+                          …
+                        </summary>
 
-                      <button
-                        type="button"
-                        onClick={() => handleToggleFeatured(post)}
-                        disabled={isLoading || Boolean(actionPostId)}
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                      >
-                        {isActionPending
-                          ? "Working..."
-                          : post.isFeatured
-                            ? "Make Standard"
-                            : "Make Featured"}
-                      </button>
+                        <div className="admin-posts-action-menu absolute right-0 top-[calc(100%+0.4rem)] z-30 w-44 rounded-xl p-1.5">
+                          <button
+                            className="admin-posts-menu-action"
+                            disabled={isLoading || Boolean(actionPostId)}
+                            onClick={() => handleToggleVisibility(post)}
+                            type="button"
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : post.isVisible
+                                ? "Hide from public"
+                                : "Show on public"}
+                          </button>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePost(post)}
-                        disabled={
-                          isLoading ||
-                          Boolean(actionPostId) ||
-                          !canDeletePosts
-                        }
-                        title={
-                          canDeletePosts
-                            ? "Permanently delete Post"
-                            : "Your role cannot permanently delete Posts"
-                        }
-                        className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                      >
-                        {isActionPending ? "Working..." : "Delete"}
-                      </button>
+                          <button
+                            className="admin-posts-menu-action"
+                            disabled={isLoading || Boolean(actionPostId)}
+                            onClick={() => handleToggleFeatured(post)}
+                            type="button"
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : post.isFeatured
+                                ? "Make standard"
+                                : "Make featured"}
+                          </button>
+
+                          <div className="admin-posts-menu-divider my-1" />
+
+                          <button
+                            className="admin-posts-menu-action is-danger"
+                            disabled={
+                              isLoading ||
+                              Boolean(actionPostId) ||
+                              !canDeletePosts
+                            }
+                            onClick={() => handleDeletePost(post)}
+                            title={
+                              canDeletePosts
+                                ? "Permanently delete Post"
+                                : "Your role cannot permanently delete Posts"
+                            }
+                            type="button"
+                          >
+                            {isActionPending ? "Working..." : "Delete"}
+                          </button>
+                        </div>
+                      </details>
                     </div>
                   </div>
                 </article>
               );
             })}
           </div>
-        )}
+        ) : null}
       </section>
     </main>
   );

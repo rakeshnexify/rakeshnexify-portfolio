@@ -221,311 +221,313 @@ function ClientPartnerForm({
     }
   }
 
-  const fieldClassName =
-    "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60";
-
   return (
     <>
       <form
         onSubmit={handleSubmit}
-        className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-7"
+        className="rnx-admin-clients-compact-v456 rnx-admin-client-partner-mobile-v461 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
-      <div className="grid gap-6">
-        <section>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-            Relationship
-          </p>
-          <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950 dark:text-white">
-            Public client / partner details
-          </h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-            These fields control the public Clients & Partners section and
-            listing page. Company Menu entries remain managed separately.
-          </p>
-        </section>
-
         {submitError && (
           <div
             role="alert"
-            className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+            className="border-b border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
           >
             {submitError}
           </div>
         )}
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Company name *
-            <input
-              type="text"
-              value={values.name}
-              onChange={(event) => setField("name", event.target.value)}
-              maxLength={150}
-              disabled={isSubmitting}
-              className={fieldClassName}
-              placeholder="UniQuick Mart"
-              autoComplete="organization"
-            />
-            {fieldErrors.name && (
-              <span className="mt-1 block text-xs font-medium text-red-600">
-                {fieldErrors.name}
-              </span>
-            )}
-          </label>
-
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Relationship *
-            <select
-              value={values.relationship}
-              onChange={(event) =>
-                setField("relationship", event.target.value)
-              }
-              disabled={isSubmitting}
-              className={fieldClassName}
-            >
-              <option value="client">Client</option>
-              <option value="partner">Partner</option>
-            </select>
-            {fieldErrors.relationship && (
-              <span className="mt-1 block text-xs font-medium text-red-600">
-                {fieldErrors.relationship}
-              </span>
-            )}
-          </label>
-
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Industry / category
-            <input
-              type="text"
-              value={values.industry}
-              onChange={(event) => setField("industry", event.target.value)}
-              maxLength={150}
-              disabled={isSubmitting}
-              className={fieldClassName}
-              placeholder="E-Commerce"
-            />
-          </label>
-
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Collaboration / role
-            <input
-              type="text"
-              value={values.role}
-              onChange={(event) => setField("role", event.target.value)}
-              maxLength={200}
-              disabled={isSubmitting}
-              className={fieldClassName}
-              placeholder="Development, Design, Support"
-            />
-          </label>
-        </div>
-
-        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-          Short description *
-          <textarea
-            value={values.shortDescription}
-            onChange={(event) =>
-              setField("shortDescription", event.target.value)
-            }
-            maxLength={400}
-            rows={4}
-            disabled={isSubmitting}
-            className={`${fieldClassName} min-h-28 resize-y`}
-            placeholder="Describe the relationship, project or collaboration in a concise public-facing sentence."
-          />
-          <div className="mt-1 flex items-start justify-between gap-3">
-            <span className="text-xs text-slate-400">
-              Used on the public relationship card.
-            </span>
-            <span className="text-xs text-slate-400">
-              {values.shortDescription.length}/400
+        <div className="p-3 sm:p-5">
+          <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5 dark:border-slate-800 sm:gap-3 sm:pb-3">
+            <div>
+              <h2 className="text-sm font-bold text-slate-950 dark:text-white">
+                Public relationship profile
+              </h2>
+              <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                Core information shown on Clients & Partners.
+              </p>
+            </div>
+            <span className="text-[10px] font-semibold text-slate-400">
+              * Required
             </span>
           </div>
-          {fieldErrors.shortDescription && (
-            <span className="mt-1 block text-xs font-medium text-red-600">
-              {fieldErrors.shortDescription}
-            </span>
-          )}
-        </label>
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Website URL
-            <input
-              type="url"
-              value={values.websiteUrl}
-              onChange={(event) => setField("websiteUrl", event.target.value)}
-              maxLength={500}
-              disabled={isSubmitting}
-              className={fieldClassName}
-              placeholder="https://example.com"
-              autoComplete="url"
-            />
-            {fieldErrors.websiteUrl && (
-              <span className="mt-1 block text-xs font-medium text-red-600">
-                {fieldErrors.websiteUrl}
-              </span>
-            )}
-          </label>
-
-          <div>
-            <label
-              htmlFor="client-partner-logo-url"
-              className="block text-sm font-semibold text-slate-700 dark:text-slate-200"
-            >
-              Logo URL
+          <div className="mt-3 grid gap-x-4 gap-y-2.5 sm:mt-4 sm:grid-cols-2 sm:gap-y-3">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Company name *
+              <input
+                type="text"
+                value={values.name}
+                onChange={(event) => setField("name", event.target.value)}
+                maxLength={150}
+                disabled={isSubmitting}
+                className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60"
+                placeholder="UniQuick Mart"
+                autoComplete="organization"
+              />
+              {fieldErrors.name && (
+                <span className="mt-1 block text-[11px] font-medium text-red-600">
+                  {fieldErrors.name}
+                </span>
+              )}
             </label>
 
-            <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
-              <input
-                id="client-partner-logo-url"
-                type="text"
-                value={values.logoUrl}
-                onChange={(event) => setField("logoUrl", event.target.value)}
-                maxLength={500}
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Relationship *
+              <select
+                value={values.relationship}
+                onChange={(event) =>
+                  setField("relationship", event.target.value)
+                }
                 disabled={isSubmitting}
-                className={fieldClassName}
-                placeholder="/uploads/company-logo.png or https://..."
-              />
-
-              <button
-                type="button"
-                onClick={openMediaPicker}
-                disabled={isSubmitting || !accessToken}
-                className="mt-2 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60"
               >
-                Choose Media
-              </button>
-            </div>
+                <option value="client">Client</option>
+                <option value="partner">Partner</option>
+              </select>
+              {fieldErrors.relationship && (
+                <span className="mt-1 block text-[11px] font-medium text-red-600">
+                  {fieldErrors.relationship}
+                </span>
+              )}
+            </label>
 
-            <p className="mt-1 text-xs leading-5 text-slate-400">
-              Paste a logo URL or choose an image/SVG from the Media Library.
-            </p>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Industry / category
+              <input
+                type="text"
+                value={values.industry}
+                onChange={(event) => setField("industry", event.target.value)}
+                maxLength={150}
+                disabled={isSubmitting}
+                className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60"
+                placeholder="E-Commerce"
+              />
+            </label>
+
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+              Collaboration / role
+              <input
+                type="text"
+                value={values.role}
+                onChange={(event) => setField("role", event.target.value)}
+                maxLength={200}
+                disabled={isSubmitting}
+                className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60"
+                placeholder="Development, Design, Support"
+              />
+            </label>
+
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 sm:col-span-2">
+              Short description *
+              <textarea
+                value={values.shortDescription}
+                onChange={(event) =>
+                  setField("shortDescription", event.target.value)
+                }
+                maxLength={400}
+                rows={2}
+                disabled={isSubmitting}
+                className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60 min-h-16 resize-y leading-5 sm:min-h-20"
+                placeholder="Concise public-facing relationship description."
+              />
+              <div className="mt-1 flex items-center justify-between gap-3 text-[10px] text-slate-400">
+                <span>Shown on the public relationship card.</span>
+                <span>{values.shortDescription.length}/400</span>
+              </div>
+              {fieldErrors.shortDescription && (
+                <span className="mt-1 block text-[11px] font-medium text-red-600">
+                  {fieldErrors.shortDescription}
+                </span>
+              )}
+            </label>
+          </div>
+
+          <div className="mt-3 border-t border-slate-200 pt-3 dark:border-slate-800 sm:mt-4 sm:pt-4">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+              Links & media
+            </h3>
+
+            <div className="mt-3 grid gap-x-4 gap-y-3 lg:grid-cols-2">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Website URL
+                <input
+                  type="url"
+                  value={values.websiteUrl}
+                  onChange={(event) => setField("websiteUrl", event.target.value)}
+                  maxLength={500}
+                  disabled={isSubmitting}
+                  className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60"
+                  placeholder="https://example.com"
+                  autoComplete="url"
+                />
+                {fieldErrors.websiteUrl && (
+                  <span className="mt-1 block text-[11px] font-medium text-red-600">
+                    {fieldErrors.websiteUrl}
+                  </span>
+                )}
+              </label>
+
+              <div>
+                <label
+                  htmlFor="client-partner-logo-url"
+                  className="block text-xs font-semibold text-slate-700 dark:text-slate-200"
+                >
+                  Logo
+                </label>
+                <div className="mt-1.5 flex gap-2">
+                  <input
+                    id="client-partner-logo-url"
+                    type="text"
+                    value={values.logoUrl}
+                    onChange={(event) => setField("logoUrl", event.target.value)}
+                    maxLength={500}
+                    disabled={isSubmitting}
+                    className="min-h-9 sm:min-h-10 min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60"
+                    placeholder="Logo URL"
+                  />
+                  <button
+                    type="button"
+                    onClick={openMediaPicker}
+                    disabled={isSubmitting || !accessToken}
+                    className="inline-flex min-h-9 sm:min-h-10 shrink-0 items-center justify-center rounded-lg border border-brand-500 bg-brand-600 px-3 text-xs font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Choose
+                  </button>
+                </div>
+                <p className="mt-1 text-[10px] text-slate-400">
+                  URL or image/SVG from Media Library.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 border-t border-slate-200 pt-3 dark:border-slate-800 sm:mt-4 sm:pt-4">
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+              Relationship settings
+            </h3>
+
+            <div className="mt-3 grid gap-x-4 gap-y-3 lg:grid-cols-4">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 lg:col-span-2">
+                Services / work areas
+                <input
+                  type="text"
+                  value={values.servicesText}
+                  onChange={(event) => setField("servicesText", event.target.value)}
+                  disabled={isSubmitting}
+                  className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60"
+                  placeholder="Web Development, UI/UX, Support"
+                />
+                <span className="mt-1 block text-[10px] text-slate-400">
+                  Comma separated.
+                </span>
+              </label>
+
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                Start date
+                <input
+                  type="date"
+                  value={values.relationshipStartDate}
+                  onChange={(event) =>
+                    setField("relationshipStartDate", event.target.value)
+                  }
+                  disabled={isSubmitting}
+                  className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60"
+                />
+              </label>
+
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                End date
+                <input
+                  type="date"
+                  value={values.relationshipEndDate}
+                  onChange={(event) =>
+                    setField("relationshipEndDate", event.target.value)
+                  }
+                  disabled={isSubmitting}
+                  className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60"
+                />
+                {fieldErrors.relationshipEndDate && (
+                  <span className="mt-1 block text-[11px] font-medium text-red-600">
+                    {fieldErrors.relationshipEndDate}
+                  </span>
+                )}
+              </label>
+
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 lg:max-w-[180px]">
+                Display order *
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={values.order}
+                  onChange={(event) => setField("order", event.target.value)}
+                  disabled={isSubmitting}
+                  className="mt-1.5 min-h-9 sm:min-h-10 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-950/60"
+                />
+                {fieldErrors.order && (
+                  <span className="mt-1 block text-[11px] font-medium text-red-600">
+                    {fieldErrors.order}
+                  </span>
+                )}
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-1.5 border-t border-slate-200 pt-3 dark:border-slate-800 sm:mt-4 sm:grid-cols-2 sm:gap-2 sm:pt-4">
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 dark:border-slate-800 dark:bg-slate-950/60 sm:gap-3 sm:px-3 sm:py-2.5">
+              <input
+                type="checkbox"
+                checked={values.isVisible}
+                onChange={(event) => setField("isVisible", event.target.checked)}
+                disabled={isSubmitting}
+                className="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              />
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-slate-900 dark:text-white">
+                  Publicly visible
+                </span>
+                <span className="block truncate text-[10px] text-slate-500 dark:text-slate-400">
+                  Show on Clients & Partners.
+                </span>
+              </span>
+            </label>
+
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 dark:border-slate-800 dark:bg-slate-950/60 sm:gap-3 sm:px-3 sm:py-2.5">
+              <input
+                type="checkbox"
+                checked={values.isFeatured}
+                onChange={(event) =>
+                  setField("isFeatured", event.target.checked)
+                }
+                disabled={isSubmitting}
+                className="size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              />
+              <span className="min-w-0">
+                <span className="block text-xs font-bold text-slate-900 dark:text-white">
+                  Home priority
+                </span>
+                <span className="block truncate text-[10px] text-slate-500 dark:text-slate-400">
+                  Prioritize in Home preview.
+                </span>
+              </span>
+            </label>
           </div>
         </div>
 
-        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-          Services / work areas
-          <input
-            type="text"
-            value={values.servicesText}
-            onChange={(event) => setField("servicesText", event.target.value)}
-            disabled={isSubmitting}
-            className={fieldClassName}
-            placeholder="Web Development, UI/UX, Support"
-          />
-          <span className="mt-1 block text-xs text-slate-400">
-            Separate multiple values with commas.
-          </span>
-        </label>
-
-        <div className="grid gap-5 sm:grid-cols-3">
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Relationship start
-            <input
-              type="date"
-              value={values.relationshipStartDate}
-              onChange={(event) =>
-                setField("relationshipStartDate", event.target.value)
-              }
-              disabled={isSubmitting}
-              className={fieldClassName}
-            />
-          </label>
-
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Relationship end
-            <input
-              type="date"
-              value={values.relationshipEndDate}
-              onChange={(event) =>
-                setField("relationshipEndDate", event.target.value)
-              }
-              disabled={isSubmitting}
-              className={fieldClassName}
-            />
-            {fieldErrors.relationshipEndDate && (
-              <span className="mt-1 block text-xs font-medium text-red-600">
-                {fieldErrors.relationshipEndDate}
-              </span>
-            )}
-          </label>
-
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
-            Display order *
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value={values.order}
-              onChange={(event) => setField("order", event.target.value)}
-              disabled={isSubmitting}
-              className={fieldClassName}
-            />
-            {fieldErrors.order && (
-              <span className="mt-1 block text-xs font-medium text-red-600">
-                {fieldErrors.order}
-              </span>
-            )}
-          </label>
-        </div>
-
-        <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/60 sm:grid-cols-2">
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-            <input
-              type="checkbox"
-              checked={values.isVisible}
-              onChange={(event) => setField("isVisible", event.target.checked)}
-              disabled={isSubmitting}
-              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-            />
-            <span>
-              <span className="block text-sm font-bold text-slate-950 dark:text-white">
-                Publicly visible
-              </span>
-              <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
-                Show this relationship on the public Clients & Partners page.
-              </span>
-            </span>
-          </label>
-
-          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-            <input
-              type="checkbox"
-              checked={values.isFeatured}
-              onChange={(event) =>
-                setField("isFeatured", event.target.checked)
-              }
-              disabled={isSubmitting}
-              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-            />
-            <span>
-              <span className="block text-sm font-bold text-slate-950 dark:text-white">
-                Prioritize on Home
-              </span>
-              <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
-                Featured relationships are considered first for the six Home
-                preview cards.
-              </span>
-            </span>
-          </label>
-        </div>
-
-        <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-950/40 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3">
+          <p className="text-[10px] leading-4 text-slate-400">
             {mode === "edit"
-              ? "Saving updates the existing Company record without breaking Team relationships."
-              : "A shared Company record will be created for this client or partner."}
+              ? "Updates the existing shared Company record."
+              : "Creates a shared Company record for this relationship."}
           </p>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg bg-brand-600 px-4 text-xs font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isSubmitting ? "Saving..." : submitLabel}
           </button>
-        </div>
         </div>
       </form>
 

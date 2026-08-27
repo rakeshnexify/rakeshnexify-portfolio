@@ -117,6 +117,12 @@ const contactSectionStringFields = [
   "privacyNote",
 ];
 
+const contactSectionBooleanFields = [
+  "showServicesOnContactPage",
+  "showFaqOnContactPage",
+  "showTestimonialsOnContactPage",
+];
+
 const contactStringFields = [
   "email",
   "phone",
@@ -860,6 +866,17 @@ function appendContactSectionPayload(payload, sectionValue) {
     "contactSection",
     contactSectionStringFields,
   );
+
+  contactSectionBooleanFields.forEach((fieldName) => {
+    if (!hasOwnProperty(section, fieldName)) {
+      return;
+    }
+
+    payload[`contactSection.${fieldName}`] = cleanStrictBoolean(
+      section[fieldName],
+      `contactSection.${fieldName}`,
+    );
+  });
 }
 
 function appendContactPayload(payload, contactValue) {

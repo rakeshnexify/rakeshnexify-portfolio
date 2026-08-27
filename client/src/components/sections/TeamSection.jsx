@@ -8,6 +8,7 @@ import styles from "./TeamSection.module.css";
 import PublicSectionEyebrow from "../layout/PublicSectionEyebrow";
 import PublicCTAButton from "../layout/PublicCTAButton";
 const HOME_TEAM_LIMIT = 5;
+const COMPANY_TEAM_URL = "https://idomere.com/team";
 
 const accentClasses = [
   styles.accentBlue,
@@ -173,8 +174,15 @@ function TeamSection() {
   const ctaLabel =
     String(ctaButton.label || "").trim();
 
-  const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href, "");
+  const configuredCtaUrl = getSafePublicUrl(
+    ctaButton.url || ctaButton.href,
+    COMPANY_TEAM_URL,
+  );
+
+  const ctaUrl =
+    configuredCtaUrl === "/team"
+      ? COMPANY_TEAM_URL
+      : configuredCtaUrl;
 
   const teamMembers = useMemo(() => {
     const sourceTeamMembers = Array.isArray(loadedTeamMembers)

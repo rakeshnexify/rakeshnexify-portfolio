@@ -135,6 +135,9 @@ function sortClientsPartners(firstCompany, secondCompany) {
   );
 }
 
+const COMPANY_CLIENTS_PARTNERS_URL =
+  "https://idomere.com/clients-partners";
+
 function ClientsPartnersSection() {
   const { companies, isLoading, error, refreshCompanies } = useCompanies();
   const { settings } = useSiteSettings();
@@ -156,8 +159,15 @@ function ClientsPartnersSection() {
   const ctaLabel =
     cleanText(ctaButton.label);
 
-  const ctaUrl = getSafePublicUrl(
-    ctaButton.url || ctaButton.href, "");
+  const configuredCtaUrl = getSafePublicUrl(
+    ctaButton.url || ctaButton.href,
+    COMPANY_CLIENTS_PARTNERS_URL,
+  );
+
+  const ctaUrl =
+    configuredCtaUrl === "/clients-partners"
+      ? COMPANY_CLIENTS_PARTNERS_URL
+      : configuredCtaUrl;
 
   const clientsPartners = useMemo(() => {
     const sourceCompanies = Array.isArray(companies) ? companies : [];

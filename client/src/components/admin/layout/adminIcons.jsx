@@ -219,6 +219,25 @@ const iconPaths = {
       <path d="M18 6 6 18" />
     </>
   ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-4-4" />
+    </>
+  ),
+  plus: (
+    <>
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </>
+  ),
+  calendar: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M8 3v4M16 3v4M3 10h18" />
+    </>
+  ),
+  chevronLeft: <path d="m15 18-6-6 6-6" />,
   chevronDown: <path d="m7 9 5 5 5-5" />,
   chevronRight: <path d="m9 7 5 5-5 5" />,
 };

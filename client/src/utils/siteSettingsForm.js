@@ -254,6 +254,15 @@ function normalizeContactSection(section = {}) {
 
     description: cleanString(section?.description),
 
+    showServicesOnContactPage:
+      section?.showServicesOnContactPage !== false,
+
+    showFaqOnContactPage:
+      section?.showFaqOnContactPage !== false,
+
+    showTestimonialsOnContactPage:
+      section?.showTestimonialsOnContactPage !== false,
+
     enquiryEyebrow: cleanString(section?.enquiryEyebrow),
 
     enquiryHeading: cleanString(section?.enquiryHeading),
@@ -1010,6 +1019,15 @@ function createSiteSettingsPayload(formValues = {}) {
       heading: values.contactSection.heading,
 
       description: values.contactSection.description,
+
+      showServicesOnContactPage:
+        values.contactSection.showServicesOnContactPage !== false,
+
+      showFaqOnContactPage:
+        values.contactSection.showFaqOnContactPage !== false,
+
+      showTestimonialsOnContactPage:
+        values.contactSection.showTestimonialsOnContactPage !== false,
 
       enquiryEyebrow: values.contactSection.enquiryEyebrow,
 

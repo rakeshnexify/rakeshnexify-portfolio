@@ -28,14 +28,6 @@ const statusLabels = {
   archived: "Archived",
 };
 
-const statusClasses = {
-  planning: "bg-violet-50 text-violet-700",
-  "in-progress": "bg-amber-50 text-amber-700",
-  completed: "bg-emerald-50 text-emerald-700",
-  maintained: "bg-blue-50 text-blue-700",
-  archived: "bg-slate-100 text-slate-600",
-};
-
 const projectTypeLabels = {
   personal: "Personal",
   client: "Client",
@@ -43,12 +35,6 @@ const projectTypeLabels = {
   "open-source": "Open Source",
   practice: "Practice",
 };
-
-const inputClassName =
-  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition-colors duration-150 motion-reduce:transition-none focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10";
-
-const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.08em] text-slate-500";
 
 function createApiFilters(filters) {
   const apiFilters = {
@@ -440,246 +426,210 @@ function AdminProjectsPage() {
   const canDeleteProjects = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <main className="admin-projects-page min-h-screen">
+      <section className="mx-auto w-full max-w-[1560px] px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-              <span className="uppercase tracking-[0.14em] text-brand-700">
-                Content
-              </span>
+            <p className="admin-projects-eyebrow text-[10px] font-bold uppercase tracking-[0.16em]">
+              Content
+            </p>
 
-              <span aria-hidden="true" className="text-slate-300">
-                /
-              </span>
-
-              <span className="text-slate-500">Portfolio management</span>
-            </div>
-
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">
               Projects
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Manage portfolio Projects, public visibility, featured state and
-              Case Study publication from one operational view.
+            <p className="mt-1 max-w-2xl text-xs leading-5">
+              Manage portfolio visibility, featured state and Case Studies.
             </p>
           </div>
 
-          <Link
-            to="/admin/projects/new"
-            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-          >
-            Add Project
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="admin-projects-count-pill rounded-lg px-3 py-2 text-[11px] font-semibold">
+              {isLoading
+                ? "Loading..."
+                : `${resultCount} Project${resultCount === 1 ? "" : "s"}`}
+            </span>
+
+            <Link
+              to="/admin/projects/new"
+              className="admin-projects-primary-button inline-flex min-h-9 items-center justify-center rounded-lg px-4 text-xs font-bold"
+            >
+              Add Project
+            </Link>
+          </div>
         </header>
 
         <form
+          className="admin-projects-toolbar mt-4 rounded-xl p-3"
           onSubmit={handleFilterSubmit}
-          className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-base font-black text-slate-950">Filters</h2>
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.4fr)_160px_170px_auto]">
+            <label className="sr-only" htmlFor="project-search">
+              Search Projects
+            </label>
 
-              <p className="mt-1 text-sm text-slate-500">
-                Narrow Projects by content, workflow and Case Study state.
-              </p>
+            <input
+              className="admin-projects-input min-h-10 rounded-lg px-3 text-sm outline-none"
+              id="project-search"
+              name="search"
+              onChange={handleFilterChange}
+              placeholder="Search title, slug, category or technology..."
+              type="search"
+              value={formFilters.search}
+            />
+
+            <label className="sr-only" htmlFor="project-type">
+              Project Type
+            </label>
+
+            <select
+              className="admin-projects-input min-h-10 rounded-lg px-3 text-xs font-semibold outline-none"
+              id="project-type"
+              name="projectType"
+              onChange={handleFilterChange}
+              value={formFilters.projectType}
+            >
+              <option value="">All Types</option>
+              <option value="personal">Personal</option>
+              <option value="client">Client</option>
+              <option value="company">Company</option>
+              <option value="open-source">Open Source</option>
+              <option value="practice">Practice</option>
+            </select>
+
+            <label className="sr-only" htmlFor="project-status">
+              Project Status
+            </label>
+
+            <select
+              className="admin-projects-input min-h-10 rounded-lg px-3 text-xs font-semibold outline-none"
+              id="project-status"
+              name="status"
+              onChange={handleFilterChange}
+              value={formFilters.status}
+            >
+              <option value="">All Statuses</option>
+              <option value="planning">Planning</option>
+              <option value="in-progress">In Development</option>
+              <option value="completed">Completed</option>
+              <option value="maintained">Active Project</option>
+              <option value="archived">Archived</option>
+            </select>
+
+            <div className="flex gap-2">
+              <button
+                className="admin-projects-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+                type="submit"
+              >
+                Apply
+              </button>
+
+              <button
+                aria-label="Clear Project filters"
+                className="admin-projects-secondary-button inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-xs font-semibold"
+                onClick={handleClearFilters}
+                title="Clear filters"
+                type="button"
+              >
+                Clear
+              </button>
             </div>
           </div>
 
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="md:col-span-2">
-              <label htmlFor="project-search" className={labelClassName}>
-                Search
-              </label>
+          <details className="admin-projects-advanced mt-2 rounded-lg">
+            <summary className="cursor-pointer list-none px-3 py-2 text-[11px] font-semibold">
+              More Filters
+            </summary>
 
-              <input
-                id="project-search"
-                name="search"
-                type="search"
-                value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Title, slug, category or technology"
-                className={`${inputClassName} px-4 placeholder:text-slate-400`}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="project-category" className={labelClassName}>
+            <div className="grid gap-2 border-t px-3 py-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              <label className="grid gap-1 text-[10px] font-semibold">
                 Category
+                <input
+                  className="admin-projects-input min-h-9 rounded-lg px-3 text-xs outline-none"
+                  id="project-category"
+                  name="category"
+                  onChange={handleFilterChange}
+                  placeholder="E-commerce"
+                  type="text"
+                  value={formFilters.category}
+                />
               </label>
 
-              <input
-                id="project-category"
-                name="category"
-                type="text"
-                value={formFilters.category}
-                onChange={handleFilterChange}
-                placeholder="E-commerce"
-                className={`${inputClassName} px-4 placeholder:text-slate-400`}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="project-type" className={labelClassName}>
-                Project type
-              </label>
-
-              <select
-                id="project-type"
-                name="projectType"
-                value={formFilters.projectType}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="">All types</option>
-                <option value="personal">Personal</option>
-                <option value="client">Client</option>
-                <option value="company">Company</option>
-                <option value="open-source">Open Source</option>
-                <option value="practice">Practice</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="project-status" className={labelClassName}>
-                Status
-              </label>
-
-              <select
-                id="project-status"
-                name="status"
-                value={formFilters.status}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="">All statuses</option>
-                <option value="planning">Planning</option>
-                <option value="in-progress">In Development</option>
-                <option value="completed">Completed</option>
-                <option value="maintained">Active Project</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="project-visibility" className={labelClassName}>
+              <label className="grid gap-1 text-[10px] font-semibold">
                 Visibility
+                <select
+                  className="admin-projects-input min-h-9 rounded-lg px-3 text-xs outline-none"
+                  id="project-visibility"
+                  name="visibility"
+                  onChange={handleFilterChange}
+                  value={formFilters.visibility}
+                >
+                  <option value="all">All Projects</option>
+                  <option value="visible">Visible</option>
+                  <option value="hidden">Hidden</option>
+                </select>
               </label>
 
-              <select
-                id="project-visibility"
-                name="visibility"
-                value={formFilters.visibility}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All Projects</option>
-                <option value="visible">Visible</option>
-                <option value="hidden">Hidden</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="project-featured" className={labelClassName}>
-                Project featured
+              <label className="grid gap-1 text-[10px] font-semibold">
+                Featured
+                <select
+                  className="admin-projects-input min-h-9 rounded-lg px-3 text-xs outline-none"
+                  id="project-featured"
+                  name="featured"
+                  onChange={handleFilterChange}
+                  value={formFilters.featured}
+                >
+                  <option value="all">All States</option>
+                  <option value="featured">Featured</option>
+                  <option value="standard">Standard</option>
+                </select>
               </label>
 
-              <select
-                id="project-featured"
-                name="featured"
-                value={formFilters.featured}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All states</option>
-                <option value="featured">Featured</option>
-                <option value="standard">Standard</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="project-case-study-publication"
-                className={labelClassName}
-              >
-                Case Study publication
+              <label className="grid gap-1 text-[10px] font-semibold">
+                Case Study
+                <select
+                  className="admin-projects-input min-h-9 rounded-lg px-3 text-xs outline-none"
+                  id="project-case-study-publication"
+                  name="caseStudyPublished"
+                  onChange={handleFilterChange}
+                  value={formFilters.caseStudyPublished}
+                >
+                  <option value="all">All Projects</option>
+                  <option value="published">Published</option>
+                  <option value="not-published">Not Published</option>
+                </select>
               </label>
 
-              <select
-                id="project-case-study-publication"
-                name="caseStudyPublished"
-                value={formFilters.caseStudyPublished}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All Projects</option>
-                <option value="published">Published</option>
-                <option value="not-published">Not published</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="project-case-study-featured"
-                className={labelClassName}
-              >
-                Case Study featured
+              <label className="grid gap-1 text-[10px] font-semibold">
+                Case Study Featured
+                <select
+                  className="admin-projects-input min-h-9 rounded-lg px-3 text-xs outline-none"
+                  id="project-case-study-featured"
+                  name="caseStudyFeatured"
+                  onChange={handleFilterChange}
+                  value={formFilters.caseStudyFeatured}
+                >
+                  <option value="all">All States</option>
+                  <option value="featured">Featured</option>
+                  <option value="standard">Standard / Not Featured</option>
+                </select>
               </label>
-
-              <select
-                id="project-case-study-featured"
-                name="caseStudyFeatured"
-                value={formFilters.caseStudyFeatured}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All states</option>
-                <option value="featured">Featured</option>
-                <option value="standard">Standard / not featured</option>
-              </select>
             </div>
-          </div>
-
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-            >
-              Clear
-            </button>
-
-            <button
-              type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
-            >
-              Apply Filters
-            </button>
-          </div>
+          </details>
         </form>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-bold text-slate-700">
-              {isLoading
-                ? "Loading Projects..."
-                : `${resultCount} Project${resultCount === 1 ? "" : "s"}`}
-            </p>
-
-            {!isLoading ? (
-              <p className="mt-0.5 text-xs text-slate-500">
-                Matching the currently applied filters.
-              </p>
-            ) : null}
-          </div>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[11px] font-semibold">
+            {isLoading
+              ? "Loading Projects..."
+              : `${resultCount} matching Project${resultCount === 1 ? "" : "s"}`}
+          </p>
 
           <button
-            type="button"
-            onClick={handleRefresh}
+            className="admin-projects-secondary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[11px] font-semibold"
             disabled={isLoading || actionProjectId !== ""}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={handleRefresh}
+            type="button"
           >
             {isLoading ? "Refreshing..." : "Refresh"}
           </button>
@@ -688,29 +638,25 @@ function AdminProjectsPage() {
         <div aria-live="polite">
           {successMessage ? (
             <div
+              className="admin-projects-success mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
               role="status"
-              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3"
             >
-              <p className="text-sm font-semibold leading-6 text-emerald-800">
-                {successMessage}
-              </p>
+              {successMessage}
             </div>
           ) : null}
         </div>
 
         {error ? (
           <div
+            className="admin-projects-error mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
             role="alert"
-            className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"
           >
-            <p className="text-sm font-semibold leading-6 text-red-700">
-              {error}
-            </p>
+            <span>{error}</span>
 
             <button
-              type="button"
+              className="ml-2 font-bold underline underline-offset-4"
               onClick={handleRefresh}
-              className="mt-3 min-h-10 text-sm font-bold text-red-700 underline underline-offset-4"
+              type="button"
             >
               Try again
             </button>
@@ -718,30 +664,28 @@ function AdminProjectsPage() {
         ) : null}
 
         {isLoading ? (
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
+          <div className="mt-3 space-y-2.5">
+            {[1, 2, 3, 4, 5].map((placeholder) => (
               <div
+                className="admin-projects-skeleton h-[104px] animate-pulse rounded-xl motion-reduce:animate-none"
                 key={placeholder}
-                className="h-[32rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
         ) : null}
 
         {!isLoading && !error && projects.length === 0 ? (
-          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <p className="text-base font-black text-slate-950">
-              No Projects found
-            </p>
+          <div className="admin-projects-empty mt-3 rounded-xl px-5 py-10 text-center">
+            <h2 className="text-base font-bold">No Projects found</h2>
 
-            <p className="mt-1.5 text-sm leading-6 text-slate-500">
-              Try changing the filters or add a new Project.
+            <p className="mt-1 text-xs">
+              Change the filters or add a new Project.
             </p>
           </div>
         ) : null}
 
         {!isLoading && projects.length > 0 ? (
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-3 space-y-2.5">
             {projects.map((project) => {
               const technologies = Array.isArray(project.technologies)
                 ? project.technologies
@@ -751,176 +695,137 @@ function AdminProjectsPage() {
 
               return (
                 <article
+                  className="admin-projects-row rounded-xl"
                   key={project._id}
-                  className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <div className="relative h-36 overflow-hidden bg-slate-900">
-                    {project.coverImageUrl ? (
-                      <img
-                        src={project.coverImageUrl}
-                        alt={`${project.title} cover`}
-                        loading="lazy"
-                        className="absolute inset-0 size-full object-cover opacity-65"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-brand-600/35 via-slate-950 to-cyan-500/15" />
-                    )}
+                  <div className="grid min-w-0 gap-3 p-3 md:grid-cols-[88px_minmax(0,1fr)_auto] md:items-center">
+                    <div className="admin-projects-thumb relative h-16 overflow-hidden rounded-lg md:h-[66px]">
+                      {project.coverImageUrl ? (
+                        <img
+                          alt={`${project.title} cover`}
+                          className="absolute inset-0 size-full object-cover"
+                          loading="lazy"
+                          src={project.coverImageUrl}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-brand-600/35 via-slate-950 to-cyan-500/15" />
+                      )}
 
-                    <div className="absolute inset-0 bg-slate-950/35" />
+                      <span className="admin-projects-order absolute bottom-1.5 left-1.5 rounded-md px-1.5 py-0.5 text-[9px] font-bold">
+                        #{project.order ?? 0}
+                      </span>
+                    </div>
 
-                    <div className="relative flex h-full flex-col justify-between p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <span className="rounded-lg border border-white/10 bg-slate-950/50 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm">
-                          {project.category || "Project"}
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                        <h2 className="mr-1 min-w-0 truncate text-sm font-bold">
+                          {project.title}
+                        </h2>
+
+                        <span
+                          className="admin-projects-badge rounded-md px-2 py-1 text-[9px] font-bold"
+                          data-status={project.status || "unknown"}
+                        >
+                          {statusLabels[project.status] ||
+                            project.status ||
+                            "Project"}
                         </span>
 
-                        <span className="rounded-lg border border-white/10 bg-slate-950/50 px-2.5 py-1 text-xs font-bold text-white backdrop-blur-sm">
-                          Order {project.order ?? 0}
+                        <span className="admin-projects-badge rounded-md px-2 py-1 text-[9px] font-bold">
+                          {projectTypeLabels[project.projectType] ||
+                            project.projectType ||
+                            "Project"}
                         </span>
-                      </div>
 
-                      <div className="flex flex-wrap gap-1.5">
                         {project.isFeatured ? (
-                          <span className="rounded-lg bg-amber-400 px-2.5 py-1 text-xs font-bold text-slate-950">
+                          <span className="admin-projects-badge is-featured rounded-md px-2 py-1 text-[9px] font-bold">
                             Featured
                           </span>
                         ) : null}
 
                         <span
-                          className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                            project.isVisible
-                              ? "bg-emerald-500 text-white"
-                              : "bg-slate-600 text-white"
+                          className={`admin-projects-badge rounded-md px-2 py-1 text-[9px] font-bold ${
+                            project.isVisible ? "is-visible" : "is-hidden"
                           }`}
                         >
                           {project.isVisible ? "Visible" : "Hidden"}
                         </span>
 
                         {project.caseStudy?.isPublished ? (
-                          <span className="rounded-lg bg-cyan-400 px-2.5 py-1 text-xs font-bold text-slate-950">
-                            Case Study
+                          <span className="admin-projects-badge is-case-study rounded-md px-2 py-1 text-[9px] font-bold">
+                            {project.caseStudy?.isFeatured
+                              ? "Case Study · Featured"
+                              : "Case Study"}
                           </span>
                         ) : null}
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="flex flex-wrap gap-1.5">
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                          statusClasses[project.status] ||
-                          "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {statusLabels[project.status] ||
-                          project.status ||
-                          "Project"}
-                      </span>
+                      <p className="mt-1 truncate text-[10px] font-semibold">
+                        {project.category || "Project"} · /{project.slug}
+                      </p>
 
-                      <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-                        {projectTypeLabels[project.projectType] ||
-                          project.projectType ||
-                          "Project"}
-                      </span>
-                    </div>
+                      <p className="mt-1 line-clamp-1 text-[11px] leading-5">
+                        {project.shortDescription}
+                      </p>
 
-                    <h2 className="mt-4 break-words text-lg font-black tracking-tight text-slate-950">
-                      {project.title}
-                    </h2>
-
-                    <p className="mt-1.5 break-all text-xs font-semibold text-brand-700">
-                      {project.slug}
-                    </p>
-
-                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
-                      {project.shortDescription}
-                    </p>
-
-                    {technologies.length > 0 ? (
-                      <div className="mt-4 flex flex-wrap gap-1.5">
-                        {technologies.slice(0, 4).map((technology) => (
+                      <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5 text-[9px]">
+                        {technologies.slice(0, 3).map((technology) => (
                           <span
+                            className="admin-projects-tech rounded-md px-1.5 py-1 font-semibold"
                             key={`${project._id}-${technology}`}
-                            className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600"
                           >
                             {technology}
                           </span>
                         ))}
 
-                        {technologies.length > 4 ? (
-                          <span className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
-                            +{technologies.length - 4} more
+                        {technologies.length > 3 ? (
+                          <span className="admin-projects-tech rounded-md px-1.5 py-1 font-semibold">
+                            +{technologies.length - 3}
                           </span>
                         ) : null}
-                      </div>
-                    ) : null}
 
-                    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <p className={labelClassName}>Case Study</p>
-
-                          <p className="mt-1 text-sm font-bold text-slate-700">
-                            {project.caseStudy?.isPublished
-                              ? project.caseStudy?.isFeatured
-                                ? "Published · Featured"
-                                : "Published"
-                              : "Not published"}
-                          </p>
-                        </div>
-
-                        <span className="rounded-lg bg-white px-2.5 py-1 text-xs font-bold text-slate-600">
-                          Order {project.caseStudy?.order ?? 0}
+                        <span className="ml-auto hidden text-slate-500 lg:inline">
+                          Updated {formatDate(project.updatedAt)}
                         </span>
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-5">
-                      <div className="border-t border-slate-100 pt-4">
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-                          <span>
-                            {technologies.length} technolog
-                            {technologies.length === 1 ? "y" : "ies"}
-                          </span>
+                    <div className="flex shrink-0 items-center gap-2 md:justify-end">
+                      <Link
+                        className="admin-projects-primary-button inline-flex min-h-9 items-center justify-center rounded-lg px-4 text-xs font-bold"
+                        to={`/admin/projects/${project._id}/edit`}
+                      >
+                        Edit
+                      </Link>
 
-                          <span>Updated {formatDate(project.updatedAt)}</span>
-                        </div>
+                      <details className="admin-projects-actions relative">
+                        <summary
+                          aria-label={`More actions for ${project.title}`}
+                          className="admin-projects-secondary-button inline-flex size-9 cursor-pointer list-none items-center justify-center rounded-lg text-base font-bold"
+                          title="More actions"
+                        >
+                          ⋯
+                        </summary>
 
-                        <div className="mt-4 grid grid-cols-2 gap-2">
-                          <Link
-                            to={`/admin/projects/${project._id}/edit`}
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-3 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-                          >
-                            Edit
-                          </Link>
-
+                        <div className="admin-projects-action-menu absolute right-0 top-[calc(100%+0.4rem)] z-30 w-52 rounded-xl p-2">
                           <button
-                            type="button"
-                            onClick={() => handleToggleVisibility(project)}
+                            className="admin-projects-menu-action"
                             disabled={actionProjectId !== ""}
-                            className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
-                              project.isVisible
-                                ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                                : "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
-                            }`}
+                            onClick={() => handleToggleVisibility(project)}
+                            type="button"
                           >
                             {isActionPending
                               ? "Working..."
                               : project.isVisible
-                                ? "Hide"
-                                : "Show"}
+                                ? "Hide Project"
+                                : "Show Project"}
                           </button>
 
                           <button
-                            type="button"
-                            onClick={() => handleToggleFeatured(project)}
+                            className="admin-projects-menu-action"
                             disabled={actionProjectId !== ""}
-                            className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
-                              project.isFeatured
-                                ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                                : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                            }`}
+                            onClick={() => handleToggleFeatured(project)}
+                            type="button"
                           >
                             {isActionPending
                               ? "Working..."
@@ -930,16 +835,12 @@ function AdminProjectsPage() {
                           </button>
 
                           <button
-                            type="button"
+                            className="admin-projects-menu-action"
+                            disabled={actionProjectId !== ""}
                             onClick={() =>
                               handleToggleCaseStudyPublication(project)
                             }
-                            disabled={actionProjectId !== ""}
-                            className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
-                              project.caseStudy?.isPublished
-                                ? "border-cyan-200 bg-cyan-50 text-cyan-800 hover:bg-cyan-100"
-                                : "border-cyan-600 bg-cyan-600 text-white hover:bg-cyan-700"
-                            }`}
+                            type="button"
                           >
                             {isActionPending
                               ? "Working..."
@@ -949,24 +850,20 @@ function AdminProjectsPage() {
                           </button>
 
                           <button
-                            type="button"
-                            onClick={() =>
-                              handleToggleCaseStudyFeatured(project)
-                            }
+                            className="admin-projects-menu-action"
                             disabled={
                               actionProjectId !== "" ||
                               !project.caseStudy?.isPublished
+                            }
+                            onClick={() =>
+                              handleToggleCaseStudyFeatured(project)
                             }
                             title={
                               project.caseStudy?.isPublished
                                 ? "Toggle Case Study featured state"
                                 : "Publish this Project as a Case Study first"
                             }
-                            className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-50 ${
-                              project.caseStudy?.isFeatured
-                                ? "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 hover:bg-fuchsia-100"
-                                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                            }`}
+                            type="button"
                           >
                             {isActionPending
                               ? "Working..."
@@ -975,23 +872,25 @@ function AdminProjectsPage() {
                                 : "Feature Case Study"}
                           </button>
 
+                          <div className="admin-projects-menu-divider my-1" />
+
                           <button
-                            type="button"
-                            onClick={() => handleDeleteProject(project)}
+                            className="admin-projects-menu-action is-danger"
                             disabled={
                               actionProjectId !== "" || !canDeleteProjects
                             }
+                            onClick={() => handleDeleteProject(project)}
                             title={
                               canDeleteProjects
                                 ? "Permanently delete Project"
                                 : "Your role cannot permanently delete Projects"
                             }
-                            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-3 text-sm font-bold text-red-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            type="button"
                           >
-                            {isActionPending ? "Working..." : "Delete"}
+                            {isActionPending ? "Working..." : "Delete Project"}
                           </button>
                         </div>
-                      </div>
+                      </details>
                     </div>
                   </div>
                 </article>

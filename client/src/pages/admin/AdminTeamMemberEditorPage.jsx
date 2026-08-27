@@ -255,8 +255,8 @@ function AdminTeamMemberEditorPage({ mode = "create" }) {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main className="rnx-admin-team-editor-v468 min-h-screen bg-slate-100 dark:bg-slate-950">
+        <section className="mx-auto w-full max-w-[1440px] px-3 py-3.5 sm:px-6 sm:py-4 lg:px-8">
           <div
             role="status"
             aria-live="polite"
@@ -266,9 +266,9 @@ function AdminTeamMemberEditorPage({ mode = "create" }) {
               Loading Team member editor...
             </span>
 
-            <div className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+            <div className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none" />
 
-            <div className="h-96 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+            <div className="h-96 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none" />
           </div>
         </section>
       </main>
@@ -280,8 +280,8 @@ function AdminTeamMemberEditorPage({ mode = "create" }) {
     (isEditMode && hasMissingTeamMemberId)
   ) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main className="rnx-admin-team-editor-v468 min-h-screen bg-slate-100 dark:bg-slate-950">
+        <section className="mx-auto w-full max-w-[1440px] px-3 py-3.5 sm:px-6 sm:py-4 lg:px-8">
           <div
             role="alert"
             className="mx-auto max-w-2xl rounded-2xl border border-red-200 bg-white p-5 shadow-sm sm:p-6"
@@ -290,11 +290,11 @@ function AdminTeamMemberEditorPage({ mode = "create" }) {
               Team Member Error
             </p>
 
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
               Team member editor could not be opened
             </h1>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
               {hasMissingTeamMemberId
                 ? "Team member ID is required."
                 : loadError}
@@ -313,12 +313,12 @@ function AdminTeamMemberEditorPage({ mode = "create" }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mx-auto max-w-5xl">
+    <main className="rnx-admin-team-editor-v468 min-h-screen bg-slate-100 dark:bg-slate-950">
+      <section className="mx-auto w-full max-w-[1440px] px-3 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+        <div className="mx-auto max-w-6xl">
           <Link
             to="/admin/team"
-            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+            className="inline-flex min-h-8 items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 dark:text-slate-400 dark:hover:text-brand-300"
           >
             <span aria-hidden="true">
               &larr;
@@ -327,25 +327,25 @@ function AdminTeamMemberEditorPage({ mode = "create" }) {
             Team Management
           </Link>
 
-          <header className="mt-3">
+          <header className="mt-1.5">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
               Team Management
             </p>
 
-            <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-0.5 break-words text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-[22px]">
               {isEditMode
                 ? `Edit ${teamMember?.name || "Team Member"}`
                 : "Add New Team Member"}
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            <p className="mt-0.5 max-w-3xl text-[11px] leading-4 text-slate-500 dark:text-slate-400 sm:text-xs sm:leading-5">
               {isEditMode
                 ? "Update the member profile, relationships, visibility, availability and SEO information."
                 : "Create a complete Team member profile and connect it with related portfolio content."}
             </p>
           </header>
 
-          <div className="mt-6">
+          <div className="mt-2 sm:mt-2.5">
             <TeamMemberForm
               initialValues={initialValues}
               onSubmit={handleSubmit}

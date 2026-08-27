@@ -57,7 +57,6 @@ function AdminMediaPage() {
   } = useAdminMedia(accessToken, appliedFilters);
 
   const canEditMedia = ["super-admin", "admin", "editor"].includes(admin?.role);
-
   const canDeleteMedia = ["super-admin", "admin"].includes(admin?.role);
 
   useEffect(() => {
@@ -118,7 +117,6 @@ function AdminMediaPage() {
         }
 
         console.error("Admin Media folders loading failed:", requestError);
-
         setFolders([]);
       } finally {
         if (!controller.signal.aborted) {
@@ -158,7 +156,6 @@ function AdminMediaPage() {
 
   function handleFilterSubmit(event) {
     event.preventDefault();
-
     setSuccessMessage("");
 
     setAppliedFilters({
@@ -213,103 +210,203 @@ function AdminMediaPage() {
   async function handleUploaded(uploadedMedia, message) {
     setSelectedMediaId(uploadedMedia?._id || "");
     setSuccessMessage(message || "Media uploaded successfully.");
-
     setFolderRefreshKey((currentKey) => currentKey + 1);
-
     await refreshMedia();
   }
 
   async function handleMediaChanged(updatedMedia, message) {
     setSelectedMediaId(updatedMedia?._id || selectedMediaId);
     setSuccessMessage(message || "Media updated successfully.");
-
     setFolderRefreshKey((currentKey) => currentKey + 1);
-
     await refreshMedia();
   }
 
   async function handleMediaDeleted(deletedMedia, message) {
     setSelectedMediaId("");
-
     setSuccessMessage(
       message || `"${deletedMedia?.title || "Media"}" was permanently deleted.`,
     );
-
     setFolderRefreshKey((currentKey) => currentKey + 1);
-
     await refreshMedia();
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <header>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-            Media Management
-          </p>
+    <main className="admin-media-page min-h-screen">
+      <section className="mx-auto w-full max-w-[1560px] px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="admin-media-eyebrow text-[10px] font-bold uppercase tracking-[0.16em]">
+              Media
+            </p>
 
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-            Media Library
-          </h1>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">
+              Media Library
+            </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            Upload, organize and maintain reusable images, SVG files, PDFs,
-            audio and video assets stored securely through Cloudinary.
-          </p>
+            <p className="mt-1 max-w-2xl text-xs leading-5">
+              Upload, find and manage reusable website assets.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 text-[11px]">
+            <span className="admin-media-count-pill rounded-lg px-3 py-2 font-semibold">
+              {isLoading ? "Loading..." : `${total} asset${total === 1 ? "" : "s"}`}
+            </span>
+
+            {totalPages > 0 ? (
+              <span className="admin-media-count-pill rounded-lg px-3 py-2 font-semibold">
+                Page {page}/{totalPages}
+              </span>
+            ) : null}
+          </div>
         </header>
 
-        <div className="mt-6">
+        <div className="mt-4">
           <MediaUploadPanel
             accessToken={accessToken}
             canUpload={canEditMedia}
-            onUploaded={handleUploaded}
             onUnauthorized={handleUnauthorized}
+            onUploaded={handleUploaded}
           />
         </div>
 
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-600">
-                Folders
-              </p>
-
-              <h2 className="mt-1 text-lg font-bold text-slate-950">
-                Browse Media Folders
-              </h2>
-            </div>
-
-            {areFoldersLoading && (
-              <span
-                role="status"
-                className="text-xs font-semibold text-slate-500"
-              >
-                Loading folders...
-              </span>
-            )}
+        {successMessage ? (
+          <div
+            className="admin-media-success mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
+            role="status"
+          >
+            {successMessage}
           </div>
+        ) : null}
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => handleFolderSelect("")}
-              className={`inline-flex min-h-10 items-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none ${
-                !appliedFilters.folder
-                  ? "border-brand-600 bg-brand-600 text-white"
-                  : "border-slate-300 bg-white text-slate-700 hover:border-brand-300 hover:text-brand-700"
-              }`}
+        {errorMessage && error?.status !== 401 ? (
+          <div
+            className="admin-media-error mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
+            role="alert"
+          >
+            {errorMessage}
+          </div>
+        ) : null}
+
+        <section className="admin-media-toolbar mt-4 rounded-xl p-3">
+          <form
+            className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(220px,1.3fr)_150px_150px_140px_110px_auto]"
+            onSubmit={handleFilterSubmit}
+          >
+            <label className="sr-only" htmlFor="media-search-filter">
+              Search Media
+            </label>
+
+            <input
+              className="admin-media-input min-h-10 rounded-lg px-3 text-sm outline-none"
+              id="media-search-filter"
+              name="search"
+              onChange={handleFilterChange}
+              placeholder="Search title, file, alt text..."
+              type="search"
+              value={formFilters.search}
+            />
+
+            <label className="sr-only" htmlFor="media-type-filter">
+              Media Type
+            </label>
+
+            <select
+              className="admin-media-input min-h-10 rounded-lg px-3 text-xs font-semibold outline-none"
+              id="media-type-filter"
+              name="mediaType"
+              onChange={handleFilterChange}
+              value={formFilters.mediaType}
             >
-              All Media
+              <option value="">All Types</option>
+              <option value="image">Images</option>
+              <option value="svg">SVG</option>
+              <option value="pdf">PDF</option>
+              <option value="audio">Audio</option>
+              <option value="video">Video</option>
+            </select>
 
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs ${
-                  !appliedFilters.folder
-                    ? "bg-white/20 text-white"
-                    : "bg-slate-100 text-slate-600"
-                }`}
+            <label className="sr-only" htmlFor="media-sort-filter">
+              Sort
+            </label>
+
+            <select
+              className="admin-media-input min-h-10 rounded-lg px-3 text-xs font-semibold outline-none"
+              id="media-sort-filter"
+              name="sort"
+              onChange={handleFilterChange}
+              value={formFilters.sort}
+            >
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="title-asc">Title A–Z</option>
+              <option value="title-desc">Title Z–A</option>
+              <option value="largest">Largest</option>
+              <option value="smallest">Smallest</option>
+            </select>
+
+            <label className="sr-only" htmlFor="media-tag-filter">
+              Tag
+            </label>
+
+            <input
+              className="admin-media-input min-h-10 rounded-lg px-3 text-xs outline-none"
+              id="media-tag-filter"
+              name="tag"
+              onChange={handleFilterChange}
+              placeholder="Tag"
+              value={formFilters.tag}
+            />
+
+            <label className="sr-only" htmlFor="media-limit-filter">
+              Per Page
+            </label>
+
+            <select
+              className="admin-media-input min-h-10 rounded-lg px-3 text-xs font-semibold outline-none"
+              id="media-limit-filter"
+              name="limit"
+              onChange={handleFilterChange}
+              value={formFilters.limit}
+            >
+              <option value={12}>12 / page</option>
+              <option value={24}>24 / page</option>
+              <option value={48}>48 / page</option>
+              <option value={96}>96 / page</option>
+            </select>
+
+            <div className="flex gap-2">
+              <button
+                className="admin-media-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+                disabled={isLoading}
+                type="submit"
               >
-                {total}
-              </span>
+                Apply
+              </button>
+
+              <button
+                aria-label="Clear Media filters"
+                className="admin-media-secondary-button inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-xs font-semibold"
+                disabled={isLoading}
+                onClick={handleClearFilters}
+                title="Clear filters"
+                type="button"
+              >
+                Clear
+              </button>
+            </div>
+          </form>
+
+          <div className="admin-media-folder-row mt-3 flex items-center gap-2 overflow-x-auto pb-1">
+            <button
+              className={`admin-media-folder-chip inline-flex min-h-8 shrink-0 items-center gap-2 rounded-lg px-3 text-[11px] font-semibold ${
+                !appliedFilters.folder ? "is-active" : ""
+              }`}
+              onClick={() => handleFolderSelect("")}
+              type="button"
+            >
+              All
+              <span>{total}</span>
             </button>
 
             {folders.map((folderRecord) => {
@@ -317,279 +414,84 @@ function AdminMediaPage() {
 
               return (
                 <button
-                  key={folderRecord.folder}
-                  type="button"
-                  onClick={() => handleFolderSelect(folderRecord.folder)}
-                  className={`inline-flex min-h-10 max-w-full items-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none ${
-                    isActive
-                      ? "border-brand-600 bg-brand-600 text-white"
-                      : "border-slate-300 bg-white text-slate-700 hover:border-brand-300 hover:text-brand-700"
+                  className={`admin-media-folder-chip inline-flex min-h-8 max-w-56 shrink-0 items-center gap-2 rounded-lg px-3 text-[11px] font-semibold ${
+                    isActive ? "is-active" : ""
                   }`}
+                  key={folderRecord.folder}
+                  onClick={() => handleFolderSelect(folderRecord.folder)}
+                  type="button"
                 >
-                  <span className="min-w-0 break-all">
-                    {folderRecord.folder}
-                  </span>
-
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${
-                      isActive
-                        ? "bg-white/20 text-white"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
-                  >
-                    {folderRecord.count}
-                  </span>
+                  <span className="truncate">{folderRecord.folder}</span>
+                  <span>{folderRecord.count}</span>
                 </button>
               );
             })}
-          </div>
 
-          {!areFoldersLoading && folders.length === 0 && (
-            <p className="mt-4 text-sm text-slate-500">
-              No custom Media folders have been created yet.
-            </p>
-          )}
-        </section>
+            {areFoldersLoading ? (
+              <span className="shrink-0 px-2 text-[10px]">
+                Loading folders...
+              </span>
+            ) : null}
 
-        <form
-          onSubmit={handleFilterSubmit}
-          className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-        >
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-brand-600">
-                Library Filters
-              </p>
-
-              <h2 className="mt-1 text-lg font-bold text-slate-950">
-                Find the right asset
-              </h2>
-            </div>
-
-            <p className="text-xs font-semibold text-slate-500">
-              Filters apply when you submit this panel.
-            </p>
-          </div>
-
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div>
-              <label
-                htmlFor="media-search"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Search
-              </label>
-
-              <input
-                id="media-search"
-                name="search"
-                type="search"
-                value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Title, filename, caption, tags..."
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="media-type-filter"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Media Type
-              </label>
-
-              <select
-                id="media-type-filter"
-                name="mediaType"
-                value={formFilters.mediaType}
-                onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
-              >
-                <option value="">All Media</option>
-                <option value="image">Images</option>
-                <option value="svg">SVG</option>
-                <option value="document">PDF Documents</option>
-                <option value="audio">Audio</option>
-                <option value="video">Video</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="media-folder-filter"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Folder
-              </label>
-
-              <input
-                id="media-folder-filter"
-                name="folder"
-                value={formFilters.folder}
-                onChange={handleFilterChange}
-                placeholder="projects/covers"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="media-tag-filter"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Tag
-              </label>
-
-              <input
-                id="media-tag-filter"
-                name="tag"
-                value={formFilters.tag}
-                onChange={handleFilterChange}
-                placeholder="Exact tag"
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 px-4 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="media-sort-filter"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Sort
-              </label>
-
-              <select
-                id="media-sort-filter"
-                name="sort"
-                value={formFilters.sort}
-                onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
-              >
-                <option value="newest">Newest first</option>
-                <option value="oldest">Oldest first</option>
-                <option value="title-asc">Title A-Z</option>
-                <option value="title-desc">Title Z-A</option>
-                <option value="size-desc">Largest first</option>
-                <option value="size-asc">Smallest first</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="media-limit-filter"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Per Page
-              </label>
-
-              <select
-                id="media-limit-filter"
-                name="limit"
-                value={formFilters.limit}
-                onChange={handleFilterChange}
-                className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition-colors focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none"
-              >
-                <option value={12}>12</option>
-                <option value={24}>24</option>
-                <option value={48}>48</option>
-                <option value={96}>96</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-3">
             <button
-              type="submit"
+              className="admin-media-secondary-button ml-auto inline-flex min-h-8 shrink-0 items-center justify-center rounded-lg px-3 text-[11px] font-semibold"
               disabled={isLoading}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-            >
-              Apply Filters
-            </button>
-
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              disabled={isLoading}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-            >
-              Clear Filters
-            </button>
-
-            <button
-              type="button"
               onClick={refreshMedia}
-              disabled={isLoading}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
+              type="button"
             >
               Refresh
             </button>
           </div>
-        </form>
+        </section>
 
-        {successMessage && (
-          <div
-            role="status"
-            className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-semibold text-emerald-700"
-          >
-            {successMessage}
-          </div>
-        )}
-
-        {errorMessage && error?.status !== 401 && (
-          <div
-            role="alert"
-            className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
-          >
-            {errorMessage}
-          </div>
-        )}
-
-        <div className="mt-6 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,400px)]">
+        <div
+          className={`mt-4 grid min-w-0 gap-4 ${
+            selectedMediaId
+              ? "lg:grid-cols-[minmax(0,1fr)_360px]"
+              : "grid-cols-1"
+          }`}
+        >
           <section className="min-w-0">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-slate-600">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold">
                 {isLoading
                   ? "Loading Media..."
-                  : `${total} asset${total === 1 ? "" : "s"} total · ${count} on this page`}
+                  : `${count} shown · ${total} total`}
               </p>
 
-              {totalPages > 0 && (
-                <p className="text-sm font-semibold text-slate-500">
-                  Page {page} of {totalPages}
-                </p>
-              )}
+              {selectedMediaId ? (
+                <button
+                  className="admin-media-secondary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[11px] font-semibold"
+                  onClick={() => setSelectedMediaId("")}
+                  type="button"
+                >
+                  Close Details
+                </button>
+              ) : null}
             </div>
 
             {isLoading ? (
               <div
+                className="admin-media-empty mt-3 grid min-h-56 place-items-center rounded-xl"
                 role="status"
-                className="mt-5 grid min-h-72 place-items-center rounded-2xl border border-slate-200 bg-white"
               >
-                <div className="text-center">
-                  <div className="mx-auto size-11 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600 motion-reduce:animate-none" />
-
-                  <p className="mt-4 text-sm font-semibold text-slate-600">
-                    Loading Media...
-                  </p>
-                </div>
+                <p className="text-xs font-semibold">Loading Media...</p>
               </div>
             ) : media.length === 0 ? (
-              <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-                <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-2xl font-black text-brand-600">
-                  M
-                </div>
-
-                <h2 className="mt-5 text-xl font-bold text-slate-950">
-                  No Media found
-                </h2>
-
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+              <div className="admin-media-empty mt-3 rounded-xl px-5 py-10 text-center">
+                <h2 className="text-base font-bold">No Media found</h2>
+                <p className="mt-1 text-xs">
                   Upload an asset or clear the current filters.
                 </p>
               </div>
             ) : (
-              <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div
+                className={`mt-3 grid gap-3 ${
+                  selectedMediaId
+                    ? "sm:grid-cols-2 2xl:grid-cols-3"
+                    : "sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+                }`}
+              >
                 {media.map((item) => {
                   const dimensions = formatDimensions(item.width, item.height);
                   const duration = formatDuration(item.duration);
@@ -597,48 +499,48 @@ function AdminMediaPage() {
 
                   return (
                     <article
-                      key={item._id}
-                      className={`min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm transition-colors motion-reduce:transition-none ${
-                        isSelected
-                          ? "border-brand-500 ring-4 ring-brand-100"
-                          : "border-slate-200 hover:border-brand-200"
+                      className={`admin-media-card min-w-0 overflow-hidden rounded-xl ${
+                        isSelected ? "is-selected" : ""
                       }`}
+                      key={item._id}
                     >
-                      <MediaPreview media={item} compact />
+                      <div className="admin-media-card-preview">
+                        <MediaPreview compact media={item} />
+                      </div>
 
-                      <div className="p-4">
-                        <div className="flex items-start justify-between gap-3">
+                      <div className="p-3">
+                        <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0">
-                            <h3 className="truncate font-bold text-slate-950">
+                            <h3 className="truncate text-xs font-bold">
                               {item.title}
                             </h3>
 
-                            <p className="mt-1 truncate text-xs text-slate-400">
+                            <p className="mt-0.5 truncate text-[10px]">
                               {item.originalName}
                             </p>
                           </div>
 
-                          <span className="shrink-0 rounded-lg bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-600">
+                          <span className="admin-media-type shrink-0 rounded-md px-2 py-1 text-[9px] font-bold">
                             {getMediaTypeLabel(item.mediaType)}
                           </span>
                         </div>
 
-                        <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-500">
-                          <span>{formatFileSize(item.size)}</span>
+                        <div className="mt-2 flex min-w-0 items-center justify-between gap-2">
+                          <p className="min-w-0 truncate text-[10px] font-medium">
+                            {formatFileSize(item.size)}
+                            {dimensions ? ` · ${dimensions}` : ""}
+                            {duration ? ` · ${duration}` : ""}
+                          </p>
 
-                          {dimensions && <span>· {dimensions}</span>}
-
-                          {duration && <span>· {duration}</span>}
+                          <button
+                            aria-pressed={isSelected}
+                            className="admin-media-card-action inline-flex min-h-8 shrink-0 items-center justify-center rounded-lg px-3 text-[10px] font-bold"
+                            onClick={() => setSelectedMediaId(item._id)}
+                            type="button"
+                          >
+                            {isSelected ? "Selected" : "Details"}
+                          </button>
                         </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setSelectedMediaId(item._id)}
-                          aria-pressed={isSelected}
-                          className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-                        >
-                          {isSelected ? "Selected" : "View Details"}
-                        </button>
                       </div>
                     </article>
                   );
@@ -646,47 +548,49 @@ function AdminMediaPage() {
               </div>
             )}
 
-            {totalPages > 1 && (
+            {totalPages > 1 ? (
               <nav
                 aria-label="Media pagination"
-                className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4"
+                className="admin-media-pagination mt-4 flex items-center justify-between gap-3 rounded-xl p-2.5"
               >
                 <button
-                  type="button"
+                  className="admin-media-secondary-button inline-flex min-h-9 items-center justify-center rounded-lg px-3 text-xs font-semibold"
                   disabled={!hasPreviousPage || isLoading}
                   onClick={() => handlePageChange(page - 1)}
-                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
+                  type="button"
                 >
-                  &larr; Previous
+                  Previous
                 </button>
 
-                <span className="text-sm font-semibold text-slate-600">
-                  Page {page} of {totalPages}
+                <span className="text-[11px] font-semibold">
+                  {page} / {totalPages}
                 </span>
 
                 <button
-                  type="button"
+                  className="admin-media-secondary-button inline-flex min-h-9 items-center justify-center rounded-lg px-3 text-xs font-semibold"
                   disabled={!hasNextPage || isLoading}
                   onClick={() => handlePageChange(page + 1)}
-                  className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
+                  type="button"
                 >
-                  Next &rarr;
+                  Next
                 </button>
               </nav>
-            )}
+            ) : null}
           </section>
 
-          <div className="min-w-0 lg:sticky lg:top-6 lg:self-start">
-            <MediaDetailsPanel
-              accessToken={accessToken}
-              mediaId={selectedMediaId}
-              canEdit={canEditMedia}
-              canDelete={canDeleteMedia}
-              onChanged={handleMediaChanged}
-              onDeleted={handleMediaDeleted}
-              onUnauthorized={handleUnauthorized}
-            />
-          </div>
+          {selectedMediaId ? (
+            <div className="admin-media-details-shell min-w-0 lg:sticky lg:top-[78px] lg:self-start">
+              <MediaDetailsPanel
+                accessToken={accessToken}
+                canDelete={canDeleteMedia}
+                canEdit={canEditMedia}
+                mediaId={selectedMediaId}
+                onChanged={handleMediaChanged}
+                onDeleted={handleMediaDeleted}
+                onUnauthorized={handleUnauthorized}
+              />
+            </div>
+          ) : null}
         </div>
       </section>
     </main>

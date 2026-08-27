@@ -451,85 +451,78 @@ function AdminPackageDesignsWorkspace() {
   const canDeleteDesigns = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <main className="admin-catalog-page min-h-screen">
+      <section className="mx-auto w-full max-w-[1560px] px-4 py-5 sm:px-6 lg:px-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-              <span className="uppercase tracking-[0.14em] text-brand-700">
-                Catalog
-              </span>
+            <p className="admin-catalog-eyebrow text-[10px] font-bold uppercase tracking-[0.16em]">
+              Services & Sales
+            </p>
 
-              <span aria-hidden="true" className="text-slate-300">
-                /
-              </span>
-
-              <span className="text-slate-500">Design management</span>
-            </div>
-
-            <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">
               Package Designs
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Manage selectable website designs, thumbnails, device screenshots,
-              live demos, default selection, featured state and public
-              visibility.
+            <p className="mt-1 max-w-2xl text-xs leading-5">
+              Manage selectable designs, previews, defaults and public state.
             </p>
           </div>
 
-          <Link
-            to="/admin/package-designs/new"
-            className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-          >
-            Add Design
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="admin-catalog-count-pill rounded-lg px-3 py-2 text-[11px] font-semibold">
+              {isLoading
+                ? "Loading..."
+                : `${resultCount} Design${resultCount === 1 ? "" : "s"}`}
+            </span>
+
+            <Link
+              className="admin-catalog-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+              to="/admin/package-designs/new"
+            >
+              Add Design
+            </Link>
+          </div>
         </header>
 
         <form
+          className="admin-catalog-toolbar mt-4 rounded-xl p-3"
           onSubmit={handleFilterSubmit}
-          className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
         >
-          <div>
-            <h2 className="text-base font-black text-slate-950">Filters</h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Narrow designs by Service, Package, group and publishing state.
-            </p>
-          </div>
-
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="md:col-span-2">
-              <label htmlFor="package-design-search" className={labelClassName}>
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-[minmax(220px,1.3fr)_180px_190px_150px_auto]">
+            <div>
+              <label
+                className={`${labelClassName} sr-only`}
+                htmlFor="package-design-search"
+              >
                 Search
               </label>
 
               <input
+                className={`${inputClassName} admin-catalog-input !mt-0 !min-h-10 !rounded-lg`}
                 id="package-design-search"
                 name="search"
+                onChange={handleFilterChange}
+                placeholder="Search design..."
                 type="search"
                 value={formFilters.search}
-                onChange={handleFilterChange}
-                placeholder="Name, slug or description"
-                className={`${inputClassName} px-4 placeholder:text-slate-400`}
               />
             </div>
 
             <div>
               <label
+                className={`${labelClassName} sr-only`}
                 htmlFor="package-design-service-filter"
-                className={labelClassName}
               >
                 Service
               </label>
 
               <select
+                className={`${inputClassName} admin-catalog-input !mt-0 !min-h-10 !rounded-lg`}
+                disabled={filtersLoading}
                 id="package-design-service-filter"
                 name="service"
-                value={formFilters.service}
                 onChange={handleFilterChange}
-                disabled={filtersLoading}
-                className={inputClassName}
+                value={formFilters.service}
               >
                 <option value="">
                   {filtersLoading ? "Loading Services..." : "All Services"}
@@ -545,19 +538,19 @@ function AdminPackageDesignsWorkspace() {
 
             <div>
               <label
+                className={`${labelClassName} sr-only`}
                 htmlFor="package-design-package-filter"
-                className={labelClassName}
               >
                 Package
               </label>
 
               <select
+                className={`${inputClassName} admin-catalog-input !mt-0 !min-h-10 !rounded-lg`}
+                disabled={filtersLoading}
                 id="package-design-package-filter"
                 name="servicePackage"
-                value={formFilters.servicePackage}
                 onChange={handleFilterChange}
-                disabled={filtersLoading}
-                className={inputClassName}
+                value={formFilters.servicePackage}
               >
                 <option value="">
                   {filtersLoading ? "Loading Packages..." : "All Packages"}
@@ -573,388 +566,375 @@ function AdminPackageDesignsWorkspace() {
 
             <div>
               <label
-                htmlFor="package-design-group-filter"
-                className={labelClassName}
-              >
-                Group
-              </label>
-
-              <select
-                id="package-design-group-filter"
-                name="group"
-                value={formFilters.group}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="">All groups</option>
-                <option value="development">Development</option>
-                <option value="management">Management</option>
-              </select>
-            </div>
-
-            <div>
-              <label
+                className={`${labelClassName} sr-only`}
                 htmlFor="package-design-visibility-filter"
-                className={labelClassName}
               >
                 Visibility
               </label>
 
               <select
+                className={`${inputClassName} admin-catalog-input !mt-0 !min-h-10 !rounded-lg`}
                 id="package-design-visibility-filter"
                 name="visibility"
-                value={formFilters.visibility}
                 onChange={handleFilterChange}
-                className={inputClassName}
+                value={formFilters.visibility}
               >
-                <option value="all">All designs</option>
+                <option value="all">All visibility</option>
                 <option value="visible">Visible</option>
                 <option value="hidden">Hidden</option>
               </select>
             </div>
 
-            <div>
-              <label
-                htmlFor="package-design-default-filter"
-                className={labelClassName}
+            <div className="flex gap-2">
+              <button
+                className="admin-catalog-primary-button inline-flex min-h-10 items-center justify-center rounded-lg px-4 text-xs font-bold"
+                disabled={isLoading || Boolean(actionDesignId)}
+                type="submit"
               >
-                Default
-              </label>
+                Apply
+              </button>
 
-              <select
-                id="package-design-default-filter"
-                name="defaultState"
-                value={formFilters.defaultState}
-                onChange={handleFilterChange}
-                className={inputClassName}
+              <button
+                className="admin-catalog-secondary-button inline-flex min-h-10 items-center justify-center rounded-lg px-3 text-xs font-semibold"
+                disabled={isLoading || Boolean(actionDesignId)}
+                onClick={handleClearFilters}
+                type="button"
               >
-                <option value="all">All states</option>
-                <option value="default">Default</option>
-                <option value="standard">Non-default</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="package-design-featured-filter"
-                className={labelClassName}
-              >
-                Featured
-              </label>
-
-              <select
-                id="package-design-featured-filter"
-                name="featured"
-                value={formFilters.featured}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All states</option>
-                <option value="featured">Featured</option>
-                <option value="standard">Standard</option>
-              </select>
+                Clear
+              </button>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-slate-400 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-            >
-              Clear
-            </button>
+          <details className="admin-catalog-more mt-2 rounded-lg">
+            <summary className="cursor-pointer list-none px-3 py-2 text-[11px] font-semibold">
+              More Filters
+            </summary>
 
-            <button
-              type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2"
-            >
-              Apply Filters
-            </button>
-          </div>
+            <div className="grid gap-3 border-t px-3 py-3 md:grid-cols-3">
+              <div>
+                <label
+                  className={`${labelClassName} !text-[10px]`}
+                  htmlFor="package-design-group-filter"
+                >
+                  Group
+                </label>
+
+                <select
+                  className={`${inputClassName} admin-catalog-input !mt-1.5 !min-h-10 !rounded-lg`}
+                  id="package-design-group-filter"
+                  name="group"
+                  onChange={handleFilterChange}
+                  value={formFilters.group}
+                >
+                  <option value="">All groups</option>
+                  <option value="development">Development</option>
+                  <option value="management">Management</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  className={`${labelClassName} !text-[10px]`}
+                  htmlFor="package-design-default-filter"
+                >
+                  Default
+                </label>
+
+                <select
+                  className={`${inputClassName} admin-catalog-input !mt-1.5 !min-h-10 !rounded-lg`}
+                  id="package-design-default-filter"
+                  name="defaultState"
+                  onChange={handleFilterChange}
+                  value={formFilters.defaultState}
+                >
+                  <option value="all">All states</option>
+                  <option value="default">Default</option>
+                  <option value="standard">Non-default</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  className={`${labelClassName} !text-[10px]`}
+                  htmlFor="package-design-featured-filter"
+                >
+                  Featured
+                </label>
+
+                <select
+                  className={`${inputClassName} admin-catalog-input !mt-1.5 !min-h-10 !rounded-lg`}
+                  id="package-design-featured-filter"
+                  name="featured"
+                  onChange={handleFilterChange}
+                  value={formFilters.featured}
+                >
+                  <option value="all">All states</option>
+                  <option value="featured">Featured</option>
+                  <option value="standard">Standard</option>
+                </select>
+              </div>
+            </div>
+          </details>
         </form>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-bold text-slate-700">
-              {isLoading
-                ? "Loading Package Designs..."
-                : `${resultCount} design${resultCount === 1 ? "" : "s"}`}
-            </p>
-
-            {!isLoading ? (
-              <p className="mt-0.5 text-xs text-slate-500">
-                Matching the currently applied filters.
-              </p>
-            ) : null}
-          </div>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold">
+            {isLoading
+              ? "Loading Package Designs..."
+              : `${resultCount} result${resultCount === 1 ? "" : "s"}`}
+          </p>
 
           <button
-            type="button"
+            className="admin-catalog-secondary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[11px] font-semibold"
+            disabled={isLoading || Boolean(actionDesignId)}
             onClick={handleRefresh}
-            disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            type="button"
           >
-            {isLoading ? "Refreshing..." : "Refresh"}
+            Refresh
           </button>
         </div>
 
         <div aria-live="polite">
           {successMessage ? (
             <div
+              className="admin-catalog-success mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
               role="status"
-              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3"
             >
-              <p className="text-sm font-semibold leading-6 text-emerald-800">
-                {successMessage}
-              </p>
+              {successMessage}
+            </div>
+          ) : null}
+
+          {error ? (
+            <div
+              className="admin-catalog-error mt-3 rounded-lg px-3 py-2 text-xs font-semibold"
+              role="alert"
+            >
+              {error}
+
+              <button
+                className="ml-2 font-bold underline underline-offset-2"
+                onClick={handleRefresh}
+                type="button"
+              >
+                Try again
+              </button>
             </div>
           ) : null}
         </div>
 
-        {error ? (
-          <div
-            role="alert"
-            className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4"
-          >
-            <p className="text-sm font-semibold leading-6 text-red-700">
-              {error}
-            </p>
-
-            <button
-              type="button"
-              onClick={handleRefresh}
-              className="mt-3 min-h-10 text-sm font-bold text-red-700 underline underline-offset-4"
-            >
-              Try again
-            </button>
-          </div>
-        ) : null}
-
         {isLoading ? (
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
+          <div className="mt-3 space-y-2" role="status">
+            <span className="sr-only">Loading Package Designs...</span>
+
+            {[1, 2, 3, 4, 5].map((placeholder) => (
               <div
+                className="admin-catalog-skeleton h-[96px] rounded-xl"
                 key={placeholder}
-                className="h-[31rem] animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
               />
             ))}
           </div>
         ) : null}
 
         {!isLoading && !error && packageDesigns.length === 0 ? (
-          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <p className="text-base font-black text-slate-950">
-              No Package Designs found
-            </p>
+          <div className="admin-catalog-empty mt-3 rounded-xl px-5 py-9 text-center">
+            <h2 className="text-base font-bold">No Package Designs found</h2>
 
-            <p className="mt-1.5 text-sm leading-6 text-slate-500">
+            <p className="mt-1 text-xs">
               Change the filters or create a new design.
             </p>
           </div>
         ) : null}
 
         {!isLoading && packageDesigns.length > 0 ? (
-          <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-3 space-y-2">
             {packageDesigns.map((packageDesign) => {
               const servicePackage = packageDesign.servicePackage;
-
               const serviceTitle = servicePackage?.service?.title || "Service";
-
               const packageName = servicePackage?.name || "Service Package";
-
               const screenshotCount = Array.isArray(packageDesign.screenshots)
                 ? packageDesign.screenshots.length
                 : 0;
 
-              const isActionPending = actionDesignId === packageDesign._id;
+              const isActionPending =
+                actionDesignId === packageDesign._id;
 
               return (
                 <article
+                  className="admin-catalog-row min-w-0 rounded-xl"
                   key={packageDesign._id}
-                  className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
-                    {packageDesign.thumbnailUrl ? (
-                      <img
-                        src={packageDesign.thumbnailUrl}
-                        alt={
-                          packageDesign.thumbnailAlt ||
-                          `${packageDesign.name} preview`
-                        }
-                        loading="lazy"
-                        className="size-full object-cover"
-                      />
-                    ) : (
-                      <div className="grid size-full place-items-center p-6 text-center text-sm font-semibold text-slate-400">
-                        No thumbnail
-                      </div>
-                    )}
+                  <div className="grid min-w-0 grid-cols-[82px_minmax(0,1fr)] gap-3 p-3 md:grid-cols-[86px_minmax(0,1fr)_auto] md:items-center">
+                    <div className="admin-catalog-thumb relative h-[62px] overflow-hidden rounded-lg">
+                      {packageDesign.thumbnailUrl ? (
+                        <img
+                          alt={
+                            packageDesign.thumbnailAlt ||
+                            `${packageDesign.name} preview`
+                          }
+                          className="size-full object-cover"
+                          loading="lazy"
+                          src={packageDesign.thumbnailUrl}
+                        />
+                      ) : (
+                        <div className="grid size-full place-items-center text-[9px] font-semibold">
+                          No preview
+                        </div>
+                      )}
+                    </div>
 
-                    <div className="absolute inset-x-0 top-0 flex flex-wrap items-start justify-between gap-2 p-3">
-                      <div className="flex flex-wrap gap-1.5">
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                        <span
+                          className={`admin-catalog-badge rounded-md px-2 py-1 text-[9px] font-bold ${
+                            packageDesign.isVisible ? "is-visible" : "is-hidden"
+                          }`}
+                        >
+                          {packageDesign.isVisible ? "Visible" : "Hidden"}
+                        </span>
+
                         {packageDesign.isDefault ? (
-                          <span className="rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+                          <span className="admin-catalog-badge is-default rounded-md px-2 py-1 text-[9px] font-bold">
                             Default
                           </span>
                         ) : null}
 
                         {packageDesign.isFeatured ? (
-                          <span className="rounded-lg bg-amber-400 px-2.5 py-1 text-xs font-bold text-slate-950 shadow-sm">
+                          <span className="admin-catalog-badge is-featured rounded-md px-2 py-1 text-[9px] font-bold">
                             Featured
                           </span>
                         ) : null}
+
+                        <span className="admin-catalog-meta max-w-64 truncate text-[9px]">
+                          {serviceTitle} · {packageName}
+                        </span>
                       </div>
 
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold shadow-sm ${
-                          packageDesign.isVisible
-                            ? "bg-emerald-600 text-white"
-                            : "bg-slate-700 text-white"
-                        }`}
-                      >
-                        {packageDesign.isVisible ? "Visible" : "Hidden"}
-                      </span>
+                      <div className="mt-1.5 flex min-w-0 flex-wrap items-baseline gap-x-2">
+                        <h2 className="truncate text-sm font-bold">
+                          {packageDesign.name}
+                        </h2>
+
+                        <span className="admin-catalog-slug max-w-48 truncate text-[10px]">
+                          {packageDesign.slug}
+                        </span>
+                      </div>
+
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
+                        <span>{screenshotCount} screenshots</span>
+                        <span className="capitalize">
+                          {servicePackage?.group || "No group"}
+                        </span>
+                        <span>Order {packageDesign.order ?? 0}</span>
+
+                        {packageDesign.liveDemoUrl ? (
+                          <a
+                            className="admin-catalog-live-link font-semibold"
+                            href={packageDesign.liveDemoUrl}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            {packageDesign.liveDemoLabel || "Live Demo"} ↗
+                          </a>
+                        ) : null}
+                      </div>
+
+                      <p className="mt-1 line-clamp-1 text-[10px] leading-4">
+                        {packageDesign.shortDescription}
+                      </p>
                     </div>
-                  </div>
 
-                  <div className="flex flex-1 flex-col p-5">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold uppercase tracking-[0.08em] text-slate-400">
-                          {serviceTitle}
-                        </p>
-
-                        <p className="mt-1 break-words text-sm font-bold text-brand-700">
-                          {packageName}
-                        </p>
-                      </div>
-
-                      <span className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-                        Order {packageDesign.order ?? 0}
-                      </span>
-                    </div>
-
-                    <h2 className="mt-4 break-words text-lg font-black tracking-tight text-slate-950">
-                      {packageDesign.name}
-                    </h2>
-
-                    <p className="mt-1 break-all text-xs font-semibold text-slate-400">
-                      {packageDesign.slug}
-                    </p>
-
-                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
-                      {packageDesign.shortDescription}
-                    </p>
-
-                    <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-slate-100 py-4">
-                      <div>
-                        <dt className={labelClassName}>Screenshots</dt>
-
-                        <dd className="mt-1 text-sm font-bold text-slate-700">
-                          {screenshotCount}
-                        </dd>
-                      </div>
-
-                      <div>
-                        <dt className={labelClassName}>Group</dt>
-
-                        <dd className="mt-1 text-sm font-bold capitalize text-slate-700">
-                          {servicePackage?.group || "—"}
-                        </dd>
-                      </div>
-                    </dl>
-
-                    {packageDesign.liveDemoUrl ? (
-                      <a
-                        href={packageDesign.liveDemoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-4 inline-flex min-h-9 self-start items-center text-sm font-bold text-brand-700 transition-colors duration-150 motion-reduce:transition-none hover:text-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                    <div className="col-span-2 flex shrink-0 items-center justify-end gap-2 md:col-span-1">
+                      <Link
+                        className="admin-catalog-primary-button inline-flex min-h-8 items-center justify-center rounded-lg px-3 text-[10px] font-bold"
+                        to={`/admin/package-designs/${packageDesign._id}/edit`}
                       >
-                        {packageDesign.liveDemoLabel || "Live Demo"} ↗
-                      </a>
-                    ) : null}
+                        Edit
+                      </Link>
 
-                    <div className="mt-auto pt-5">
-                      <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
-                        <Link
-                          to={`/admin/package-designs/${packageDesign._id}/edit`}
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-3 text-sm font-bold text-white transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                      <details className="admin-catalog-actions relative">
+                        <summary
+                          aria-label={`More actions for ${packageDesign.name}`}
+                          className="admin-catalog-secondary-button inline-flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-base font-bold"
+                          title="More actions"
                         >
-                          Edit
-                        </Link>
+                          …
+                        </summary>
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggleVisibility(packageDesign)}
-                          disabled={actionDesignId !== ""}
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
-                            packageDesign.isVisible
-                              ? "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                              : "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
-                          }`}
-                        >
-                          {isActionPending
-                            ? "Updating..."
-                            : packageDesign.isVisible
-                              ? "Hide"
-                              : "Show"}
-                        </button>
+                        <div className="admin-catalog-action-menu absolute right-0 top-[calc(100%+0.4rem)] z-30 w-48 rounded-xl p-1.5">
+                          <button
+                            className="admin-catalog-menu-action"
+                            disabled={actionDesignId !== ""}
+                            onClick={() =>
+                              handleToggleVisibility(packageDesign)
+                            }
+                            type="button"
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : packageDesign.isVisible
+                                ? "Hide from public"
+                                : "Show on public"}
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleToggleFeatured(packageDesign)}
-                          disabled={actionDesignId !== ""}
-                          className={`inline-flex min-h-10 items-center justify-center rounded-xl border px-3 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-60 ${
-                            packageDesign.isFeatured
-                              ? "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                              : "border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100"
-                          }`}
-                        >
-                          {isActionPending
-                            ? "Updating..."
-                            : packageDesign.isFeatured
-                              ? "Make Standard"
-                              : "Make Featured"}
-                        </button>
+                          <button
+                            className="admin-catalog-menu-action"
+                            disabled={actionDesignId !== ""}
+                            onClick={() =>
+                              handleToggleFeatured(packageDesign)
+                            }
+                            type="button"
+                          >
+                            {isActionPending
+                              ? "Working..."
+                              : packageDesign.isFeatured
+                                ? "Make standard"
+                                : "Make featured"}
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleMakeDefault(packageDesign)}
-                          disabled={
-                            actionDesignId !== "" || packageDesign.isDefault
-                          }
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-3 text-sm font-bold text-brand-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {packageDesign.isDefault
-                            ? "Default Design"
-                            : isActionPending
-                              ? "Updating..."
-                              : "Make Default"}
-                        </button>
+                          <button
+                            className="admin-catalog-menu-action"
+                            disabled={
+                              actionDesignId !== "" ||
+                              packageDesign.isDefault
+                            }
+                            onClick={() =>
+                              handleMakeDefault(packageDesign)
+                            }
+                            type="button"
+                          >
+                            {packageDesign.isDefault
+                              ? "Default design"
+                              : isActionPending
+                                ? "Working..."
+                                : "Make default"}
+                          </button>
 
-                        <Link
-                          to="/admin/service-packages"
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-3 text-center text-sm font-bold text-slate-700 transition-colors duration-150 motion-reduce:transition-none hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-                        >
-                          Packages
-                        </Link>
+                          <Link
+                            className="admin-catalog-menu-action"
+                            to="/admin/service-packages"
+                          >
+                            Service Packages
+                          </Link>
 
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(packageDesign)}
-                          disabled={actionDesignId !== "" || !canDeleteDesigns}
-                          title={
-                            canDeleteDesigns
-                              ? "Permanently delete design"
-                              : "Your role cannot permanently delete designs"
-                          }
-                          className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-3 text-sm font-bold text-red-700 transition-colors duration-150 motion-reduce:transition-none hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {isActionPending ? "Deleting..." : "Delete"}
-                        </button>
-                      </div>
+                          <div className="admin-catalog-menu-divider my-1" />
+
+                          <button
+                            className="admin-catalog-menu-action is-danger"
+                            disabled={
+                              actionDesignId !== "" || !canDeleteDesigns
+                            }
+                            onClick={() => handleDelete(packageDesign)}
+                            title={
+                              canDeleteDesigns
+                                ? "Permanently delete design"
+                                : "Your role cannot permanently delete designs"
+                            }
+                            type="button"
+                          >
+                            {isActionPending ? "Working..." : "Delete"}
+                          </button>
+                        </div>
+                      </details>
                     </div>
                   </div>
                 </article>
