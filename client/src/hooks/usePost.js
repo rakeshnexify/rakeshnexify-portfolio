@@ -19,6 +19,7 @@ export default function usePost(slugValue) {
   const [isLoading, setIsLoading] = useState(Boolean(slug));
   const [error, setError] = useState("");
   const [status, setStatus] = useState(null);
+  const [settledSlug, setSettledSlug] = useState("");
 
   const activeRequestRef = useRef({
     controller: null,
@@ -30,6 +31,16 @@ export default function usePost(slugValue) {
 
     previousController?.abort();
 
+    if (!slug) {
+      activeRequestRef.current = {
+        controller: null,
+        requestId:
+          activeRequestRef.current.requestId + 1,
+      };
+
+      return;
+    }
+
     const controller = new AbortController();
     const requestId = activeRequestRef.current.requestId + 1;
 
@@ -37,18 +48,6 @@ export default function usePost(slugValue) {
       controller,
       requestId,
     };
-
-    if (!slug) {
-      setPost(null);
-      setError("");
-      setStatus(null);
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-    setStatus(null);
 
     try {
       const databasePost = await fetchPublicPostBySlug(slug, {
@@ -65,6 +64,7 @@ export default function usePost(slugValue) {
       setPost(databasePost);
       setError("");
       setStatus(200);
+      setSettledSlug(slug);
     } catch (requestError) {
       if (
         controller.signal.aborted ||
@@ -81,6 +81,7 @@ export default function usePost(slugValue) {
       setError(
         getErrorMessage(requestError, "Post could not be loaded."),
       );
+      setSettledSlug(slug);
     } finally {
       if (
         !controller.signal.aborted &&
@@ -97,7 +98,74 @@ export default function usePost(slugValue) {
   }, [slug]);
 
   useEffect(() => {
-    loadPost();
+    const previousRequest = activeRequestRef.current;
+
+    previousRequest.controller?.abort();
+
+    if (!slug) {
+      activeRequestRef.current = {
+        controller: null,
+        requestId: previousRequest.requestId + 1,
+      };
+
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const requestId = previousRequest.requestId + 1;
+
+    activeRequestRef.current = {
+      controller,
+      requestId,
+    };
+
+    fetchPublicPostBySlug(slug, {
+      signal: controller.signal,
+    })
+      .then((databasePost) => {
+        if (
+          controller.signal.aborted ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
+
+        setPost(databasePost);
+        setError("");
+        setStatus(200);
+        setSettledSlug(slug);
+      })
+      .catch((requestError) => {
+        if (
+          controller.signal.aborted ||
+          requestError?.name === "AbortError" ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
+
+        console.error("Post load failed:", requestError);
+
+        setPost(null);
+        setStatus(Number(requestError?.status) || null);
+        setError(
+          getErrorMessage(requestError, "Post could not be loaded."),
+        );
+        setSettledSlug(slug);
+      })
+      .finally(() => {
+        if (
+          !controller.signal.aborted &&
+          activeRequestRef.current.requestId === requestId
+        ) {
+          activeRequestRef.current = {
+            controller: null,
+            requestId,
+          };
+
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       const currentRequest = activeRequestRef.current;
@@ -109,17 +177,38 @@ export default function usePost(slugValue) {
         requestId: currentRequest.requestId + 1,
       };
     };
-  }, [loadPost]);
+  }, [slug]);
 
   const refreshPost = useCallback(async () => {
+    if (!slug) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+    setStatus(null);
+
     await loadPost();
-  }, [loadPost]);
+  }, [loadPost, slug]);
+
+  const hasCurrentResult =
+    settledSlug === slug;
 
   return {
-    post,
-    isLoading,
-    error,
-    status,
+    post: slug
+      ? post
+      : null,
+    isLoading:
+      Boolean(slug) &&
+      (isLoading || !hasCurrentResult),
+    error:
+      slug && hasCurrentResult
+        ? error
+        : "",
+    status:
+      slug && hasCurrentResult
+        ? status
+        : null,
     refreshPost,
   };
 }

@@ -25,6 +25,25 @@ export default function useAdminMediaItem(
 
   const [error, setError] = useState(null);
 
+  const [settledRequestKey, setSettledRequestKey] = useState("");
+
+  const cleanMediaId =
+    typeof mediaId === "string"
+      ? mediaId.trim()
+      : "";
+
+  const canLoad = Boolean(
+    enabled &&
+      accessToken &&
+      cleanMediaId,
+  );
+
+  const requestKey = JSON.stringify([
+    accessToken || "",
+    cleanMediaId,
+    Boolean(enabled),
+  ]);
+
   const activeRequestRef = useRef({
     controller: null,
     requestId: 0,
@@ -35,17 +54,11 @@ export default function useAdminMediaItem(
 
     previousRequest.controller?.abort();
 
-    const cleanMediaId = typeof mediaId === "string" ? mediaId.trim() : "";
-
-    if (!enabled || !accessToken || !cleanMediaId) {
+    if (!canLoad) {
       activeRequestRef.current = {
         controller: null,
         requestId: previousRequest.requestId + 1,
       };
-
-      setMedia(null);
-      setError(null);
-      setIsLoading(false);
 
       return;
     }
@@ -58,9 +71,6 @@ export default function useAdminMediaItem(
       controller,
       requestId,
     };
-
-    setIsLoading(true);
-    setError(null);
 
     try {
       const mediaRecord = await fetchAdminMediaById(accessToken, cleanMediaId, {
@@ -76,6 +86,7 @@ export default function useAdminMediaItem(
 
       setMedia(mediaRecord);
       setError(null);
+      setSettledRequestKey(requestKey);
     } catch (requestError) {
       if (
         controller.signal.aborted ||
@@ -94,6 +105,7 @@ export default function useAdminMediaItem(
           ? requestError
           : new Error("Media details could not be loaded."),
       );
+      setSettledRequestKey(requestKey);
     } finally {
       if (
         !controller.signal.aborted &&
@@ -107,10 +119,82 @@ export default function useAdminMediaItem(
         setIsLoading(false);
       }
     }
-  }, [accessToken, enabled, mediaId]);
+  }, [
+    accessToken,
+    canLoad,
+    cleanMediaId,
+    requestKey,
+  ]);
 
   useEffect(() => {
-    loadMediaItem();
+    const previousRequest = activeRequestRef.current;
+
+    previousRequest.controller?.abort();
+
+    if (!canLoad) {
+      activeRequestRef.current = {
+        controller: null,
+        requestId: previousRequest.requestId + 1,
+      };
+
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const requestId = previousRequest.requestId + 1;
+
+    activeRequestRef.current = {
+      controller,
+      requestId,
+    };
+
+    fetchAdminMediaById(accessToken, cleanMediaId, {
+      signal: controller.signal,
+    })
+      .then((mediaRecord) => {
+        if (
+          controller.signal.aborted ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
+
+        setMedia(mediaRecord);
+        setError(null);
+        setSettledRequestKey(requestKey);
+      })
+      .catch((requestError) => {
+        if (
+          controller.signal.aborted ||
+          requestError?.name === "AbortError" ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
+
+        console.error("Admin Media detail loading failed:", requestError);
+
+        setMedia(null);
+        setError(
+          requestError instanceof Error
+            ? requestError
+            : new Error("Media details could not be loaded."),
+        );
+        setSettledRequestKey(requestKey);
+      })
+      .finally(() => {
+        if (
+          !controller.signal.aborted &&
+          activeRequestRef.current.requestId === requestId
+        ) {
+          activeRequestRef.current = {
+            controller: null,
+            requestId,
+          };
+
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       const currentRequest = activeRequestRef.current;
@@ -122,17 +206,48 @@ export default function useAdminMediaItem(
         requestId: currentRequest.requestId + 1,
       };
     };
-  }, [loadMediaItem]);
+  }, [
+    accessToken,
+    canLoad,
+    cleanMediaId,
+    requestKey,
+  ]);
 
   const refreshMediaItem = useCallback(async () => {
+    if (!canLoad) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
     await loadMediaItem();
-  }, [loadMediaItem]);
+  }, [canLoad, loadMediaItem]);
+
+  const hasCurrentResult =
+    settledRequestKey === requestKey;
+
+  const visibleMedia = canLoad
+    ? media
+    : null;
+
+  const visibleError =
+    canLoad && hasCurrentResult
+      ? error
+      : null;
+
+  const visibleIsLoading =
+    canLoad &&
+    (isLoading || !hasCurrentResult);
 
   const usage =
-    media?.usage && typeof media.usage === "object" ? media.usage : null;
+    visibleMedia?.usage &&
+    typeof visibleMedia.usage === "object"
+      ? visibleMedia.usage
+      : null;
 
   return {
-    media,
+    media: visibleMedia,
 
     usage,
 
@@ -146,11 +261,13 @@ export default function useAdminMediaItem(
       ? usage.resourceTypes
       : [],
 
-    isLoading,
+    isLoading: visibleIsLoading,
 
-    error,
+    error: visibleError,
 
-    errorMessage: error ? getMediaItemErrorMessage(error) : "",
+    errorMessage: visibleError
+      ? getMediaItemErrorMessage(visibleError)
+      : "",
 
     refreshMediaItem,
   };

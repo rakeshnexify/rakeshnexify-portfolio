@@ -131,6 +131,15 @@ export default function useAdminMedia(accessToken, filters = {}) {
 
   const [error, setError] = useState(null);
 
+  const [settledRequestKey, setSettledRequestKey] = useState("");
+
+  const requestKey = JSON.stringify([
+    accessToken || "",
+    normalizedFilters,
+  ]);
+
+  const canLoad = Boolean(accessToken);
+
   const activeRequestRef = useRef({
     controller: null,
     requestId: 0,
@@ -147,15 +156,6 @@ export default function useAdminMedia(accessToken, filters = {}) {
         requestId: previousRequest.requestId + 1,
       };
 
-      setMedia([]);
-      setCount(0);
-      setTotal(0);
-      setPage(normalizedFilters.page || DEFAULT_MEDIA_PAGE);
-      setLimit(normalizedFilters.limit || DEFAULT_MEDIA_LIMIT);
-      setTotalPages(0);
-      setError(null);
-      setIsLoading(false);
-
       return;
     }
 
@@ -167,9 +167,6 @@ export default function useAdminMedia(accessToken, filters = {}) {
       controller,
       requestId,
     };
-
-    setIsLoading(true);
-    setError(null);
 
     try {
       const response = await fetchAdminMedia(accessToken, normalizedFilters, {
@@ -202,6 +199,7 @@ export default function useAdminMedia(accessToken, filters = {}) {
       );
 
       setError(null);
+      setSettledRequestKey(requestKey);
     } catch (requestError) {
       if (
         controller.signal.aborted ||
@@ -222,6 +220,7 @@ export default function useAdminMedia(accessToken, filters = {}) {
           ? requestError
           : new Error("Media could not be loaded."),
       );
+      setSettledRequestKey(requestKey);
     } finally {
       if (
         !controller.signal.aborted &&
@@ -235,10 +234,97 @@ export default function useAdminMedia(accessToken, filters = {}) {
         setIsLoading(false);
       }
     }
-  }, [accessToken, normalizedFilters]);
+  }, [accessToken, normalizedFilters, requestKey]);
 
   useEffect(() => {
-    loadMedia();
+    const previousRequest = activeRequestRef.current;
+
+    previousRequest.controller?.abort();
+
+    if (!canLoad) {
+      activeRequestRef.current = {
+        controller: null,
+        requestId: previousRequest.requestId + 1,
+      };
+
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    const requestId = previousRequest.requestId + 1;
+
+    activeRequestRef.current = {
+      controller,
+      requestId,
+    };
+
+    fetchAdminMedia(accessToken, normalizedFilters, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (
+          controller.signal.aborted ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
+
+        setMedia(Array.isArray(response.media) ? response.media : []);
+        setCount(Number.isInteger(response.count) ? response.count : 0);
+        setTotal(Number.isInteger(response.total) ? response.total : 0);
+        setPage(
+          Number.isInteger(response.page)
+            ? response.page
+            : DEFAULT_MEDIA_PAGE,
+        );
+        setLimit(
+          Number.isInteger(response.limit)
+            ? response.limit
+            : DEFAULT_MEDIA_LIMIT,
+        );
+        setTotalPages(
+          Number.isInteger(response.totalPages)
+            ? response.totalPages
+            : 0,
+        );
+        setError(null);
+        setSettledRequestKey(requestKey);
+      })
+      .catch((requestError) => {
+        if (
+          controller.signal.aborted ||
+          requestError?.name === "AbortError" ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
+
+        console.error("Admin Media loading failed:", requestError);
+
+        setMedia([]);
+        setCount(0);
+        setTotal(0);
+        setTotalPages(0);
+        setError(
+          requestError instanceof Error
+            ? requestError
+            : new Error("Media could not be loaded."),
+        );
+        setSettledRequestKey(requestKey);
+      })
+      .finally(() => {
+        if (
+          !controller.signal.aborted &&
+          activeRequestRef.current.requestId === requestId
+        ) {
+          activeRequestRef.current = {
+            controller: null,
+            requestId,
+          };
+
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       const currentRequest = activeRequestRef.current;
@@ -250,29 +336,81 @@ export default function useAdminMedia(accessToken, filters = {}) {
         requestId: currentRequest.requestId + 1,
       };
     };
-  }, [loadMedia]);
+  }, [
+    accessToken,
+    canLoad,
+    normalizedFilters,
+    requestKey,
+  ]);
 
   const refreshMedia = useCallback(async () => {
+    if (!canLoad) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
     await loadMedia();
-  }, [loadMedia]);
+  }, [canLoad, loadMedia]);
+
+  const hasCurrentResult =
+    settledRequestKey === requestKey;
+
+  const visibleMedia = canLoad
+    ? media
+    : [];
+
+  const visibleCount = canLoad
+    ? count
+    : 0;
+
+  const visibleTotal = canLoad
+    ? total
+    : 0;
+
+  const visiblePage = canLoad
+    ? page
+    : normalizedFilters.page || DEFAULT_MEDIA_PAGE;
+
+  const visibleLimit = canLoad
+    ? limit
+    : normalizedFilters.limit || DEFAULT_MEDIA_LIMIT;
+
+  const visibleTotalPages = canLoad
+    ? totalPages
+    : 0;
+
+  const visibleIsLoading =
+    canLoad &&
+    (isLoading || !hasCurrentResult);
+
+  const visibleError =
+    canLoad && hasCurrentResult
+      ? error
+      : null;
 
   return {
-    media,
-    count,
-    total,
-    page,
-    limit,
-    totalPages,
+    media: visibleMedia,
+    count: visibleCount,
+    total: visibleTotal,
+    page: visiblePage,
+    limit: visibleLimit,
+    totalPages: visibleTotalPages,
 
-    hasPreviousPage: page > 1,
+    hasPreviousPage: visiblePage > 1,
 
-    hasNextPage: totalPages > 0 && page < totalPages,
+    hasNextPage:
+      visibleTotalPages > 0 &&
+      visiblePage < visibleTotalPages,
 
-    isLoading,
+    isLoading: visibleIsLoading,
 
-    error,
+    error: visibleError,
 
-    errorMessage: error ? getErrorMessage(error) : "",
+    errorMessage: visibleError
+      ? getErrorMessage(visibleError)
+      : "",
 
     refreshMedia,
   };

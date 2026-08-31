@@ -93,6 +93,9 @@ export default function useTestimonials(filters = {}) {
   const [testimonials, setTestimonials] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [settledRequestKey, setSettledRequestKey] = useState("");
+
+  const requestKey = JSON.stringify(normalizedFilters);
 
   const activeRequestRef = useRef({
     controller: null,
@@ -112,9 +115,6 @@ export default function useTestimonials(filters = {}) {
       requestId,
     };
 
-    setIsLoading(true);
-    setError("");
-
     try {
       const databaseTestimonials = await fetchPublicTestimonials(
         normalizedFilters,
@@ -132,6 +132,7 @@ export default function useTestimonials(filters = {}) {
 
       setTestimonials(sortTestimonials(databaseTestimonials));
       setError("");
+      setSettledRequestKey(requestKey);
     } catch (requestError) {
       if (
         controller.signal.aborted ||
@@ -151,6 +152,7 @@ export default function useTestimonials(filters = {}) {
           "Testimonials could not be loaded.",
         ),
       );
+      setSettledRequestKey(requestKey);
     } finally {
       if (
         !controller.signal.aborted &&
@@ -164,10 +166,72 @@ export default function useTestimonials(filters = {}) {
         setIsLoading(false);
       }
     }
-  }, [normalizedFilters]);
+  }, [normalizedFilters, requestKey]);
 
   useEffect(() => {
-    loadTestimonials();
+    const previousController = activeRequestRef.current.controller;
+
+    previousController?.abort();
+
+    const controller = new AbortController();
+    const requestId = activeRequestRef.current.requestId + 1;
+
+    activeRequestRef.current = {
+      controller,
+      requestId,
+    };
+
+    fetchPublicTestimonials(
+      normalizedFilters,
+      {
+        signal: controller.signal,
+      },
+    )
+      .then((databaseTestimonials) => {
+        if (
+          controller.signal.aborted ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
+
+        setTestimonials(sortTestimonials(databaseTestimonials));
+        setError("");
+        setSettledRequestKey(requestKey);
+      })
+      .catch((requestError) => {
+        if (
+          controller.signal.aborted ||
+          requestError?.name === "AbortError" ||
+          activeRequestRef.current.requestId !== requestId
+        ) {
+          return;
+        }
+
+        console.error("Testimonials load failed:", requestError);
+
+        setTestimonials([]);
+        setError(
+          getErrorMessage(
+            requestError,
+            "Testimonials could not be loaded.",
+          ),
+        );
+        setSettledRequestKey(requestKey);
+      })
+      .finally(() => {
+        if (
+          !controller.signal.aborted &&
+          activeRequestRef.current.requestId === requestId
+        ) {
+          activeRequestRef.current = {
+            controller: null,
+            requestId,
+          };
+
+          setIsLoading(false);
+        }
+      });
 
     return () => {
       const currentRequest = activeRequestRef.current;
@@ -179,17 +243,27 @@ export default function useTestimonials(filters = {}) {
         requestId: currentRequest.requestId + 1,
       };
     };
-  }, [loadTestimonials]);
+  }, [normalizedFilters, requestKey]);
 
   const refreshTestimonials = useCallback(async () => {
+    setIsLoading(true);
+    setError("");
+
     await loadTestimonials();
   }, [loadTestimonials]);
+
+  const hasCurrentResult =
+    settledRequestKey === requestKey;
 
   return {
     testimonials,
     count: testimonials.length,
-    isLoading,
-    error,
+    isLoading:
+      isLoading ||
+      !hasCurrentResult,
+    error: hasCurrentResult
+      ? error
+      : "",
     refreshTestimonials,
   };
 }
