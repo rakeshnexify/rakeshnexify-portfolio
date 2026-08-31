@@ -148,22 +148,13 @@ function useAdminAuditLogs({
     ],
   );
 
+  const canLoad = Boolean(
+    enabled &&
+    accessToken,
+  );
+
   useEffect(() => {
-    if (
-      !enabled ||
-      !accessToken
-    ) {
-      setListState({
-        ...EMPTY_LIST_STATE,
-        page:
-          normalizedFilters.page,
-        limit:
-          normalizedFilters.limit,
-      });
-
-      setIsLoading(false);
-      setError(null);
-
+    if (!canLoad) {
       return undefined;
     }
 
@@ -268,7 +259,7 @@ function useAdminAuditLogs({
     };
   }, [
     accessToken,
-    enabled,
+    canLoad,
     normalizedFilters,
     refreshKey,
   ]);
@@ -280,23 +271,39 @@ function useAdminAuditLogs({
     );
   }, []);
 
+  const visibleListState = canLoad
+    ? listState
+    : {
+        ...EMPTY_LIST_STATE,
+        page:
+          normalizedFilters.page,
+        limit:
+          normalizedFilters.limit,
+      };
+
+  const visibleError = canLoad
+    ? error
+    : null;
+
   return {
     auditLogs:
-      listState.auditLogs,
+      visibleListState.auditLogs,
     count:
-      listState.count,
+      visibleListState.count,
     total:
-      listState.total,
+      visibleListState.total,
     page:
-      listState.page,
+      visibleListState.page,
     limit:
-      listState.limit,
+      visibleListState.limit,
     pages:
-      listState.pages,
-    isLoading,
-    error,
+      visibleListState.pages,
+    isLoading: canLoad
+      ? isLoading
+      : false,
+    error: visibleError,
     isForbidden:
-      error?.status === 403,
+      visibleError?.status === 403,
     refresh,
   };
 }

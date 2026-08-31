@@ -53,16 +53,14 @@ function useAdminAuditLog({
       auditLogId,
     );
 
-  useEffect(() => {
-    if (
-      !enabled ||
-      !accessToken ||
-      !normalizedAuditLogId
-    ) {
-      setAuditLog(null);
-      setIsLoading(false);
-      setError(null);
+  const canLoad = Boolean(
+    enabled &&
+    accessToken &&
+    normalizedAuditLogId,
+  );
 
+  useEffect(() => {
+    if (!canLoad) {
       return undefined;
     }
 
@@ -140,7 +138,7 @@ function useAdminAuditLog({
     };
   }, [
     accessToken,
-    enabled,
+    canLoad,
     normalizedAuditLogId,
     refreshKey,
   ]);
@@ -152,16 +150,26 @@ function useAdminAuditLog({
     );
   }, []);
 
+  const visibleAuditLog = canLoad
+    ? auditLog
+    : null;
+
+  const visibleError = canLoad
+    ? error
+    : null;
+
   return {
-    auditLog,
-    isLoading,
-    error,
+    auditLog: visibleAuditLog,
+    isLoading: canLoad
+      ? isLoading
+      : false,
+    error: visibleError,
     status:
-      Number(error?.status) || 0,
+      Number(visibleError?.status) || 0,
     isNotFound:
-      error?.status === 404,
+      visibleError?.status === 404,
     isForbidden:
-      error?.status === 403,
+      visibleError?.status === 403,
     refresh,
   };
 }

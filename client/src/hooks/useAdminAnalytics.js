@@ -27,12 +27,10 @@ function useAdminAnalytics({
   }, [onUnauthorized]);
 
   const normalizedRange = useMemo(() => normalizeRange(range), [range]);
+  const canLoad = Boolean(enabled && accessToken);
 
   useEffect(() => {
-    if (!enabled || !accessToken) {
-      setData(null);
-      setIsLoading(false);
-      setError(null);
+    if (!canLoad) {
       return undefined;
     }
 
@@ -78,20 +76,22 @@ function useAdminAnalytics({
     return () => {
       controller.abort();
     };
-  }, [accessToken, enabled, normalizedRange, refreshKey]);
+  }, [accessToken, canLoad, normalizedRange, refreshKey]);
 
   const refresh = useCallback(() => {
     setRefreshKey((currentKey) => currentKey + 1);
   }, []);
 
+  const visibleData = canLoad ? data : null;
+  const visibleError = canLoad ? error : null;
   const hasCurrentRangeData =
-    data?.range?.key === normalizedRange;
+    canLoad && visibleData?.range?.key === normalizedRange;
 
   return {
-    data,
+    data: visibleData,
     hasCurrentRangeData,
-    isLoading,
-    error,
+    isLoading: canLoad ? isLoading : false,
+    error: visibleError,
     refresh,
   };
 }

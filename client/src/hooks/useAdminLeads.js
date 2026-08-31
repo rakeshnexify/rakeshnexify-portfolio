@@ -67,10 +67,13 @@ function useAdminLeads({
     setRefreshKey((currentKey) => currentKey + 1);
   }, []);
 
-  useEffect(() => {
-    if (!enabled || !accessToken) {
-      setIsLoading(false);
+  const canLoad = Boolean(
+    enabled &&
+    accessToken,
+  );
 
+  useEffect(() => {
+    if (!canLoad) {
       return undefined;
     }
 
@@ -147,7 +150,7 @@ function useAdminLeads({
     };
   }, [
     accessToken,
-    enabled,
+    canLoad,
     queryString,
     refreshKey,
     requestFilters,
@@ -162,7 +165,9 @@ function useAdminLeads({
     totalPages,
     statusCounts,
     followUpCounts,
-    isLoading,
+    isLoading: canLoad
+      ? isLoading
+      : false,
     error,
     refresh,
   };

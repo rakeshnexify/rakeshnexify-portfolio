@@ -90,22 +90,13 @@ function useAdminSubscribers({
     ],
   );
 
+  const canLoad = Boolean(
+    enabled &&
+    accessToken,
+  );
+
   useEffect(() => {
-    if (
-      !enabled ||
-      !accessToken
-    ) {
-      setListState({
-        ...EMPTY_LIST_STATE,
-        page:
-          normalizedFilters.page,
-        limit:
-          normalizedFilters.limit,
-      });
-
-      setIsLoading(false);
-      setError(null);
-
+    if (!canLoad) {
       return undefined;
     }
 
@@ -204,7 +195,7 @@ function useAdminSubscribers({
     };
   }, [
     accessToken,
-    enabled,
+    canLoad,
     normalizedFilters,
     refreshKey,
   ]);
@@ -216,16 +207,30 @@ function useAdminSubscribers({
     );
   }, []);
 
+  const visibleListState = canLoad
+    ? listState
+    : {
+        ...EMPTY_LIST_STATE,
+        page:
+          normalizedFilters.page,
+        limit:
+          normalizedFilters.limit,
+      };
+
   return {
     subscribers:
-      listState.subscribers,
-    count: listState.count,
-    total: listState.total,
-    page: listState.page,
-    limit: listState.limit,
-    pages: listState.pages,
-    isLoading,
-    error,
+      visibleListState.subscribers,
+    count: visibleListState.count,
+    total: visibleListState.total,
+    page: visibleListState.page,
+    limit: visibleListState.limit,
+    pages: visibleListState.pages,
+    isLoading: canLoad
+      ? isLoading
+      : false,
+    error: canLoad
+      ? error
+      : null,
     refresh,
   };
 }
