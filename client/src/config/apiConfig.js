@@ -2,17 +2,15 @@ const configuredApiUrl = String(import.meta.env.VITE_API_URL || "").trim();
 
 /*
  * Development:
- * VITE_API_URL missing ho to local backend use hoga.
+ * Configure VITE_API_URL in the local client environment.
  *
  * Production:
- * Empty base URL same-origin requests banayega:
+ * Empty VITE_API_URL intentionally uses same-origin requests:
  * /api/services
  * /api/projects
  * /api/companies
  */
-const defaultApiUrl = import.meta.env.DEV ? "http://localhost:5000" : "";
-
-const API_URL = (configuredApiUrl || defaultApiUrl).replace(/\/+$/, "");
+const API_URL = configuredApiUrl.replace(/\/+$/, "");
 
 function createApiUrl(pathname) {
   const safePath = String(pathname || "").trim();
