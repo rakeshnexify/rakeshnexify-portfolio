@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { createServiceOrder } from "../../../services/serviceOrdersApi";
-import { formatPackagePrice } from "./PackageCard";
+import { formatPackagePrice } from "./PackageCard.utils";
 
 const PRODUCTION_SITE_ORIGIN = "https://rakeshnexify.com";
 

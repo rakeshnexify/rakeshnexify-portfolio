@@ -1,22 +1,6 @@
 import { Link } from "react-router";
 
-function formatPostDate(value) {
-  if (!value) {
-    return "";
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
-}
+import { formatPostDate } from "./PostCard.utils";
 
 function normalisePost(post = {}, index = 0) {
   const type = post.type === "news" ? "news" : "blog";
@@ -174,5 +158,4 @@ function PostCard({ post, index = 0, linkEnabled = true }) {
   );
 }
 
-export { formatPostDate, normalisePost };
 export default PostCard;

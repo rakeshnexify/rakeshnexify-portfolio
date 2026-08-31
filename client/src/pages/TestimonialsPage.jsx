@@ -5,9 +5,8 @@ import PublicPageCTA from "../components/layout/PublicPageCTA";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
 import PageSeo from "../components/seo/PageSeo";
-import TestimonialCard, {
-  normalizeRating,
-} from "../components/testimonials/TestimonialCard";
+import TestimonialCard from "../components/testimonials/TestimonialCard";
+import { normalizeRating } from "../components/testimonials/TestimonialCard.utils";
 import useSiteSettings from "../hooks/useSiteSettings";
 import useTestimonials from "../hooks/useTestimonials";
 

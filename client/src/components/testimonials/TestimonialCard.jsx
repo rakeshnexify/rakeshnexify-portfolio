@@ -1,5 +1,7 @@
 import { Link } from "react-router";
 
+import { normalizeRating } from "./TestimonialCard.utils";
+
 function cleanText(value) {
   return String(value ?? "").trim();
 }
@@ -38,23 +40,6 @@ function createClientInitials(value) {
     .toUpperCase();
 
   return initials || "CL";
-}
-
-function normalizeRating(value) {
-  if (
-    typeof value === "number" &&
-    Number.isInteger(value) &&
-    value >= 1 &&
-    value <= 5
-  ) {
-    return value;
-  }
-
-  if (typeof value === "string" && /^[1-5]$/.test(value)) {
-    return value.charCodeAt(0) - 48;
-  }
-
-  return 0;
 }
 
 function getRelatedProject(testimonial) {
@@ -199,12 +184,5 @@ function TestimonialCard({ testimonial, compact = false }) {
     </article>
   );
 }
-
-export {
-  cleanText,
-  createClientInitials,
-  getSafeHttpUrl,
-  normalizeRating,
-};
 
 export default TestimonialCard;

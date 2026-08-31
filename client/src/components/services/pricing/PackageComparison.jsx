@@ -1,4 +1,4 @@
-import { formatPackagePrice } from "./PackageCard";
+import { formatPackagePrice } from "./PackageCard.utils";
 
 function buildFeatureRows(servicePackages) {
   const rowsByKey = new Map();

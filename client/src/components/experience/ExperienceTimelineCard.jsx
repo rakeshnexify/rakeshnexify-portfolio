@@ -1,3 +1,5 @@
+import { getSafeHttpUrl } from "./ExperienceTimelineCard.utils";
+
 const employmentTypeLabels = {
   "full-time": "Full-time",
   "part-time": "Part-time",
@@ -56,31 +58,6 @@ function createOrganizationInitials(value) {
     .toUpperCase();
 
   return initials || "EX";
-}
-
-function getSafeHttpUrl(value) {
-  const url = String(value || "").trim();
-
-  if (!url) {
-    return "";
-  }
-
-  try {
-    const parsedUrl = new URL(url);
-
-    if (
-      ["http:", "https:"].includes(parsedUrl.protocol) &&
-      Boolean(parsedUrl.hostname) &&
-      !parsedUrl.username &&
-      !parsedUrl.password
-    ) {
-      return url;
-    }
-  } catch {
-    return "";
-  }
-
-  return "";
 }
 
 function getStringList(value) {
@@ -380,15 +357,5 @@ function ExperienceTimelineCard({
     </article>
   );
 }
-
-export {
-  createOrganizationInitials,
-  employmentTypeLabels,
-  employmentTypeStyles,
-  formatExperienceDate,
-  getSafeHttpUrl,
-  getStringList,
-  locationTypeLabels,
-};
 
 export default ExperienceTimelineCard;

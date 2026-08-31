@@ -1,11 +1,9 @@
 import { useState } from "react";
 
-const typeLabels = {
-  certification: "Certification",
-  license: "License",
-  award: "Award",
-  achievement: "Achievement",
-};
+import {
+  certificationAchievementTypeLabels as typeLabels,
+  getSafeHttpUrl,
+} from "./CertificationAchievementCard.utils";
 
 const typeStyles = {
   certification: "bg-blue-50 text-blue-700 ring-blue-100",
@@ -13,31 +11,6 @@ const typeStyles = {
   award: "bg-amber-50 text-amber-800 ring-amber-100",
   achievement: "bg-emerald-50 text-emerald-700 ring-emerald-100",
 };
-
-function getSafeHttpUrl(value) {
-  const url = String(value || "").trim();
-
-  if (!url) {
-    return "";
-  }
-
-  try {
-    const parsedUrl = new URL(url);
-
-    if (
-      ["http:", "https:"].includes(parsedUrl.protocol) &&
-      Boolean(parsedUrl.hostname) &&
-      !parsedUrl.username &&
-      !parsedUrl.password
-    ) {
-      return url;
-    }
-  } catch {
-    return "";
-  }
-
-  return "";
-}
 
 function formatDateOnly(value) {
   const cleanValue = String(value || "").slice(0, 10);
@@ -245,12 +218,5 @@ function CertificationAchievementCard({
     </article>
   );
 }
-
-export {
-  formatDateOnly,
-  getSafeHttpUrl,
-  isPdfUrl,
-  typeLabels as certificationAchievementTypeLabels,
-};
 
 export default CertificationAchievementCard;

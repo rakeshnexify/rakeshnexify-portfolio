@@ -1,3 +1,5 @@
+import { getSafeHttpUrl } from "./EducationTimelineCard.utils";
+
 const educationTypeLabels = {
   school: "School",
   college: "College",
@@ -46,31 +48,6 @@ function createInstitutionInitials(value) {
     .toUpperCase();
 
   return initials || "ED";
-}
-
-function getSafeHttpUrl(value) {
-  const url = String(value || "").trim();
-
-  if (!url) {
-    return "";
-  }
-
-  try {
-    const parsedUrl = new URL(url);
-
-    if (
-      ["http:", "https:"].includes(parsedUrl.protocol) &&
-      Boolean(parsedUrl.hostname) &&
-      !parsedUrl.username &&
-      !parsedUrl.password
-    ) {
-      return url;
-    }
-  } catch {
-    return "";
-  }
-
-  return "";
 }
 
 function EducationTimelineCard({
@@ -247,13 +224,5 @@ function EducationTimelineCard({
     </article>
   );
 }
-
-export {
-  createInstitutionInitials,
-  educationTypeLabels,
-  educationTypeStyles,
-  formatEducationDate,
-  getSafeHttpUrl,
-};
 
 export default EducationTimelineCard;

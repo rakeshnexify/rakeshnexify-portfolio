@@ -6,7 +6,7 @@ import PublicPageCTA from "../components/layout/PublicPageCTA";
 import { mergeHomepageSections } from "../config/homepageSections";
 import Footer from "../components/layout/Footer";
 import PublicPageHeader from "../components/layout/PublicPageHeader";
-import { formatPostDate } from "../components/posts/PostCard";
+import { formatPostDate } from "../components/posts/PostCard.utils";
 import PageSeo from "../components/seo/PageSeo";
 import usePost from "../hooks/usePost";
 import useSiteSettings from "../hooks/useSiteSettings";

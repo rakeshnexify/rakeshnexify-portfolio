@@ -1,9 +1,8 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 
-import ExperienceTimelineCard, {
-  getSafeHttpUrl,
-} from "../components/experience/ExperienceTimelineCard";
+import ExperienceTimelineCard from "../components/experience/ExperienceTimelineCard";
+import { getSafeHttpUrl } from "../components/experience/ExperienceTimelineCard.utils";
 import Container from "../components/layout/Container";
 import PublicPageCTA from "../components/layout/PublicPageCTA";
 import Footer from "../components/layout/Footer";

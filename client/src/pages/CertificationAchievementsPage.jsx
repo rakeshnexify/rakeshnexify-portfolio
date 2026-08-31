@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 
-import CertificationAchievementCard, {
+import CertificationAchievementCard from "../components/certification-achievements/CertificationAchievementCard";
+import {
   certificationAchievementTypeLabels,
   getSafeHttpUrl,
-} from "../components/certification-achievements/CertificationAchievementCard";
+} from "../components/certification-achievements/CertificationAchievementCard.utils";
 import Container from "../components/layout/Container";
 import PublicPageCTA from "../components/layout/PublicPageCTA";
 import Footer from "../components/layout/Footer";

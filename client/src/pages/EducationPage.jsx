@@ -1,9 +1,8 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
 
-import EducationTimelineCard, {
-  getSafeHttpUrl,
-} from "../components/education/EducationTimelineCard";
+import EducationTimelineCard from "../components/education/EducationTimelineCard";
+import { getSafeHttpUrl } from "../components/education/EducationTimelineCard.utils";
 import Container from "../components/layout/Container";
 import PublicPageCTA from "../components/layout/PublicPageCTA";
 import Footer from "../components/layout/Footer";
