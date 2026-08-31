@@ -7,6 +7,7 @@ import { useNavigate } from "react-router";
 
 import useAdminAuth from "../../../hooks/useAdminAuth";
 import useAdminNotifications from "../../../hooks/useAdminNotifications";
+import useAdminPushNotifications from "../../../hooks/useAdminPushNotifications";
 import { AdminIcon } from "./adminIcons";
 
 const NOTIFICATION_ICON_BY_TYPE = {
@@ -120,6 +121,27 @@ function AdminNotificationsMenu() {
     },
   );
 
+  const {
+    isSupported: isPushSupported,
+    isConfigured: isPushConfigured,
+    isEnabled: isPushEnabled,
+    isBusy: isPushBusy,
+    permission: pushPermission,
+    subscriptionCount: pushSubscriptionCount,
+    error: pushError,
+    statusMessage: pushStatusMessage,
+    enablePush,
+    disablePush,
+    sendTestPush,
+    clearError: clearPushError,
+    refreshStatus: refreshPushStatus,
+  } = useAdminPushNotifications(
+    accessToken,
+    {
+      enabled: Boolean(accessToken),
+    },
+  );
+
   useEffect(() => {
     if (!isOpen) {
       return undefined;
@@ -173,10 +195,12 @@ function AdminNotificationsMenu() {
     const nextOpen = !isOpen;
 
     clearActionError();
+    clearPushError();
     setIsOpen(nextOpen);
 
     if (nextOpen) {
       refreshNotifications();
+      refreshPushStatus();
     }
   }
 
@@ -215,6 +239,18 @@ function AdminNotificationsMenu() {
 
   function handleMarkAllRead() {
     void markAllAsRead().catch(() => {});
+  }
+
+  function handleEnablePush() {
+    void enablePush().catch(() => {});
+  }
+
+  function handleDisablePush() {
+    void disablePush().catch(() => {});
+  }
+
+  function handleTestPush() {
+    void sendTestPush().catch(() => {});
   }
 
   const badgeText =
@@ -285,6 +321,83 @@ function AdminNotificationsMenu() {
                 ? "Marking..."
                 : "Mark all read"}
             </button>
+          </div>
+
+          <div className="admin-push-strip border-b px-4 py-2.5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <AdminIcon
+                    name="bell"
+                    size={13}
+                  />
+
+                  <p className="text-[10px] font-black">
+                    Phone alerts
+                  </p>
+                </div>
+
+                <p className="mt-0.5 text-[9px] leading-4">
+                  {pushStatusMessage}
+                </p>
+
+                {isPushConfigured &&
+                pushSubscriptionCount > 1 ? (
+                  <p className="mt-0.5 text-[9px]">
+                    {pushSubscriptionCount} subscribed devices
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="flex shrink-0 items-center gap-1.5">
+                {isPushEnabled ? (
+                  <>
+                    <button
+                      className="admin-push-action rounded-lg px-2 py-1.5 text-[9px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={isPushBusy}
+                      onClick={handleTestPush}
+                      type="button"
+                    >
+                      Test
+                    </button>
+
+                    <button
+                      className="admin-push-action rounded-lg px-2 py-1.5 text-[9px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={isPushBusy}
+                      onClick={handleDisablePush}
+                      type="button"
+                    >
+                      Disable
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    className="admin-push-action rounded-lg px-2.5 py-1.5 text-[9px] font-bold disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={
+                      isPushBusy ||
+                      !isPushSupported ||
+                      !isPushConfigured ||
+                      pushPermission === "denied"
+                    }
+                    onClick={handleEnablePush}
+                    type="button"
+                  >
+                    {isPushBusy
+                      ? "Working..."
+                      : "Enable alerts"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {pushError ? (
+              <p
+                className="admin-push-error mt-1.5 text-[9px] font-semibold"
+                role="alert"
+              >
+                {pushError.message}
+              </p>
+            ) : null}
           </div>
 
           {actionError ? (

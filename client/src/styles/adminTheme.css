@@ -1996,3 +1996,58 @@ body.admin-theme-active[data-admin-theme="light"]
     max-height: min(58dvh, 410px);
   }
 }
+
+/* =========================================================
+   ADMIN WEB PUSH CONTROLS
+   ========================================================= */
+
+body.admin-theme-active .admin-push-strip {
+  border-color: var(--admin-color-border);
+  background:
+    color-mix(
+      in srgb,
+      var(--admin-color-surface-elevated) 72%,
+      var(--admin-color-surface)
+    );
+  color: var(--admin-color-text-secondary);
+}
+
+body.admin-theme-active .admin-push-strip p:first-of-type {
+  color: var(--admin-color-text-strong);
+}
+
+body.admin-theme-active .admin-push-strip svg {
+  color: var(--admin-color-primary);
+}
+
+body.admin-theme-active .admin-push-action {
+  border: 1px solid var(--admin-color-border);
+  background: var(--admin-color-surface);
+  color: var(--admin-color-primary);
+}
+
+body.admin-theme-active
+  .admin-push-action:hover:not(:disabled) {
+  border-color: var(--admin-color-border-strong);
+  background: var(--admin-color-surface-hover);
+  color: var(--admin-color-primary-hover);
+}
+
+body.admin-theme-active .admin-push-error {
+  color: #fb7185;
+}
+
+body.admin-theme-active[data-admin-theme="light"]
+  .admin-push-error {
+  color: #be123c;
+}
+
+@media (max-width: 639px) {
+  body.admin-theme-active .admin-push-strip {
+    padding-inline: 0.75rem;
+  }
+
+  body.admin-theme-active .admin-push-action {
+    padding-inline: 0.5rem;
+  }
+}
