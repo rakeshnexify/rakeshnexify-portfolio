@@ -4,6 +4,7 @@ import Appointment, { APPOINTMENT_STATUSES } from "../models/Appointment.js";
 import AdminUser from "../models/AdminUser.js";
 import Lead from "../models/Lead.js";
 import { createAuditLog } from "../services/auditLog.service.js";
+import { createEventNotification } from "../services/notification.service.js";
 
 const allowedListQueryFields = new Set([
   "page",
@@ -1447,6 +1448,16 @@ async function convertAppointmentToLead(req, res, next) {
       await lead.save({
         session,
       });
+
+      await createEventNotification(
+        {
+          type: "lead",
+          resource: lead,
+        },
+        {
+          session,
+        },
+      );
 
       await createAuditLog({
         actor: req.admin,

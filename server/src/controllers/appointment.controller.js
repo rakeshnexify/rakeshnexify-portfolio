@@ -5,6 +5,7 @@ import Appointment, {
 } from "../models/Appointment.js";
 import Service from "../models/Service.js";
 import ServicePackage from "../models/ServicePackage.js";
+import { createEventNotificationSafely } from "../services/notification.service.js";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -636,6 +637,11 @@ async function createAppointment(req, res, next) {
       message,
 
       status: "requested",
+    });
+
+    await createEventNotificationSafely({
+      type: "appointment",
+      resource: appointment,
     });
 
     return res.status(201).json({

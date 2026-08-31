@@ -8,6 +8,7 @@ import Lead, {
 } from "../models/Lead.js";
 import Service from "../models/Service.js";
 import { createAuditLog } from "../services/auditLog.service.js";
+import { createEventNotification } from "../services/notification.service.js";
 
 const ACTIVE_LEAD_STATUSES = [
   "new",
@@ -1434,6 +1435,16 @@ async function createAdminLead(req, res, next) {
         session,
       });
 
+      await createEventNotification(
+        {
+          type: "lead",
+          resource: lead,
+        },
+        {
+          session,
+        },
+      );
+
       await createAuditLog({
         actor: req.admin,
         category: "workflow",
@@ -1871,6 +1882,16 @@ async function convertContactMessageToLead(req, res, next) {
       await lead.save({
         session,
       });
+
+      await createEventNotification(
+        {
+          type: "lead",
+          resource: lead,
+        },
+        {
+          session,
+        },
+      );
 
       await createAuditLog({
         actor: req.admin,

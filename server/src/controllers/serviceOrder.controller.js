@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import PackageDesign from "../models/PackageDesign.js";
 import ServiceOrder from "../models/ServiceOrder.js";
 import ServicePackage from "../models/ServicePackage.js";
+import { createEventNotificationSafely } from "../services/notification.service.js";
 
 const ALLOWED_CREATE_FIELDS = new Set([
   "servicePackage",
@@ -434,6 +435,11 @@ async function createServiceOrder(req, res, next) {
         }
       }
     }
+
+    await createEventNotificationSafely({
+      type: "service-order",
+      resource: savedOrder,
+    });
 
     return res.status(201).json({
       success: true,

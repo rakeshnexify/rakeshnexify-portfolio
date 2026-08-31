@@ -1,4 +1,5 @@
 import ContactMessage from "../models/ContactMessage.js";
+import { createEventNotificationSafely } from "../services/notification.service.js";
 
 function formatValidationErrors(error) {
   return Object.fromEntries(
@@ -45,6 +46,11 @@ async function createContactMessage(req, res, next) {
       message,
 
       source: "portfolio-website",
+    });
+
+    await createEventNotificationSafely({
+      type: "contact-message",
+      resource: savedMessage,
     });
 
     return res.status(201).json({

@@ -20,6 +20,7 @@ import adminExperienceRoutes from "./routes/adminExperience.routes.js";
 import adminFaqRoutes from "./routes/adminFaq.routes.js";
 import adminLeadRoutes from "./routes/adminLead.routes.js";
 import adminMediaRoutes from "./routes/adminMedia.routes.js";
+import adminNotificationRoutes from "./routes/adminNotification.routes.js";
 import adminPackageDesignRoutes from "./routes/adminPackageDesign.routes.js";
 import adminPostRoutes from "./routes/adminPost.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
@@ -181,6 +182,7 @@ app.use("/api/admin/team", adminTeamMemberRoutes);
 app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/admin/companies", adminCompanyRoutes);
 app.use("/api/admin/media", adminMediaRoutes);
+app.use("/api/admin/notifications", adminNotificationRoutes);
 app.use(
   "/api/admin/contact-messages",
   adminContactMessageRoutes,
