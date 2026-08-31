@@ -86,7 +86,7 @@ function ServiceFieldError({ message }) {
     return null;
   }
 
-  return <p className="mt-2 text-sm font-medium text-red-600">{message}</p>;
+  return <p className="mt-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{message}</p>;
 }
 
 function ServiceForm({
@@ -224,28 +224,29 @@ function ServiceForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate className="rnx-admin-service-form-v489 rnx-admin-service-form-balanced-v490 space-y-2">
       {submitError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 xl:col-span-2"
         >
           {submitError}
         </div>
       )}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">Basic Information</h2>
+            <div className="space-y-2 xl:columns-2 xl:gap-2 xl:space-y-0">
+<section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">Basic Information</h2>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+        <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
           Add the public title, URL slug and descriptions for this service.
         </p>
 
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <div className="mt-2 grid gap-2 lg:grid-cols-2">
           <div>
             <label
               htmlFor="service-title"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Service title *
             </label>
@@ -258,7 +259,7 @@ function ServiceForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               placeholder="MERN Stack Development"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <ServiceFieldError message={getFieldError("title")} />
@@ -267,7 +268,7 @@ function ServiceForm({
           <div>
             <label
               htmlFor="service-slug"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               URL slug *
             </label>
@@ -281,17 +282,17 @@ function ServiceForm({
               onBlur={handleSlugBlur}
               disabled={isSubmitting}
               placeholder="mern-stack-development"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <ServiceFieldError message={getFieldError("slug")} />
           </div>
         </div>
 
-        <div className="mt-5">
+        <div className="mt-2">
           <label
             htmlFor="service-short-description"
-            className="text-sm font-semibold text-slate-700"
+            className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
           >
             Short description *
           </label>
@@ -302,26 +303,26 @@ function ServiceForm({
             value={formValues.shortDescription}
             onChange={handleInputChange}
             disabled={isSubmitting}
-            rows={3}
+            rows={2}
             maxLength={300}
             placeholder="Briefly explain this service."
-            className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm"
           />
 
-          <div className="mt-2 flex items-start justify-between gap-4">
+          <div className="mt-0.5 flex items-start justify-between gap-2">
             <ServiceFieldError message={getFieldError("shortDescription")} />
 
-            <span className="ml-auto text-xs text-slate-400">
+            <span className="ml-auto text-[9px] text-slate-400 sm:text-[10px]">
               {formValues.shortDescription.length}
               /300
             </span>
           </div>
         </div>
 
-        <div className="mt-5">
+        <div className="mt-2">
           <label
             htmlFor="service-description"
-            className="text-sm font-semibold text-slate-700"
+            className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
           >
             Full description
           </label>
@@ -332,30 +333,30 @@ function ServiceForm({
             value={formValues.description}
             onChange={handleInputChange}
             disabled={isSubmitting}
-            rows={7}
+            rows={3}
             maxLength={5000}
             placeholder="Explain complete service details."
-            className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm"
           />
 
           <ServiceFieldError message={getFieldError("description")} />
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
           Features and Technologies
         </h2>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+        <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
           Enter one item per line or separate multiple items using commas.
         </p>
 
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <div className="mt-2 grid gap-2 lg:grid-cols-2">
           <div>
             <label
               htmlFor="service-features"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Service features
             </label>
@@ -366,9 +367,9 @@ function ServiceForm({
               value={formValues.features}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              rows={7}
+              rows={3}
               placeholder={"Responsive frontend\nREST API\nAdmin dashboard"}
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm"
             />
 
             <ServiceFieldError message={getFieldError("features")} />
@@ -377,7 +378,7 @@ function ServiceForm({
           <div>
             <label
               htmlFor="service-technologies"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Technologies
             </label>
@@ -388,9 +389,9 @@ function ServiceForm({
               value={formValues.technologies}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              rows={7}
+              rows={3}
               placeholder={"MongoDB\nExpress.js\nReact\nNode.js"}
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm"
             />
 
             <ServiceFieldError message={getFieldError("technologies")} />
@@ -398,13 +399,13 @@ function ServiceForm({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">Display Settings</h2>
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">Display Settings</h2>
 
-        <div className="mt-6">
+        <div className="mt-2">
           <label
             htmlFor="service-order-url"
-            className="text-sm font-semibold text-slate-700"
+            className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
           >
             Idomere service/order URL
           </label>
@@ -418,10 +419,10 @@ function ServiceForm({
             disabled={isSubmitting}
             maxLength={500}
             placeholder="https://idomere.com/..."
-            className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+            className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
           />
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
             Add the matching Idomere Technologies service or order page.
             Leave this empty to hide the public Order Service button.
           </p>
@@ -433,7 +434,7 @@ function ServiceForm({
           <div>
             <label
               htmlFor="service-order"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Display order
             </label>
@@ -447,7 +448,7 @@ function ServiceForm({
               value={formValues.order}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <ServiceFieldError message={getFieldError("order")} />
@@ -456,7 +457,7 @@ function ServiceForm({
           <div>
             <label
               htmlFor="service-icon"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Icon name
             </label>
@@ -469,7 +470,7 @@ function ServiceForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               placeholder="code"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
           </div>
 
@@ -535,14 +536,18 @@ function ServiceForm({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">SEO Settings</h2>
+      <details className="group h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between px-3 text-[11px] font-bold text-slate-800 marker:hidden dark:text-slate-200">
+          <span>SEO Settings</span>
+          <span className="text-[9px] font-semibold text-slate-400">Advanced</span>
+        </summary>
+        <div className="border-t border-slate-200 p-2.5 dark:border-slate-800">
 
-        <div className="mt-6 space-y-5">
+        <div className="mt-2 space-y-1.5">
           <div>
             <label
               htmlFor="service-seo-title"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               SEO title
             </label>
@@ -555,7 +560,7 @@ function ServiceForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               maxLength={70}
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <ServiceFieldError
@@ -566,7 +571,7 @@ function ServiceForm({
           <div>
             <label
               htmlFor="service-seo-description"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               SEO description
             </label>
@@ -577,9 +582,9 @@ function ServiceForm({
               value={formValues.seoDescription}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              rows={3}
+              rows={2}
               maxLength={180}
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm"
             />
 
             <ServiceFieldError
@@ -594,7 +599,7 @@ function ServiceForm({
           <div>
             <label
               htmlFor="service-seo-keywords"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               SEO keywords
             </label>
@@ -605,9 +610,9 @@ function ServiceForm({
               value={formValues.seoKeywords}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              rows={3}
+              rows={2}
               placeholder="mern development, react developer"
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm"
             />
 
             <ServiceFieldError
@@ -615,12 +620,14 @@ function ServiceForm({
             />
           </div>
         </div>
-      </section>
+        </div>
+      </details>
+      </div>
 
-      <div className="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-end">
+<div className="sticky bottom-2 z-20 flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:flex-row sm:items-center sm:justify-end xl:col-span-2">
         <Link
           to="/admin/services"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
         >
           Cancel
         </Link>
@@ -628,7 +635,7 @@ function ServiceForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:px-5 sm:text-xs"
         >
           {isSubmitting ? "Saving service..." : submitLabel}
         </button>

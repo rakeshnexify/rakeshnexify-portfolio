@@ -505,7 +505,7 @@ function AdminClientsPartnersPage() {
               return (
                 <article
                   key={company?._id}
-                  className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 sm:p-4"
+                  className="rnx-admin-clients-actions-center-v500 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:p-4"
                 >
                   <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
                     {logoUrl ? (
@@ -594,7 +594,7 @@ function AdminClientsPartnersPage() {
                     </div>
                   </div>
 
-                  <div className="mt-2 flex items-center justify-end gap-1.5">
+                  <div className="mt-2 flex items-center justify-end gap-1.5 sm:mt-0 sm:self-center">
                     <Link
                       to={`/admin/clients-partners/${company._id}/edit`}
                       className="inline-flex min-h-8 items-center justify-center rounded-lg bg-brand-600 px-3 text-[10px] font-bold text-white shadow-sm transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 sm:text-[11px]"

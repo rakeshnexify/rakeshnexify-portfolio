@@ -131,8 +131,8 @@ function LegalLinksEditor({
   const groupError = getFieldError(fieldErrors, "footer.legalLinks");
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-950/60">
+      <div className="flex flex-col gap-2 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="text-lg font-bold text-slate-950">Legal Links</h3>
 
@@ -161,14 +161,14 @@ function LegalLinksEditor({
       {groupError && (
         <p
           role="alert"
-          className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+          className="mt-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
         >
           {groupError}
         </p>
       )}
 
       {linkItems.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center">
+        <div className="mt-2.5 rounded-lg border border-dashed border-slate-300 bg-white px-3 py-5 dark:border-slate-700 dark:bg-slate-950 text-center">
           <p className="font-semibold text-slate-700">No legal links added</p>
 
           <p className="mt-2 text-sm text-slate-500">
@@ -176,7 +176,7 @@ function LegalLinksEditor({
           </p>
         </div>
       ) : (
-        <div className="mt-5 space-y-4">
+        <div className="mt-2.5 space-y-4">
           {linkItems.map((link, index) => {
             const labelField = `footer.legalLinks.${index}.label`;
 
@@ -195,9 +195,9 @@ function LegalLinksEditor({
             return (
               <article
                 key={`legal-link-${index}`}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+                className="overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950"
               >
-                <div className="flex flex-col gap-4 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-2 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
                     <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-sm font-black text-brand-700">
                       {index + 1}
@@ -248,7 +248,7 @@ function LegalLinksEditor({
                   </div>
                 </div>
 
-                <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-2">
+                <div className="grid gap-2.5 p-4 sm:p-5 lg:grid-cols-2">
                   <div>
                     <label
                       htmlFor={labelField}
@@ -268,7 +268,7 @@ function LegalLinksEditor({
                       disabled={disabled}
                       maxLength={100}
                       placeholder="Privacy Policy"
-                      className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                      className={`mt-2 min-h-9 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
                         labelError
                           ? "border-red-400 focus:border-red-500"
                           : "border-slate-300 focus:border-brand-500"
@@ -323,7 +323,7 @@ function LegalLinksEditor({
                       disabled={disabled}
                       maxLength={500}
                       placeholder="/privacy or https://example.com/privacy"
-                      className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                      className={`mt-2 min-h-9 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
                         urlError
                           ? "border-red-400 focus:border-red-500"
                           : "border-slate-300 focus:border-brand-500"
@@ -392,3 +392,4 @@ function LegalLinksEditor({
 }
 
 export default LegalLinksEditor;
+// rnx-site-settings-legal-v482

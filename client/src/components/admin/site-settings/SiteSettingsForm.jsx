@@ -18,10 +18,10 @@ import PlatformSettingsEditor from "./PlatformSettingsEditor";
 import TestimonialsTrustedClientsEditor from "./TestimonialsTrustedClientsEditor";
 
 const inputClasses =
-  "mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm";
 
 const textareaClasses =
-  "mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm";
 
 const defaultFormValues = createSiteSettingsFormValues({});
 
@@ -923,7 +923,7 @@ function FieldError({ message }) {
     return null;
   }
 
-  return <p className="mt-2 text-sm font-medium text-red-600">{message}</p>;
+  return <p className="mt-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{message}</p>;
 }
 
 function SettingsCard({ title, description, children, isVisible = true }) {
@@ -932,14 +932,18 @@ function SettingsCard({ title, description, children, isVisible = true }) {
   }
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-      <h2 className="text-xl font-bold text-slate-950">{title}</h2>
+    <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+      <h2 className="text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
+        {title}
+      </h2>
 
       {description && (
-        <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
+        <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400 sm:text-[11px]">
+          {description}
+        </p>
       )}
 
-      <div className="mt-6">{children}</div>
+      <div className="mt-2.5">{children}</div>
     </section>
   );
 }
@@ -960,7 +964,7 @@ function TextInput({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="text-sm font-semibold text-slate-700">
+      <label htmlFor={id} className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
         {label}
         {required ? " *" : ""}
       </label>
@@ -994,14 +998,14 @@ function TextareaInput({
   error,
   disabled,
   placeholder = "",
-  rows = 5,
+  rows = 3,
   maxLength,
   required = false,
   helpText = "",
 }) {
   return (
     <div>
-      <label htmlFor={id} className="text-sm font-semibold text-slate-700">
+      <label htmlFor={id} className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
         {label}
         {required ? " *" : ""}
       </label>
@@ -1018,17 +1022,17 @@ function TextareaInput({
         className={textareaClasses}
       />
 
-      <div className="mt-2 flex items-start justify-between gap-4">
+      <div className="mt-0.5 flex items-start justify-between gap-2">
         <div>
           {helpText && !error && (
-            <p className="text-xs leading-5 text-slate-400">{helpText}</p>
+            <p className="text-[9px] leading-3.5 text-slate-400 sm:text-[10px]">{helpText}</p>
           )}
 
           <FieldError message={error} />
         </div>
 
         {maxLength && (
-          <span className="ml-auto shrink-0 text-xs text-slate-400">
+          <span className="ml-auto shrink-0 text-[9px] text-slate-400 sm:text-[10px]">
             {String(value || "").length}/{maxLength}
           </span>
         )}
@@ -1073,7 +1077,7 @@ function ImageUrlField({
       />
 
       {value && (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="mt-1.5 flex max-h-32 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-1.5 dark:border-slate-700 dark:bg-slate-950/60">
           <img src={value} alt={previewAlt} className={previewClassName} />
         </div>
       )}
@@ -1092,9 +1096,30 @@ function ListingSectionSettingsCard({
   isVisible = true,
   showCta = true,
 }) {
+  if (!isVisible) {
+    return null;
+  }
+
   return (
-    <SettingsCard title={title} description={description} isVisible={isVisible}>
-      <div className="grid gap-5">
+    <details className="group h-fit self-start rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <summary className="flex cursor-pointer list-none items-center gap-2.5 px-2.5 py-2 marker:hidden sm:px-3">
+        <span className="min-w-0 flex-1">
+          <span className="block text-[11px] font-bold text-slate-900 dark:text-slate-100 sm:text-xs">
+            {title}
+          </span>
+          {description && (
+            <span className="mt-0.5 line-clamp-1 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+              {description}
+            </span>
+          )}
+        </span>
+
+        <span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-[9px] font-bold text-slate-500 group-open:bg-brand-50 group-open:text-brand-700 dark:bg-slate-800 dark:text-slate-400 dark:group-open:bg-brand-950/50 dark:group-open:text-brand-300">
+          Edit
+        </span>
+      </summary>
+
+      <div className="grid gap-2 border-t border-slate-200 p-2.5 dark:border-slate-800 md:grid-cols-2">
         <TextInput
           id={`settings-${fieldName}-eyebrow`}
           name={`${fieldName}.eyebrow`}
@@ -1119,21 +1144,23 @@ function ListingSectionSettingsCard({
           maxLength={200}
         />
 
-        <TextareaInput
-          id={`settings-${fieldName}-description`}
-          name={`${fieldName}.description`}
-          label="Section description"
-          value={values.description}
-          onChange={onChange}
-          error={getFieldError(`${fieldName}.description`, fieldName)}
-          disabled={disabled}
-          rows={5}
-          maxLength={1200}
-          placeholder="Explain the content shown in this section."
-        />
+        <div className="md:col-span-2">
+          <TextareaInput
+            id={`settings-${fieldName}-description`}
+            name={`${fieldName}.description`}
+            label="Section description"
+            value={values.description}
+            onChange={onChange}
+            error={getFieldError(`${fieldName}.description`, fieldName)}
+            disabled={disabled}
+            rows={2}
+            maxLength={1200}
+            placeholder="Explain the content shown in this section."
+          />
+        </div>
 
         {showCta && (
-          <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">
+          <>
             <TextInput
               id={`settings-${fieldName}-cta-label`}
               name={`${fieldName}.ctaButton.label`}
@@ -1165,10 +1192,47 @@ function ListingSectionSettingsCard({
               placeholder="#contact or /projects"
               maxLength={500}
             />
-          </div>
+          </>
         )}
       </div>
-    </SettingsCard>
+    </details>
+  );
+}
+
+function ListingSectionGroup({
+  title,
+  description,
+  count,
+  children,
+}) {
+  return (
+    <details className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <summary className="flex cursor-pointer list-none items-center gap-2.5 px-2.5 py-2.5 marker:hidden sm:px-3">
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 sm:text-xs">
+              {title}
+            </span>
+
+            <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+              {count}
+            </span>
+          </span>
+
+          <span className="mt-0.5 line-clamp-1 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+            {description}
+          </span>
+        </span>
+
+        <span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-[9px] font-bold text-slate-500 transition group-open:bg-brand-50 group-open:text-brand-700 dark:bg-slate-800 dark:text-slate-400 dark:group-open:bg-brand-950/50 dark:group-open:text-brand-300">
+          Manage
+        </span>
+      </summary>
+
+      <div className="grid items-start gap-1.5 border-t border-slate-200 bg-slate-50/50 p-2 dark:border-slate-800 dark:bg-slate-950/30 xl:grid-cols-2">
+        {children}
+      </div>
+    </details>
   );
 }
 
@@ -1571,11 +1635,11 @@ function SiteSettingsForm({
     .filter((index) => index >= 0);
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate className="rnx-admin-site-settings-form-v482 space-y-2">
       {submitError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-medium leading-6 text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium leading-5 text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
         >
           {submitError}
         </div>
@@ -1586,7 +1650,7 @@ function SiteSettingsForm({
         title="Brand Identity"
         description="Manage the main website name, short logo text, tagline and brand images."
       >
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-2.5 lg:grid-cols-2">
           <TextInput
             id="settings-brand-name"
             name="brand.name"
@@ -1667,7 +1731,7 @@ function SiteSettingsForm({
         title="Owner Profile"
         description="Manage the portfolio owner information shown in the Hero and About sections."
       >
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-2.5 lg:grid-cols-2">
           <TextInput
             id="settings-owner-name"
             name="owner.name"
@@ -1736,7 +1800,7 @@ function SiteSettingsForm({
               helpText="Paste an external URL or choose an image/SVG from the Media Library."
               onUnauthorized={onMediaUnauthorized}
               previewAlt="Portfolio owner profile preview"
-              previewClassName="mx-auto size-40 rounded-2xl object-cover"
+              previewClassName="mx-auto size-24 rounded-lg object-cover"
             />
           </div>
         </div>
@@ -1747,7 +1811,7 @@ function SiteSettingsForm({
         title="Hero Section"
         description="Control the technical cover image, main heading, introduction, dynamic quick links and call-to-action settings."
       >
-        <div className="grid gap-5">
+        <div className="grid gap-2.5">
           <ImageUrlField
             id="settings-hero-cover-image"
             name="hero.coverImageUrl"
@@ -1762,7 +1826,7 @@ function SiteSettingsForm({
             helpText="Optional technical cover/background image. Choose from the existing Media Library or paste an external URL. When empty, the Hero uses its built-in professional technical background."
             onUnauthorized={onMediaUnauthorized}
             previewAlt="Hero cover image preview"
-            previewClassName="h-44 w-full rounded-xl object-cover sm:h-56"
+            previewClassName="h-24 w-full rounded-lg object-cover sm:h-28"
           />
 
           <TextInput
@@ -1798,7 +1862,7 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("hero.description", "hero")}
             disabled={isSubmitting}
-            rows={5}
+            rows={3}
             maxLength={1000}
             placeholder="Explain your professional services and value."
           />
@@ -1812,7 +1876,7 @@ function SiteSettingsForm({
             onChange={handleHeroQuickLinksChange}
           />
 
-          <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">
+          <div className="grid gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">
             <TextInput
               id="settings-primary-label"
               name="hero.primaryButton.label"
@@ -1885,7 +1949,7 @@ function SiteSettingsForm({
         title="About Section"
         description="Manage the public About content, animated identity roles and manually linked rotating work items."
       >
-        <div className="grid gap-5">
+        <div className="grid gap-2.5">
           <TextInput
             id="settings-about-eyebrow"
             name="about.eyebrow"
@@ -1926,7 +1990,7 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("about.description", "about")}
             disabled={isSubmitting}
-            rows={8}
+            rows={4}
             maxLength={3000}
             placeholder="Write the complete About section content."
             helpText="Use a blank line to separate multiple paragraphs."
@@ -1939,7 +2003,7 @@ function SiteSettingsForm({
             onChange={handleAboutWorkItemsChange}
           />
 
-          <div className="grid gap-5">
+          <div className="grid gap-2.5">
             <div>
               <h3 className="text-base font-bold text-slate-900">
                 About Platform Grids
@@ -1982,206 +2046,237 @@ function SiteSettingsForm({
         </div>
       </SettingsCard>
 
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Statistics Section Content"
-        description="Manage the eyebrow, heading and description shown above the Home Statistics section."
-        fieldName="statisticsSection"
-        values={formValues.statisticsSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-        showCta={false}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Skills Section Content"
-        description="Manage the eyebrow, heading and short description shown above the Home Skills grid."
-        fieldName="skillsSection"
-        values={formValues.skillsSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-        showCta={false}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Services Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public services."
-        fieldName="servicesSection"
-        values={formValues.servicesSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Projects Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public projects."
-        fieldName="projectsSection"
-        values={formValues.projectsSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Case Studies Section Content"
-        description="Manage the heading, description and call-to-action displayed above your published Project Case Studies."
-        fieldName="caseStudiesSection"
-        values={formValues.caseStudiesSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Education Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public Education timeline."
-        fieldName="educationSection"
-        values={formValues.educationSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Experience Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public Experience timeline."
-        fieldName="experienceSection"
-        values={formValues.experienceSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Certifications & Achievements Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public certifications, licenses, awards and achievements."
-        fieldName="achievementsSection"
-        values={formValues.achievementsSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Team Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public Team members."
-        fieldName="teamSection"
-        values={formValues.teamSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Clients & Partners Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public Clients & Partners."
-        fieldName="clientsPartnersSection"
-        values={formValues.clientsPartnersSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Testimonials Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public client Testimonials."
-        fieldName="testimonialsSection"
-        values={formValues.testimonialsSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
       <SettingsCard
         isVisible={isPanelActive("listing-sections")}
-        title="Testimonials Showcase Clients"
-        description="Manage independent showcase clients/brands displayed in the Testimonials trust strip. These do not use or modify Clients & Partners records."
+        title="Listing Sections"
+        description="Homepage section copy is grouped below. Open only the group and section you need to edit."
       >
-        <div className="grid gap-5">
-          <div className="grid gap-5 lg:grid-cols-2">
-            <TextInput
-              id="settings-testimonials-trusted-heading"
-              name="testimonialsSection.trustedHeading"
-              label="Trust strip heading"
-              value={formValues.testimonialsSection.trustedHeading}
-              onChange={handleFieldChange}
-              error={getFieldError(
-                "testimonialsSection.trustedHeading",
-                "testimonialsSection",
-              )}
+        <div className="rnx-site-settings-listing-manager-v483 space-y-1.5">
+          <ListingSectionGroup
+            title="Core Homepage"
+            description="Statistics, Skills, Services and Projects."
+            count="4 sections"
+          >
+            <ListingSectionSettingsCard
+              title="Statistics"
+              description="Eyebrow, heading and description above Home Statistics."
+              fieldName="statisticsSection"
+              values={formValues.statisticsSection}
               disabled={isSubmitting}
-              placeholder="Trusted by 50+ clients"
-              maxLength={140}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+              showCta={false}
             />
 
-            <TextInput
-              id="settings-testimonials-trusted-description"
-              name="testimonialsSection.trustedDescription"
-              label="Trust strip description"
-              value={formValues.testimonialsSection.trustedDescription}
-              onChange={handleFieldChange}
-              error={getFieldError(
-                "testimonialsSection.trustedDescription",
-                "testimonialsSection",
-              )}
+            <ListingSectionSettingsCard
+              title="Skills"
+              description="Eyebrow, heading and short description above Skills."
+              fieldName="skillsSection"
+              values={formValues.skillsSection}
               disabled={isSubmitting}
-              placeholder="from around the world"
-              maxLength={220}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+              showCta={false}
             />
-          </div>
 
-          <TestimonialsTrustedClientsEditor
-            clients={formValues.testimonialsSection.trustedClients}
-            disabled={isSubmitting}
-            accessToken={accessToken}
-            onUnauthorized={onMediaUnauthorized}
-            onChange={handleTestimonialsTrustedClientsChange}
-            getFieldError={getFieldError}
-          />
+            <ListingSectionSettingsCard
+              title="Services"
+              description="Heading, description and CTA above Services."
+              fieldName="servicesSection"
+              values={formValues.servicesSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+
+            <ListingSectionSettingsCard
+              title="Projects"
+              description="Heading, description and CTA above Projects."
+              fieldName="projectsSection"
+              values={formValues.projectsSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+          </ListingSectionGroup>
+
+          <ListingSectionGroup
+            title="Career & Portfolio"
+            description="Case Studies, Education, Experience and Certifications."
+            count="4 sections"
+          >
+            <ListingSectionSettingsCard
+              title="Case Studies"
+              description="Heading, description and CTA above Project Case Studies."
+              fieldName="caseStudiesSection"
+              values={formValues.caseStudiesSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+
+            <ListingSectionSettingsCard
+              title="Education"
+              description="Heading, description and CTA above Education."
+              fieldName="educationSection"
+              values={formValues.educationSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+
+            <ListingSectionSettingsCard
+              title="Experience"
+              description="Heading, description and CTA above Experience."
+              fieldName="experienceSection"
+              values={formValues.experienceSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+
+            <ListingSectionSettingsCard
+              title="Certifications & Achievements"
+              description="Heading, description and CTA above credentials and achievements."
+              fieldName="achievementsSection"
+              values={formValues.achievementsSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+          </ListingSectionGroup>
+
+          <ListingSectionGroup
+            title="People & Trust"
+            description="Team, Clients & Partners, Testimonials and showcase clients."
+            count="4 areas"
+          >
+            <ListingSectionSettingsCard
+              title="Team"
+              description="Heading, description and CTA above Team."
+              fieldName="teamSection"
+              values={formValues.teamSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+
+            <ListingSectionSettingsCard
+              title="Clients & Partners"
+              description="Heading, description and CTA above Clients & Partners."
+              fieldName="clientsPartnersSection"
+              values={formValues.clientsPartnersSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+
+            <ListingSectionSettingsCard
+              title="Testimonials"
+              description="Heading, description and CTA above Testimonials."
+              fieldName="testimonialsSection"
+              values={formValues.testimonialsSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+
+            <details className="group rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <summary className="flex cursor-pointer list-none items-center gap-2.5 px-2.5 py-2 marker:hidden sm:px-3">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[11px] font-bold text-slate-900 dark:text-slate-100 sm:text-xs">
+                    Testimonials Showcase Clients
+                  </span>
+
+                  <span className="mt-0.5 line-clamp-1 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                    Trust-strip heading, description and independent showcase brands.
+                  </span>
+                </span>
+
+                <span className="shrink-0 rounded-md bg-slate-100 px-2 py-1 text-[9px] font-bold text-slate-500 group-open:bg-brand-50 group-open:text-brand-700 dark:bg-slate-800 dark:text-slate-400 dark:group-open:bg-brand-950/50 dark:group-open:text-brand-300">
+                  Edit
+                </span>
+              </summary>
+
+              <div className="grid gap-2 border-t border-slate-200 p-2.5 dark:border-slate-800">
+                <div className="grid gap-2 lg:grid-cols-2">
+                  <TextInput
+                    id="settings-testimonials-trusted-heading"
+                    name="testimonialsSection.trustedHeading"
+                    label="Trust strip heading"
+                    value={formValues.testimonialsSection.trustedHeading}
+                    onChange={handleFieldChange}
+                    error={getFieldError(
+                      "testimonialsSection.trustedHeading",
+                      "testimonialsSection",
+                    )}
+                    disabled={isSubmitting}
+                    placeholder="Trusted by 50+ clients"
+                    maxLength={140}
+                  />
+
+                  <TextInput
+                    id="settings-testimonials-trusted-description"
+                    name="testimonialsSection.trustedDescription"
+                    label="Trust strip description"
+                    value={formValues.testimonialsSection.trustedDescription}
+                    onChange={handleFieldChange}
+                    error={getFieldError(
+                      "testimonialsSection.trustedDescription",
+                      "testimonialsSection",
+                    )}
+                    disabled={isSubmitting}
+                    placeholder="from around the world"
+                    maxLength={220}
+                  />
+                </div>
+
+                <TestimonialsTrustedClientsEditor
+                  clients={formValues.testimonialsSection.trustedClients}
+                  disabled={isSubmitting}
+                  accessToken={accessToken}
+                  onUnauthorized={onMediaUnauthorized}
+                  onChange={handleTestimonialsTrustedClientsChange}
+                  getFieldError={getFieldError}
+                />
+              </div>
+            </details>
+          </ListingSectionGroup>
+
+          <ListingSectionGroup
+            title="Content & Help"
+            description="FAQ and Latest Articles & News."
+            count="2 sections"
+          >
+            <ListingSectionSettingsCard
+              title="FAQ"
+              description="Heading, description and CTA above FAQ."
+              fieldName="faqSection"
+              values={formValues.faqSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+
+            <ListingSectionSettingsCard
+              title="Latest Articles & News"
+              description="Heading, description and CTA above Blog and News preview."
+              fieldName="postsSection"
+              values={formValues.postsSection}
+              disabled={isSubmitting}
+              onChange={handleFieldChange}
+              getFieldError={getFieldError}
+            />
+          </ListingSectionGroup>
         </div>
       </SettingsCard>
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="FAQ Section Content"
-        description="Manage the heading, description and call-to-action displayed above your public FAQ accordion."
-        fieldName="faqSection"
-        values={formValues.faqSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
-
-      <ListingSectionSettingsCard
-        isVisible={isPanelActive("listing-sections")}
-        title="Latest Articles & News Section Content"
-        description="Manage the heading, description and primary call-to-action for the combined Blog and News homepage preview."
-        fieldName="postsSection"
-        values={formValues.postsSection}
-        disabled={isSubmitting}
-        onChange={handleFieldChange}
-        getFieldError={getFieldError}
-      />
 
       <SettingsCard
         isVisible={isPanelActive("contact")}
         title="Contact Section Content"
         description="Manage every visible Contact section text: heading, form copy, social/freelancer copy, submit label and privacy note."
       >
-        <div className="grid gap-5">
+        <div className="grid gap-2.5">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
             <div>
               <h3 className="text-sm font-bold text-slate-900">
@@ -2302,13 +2397,13 @@ function SiteSettingsForm({
               "contactSection",
             )}
             disabled={isSubmitting}
-            rows={5}
+            rows={3}
             maxLength={1200}
             placeholder="Explain which types of projects and enquiries are welcome."
           />
 
-          <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div className="grid gap-2.5 lg:grid-cols-2">
               <TextInput
                 id="settings-contact-form-heading"
                 name="contactSection.formHeading"
@@ -2351,13 +2446,13 @@ function SiteSettingsForm({
                 "contactSection",
               )}
               disabled={isSubmitting}
-              rows={3}
+              rows={2}
               maxLength={320}
               placeholder="Share the project details and I will get back to you."
             />
 
-            <div className="grid gap-5 lg:grid-cols-2">
-              <div className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="grid gap-2.5 lg:grid-cols-2">
+              <div className="grid gap-2.5 rounded-2xl border border-slate-200 bg-white p-4">
                 <TextInput
                   id="settings-contact-social-heading"
                   name="contactSection.socialHeading"
@@ -2384,13 +2479,13 @@ function SiteSettingsForm({
                     "contactSection",
                   )}
                   disabled={isSubmitting}
-                  rows={3}
+                  rows={2}
                   maxLength={220}
                   placeholder="Find me on social media."
                 />
               </div>
 
-              <div className="grid gap-5 rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="grid gap-2.5 rounded-2xl border border-slate-200 bg-white p-4">
                 <TextInput
                   id="settings-contact-freelancer-heading"
                   name="contactSection.freelancerHeading"
@@ -2417,7 +2512,7 @@ function SiteSettingsForm({
                     "contactSection",
                   )}
                   disabled={isSubmitting}
-                  rows={3}
+                  rows={2}
                   maxLength={220}
                   placeholder="Hire me on trusted platforms."
                 />
@@ -2448,7 +2543,7 @@ function SiteSettingsForm({
         title="Contact Information"
         description="Manage the public email, phone, WhatsApp, location and availability message."
       >
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-2.5 lg:grid-cols-2">
           <TextInput
             id="settings-contact-email"
             name="contact.email"
@@ -2567,7 +2662,7 @@ function SiteSettingsForm({
         title="Footer Content"
         description="Manage the Footer introduction, column headings, project button, legal links and copyright text."
       >
-        <div className="grid gap-6">
+        <div className="grid gap-3">
           <TextareaInput
             id="settings-footer-introduction"
             name="footer.introduction"
@@ -2576,12 +2671,12 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("footer.introduction", "footer")}
             disabled={isSubmitting}
-            rows={5}
+            rows={3}
             maxLength={1000}
             placeholder="Write a short professional introduction for the Footer."
           />
 
-          <div className="grid gap-5 lg:grid-cols-3">
+          <div className="grid gap-2.5 lg:grid-cols-3">
             <TextInput
               id="settings-footer-quick-links-heading"
               name="footer.quickLinksHeading"
@@ -2627,12 +2722,12 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("footer.platformNote", "footer")}
             disabled={isSubmitting}
-            rows={3}
+            rows={2}
             maxLength={300}
             placeholder="Profiles without official URLs remain disabled."
           />
 
-          <div className="grid gap-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">
+          <div className="grid gap-2.5 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-2">
             <TextInput
               id="settings-footer-project-button-label"
               name="footer.projectButton.label"
@@ -2692,7 +2787,7 @@ function SiteSettingsForm({
         title="SEO Settings"
         description="Control search-engine metadata and the social-sharing preview image."
       >
-        <div className="grid gap-5">
+        <div className="grid gap-2.5">
           <TextInput
             id="settings-seo-title"
             name="seo.title"
@@ -2713,7 +2808,7 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("seo.description", "seo")}
             disabled={isSubmitting}
-            rows={4}
+            rows={3}
             maxLength={180}
             placeholder="Write a clear website description for search engines."
           />
@@ -2726,7 +2821,7 @@ function SiteSettingsForm({
             onChange={handleFieldChange}
             error={getFieldError("seo.keywords", "seo.keywordsText", "seo")}
             disabled={isSubmitting}
-            rows={4}
+            rows={3}
             placeholder="mern developer, wordpress developer, ecommerce development"
             helpText="Separate keywords using commas or new lines."
           />
@@ -2745,7 +2840,7 @@ function SiteSettingsForm({
             helpText="Paste an external URL or choose an image/SVG from the Media Library. JPG or PNG is generally safest for social sharing."
             onUnauthorized={onMediaUnauthorized}
             previewAlt="Social sharing preview"
-            previewClassName="max-h-72 w-full object-contain"
+            previewClassName="max-h-32 w-full object-contain"
           />
         </div>
       </SettingsCard>
@@ -2757,7 +2852,7 @@ function SiteSettingsForm({
       >
         <FieldError message={getFieldError("sections")} />
 
-        <div className="space-y-5">
+        <div className="space-y-2">
           {formValues.sections.map((section, index) => {
             if (section.key === "news") {
               return null;
@@ -2809,11 +2904,11 @@ function SiteSettingsForm({
                           : "Registry Item";
 
             return (
-              <div
+              <details
                 key={section.key}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                className="group rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950/60"
               >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <summary className="flex cursor-pointer list-none flex-col gap-1.5 px-2.5 py-2 marker:hidden sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <p className="break-words text-base font-bold text-slate-950">
                       {isBlogNewsSection
@@ -2855,9 +2950,9 @@ function SiteSettingsForm({
                   >
                     {capabilityLabel}
                   </span>
-                </div>
+                </summary>
 
-                <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_8rem_8rem_8rem]">
+                <div className="grid gap-2 border-t border-slate-200 p-2.5 dark:border-slate-700 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_7rem_7rem_7rem]">
                   <TextInput
                     id={`settings-section-key-${index}`}
                     name={`sections.${index}.key`}
@@ -3044,7 +3139,7 @@ function SiteSettingsForm({
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {hasHomepageSection ? (
-                    <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-2.5 py-2">
                       <input
                         type="checkbox"
                         checked={section.isVisible !== false}
@@ -3069,7 +3164,7 @@ function SiteSettingsForm({
                       </span>
                     </label>
                   ) : (
-                    <div className="flex min-h-16 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-4 py-3">
+                    <div className="flex min-h-11 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-2.5 py-2">
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold text-slate-600">
                           No homepage section
@@ -3084,7 +3179,7 @@ function SiteSettingsForm({
                   )}
 
                   {hasNavigationItem ? (
-                    <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-2.5 py-2">
                       <input
                         type="checkbox"
                         checked={section.isNavigationVisible !== false}
@@ -3110,7 +3205,7 @@ function SiteSettingsForm({
                       </span>
                     </label>
                   ) : (
-                    <div className="flex min-h-16 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-4 py-3">
+                    <div className="flex min-h-11 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-2.5 py-2">
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold text-slate-600">
                           No navbar item
@@ -3125,7 +3220,7 @@ function SiteSettingsForm({
                   )}
 
                   {hasFooterNavigationItem ? (
-                    <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-2.5 py-2">
                       <input
                         type="checkbox"
                         checked={section.isFooterNavigationVisible !== false}
@@ -3151,7 +3246,7 @@ function SiteSettingsForm({
                       </span>
                     </label>
                   ) : (
-                    <div className="flex min-h-16 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-4 py-3">
+                    <div className="flex min-h-11 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-2.5 py-2">
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold text-slate-600">
                           No footer item
@@ -3166,7 +3261,7 @@ function SiteSettingsForm({
                   )}
 
                   {isBlogNewsSection ? (
-                    <div className="flex min-h-16 items-center rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3">
+                    <div className="flex min-h-11 items-center rounded-xl border border-cyan-200 bg-cyan-50 px-2.5 py-2">
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold text-cyan-900">
                           Idomere destination
@@ -3178,7 +3273,7 @@ function SiteSettingsForm({
                       </span>
                     </div>
                   ) : hasDedicatedPage ? (
-                    <label className="flex min-h-16 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3">
+                    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-2.5 py-2">
                       <input
                         type="checkbox"
                         checked={section.isPageVisible !== false}
@@ -3204,7 +3299,7 @@ function SiteSettingsForm({
                       </span>
                     </label>
                   ) : (
-                    <div className="flex min-h-16 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-4 py-3">
+                    <div className="flex min-h-11 items-center rounded-xl border border-dashed border-slate-300 bg-slate-100 px-2.5 py-2">
                       <span className="min-w-0">
                         <span className="block text-sm font-semibold text-slate-600">
                           No dedicated page
@@ -3253,7 +3348,7 @@ function SiteSettingsForm({
                     </div>
                   )}
                 </div>
-              </div>
+              </details>
             );
           })}
         </div>
@@ -3288,10 +3383,10 @@ function SiteSettingsForm({
         <FieldError message={getFieldError("isPublished")} />
       </SettingsCard>
 
-      <div className="flex flex-col-reverse gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-end">
+      <div className="sticky bottom-2 z-20 flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:flex-row sm:items-center sm:justify-end">
         <Link
           to={cancelPath}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
         >
           {cancelLabel}
         </Link>
@@ -3299,9 +3394,9 @@ function SiteSettingsForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-400 sm:min-h-10 sm:px-5 sm:text-xs"
         >
-          {isSubmitting ? "Saving site settings..." : submitLabel}
+          {isSubmitting ? "Saving..." : submitLabel}
         </button>
       </div>
     </form>

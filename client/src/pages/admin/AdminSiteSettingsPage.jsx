@@ -107,29 +107,27 @@ function AdminSiteSettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <main className="rnx-admin-site-settings-v482 min-h-screen bg-slate-100 dark:bg-slate-950">
+      <section className="mx-auto w-full max-w-[1440px] px-3 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-end sm:justify-between">
           <header className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-600 dark:text-brand-300">
               Website Management
             </p>
 
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-[22px]">
               Site Settings
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Open a settings category to manage only the website fields you
-              need. Every category remains connected to the same dynamic Site
-              Settings database record.
+            <p className="mt-0.5 max-w-2xl text-[11px] leading-4 text-slate-500 dark:text-slate-400 sm:text-xs">
+              Choose a category, update only what you need and save.
             </p>
           </header>
 
           {settings && (
             <aside
               aria-label="Site settings status"
-              className="shrink-0 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm"
+              className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
                 Last updated
@@ -158,7 +156,7 @@ function AdminSiteSettingsPage() {
           <div
             role="status"
             aria-live="polite"
-            className="mt-6 grid gap-5 lg:grid-cols-2"
+            className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3"
           >
             <span className="sr-only">
               Loading Site Settings...
@@ -167,7 +165,7 @@ function AdminSiteSettingsPage() {
             {[1, 2, 3, 4].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-64 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
+                className="h-20 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none"
               />
             ))}
           </div>
@@ -201,7 +199,7 @@ function AdminSiteSettingsPage() {
         )}
 
         {!isLoading && !loadError && settings && (
-          <div className="mt-6">
+          <div className="mt-3">
             <SiteSettingsOverview />
           </div>
         )}

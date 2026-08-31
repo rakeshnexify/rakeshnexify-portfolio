@@ -13,10 +13,10 @@ import {
 } from "../../../utils/educationForm";
 
 const inputClasses =
-  "mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm";
 
 const textareaClasses =
-  "mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm";
 
 const educationTypeLabels = {
   school: "School",
@@ -33,7 +33,7 @@ function EducationFieldError({ message }) {
     return null;
   }
 
-  return <p className="mt-2 text-sm font-medium text-red-600">{message}</p>;
+  return <p className="mt-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{message}</p>;
 }
 
 function EducationForm({
@@ -180,34 +180,36 @@ function EducationForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="rnx-admin-education-form-v476 space-y-2"
+    >
       {submitError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
         >
           {submitError}
         </div>
       )}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Education Identity
-        </p>
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+            Education Details
+          </p>
 
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Institution and Qualification
-        </h2>
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
+            Qualification and Timeline
+          </h2>
+        </div>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Add the institution, qualification, study field and public URL slug.
-        </p>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2 xl:grid-cols-4">
+          <div className="xl:col-span-2">
             <label
               htmlFor="education-institution-name"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Institution Name <span className="text-red-600">*</span>
             </label>
@@ -228,10 +230,10 @@ function EducationForm({
             <EducationFieldError message={getFieldError("institutionName")} />
           </div>
 
-          <div>
+          <div className="xl:col-span-2">
             <label
               htmlFor="education-slug"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               URL Slug <span className="text-red-600">*</span>
             </label>
@@ -250,17 +252,13 @@ function EducationForm({
               className={inputClasses}
             />
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Automatically generated until manually edited.
-            </p>
-
             <EducationFieldError message={getFieldError("slug")} />
           </div>
 
-          <div>
+          <div className="xl:col-span-2">
             <label
               htmlFor="education-degree"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Degree or Qualification <span className="text-red-600">*</span>
             </label>
@@ -284,7 +282,7 @@ function EducationForm({
           <div>
             <label
               htmlFor="education-field-of-study"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Field of Study <span className="text-red-600">*</span>
             </label>
@@ -308,7 +306,7 @@ function EducationForm({
           <div>
             <label
               htmlFor="education-type"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Education Type <span className="text-red-600">*</span>
             </label>
@@ -335,7 +333,7 @@ function EducationForm({
           <div>
             <label
               htmlFor="education-location"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Location
             </label>
@@ -355,23 +353,11 @@ function EducationForm({
 
             <EducationFieldError message={getFieldError("location")} />
           </div>
-        </div>
-      </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Timeline
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Study Dates and Result
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
           <div>
             <label
               htmlFor="education-start-date"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Start Date <span className="text-red-600">*</span>
             </label>
@@ -393,7 +379,7 @@ function EducationForm({
           <div>
             <label
               htmlFor="education-end-date"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               End Date
             </label>
@@ -415,9 +401,9 @@ function EducationForm({
           <div>
             <label
               htmlFor="education-grade"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
-              Grade, Score or Result
+              Grade / Result
             </label>
 
             <input
@@ -436,199 +422,176 @@ function EducationForm({
             <EducationFieldError message={getFieldError("grade")} />
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isCurrentlyStudying"
-                type="checkbox"
-                checked={formValues.isCurrentlyStudying}
+          <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60 md:col-span-2 xl:col-span-1">
+            <input
+              name="isCurrentlyStudying"
+              type="checkbox"
+              checked={formValues.isCurrentlyStudying}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+            />
+
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                Currently Studying
+              </span>
+
+              <span className="mt-0.5 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                End date stays empty; public timeline shows Present.
+              </span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+            Content and Publishing
+          </p>
+
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
+            Public Content, Media and Visibility
+          </h2>
+        </div>
+
+        <div className="mt-2 grid gap-2 xl:grid-cols-2 xl:items-start">
+          <div className="space-y-2">
+            <div>
+              <label
+                htmlFor="education-short-description"
+                className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
+              >
+                Short Description
+              </label>
+
+              <textarea
+                id="education-short-description"
+                name="shortDescription"
+                value={formValues.shortDescription}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                rows={2}
+                maxLength={600}
+                placeholder="Summarise the qualification and professional value."
+                aria-invalid={Boolean(getFieldError("shortDescription"))}
+                className={textareaClasses}
               />
 
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Currently Studying
-                </span>
+              <div className="mt-0.5 flex justify-between gap-3 text-[9px] text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                <span>Optional</span>
+                <span>{String(formValues.shortDescription || "").length}/600</span>
+              </div>
 
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  End date will remain empty and the public timeline will show
-                  “Present”.
-                </span>
-              </span>
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Public Content
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Education Description
-        </h2>
-
-        <div className="mt-7 grid gap-6">
-          <div>
-            <label
-              htmlFor="education-short-description"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Short Description
-            </label>
-
-            <textarea
-              id="education-short-description"
-              name="shortDescription"
-              value={formValues.shortDescription}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={5}
-              maxLength={600}
-              placeholder="Summarise the qualification, core subjects and professional value."
-              aria-invalid={Boolean(getFieldError("shortDescription"))}
-              className={textareaClasses}
-            />
-
-            <div className="mt-2 flex justify-between gap-4 text-xs text-slate-500">
-              <span>Optional - add only when useful</span>
-              <span>
-                {String(formValues.shortDescription || "").length}/600
-              </span>
+              <EducationFieldError message={getFieldError("shortDescription")} />
             </div>
 
-            <EducationFieldError
-              message={getFieldError("shortDescription")}
-            />
-          </div>
+            <div>
+              <label
+                htmlFor="education-description"
+                className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
+              >
+                Detailed Description
+              </label>
 
-          <div>
-            <label
-              htmlFor="education-description"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Detailed Description
-            </label>
+              <textarea
+                id="education-description"
+                name="description"
+                value={formValues.description}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                rows={3}
+                maxLength={5000}
+                placeholder="Subjects, achievements, activities and useful details."
+                aria-invalid={Boolean(getFieldError("description"))}
+                className={textareaClasses}
+              />
 
-            <textarea
-              id="education-description"
-              name="description"
-              value={formValues.description}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={9}
-              maxLength={5000}
-              placeholder="Add subjects, achievements, activities and other useful details."
-              aria-invalid={Boolean(getFieldError("description"))}
-              className={textareaClasses}
-            />
+              <div className="mt-0.5 text-right text-[9px] text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                {String(formValues.description || "").length}/5000
+              </div>
 
-            <div className="mt-2 text-right text-xs text-slate-500">
-              {String(formValues.description || "").length}/5000
+              <EducationFieldError message={getFieldError("description")} />
             </div>
 
-            <EducationFieldError message={getFieldError("description")} />
-          </div>
-        </div>
-      </section>
+            <div>
+              <label
+                htmlFor="education-institution-url"
+                className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
+              >
+                Institution Website URL
+              </label>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Supporting Links
-        </p>
+              <input
+                id="education-institution-url"
+                name="institutionUrl"
+                type="url"
+                value={formValues.institutionUrl}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                maxLength={500}
+                placeholder="https://example.edu"
+                aria-invalid={Boolean(getFieldError("institutionUrl"))}
+                className={inputClasses}
+              />
 
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Institution, Certificate and Logo
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="education-institution-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Institution Website URL
-            </label>
-
-            <input
-              id="education-institution-url"
-              name="institutionUrl"
-              type="url"
-              value={formValues.institutionUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.edu"
-              aria-invalid={Boolean(getFieldError("institutionUrl"))}
-              className={inputClasses}
-            />
-
-            <EducationFieldError message={getFieldError("institutionUrl")} />
+              <EducationFieldError message={getFieldError("institutionUrl")} />
+            </div>
           </div>
 
-          <MediaField
-            id="education-certificate-url"
-            name="certificateUrl"
-            label="Certificate URL"
-            value={formValues.certificateUrl}
-            onChange={handleInputChange}
-            accessToken={accessToken}
-            allowedTypes={["document", "image", "svg"]}
-            pickerTitle="Choose Education Certificate"
-            placeholder="https://example.com/certificate"
-            helpText="Paste an external certificate URL or choose a PDF/image/SVG from the Media Library."
-            error={getFieldError("certificateUrl")}
-            disabled={isSubmitting}
-            onUnauthorized={onMediaUnauthorized}
-          />
-
-          <div className="md:col-span-2">
+          <div className="space-y-2">
             <MediaField
-              id="education-logo-url"
-              name="logoUrl"
-              label="Institution Logo URL"
-              value={formValues.logoUrl}
+              id="education-certificate-url"
+              name="certificateUrl"
+              label="Certificate URL"
+              value={formValues.certificateUrl}
               onChange={handleInputChange}
               accessToken={accessToken}
-              allowedTypes={["image", "svg"]}
-              pickerTitle="Choose Institution Logo"
-              placeholder="https://example.edu/logo.png"
-              helpText="Paste an external logo URL or choose an image/SVG from the Media Library."
-              error={getFieldError("logoUrl")}
+              allowedTypes={["document", "image", "svg"]}
+              pickerTitle="Choose Education Certificate"
+              placeholder="https://example.com/certificate"
+              helpText="Paste a URL or choose from Media Library."
+              error={getFieldError("certificateUrl")}
               disabled={isSubmitting}
               onUnauthorized={onMediaUnauthorized}
             />
 
-            {formValues.logoUrl && (
-              <div className="mt-4 flex min-h-32 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <img
-                  src={formValues.logoUrl}
-                  alt="Institution logo preview"
-                  className="max-h-24 max-w-full object-contain"
-                />
-              </div>
-            )}
+            <div>
+              <MediaField
+                id="education-logo-url"
+                name="logoUrl"
+                label="Institution Logo URL"
+                value={formValues.logoUrl}
+                onChange={handleInputChange}
+                accessToken={accessToken}
+                allowedTypes={["image", "svg"]}
+                pickerTitle="Choose Institution Logo"
+                placeholder="https://example.edu/logo.png"
+                helpText="Paste a URL or choose from Media Library."
+                error={getFieldError("logoUrl")}
+                disabled={isSubmitting}
+                onUnauthorized={onMediaUnauthorized}
+              />
+
+              {formValues.logoUrl && (
+                <div className="mt-1 flex h-10 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-950/60">
+                  <img
+                    src={formValues.logoUrl}
+                    alt="Institution logo preview"
+                    className="max-h-8 max-w-full object-contain"
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Publishing Controls
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Display Order and Visibility
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-2 md:grid-cols-3">
           <div>
             <label
               htmlFor="education-order"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Display Order
             </label>
@@ -649,56 +612,54 @@ function EducationForm({
             <EducationFieldError message={getFieldError("order")} />
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isVisible"
-                type="checkbox"
-                checked={formValues.isVisible}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-              />
+          <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+            <input
+              name="isVisible"
+              type="checkbox"
+              checked={formValues.isVisible}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+            />
 
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Publicly Visible
-                </span>
-
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  Show this Education record on public pages and sections.
-                </span>
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                Publicly Visible
               </span>
-            </label>
 
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isFeatured"
-                type="checkbox"
-                checked={formValues.isFeatured}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-              />
-
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Featured Education
-                </span>
-
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  Prioritise this record on the homepage and public timeline.
-                </span>
+              <span className="mt-0.5 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                Show on public Education pages.
               </span>
-            </label>
-          </div>
+            </span>
+          </label>
+
+          <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+            <input
+              name="isFeatured"
+              type="checkbox"
+              checked={formValues.isFeatured}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+            />
+
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                Featured Education
+              </span>
+
+              <span className="mt-0.5 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                Prioritise in featured displays.
+              </span>
+            </span>
+          </label>
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-end">
+      <div className="flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-end">
         <Link
           to="/admin/education"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
         >
           Cancel
         </Link>
@@ -706,7 +667,7 @@ function EducationForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-7 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:px-5 sm:text-xs"
         >
           {isSubmitting ? "Saving Education..." : submitLabel}
         </button>

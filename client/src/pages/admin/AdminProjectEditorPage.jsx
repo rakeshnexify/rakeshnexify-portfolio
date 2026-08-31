@@ -172,87 +172,91 @@ function AdminProjectEditorPage({ mode = "create" }) {
 
   if (isLoading) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-100 px-4">
-        <div className="text-center">
-          <div className="mx-auto size-12 animate-spin rounded-full border-4 border-slate-200 border-t-brand-600 motion-reduce:animate-none" />
-
-          <p className="mt-5 text-sm font-semibold text-slate-600">
-            Loading project details...
-          </p>
-        </div>
+      <main className="min-h-screen bg-slate-100 dark:bg-slate-950">
+        <section className="mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-6 lg:px-8">
+          <div role="status" aria-live="polite" className="mx-auto max-w-6xl space-y-2">
+            <span className="sr-only">Loading project details...</span>
+            <div className="h-14 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none" />
+            <div className="h-72 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none" />
+          </div>
+        </section>
       </main>
     );
   }
 
   if (isEditMode && (loadError || hasMissingProjectId)) {
     return (
-      <main className="grid min-h-screen place-items-center bg-slate-100 px-4 py-12">
-        <div className="w-full max-w-lg rounded-3xl border border-red-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-red-50 text-2xl font-bold text-red-600">
-            !
-          </div>
-
-          <p className="mt-6 text-sm font-bold uppercase tracking-[0.18em] text-red-600">
-            Project Error
-          </p>
-
-          <h1 className="mt-3 text-2xl font-bold text-slate-950">
-            Project could not be opened
-          </h1>
-
-          <p className="mt-4 leading-7 text-slate-600">
-            {hasMissingProjectId ? "Project ID is required." : loadError}
-          </p>
-
-          <Link
-            to="/admin/projects"
-            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+      <main className="min-h-screen bg-slate-100 dark:bg-slate-950">
+        <section className="mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-6 lg:px-8">
+          <div
+            role="alert"
+            className="mx-auto max-w-xl rounded-xl border border-red-200 bg-white p-3 shadow-sm dark:border-red-900/60 dark:bg-slate-900 sm:p-4"
           >
-            Return to projects
-          </Link>
-        </div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-red-600 dark:text-red-300">
+              Project Error
+            </p>
+
+            <h1 className="mt-1 text-lg font-bold tracking-tight text-slate-950 dark:text-white sm:text-xl">
+              Project could not be opened
+            </h1>
+
+            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+              {hasMissingProjectId ? "Project ID is required." : loadError}
+            </p>
+
+            <Link
+              to="/admin/projects"
+              className="mt-3 inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+            >
+              <span aria-hidden="true">&larr;</span>
+              <span className="ml-1.5">Return to Projects</span>
+            </Link>
+          </div>
+        </section>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <Link
-          to="/admin/projects"
-          className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-        >
-          <span aria-hidden="true">&larr;</span>
-          Projects Management
-        </Link>
+    <main className="rnx-admin-project-editor-v492 min-h-screen bg-slate-100 dark:bg-slate-950">
+      <section className="mx-auto w-full max-w-[1440px] px-3 py-3 sm:px-6 sm:py-3.5 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <Link
+            to="/admin/projects"
+            className="inline-flex min-h-8 items-center gap-1.5 text-[11px] font-semibold text-slate-500 transition hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-300"
+          >
+            <span aria-hidden="true">&larr;</span>
+            Projects
+          </Link>
 
-        <header className="mt-3">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-            {isEditMode ? "Update Project" : "Create Project"}
-          </p>
+          <header className="mt-0.5">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300 sm:text-[10px]">
+              {isEditMode ? "Edit Project" : "Create Project"}
+            </p>
 
-          <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-            {isEditMode
-              ? `Edit ${project?.title || "project"}`
-              : "Add a new project"}
-          </h1>
+            <h1 className="mt-0.5 break-words text-lg font-bold tracking-tight text-slate-950 dark:text-white sm:text-xl">
+              {isEditMode
+                ? `Edit ${project?.title || "Project"}`
+                : "Add Project"}
+            </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            {isEditMode
-              ? "Update project content, screenshots, technologies, links, case-study details, visibility and SEO information."
-              : "Create a complete portfolio project with project details, technologies, screenshots, links and case-study content."}
-          </p>
-        </header>
+            <p className="mt-0.5 max-w-3xl text-[10px] leading-4 text-slate-500 dark:text-slate-400 sm:text-[11px]">
+              {isEditMode
+                ? "Update project details, content, media, links and publishing."
+                : "Create project details, content, media, links and publishing in one compact editor."}
+            </p>
+          </header>
 
-        <div className="mt-6">
-          <ProjectForm
-            key={isEditMode ? project?._id : "new-project"}
-            initialValues={initialValues}
-            onSubmit={handleSubmit}
-            submitLabel={isEditMode ? "Update Project" : "Create Project"}
-            accessToken={accessToken}
-            onMediaUnauthorized={handleMediaUnauthorized}
-          />
+          <div className="mt-2">
+            <ProjectForm
+              key={isEditMode ? project?._id : "new-project"}
+              initialValues={initialValues}
+              onSubmit={handleSubmit}
+              submitLabel={isEditMode ? "Update Project" : "Create Project"}
+              accessToken={accessToken}
+              onMediaUnauthorized={handleMediaUnauthorized}
+            />
+          </div>
         </div>
       </section>
     </main>

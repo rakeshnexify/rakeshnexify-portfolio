@@ -199,20 +199,17 @@ function AdminTestimonialEditorPage({ mode = "create" }) {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main className="min-h-screen bg-slate-100 dark:bg-slate-950">
+        <section className="mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-6 lg:px-8">
           <div
             role="status"
             aria-live="polite"
-            className="mx-auto max-w-5xl space-y-4"
+            className="mx-auto max-w-6xl space-y-2"
           >
-            <span className="sr-only">
-              Loading Testimonial editor...
-            </span>
+            <span className="sr-only">Loading Testimonial editor...</span>
 
-            <div className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
-
-            <div className="h-96 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+            <div className="h-14 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none" />
+            <div className="h-72 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none" />
           </div>
         </section>
       </main>
@@ -221,21 +218,21 @@ function AdminTestimonialEditorPage({ mode = "create" }) {
 
   if (loadError || hasMissingTestimonialId) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main className="min-h-screen bg-slate-100 dark:bg-slate-950">
+        <section className="mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-6 lg:px-8">
           <div
             role="alert"
-            className="mx-auto max-w-2xl rounded-2xl border border-red-200 bg-white p-5 shadow-sm sm:p-6"
+            className="mx-auto max-w-xl rounded-xl border border-red-200 bg-white p-3 shadow-sm dark:border-red-900/60 dark:bg-slate-900 sm:p-4"
           >
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-red-600 dark:text-red-300">
               Testimonial Error
             </p>
 
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-1 text-lg font-bold tracking-tight text-slate-950 dark:text-white sm:text-xl">
               Testimonial editor could not be opened
             </h1>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
               {hasMissingTestimonialId
                 ? "Testimonial ID is required."
                 : loadError}
@@ -243,7 +240,7 @@ function AdminTestimonialEditorPage({ mode = "create" }) {
 
             <Link
               to="/admin/testimonials"
-              className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+              className="mt-3 inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
             >
               &larr; Return to Testimonials
             </Link>
@@ -254,39 +251,36 @@ function AdminTestimonialEditorPage({ mode = "create" }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mx-auto max-w-5xl">
+    <main className="rnx-admin-testimonial-editor-v497 min-h-screen bg-slate-100 dark:bg-slate-950">
+      <section className="mx-auto w-full max-w-[1440px] px-3 py-3 sm:px-6 sm:py-3.5 lg:px-8">
+        <div className="mx-auto max-w-6xl">
           <Link
             to="/admin/testimonials"
-            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+            className="inline-flex min-h-8 items-center gap-1.5 text-[11px] font-semibold text-slate-500 transition hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-300"
           >
-            <span aria-hidden="true">
-              &larr;
-            </span>
-
-            Testimonials Management
+            <span aria-hidden="true">&larr;</span>
+            Testimonials
           </Link>
 
-          <header className="mt-3">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-              Testimonials Management
+          <header className="mt-0.5">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300 sm:text-[10px]">
+              {isEditMode ? "Edit Testimonial" : "Create Testimonial"}
             </p>
 
-            <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-0.5 break-words text-lg font-bold tracking-tight text-slate-950 dark:text-white sm:text-xl">
               {isEditMode
                 ? `Edit ${testimonial?.clientName || "Testimonial"}`
-                : "Add New Testimonial"}
+                : "Add Testimonial"}
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            <p className="mt-0.5 max-w-3xl text-[10px] leading-4 text-slate-500 dark:text-slate-400 sm:text-[11px]">
               {isEditMode
-                ? "Update the client identity, review, rating, related Project, profile media and publishing controls."
-                : "Create a professional client Testimonial that can be managed dynamically from the Admin Panel."}
+                ? "Update client details, review, media and publishing."
+                : "Create client feedback in one compact editor."}
             </p>
           </header>
 
-          <div className="mt-6">
+          <div className="mt-2">
             <TestimonialForm
               key={isEditMode ? testimonial?._id : "new-testimonial"}
               initialValues={initialValues}

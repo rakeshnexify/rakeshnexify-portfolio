@@ -14,10 +14,10 @@ import {
 } from "../../../utils/experienceForm";
 
 const inputClasses =
-  "mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm";
 
 const textareaClasses =
-  "mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm";
 
 const employmentTypeLabels = {
   "full-time": "Full-time",
@@ -42,7 +42,7 @@ function ExperienceFieldError({ message }) {
     return null;
   }
 
-  return <p className="mt-2 text-sm font-medium text-red-600">{message}</p>;
+  return <p className="mt-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{message}</p>;
 }
 
 function ExperienceForm({
@@ -187,36 +187,34 @@ function ExperienceForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="rnx-admin-experience-form-v478 space-y-2"
+    >
       {submitError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
         >
           {submitError}
         </div>
       )}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Experience Identity
-        </p>
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+            Role and Timeline
+          </p>
 
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Organization and Professional Role
-        </h2>
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
+            Organization, Role and Employment Dates
+          </h2>
+        </div>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Add the organization, role, employment type, location and public URL
-          slug.
-        </p>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="experience-organization-name"
-              className="text-sm font-semibold text-slate-700"
-            >
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2 xl:grid-cols-4">
+          <div className="xl:col-span-2">
+            <label htmlFor="experience-organization-name" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
               Organization Name <span className="text-red-600">*</span>
             </label>
 
@@ -233,16 +231,11 @@ function ExperienceForm({
               className={inputClasses}
             />
 
-            <ExperienceFieldError
-              message={getFieldError("organizationName")}
-            />
+            <ExperienceFieldError message={getFieldError("organizationName")} />
           </div>
 
-          <div>
-            <label
-              htmlFor="experience-slug"
-              className="text-sm font-semibold text-slate-700"
-            >
+          <div className="xl:col-span-2">
+            <label htmlFor="experience-slug" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
               URL Slug <span className="text-red-600">*</span>
             </label>
 
@@ -260,20 +253,16 @@ function ExperienceForm({
               className={inputClasses}
             />
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Automatically generated until manually edited.
+            <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+              Auto-generated until manually edited.
             </p>
 
             <ExperienceFieldError message={getFieldError("slug")} />
           </div>
 
-          <div>
-            <label
-              htmlFor="experience-job-title"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Job Title / Professional Role{" "}
-              <span className="text-red-600">*</span>
+          <div className="xl:col-span-2">
+            <label htmlFor="experience-job-title" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+              Job Title / Professional Role <span className="text-red-600">*</span>
             </label>
 
             <input
@@ -293,10 +282,7 @@ function ExperienceForm({
           </div>
 
           <div>
-            <label
-              htmlFor="experience-employment-type"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="experience-employment-type" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
               Employment Type <span className="text-red-600">*</span>
             </label>
 
@@ -320,35 +306,8 @@ function ExperienceForm({
           </div>
 
           <div>
-            <label
-              htmlFor="experience-location"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Location
-            </label>
-
-            <input
-              id="experience-location"
-              name="location"
-              type="text"
-              value={formValues.location}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={180}
-              placeholder="Kathmandu, Nepal"
-              aria-invalid={Boolean(getFieldError("location"))}
-              className={inputClasses}
-            />
-
-            <ExperienceFieldError message={getFieldError("location")} />
-          </div>
-
-          <div>
-            <label
-              htmlFor="experience-location-type"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Location Type
+            <label htmlFor="experience-location-type" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+              Work Mode
             </label>
 
             <select
@@ -371,24 +330,30 @@ function ExperienceForm({
 
             <ExperienceFieldError message={getFieldError("locationType")} />
           </div>
-        </div>
-      </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Timeline
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Employment Dates
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
           <div>
-            <label
-              htmlFor="experience-start-date"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="experience-location" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+              Location
+            </label>
+
+            <input
+              id="experience-location"
+              name="location"
+              type="text"
+              value={formValues.location}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              maxLength={180}
+              placeholder="Kathmandu, Nepal"
+              aria-invalid={Boolean(getFieldError("location"))}
+              className={inputClasses}
+            />
+
+            <ExperienceFieldError message={getFieldError("location")} />
+          </div>
+
+          <div>
+            <label htmlFor="experience-start-date" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
               Start Date <span className="text-red-600">*</span>
             </label>
 
@@ -407,14 +372,8 @@ function ExperienceForm({
           </div>
 
           <div>
-            <label
-              htmlFor="experience-end-date"
-              className="text-sm font-semibold text-slate-700"
-            >
-              End Date{" "}
-              {!formValues.isCurrent && (
-                <span className="text-red-600">*</span>
-              )}
+            <label htmlFor="experience-end-date" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+              End Date {!formValues.isCurrent && <span className="text-red-600">*</span>}
             </label>
 
             <input
@@ -431,349 +390,252 @@ function ExperienceForm({
             <ExperienceFieldError message={getFieldError("endDate")} />
           </div>
 
-          <div className="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isCurrent"
-                type="checkbox"
-                checked={formValues.isCurrent}
+          <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60 md:col-span-2 xl:col-span-1">
+            <input
+              name="isCurrent"
+              type="checkbox"
+              checked={formValues.isCurrent}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+            />
+
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                Current Position
+              </span>
+
+              <span className="mt-0.5 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                End date stays empty; public timeline shows Present.
+              </span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+            Content and Publishing
+          </p>
+
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
+            Work Details, Expertise, Media and Visibility
+          </h2>
+        </div>
+
+        <div className="mt-2 grid gap-2 xl:grid-cols-2 xl:items-start">
+          <div className="space-y-2">
+            <div>
+              <label htmlFor="experience-short-description" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+                Short Description <span className="text-red-600">*</span>
+              </label>
+
+              <textarea
+                id="experience-short-description"
+                name="shortDescription"
+                value={formValues.shortDescription}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                rows={2}
+                maxLength={600}
+                placeholder="Summarise the role, responsibilities and professional impact."
+                aria-invalid={Boolean(getFieldError("shortDescription"))}
+                className={textareaClasses}
               />
 
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Current Position
-                </span>
+              <div className="mt-0.5 flex justify-between gap-3 text-[9px] text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                <span>Minimum 10 characters</span>
+                <span>{String(formValues.shortDescription || "").length}/600</span>
+              </div>
 
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  End date will remain empty and the public timeline will show
-                  “Present”.
-                </span>
-              </span>
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Public Content
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Experience Description
-        </h2>
-
-        <div className="mt-7 grid gap-6">
-          <div>
-            <label
-              htmlFor="experience-short-description"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Short Description <span className="text-red-600">*</span>
-            </label>
-
-            <textarea
-              id="experience-short-description"
-              name="shortDescription"
-              value={formValues.shortDescription}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={5}
-              maxLength={600}
-              placeholder="Summarise the role, responsibilities and professional impact."
-              aria-invalid={Boolean(getFieldError("shortDescription"))}
-              className={textareaClasses}
-            />
-
-            <div className="mt-2 flex justify-between gap-4 text-xs text-slate-500">
-              <span>Minimum 10 characters</span>
-
-              <span>
-                {String(formValues.shortDescription || "").length}/600
-              </span>
+              <ExperienceFieldError message={getFieldError("shortDescription")} />
             </div>
 
-            <ExperienceFieldError
-              message={getFieldError("shortDescription")}
-            />
-          </div>
+            <div>
+              <label htmlFor="experience-description" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+                Detailed Description
+              </label>
 
-          <div>
-            <label
-              htmlFor="experience-description"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Detailed Description
-            </label>
+              <textarea
+                id="experience-description"
+                name="description"
+                value={formValues.description}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                rows={3}
+                maxLength={5000}
+                placeholder="Professional background, scope of work and useful context."
+                aria-invalid={Boolean(getFieldError("description"))}
+                className={textareaClasses}
+              />
 
-            <textarea
-              id="experience-description"
-              name="description"
-              value={formValues.description}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={9}
-              maxLength={5000}
-              placeholder="Add detailed professional background, scope of work and useful context."
-              aria-invalid={Boolean(getFieldError("description"))}
-              className={textareaClasses}
-            />
+              <div className="mt-0.5 text-right text-[9px] text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                {String(formValues.description || "").length}/5000
+              </div>
 
-            <div className="mt-2 text-right text-xs text-slate-500">
-              {String(formValues.description || "").length}/5000
+              <ExperienceFieldError message={getFieldError("description")} />
             </div>
 
-            <ExperienceFieldError message={getFieldError("description")} />
-          </div>
-        </div>
-      </section>
+            <div className="grid gap-2 md:grid-cols-2">
+              <div>
+                <label htmlFor="experience-responsibilities" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+                  Responsibilities
+                </label>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Work Details
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Responsibilities and Achievements
-        </h2>
-
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Enter one item per line. Comma-separated items are also supported.
-        </p>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="experience-responsibilities"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Responsibilities
-            </label>
-
-            <textarea
-              id="experience-responsibilities"
-              name="responsibilities"
-              value={formValues.responsibilities}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={9}
-              placeholder={`Build responsive MERN applications
-Design reusable frontend components
-Maintain secure REST APIs`}
-              aria-invalid={Boolean(getFieldError("responsibilities"))}
-              className={textareaClasses}
-            />
-
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Maximum 30 items and 300 characters per item.
-            </p>
-
-            <ExperienceFieldError
-              message={getFieldError("responsibilities")}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="experience-achievements"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Achievements
-            </label>
-
-            <textarea
-              id="experience-achievements"
-              name="achievements"
-              value={formValues.achievements}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={9}
-              placeholder={`Delivered production-ready portfolio modules
-Improved API validation and security
-Automated reusable development workflows`}
-              aria-invalid={Boolean(getFieldError("achievements"))}
-              className={textareaClasses}
-            />
-
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Maximum 30 items and 300 characters per item.
-            </p>
-
-            <ExperienceFieldError message={getFieldError("achievements")} />
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Expertise
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Skills and Tools
-        </h2>
-
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Enter one skill or tool per line. Duplicate values are removed
-          automatically.
-        </p>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="experience-skills"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Skills
-            </label>
-
-            <textarea
-              id="experience-skills"
-              name="skills"
-              value={formValues.skills}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={8}
-              placeholder={`JavaScript
-React
-Node.js
-MongoDB`}
-              aria-invalid={Boolean(getFieldError("skills"))}
-              className={textareaClasses}
-            />
-
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Maximum 50 items and 100 characters per item.
-            </p>
-
-            <ExperienceFieldError message={getFieldError("skills")} />
-          </div>
-
-          <div>
-            <label
-              htmlFor="experience-tools"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Tools and Technologies
-            </label>
-
-            <textarea
-              id="experience-tools"
-              name="tools"
-              value={formValues.tools}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={8}
-              placeholder={`VS Code
-Git
-GitHub
-Postman`}
-              aria-invalid={Boolean(getFieldError("tools"))}
-              className={textareaClasses}
-            />
-
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Maximum 50 items and 100 characters per item.
-            </p>
-
-            <ExperienceFieldError message={getFieldError("tools")} />
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Organization Links
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Website and Logo
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="experience-website-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Organization Website URL
-            </label>
-
-            <input
-              id="experience-website-url"
-              name="organizationWebsiteUrl"
-              type="url"
-              value={formValues.organizationWebsiteUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={500}
-              placeholder="https://example.com"
-              aria-invalid={Boolean(
-                getFieldError("organizationWebsiteUrl"),
-              )}
-              className={inputClasses}
-            />
-
-            <ExperienceFieldError
-              message={getFieldError("organizationWebsiteUrl")}
-            />
-          </div>
-
-          <MediaField
-            id="experience-logo-url"
-            name="organizationLogoUrl"
-            label="Organization Logo URL"
-            value={formValues.organizationLogoUrl}
-            onChange={handleInputChange}
-            accessToken={accessToken}
-            allowedTypes={["image", "svg"]}
-            pickerTitle="Choose Organization Logo"
-            placeholder="https://example.com/logo.png"
-            helpText="Paste an external logo URL or choose an image/SVG from the Media Library."
-            error={getFieldError("organizationLogoUrl")}
-            disabled={isSubmitting}
-            onUnauthorized={onMediaUnauthorized}
-          />
-
-          {formValues.organizationLogoUrl && (
-            <div className="md:col-span-2">
-              <p className="text-sm font-semibold text-slate-700">
-                Logo Preview
-              </p>
-
-              <div className="mt-3 flex min-h-32 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <img
-                  src={formValues.organizationLogoUrl}
-                  alt="Organization logo preview"
-                  className="max-h-24 max-w-full object-contain"
-                  onError={(event) => {
-                    event.currentTarget.hidden = true;
-                  }}
+                <textarea
+                  id="experience-responsibilities"
+                  name="responsibilities"
+                  value={formValues.responsibilities}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  rows={3}
+                  placeholder={"Build responsive applications\nMaintain secure APIs"}
+                  aria-invalid={Boolean(getFieldError("responsibilities"))}
+                  className={textareaClasses}
                 />
+
+                <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                  Up to 30 items.
+                </p>
+
+                <ExperienceFieldError message={getFieldError("responsibilities")} />
+              </div>
+
+              <div>
+                <label htmlFor="experience-achievements" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+                  Achievements
+                </label>
+
+                <textarea
+                  id="experience-achievements"
+                  name="achievements"
+                  value={formValues.achievements}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  rows={3}
+                  placeholder={"Delivered production modules\nImproved workflows"}
+                  aria-invalid={Boolean(getFieldError("achievements"))}
+                  className={textareaClasses}
+                />
+
+                <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                  Up to 30 items.
+                </p>
+
+                <ExperienceFieldError message={getFieldError("achievements")} />
               </div>
             </div>
-          )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="grid gap-2 md:grid-cols-2">
+              <div>
+                <label htmlFor="experience-skills" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+                  Skills
+                </label>
+
+                <textarea
+                  id="experience-skills"
+                  name="skills"
+                  value={formValues.skills}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  rows={2}
+                  placeholder={"JavaScript\nReact\nNode.js"}
+                  aria-invalid={Boolean(getFieldError("skills"))}
+                  className={textareaClasses}
+                />
+
+                <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                  Up to 50 items.
+                </p>
+
+                <ExperienceFieldError message={getFieldError("skills")} />
+              </div>
+
+              <div>
+                <label htmlFor="experience-tools" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+                  Tools and Technologies
+                </label>
+
+                <textarea
+                  id="experience-tools"
+                  name="tools"
+                  value={formValues.tools}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  rows={2}
+                  placeholder={"VS Code\nGit\nPostman"}
+                  aria-invalid={Boolean(getFieldError("tools"))}
+                  className={textareaClasses}
+                />
+
+                <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                  Up to 50 items.
+                </p>
+
+                <ExperienceFieldError message={getFieldError("tools")} />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="experience-website-url" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
+                Organization Website URL
+              </label>
+
+              <input
+                id="experience-website-url"
+                name="organizationWebsiteUrl"
+                type="url"
+                value={formValues.organizationWebsiteUrl}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                maxLength={500}
+                placeholder="https://example.com"
+                aria-invalid={Boolean(getFieldError("organizationWebsiteUrl"))}
+                className={inputClasses}
+              />
+
+              <ExperienceFieldError message={getFieldError("organizationWebsiteUrl")} />
+            </div>
+
+            <div>
+              <MediaField
+                id="experience-logo-url"
+                name="organizationLogoUrl"
+                label="Organization Logo URL"
+                value={formValues.organizationLogoUrl}
+                onChange={handleInputChange}
+                accessToken={accessToken}
+                allowedTypes={["image", "svg"]}
+                pickerTitle="Choose Organization Logo"
+                placeholder="https://example.com/logo.png"
+                helpText="Paste a URL or choose from Media Library."
+                error={getFieldError("organizationLogoUrl")}
+                disabled={isSubmitting}
+                onUnauthorized={onMediaUnauthorized}
+              />
+
+              {formValues.organizationLogoUrl && (
+                <div className="mt-1 flex h-10 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-950/60">
+                  <img
+                    src={formValues.organizationLogoUrl}
+                    alt="Organization logo preview"
+                    className="max-h-8 max-w-full object-contain"
+                    onError={(event) => {
+                      event.currentTarget.hidden = true;
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Publishing Controls
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Display Order and Visibility
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-2 md:grid-cols-3">
           <div>
-            <label
-              htmlFor="experience-order"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="experience-order" className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]">
               Display Order
             </label>
 
@@ -793,56 +655,54 @@ Postman`}
             <ExperienceFieldError message={getFieldError("order")} />
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isVisible"
-                type="checkbox"
-                checked={formValues.isVisible}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-              />
+          <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+            <input
+              name="isVisible"
+              type="checkbox"
+              checked={formValues.isVisible}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+            />
 
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Publicly Visible
-                </span>
-
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  Show this Experience record on public pages and sections.
-                </span>
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                Publicly Visible
               </span>
-            </label>
 
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isFeatured"
-                type="checkbox"
-                checked={formValues.isFeatured}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-              />
-
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Featured Experience
-                </span>
-
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  Prioritise this record on the homepage and public timeline.
-                </span>
+              <span className="mt-0.5 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                Show on public Experience pages.
               </span>
-            </label>
-          </div>
+            </span>
+          </label>
+
+          <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+            <input
+              name="isFeatured"
+              type="checkbox"
+              checked={formValues.isFeatured}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+            />
+
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                Featured Experience
+              </span>
+
+              <span className="mt-0.5 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                Prioritise in featured displays.
+              </span>
+            </span>
+          </label>
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-end">
+      <div className="flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-end">
         <Link
           to="/admin/experience"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
         >
           Cancel
         </Link>
@@ -850,7 +710,7 @@ Postman`}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-7 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:px-5 sm:text-xs"
         >
           {isSubmitting ? "Saving Experience..." : submitLabel}
         </button>

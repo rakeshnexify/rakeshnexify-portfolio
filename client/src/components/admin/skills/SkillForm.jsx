@@ -12,10 +12,16 @@ import {
 } from "../../../utils/skillForm";
 
 const inputClasses =
-  "mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm";
 
 const textareaClasses =
-  "mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm";
+
+const labelClasses =
+  "text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]";
+
+const sectionClasses =
+  "rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3";
 
 const proficiencyLabels = {
   familiar: "Familiar",
@@ -29,7 +35,7 @@ function SkillFieldError({ message }) {
     return null;
   }
 
-  return <p className="mt-2 text-sm font-medium text-red-600">{message}</p>;
+  return <p className="mt-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{message}</p>;
 }
 
 function SkillForm({
@@ -158,35 +164,38 @@ function SkillForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="rnx-admin-skill-form-v473 space-y-2"
+    >
       {submitError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
         >
           {submitError}
         </div>
       )}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Skill Identity
-        </p>
+      <section className={sectionClasses}>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+            Skill Details
+          </p>
 
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Basic Information
-        </h2>
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
+            Basic Information
+          </h2>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Add the public name, URL slug and category. Description is optional.
-        </p>
+          <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+            Core public identity, category and short description.
+          </p>
+        </div>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2 xl:grid-cols-4">
           <div>
-            <label
-              htmlFor="skill-name"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="skill-name" className={labelClasses}>
               Skill Name <span className="text-red-600">*</span>
             </label>
 
@@ -207,10 +216,7 @@ function SkillForm({
           </div>
 
           <div>
-            <label
-              htmlFor="skill-slug"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="skill-slug" className={labelClasses}>
               URL Slug <span className="text-red-600">*</span>
             </label>
 
@@ -228,18 +234,15 @@ function SkillForm({
               className={inputClasses}
             />
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Automatically generated from the name until manually edited.
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+              Auto-generated until manually edited.
             </p>
 
             <SkillFieldError message={getFieldError("slug")} />
           </div>
 
           <div>
-            <label
-              htmlFor="skill-short-name"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="skill-short-name" className={labelClasses}>
               Short Name
             </label>
 
@@ -260,10 +263,7 @@ function SkillForm({
           </div>
 
           <div>
-            <label
-              htmlFor="skill-category"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="skill-category" className={labelClasses}>
               Category <span className="text-red-600">*</span>
             </label>
 
@@ -283,12 +283,10 @@ function SkillForm({
             <SkillFieldError message={getFieldError("category")} />
           </div>
 
-          <div className="md:col-span-2">
-            <label
-              htmlFor="skill-description"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Description <span className="font-normal text-slate-400">(Optional)</span>
+          <div className="md:col-span-2 xl:col-span-4">
+            <label htmlFor="skill-description" className={labelClasses}>
+              Description
+              <span className="ml-1 font-normal text-slate-400">(Optional)</span>
             </label>
 
             <textarea
@@ -297,15 +295,15 @@ function SkillForm({
               value={formValues.description}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              rows={4}
+              rows={2}
               maxLength={500}
               placeholder="Explain how this skill is used in your professional work."
               aria-invalid={Boolean(getFieldError("description"))}
               className={textareaClasses}
             />
 
-            <div className="mt-2 flex justify-between gap-4 text-xs text-slate-500">
-              <span>Optional. Maximum 500 characters.</span>
+            <div className="mt-0.5 flex justify-between gap-3 text-[10px] text-slate-500 dark:text-slate-400">
+              <span>Maximum 500 characters</span>
               <span>{String(formValues.description || "").length}/500</span>
             </div>
 
@@ -314,22 +312,25 @@ function SkillForm({
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Experience
-        </p>
+      <section className={sectionClasses}>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+            Skill Settings
+          </p>
 
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Proficiency and Experience
-        </h2>
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
+            Experience, Icon and Publishing
+          </h2>
 
-        <div className="mt-7 grid gap-6 md:grid-cols-3">
+          <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+            Keep proficiency, visual identity and public state in one place.
+          </p>
+        </div>
+
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2 xl:grid-cols-4">
           <div>
-            <label
-              htmlFor="skill-proficiency-level"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Proficiency Level <span className="text-red-600">*</span>
+            <label htmlFor="skill-proficiency-level" className={labelClasses}>
+              Proficiency <span className="text-red-600">*</span>
             </label>
 
             <select
@@ -341,7 +342,7 @@ function SkillForm({
               aria-invalid={Boolean(getFieldError("proficiencyLevel"))}
               className={inputClasses}
             >
-              <option value="">Select proficiency level</option>
+              <option value="">Select level</option>
 
               {skillProficiencyLevels.map((level) => (
                 <option key={level} value={level}>
@@ -354,11 +355,8 @@ function SkillForm({
           </div>
 
           <div>
-            <label
-              htmlFor="skill-proficiency-percent"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Proficiency Percentage
+            <label htmlFor="skill-proficiency-percent" className={labelClasses}>
+              Proficiency %
             </label>
 
             <input
@@ -376,19 +374,16 @@ function SkillForm({
               className={inputClasses}
             />
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Optional. Used by the compact Home Skills progress bar.
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+              Optional, 0 to 100.
             </p>
 
             <SkillFieldError message={getFieldError("proficiencyPercent")} />
           </div>
 
           <div>
-            <label
-              htmlFor="skill-years-of-experience"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Years of Experience
+            <label htmlFor="skill-years-of-experience" className={labelClasses}>
+              Experience Years
             </label>
 
             <input
@@ -406,82 +401,15 @@ function SkillForm({
               className={inputClasses}
             />
 
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Optional. Decimal values such as 2.5 are supported.
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+              Decimal values supported.
             </p>
 
             <SkillFieldError message={getFieldError("yearsOfExperience")} />
           </div>
-        </div>
-      </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Visual Identity
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Icon Settings
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
           <div>
-            <label
-              htmlFor="skill-icon"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Icon Name
-            </label>
-
-            <input
-              id="skill-icon"
-              name="icon"
-              type="text"
-              value={formValues.icon}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={100}
-              placeholder="javascript"
-              aria-invalid={Boolean(getFieldError("icon"))}
-              className={inputClasses}
-            />
-
-            <SkillFieldError message={getFieldError("icon")} />
-          </div>
-
-          <MediaField
-            id="skill-icon-url"
-            name="iconUrl"
-            label="Icon Image URL"
-            value={formValues.iconUrl}
-            onChange={handleInputChange}
-            accessToken={accessToken}
-            allowedTypes={["image", "svg"]}
-            pickerTitle="Choose Skill Icon"
-            placeholder="https://example.com/javascript.svg"
-            helpText="Paste an external icon URL or choose an image/SVG from the Media Library."
-            error={getFieldError("iconUrl")}
-            disabled={isSubmitting}
-            onUnauthorized={onMediaUnauthorized}
-          />
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Publishing Controls
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Display Order and Visibility
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="skill-order"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="skill-order" className={labelClasses}>
               Display Order
             </label>
 
@@ -501,56 +429,93 @@ function SkillForm({
             <SkillFieldError message={getFieldError("order")} />
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isVisible"
-                type="checkbox"
-                checked={formValues.isVisible}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-              />
-
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Publicly Visible
-                </span>
-
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  Show this skill on public Skills pages and sections.
-                </span>
-              </span>
+          <div>
+            <label htmlFor="skill-icon" className={labelClasses}>
+              Icon Name
             </label>
 
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isFeatured"
-                type="checkbox"
-                checked={formValues.isFeatured}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-              />
+            <input
+              id="skill-icon"
+              name="icon"
+              type="text"
+              value={formValues.icon}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              maxLength={100}
+              placeholder="javascript"
+              aria-invalid={Boolean(getFieldError("icon"))}
+              className={inputClasses}
+            />
 
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Featured Skill
-                </span>
-
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  Prioritise this skill in featured displays.
-                </span>
-              </span>
-            </label>
+            <SkillFieldError message={getFieldError("icon")} />
           </div>
+
+          <div className="md:col-span-1 xl:col-span-3">
+            <MediaField
+              id="skill-icon-url"
+              name="iconUrl"
+              label="Icon Image URL"
+              value={formValues.iconUrl}
+              onChange={handleInputChange}
+              accessToken={accessToken}
+              allowedTypes={["image", "svg"]}
+              pickerTitle="Choose Skill Icon"
+              placeholder="https://example.com/javascript.svg"
+              helpText="Paste a URL or choose an image/SVG from Media Library."
+              error={getFieldError("iconUrl")}
+              disabled={isSubmitting}
+              onUnauthorized={onMediaUnauthorized}
+            />
+          </div>
+
+          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60 md:col-span-1 xl:col-span-2">
+            <input
+              name="isVisible"
+              type="checkbox"
+              checked={formValues.isVisible}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+            />
+
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                Publicly Visible
+              </span>
+
+              <span className="mt-0.5 block text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+                Show on public Skills pages and sections.
+              </span>
+            </span>
+          </label>
+
+          <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60 md:col-span-1 xl:col-span-2">
+            <input
+              name="isFeatured"
+              type="checkbox"
+              checked={formValues.isFeatured}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+            />
+
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                Featured Skill
+              </span>
+
+              <span className="mt-0.5 block text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+                Prioritise this skill in featured displays.
+              </span>
+            </span>
+          </label>
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-end">
+      <div className="flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-end">
         <Link
           to="/admin/skills"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-brand-700 dark:hover:text-brand-300"
         >
           Cancel
         </Link>
@@ -558,7 +523,7 @@ function SkillForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-7 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:px-5 sm:text-xs"
         >
           {isSubmitting ? "Saving Skill..." : submitLabel}
         </button>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router";
 
 import {
   billingCycles,
@@ -17,7 +18,7 @@ function FieldError({ message }) {
   }
 
   return (
-    <p className="mt-2 text-sm font-medium text-red-600">
+    <p className="mt-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">
       {message}
     </p>
   );
@@ -259,31 +260,32 @@ function ServicePackageForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate className="rnx-admin-service-package-form-v489 rnx-admin-service-package-form-balanced-v490 space-y-2">
       {submitError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 xl:col-span-2"
         >
           {submitError}
         </div>
       )}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">
+            <div className="space-y-2 xl:columns-2 xl:gap-2 xl:space-y-0">
+<section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
           Package Identity
         </h2>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+        <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
           Connect this package to an existing Service and define the package
           group and public identity.
         </p>
 
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <div className="mt-2 grid gap-2 md:grid-cols-2">
           <div>
             <label
               htmlFor="service-package-service"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Parent Service *
             </label>
@@ -314,7 +316,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-group"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Package group *
             </label>
@@ -340,7 +342,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-name"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Package name *
             </label>
@@ -352,7 +354,7 @@ function ServicePackageForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               placeholder="Professional"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <FieldError message={getFieldError("name")} />
@@ -361,7 +363,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-slug"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Package slug
             </label>
@@ -374,7 +376,7 @@ function ServicePackageForm({
               onBlur={handleSlugBlur}
               disabled={isSubmitting}
               placeholder="professional"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <p className="mt-2 text-xs leading-5 text-slate-400">
@@ -386,10 +388,10 @@ function ServicePackageForm({
           </div>
         </div>
 
-        <div className="mt-5">
+        <div className="mt-2">
           <label
             htmlFor="service-package-short-description"
-            className="text-sm font-semibold text-slate-700"
+            className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
           >
             Short description *
           </label>
@@ -400,18 +402,18 @@ function ServicePackageForm({
             value={formValues.shortDescription}
             onChange={handleInputChange}
             disabled={isSubmitting}
-            rows={3}
+            rows={2}
             placeholder="Explain the main value of this package."
-            className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm"
           />
 
           <FieldError message={getFieldError("shortDescription")} />
         </div>
 
-        <div className="mt-5">
+        <div className="mt-2">
           <label
             htmlFor="service-package-description"
-            className="text-sm font-semibold text-slate-700"
+            className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
           >
             Full description
           </label>
@@ -422,21 +424,21 @@ function ServicePackageForm({
             value={formValues.description}
             onChange={handleInputChange}
             disabled={isSubmitting}
-            rows={6}
+            rows={2}
             placeholder="Add complete package details, scope and expectations."
-            className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm"
           />
 
           <FieldError message={getFieldError("description")} />
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
           Pricing and Billing
         </h2>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+        <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
           Configure development, recurring management or custom pricing
           without creating a separate pricing domain.
         </p>
@@ -445,7 +447,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-pricing-mode"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Pricing mode *
             </label>
@@ -471,7 +473,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-price"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Price {formValues.pricingMode === "custom" ? "(optional)" : "*"}
             </label>
@@ -486,7 +488,7 @@ function ServicePackageForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               placeholder="25000"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <FieldError message={getFieldError("price")} />
@@ -495,7 +497,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-currency"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Currency *
             </label>
@@ -516,7 +518,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-price-label"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Price label
             </label>
@@ -528,7 +530,7 @@ function ServicePackageForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               placeholder="Starting package"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <FieldError message={getFieldError("priceLabel")} />
@@ -537,7 +539,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-billing-cycle"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Billing cycle *
             </label>
@@ -563,7 +565,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-billing-label"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Billing label
             </label>
@@ -575,7 +577,7 @@ function ServicePackageForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               placeholder="Per month / One-time payment"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <FieldError message={getFieldError("billingLabel")} />
@@ -583,10 +585,10 @@ function ServicePackageForm({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-xl font-bold text-slate-950">
+            <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
               Comparison Features
             </h2>
 
@@ -619,7 +621,7 @@ function ServicePackageForm({
                   Feature {index + 1}
                 </p>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   <button
                     type="button"
                     onClick={() => handleMoveFeature(index, -1)}
@@ -656,7 +658,7 @@ function ServicePackageForm({
                 <div>
                   <label
                     htmlFor={`feature-key-${index}`}
-                    className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
+                    className="text-[9px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400 sm:text-[10px]"
                   >
                     Key
                   </label>
@@ -669,7 +671,7 @@ function ServicePackageForm({
                     }
                     disabled={isSubmitting}
                     placeholder="admin-panel"
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                    className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 sm:min-h-10 sm:text-sm"
                   />
 
                   <FieldError
@@ -680,7 +682,7 @@ function ServicePackageForm({
                 <div>
                   <label
                     htmlFor={`feature-label-${index}`}
-                    className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
+                    className="text-[9px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400 sm:text-[10px]"
                   >
                     Label
                   </label>
@@ -693,7 +695,7 @@ function ServicePackageForm({
                     }
                     disabled={isSubmitting}
                     placeholder="Admin Panel"
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                    className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 sm:min-h-10 sm:text-sm"
                   />
 
                   <FieldError
@@ -704,7 +706,7 @@ function ServicePackageForm({
                 <div>
                   <label
                     htmlFor={`feature-value-${index}`}
-                    className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
+                    className="text-[9px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400 sm:text-[10px]"
                   >
                     Value
                   </label>
@@ -717,7 +719,7 @@ function ServicePackageForm({
                     }
                     disabled={isSubmitting}
                     placeholder="Advanced / Basic / 5 pages"
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                    className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 sm:min-h-10 sm:text-sm"
                   />
 
                   <FieldError
@@ -728,7 +730,7 @@ function ServicePackageForm({
                 <div>
                   <label
                     htmlFor={`feature-order-${index}`}
-                    className="text-xs font-bold uppercase tracking-[0.08em] text-slate-500"
+                    className="text-[9px] font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400 sm:text-[10px]"
                   >
                     Order
                   </label>
@@ -743,7 +745,7 @@ function ServicePackageForm({
                       handleFeatureChange(index, "order", event.target.value)
                     }
                     disabled={isSubmitting}
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none focus:border-brand-600 focus:ring-4 focus:ring-brand-100"
+                    className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 sm:min-h-10 sm:text-sm"
                   />
 
                   <FieldError
@@ -778,12 +780,12 @@ function ServicePackageForm({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
           Delivery and Customer Fit
         </h2>
 
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <div className="mt-2 grid gap-2 md:grid-cols-2">
           {[
             ["bestFor", "Best for", "Small businesses and growing brands"],
             ["deliveryLabel", "Delivery label", "10-15 days"],
@@ -795,7 +797,7 @@ function ServicePackageForm({
             <div key={name}>
               <label
                 htmlFor={`service-package-${name}`}
-                className="text-sm font-semibold text-slate-700"
+                className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
               >
                 {label}
               </label>
@@ -807,7 +809,7 @@ function ServicePackageForm({
                 onChange={handleInputChange}
                 disabled={isSubmitting}
                 placeholder={placeholder}
-                className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+                className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
               />
 
               <FieldError message={getFieldError(name)} />
@@ -816,8 +818,8 @@ function ServicePackageForm({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
           Publication Controls
         </h2>
 
@@ -825,7 +827,7 @@ function ServicePackageForm({
           <div>
             <label
               htmlFor="service-package-order"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Display order
             </label>
@@ -839,13 +841,13 @@ function ServicePackageForm({
               value={formValues.order}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
+              className="mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm"
             />
 
             <FieldError message={getFieldError("order")} />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-1.5 sm:grid-cols-3">
             {[
               [
                 "isVisible",
@@ -865,7 +867,7 @@ function ServicePackageForm({
             ].map(([name, label, description]) => (
               <label
                 key={name}
-                className="flex cursor-pointer gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="flex cursor-pointer gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60"
               >
                 <input
                   name={name}
@@ -877,11 +879,11 @@ function ServicePackageForm({
                 />
 
                 <span>
-                  <span className="block text-sm font-bold text-slate-800">
+                  <span className="block text-[10px] font-bold text-slate-800 dark:text-slate-200 sm:text-[11px]">
                     {label}
                   </span>
 
-                  <span className="mt-1 block text-xs leading-5 text-slate-500">
+                  <span className="mt-0.5 block text-[8px] leading-3 text-slate-500 dark:text-slate-400 sm:text-[9px]">
                     {description}
                   </span>
                 </span>
@@ -890,12 +892,20 @@ function ServicePackageForm({
           </div>
         </div>
       </section>
+      </div>
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+<div className="sticky bottom-2 z-20 flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:flex-row sm:items-center sm:justify-end xl:col-span-2">
+        <Link
+          to="/admin/service-packages"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+        >
+          Cancel
+        </Link>
+
         <button
           type="submit"
           disabled={isSubmitting || servicesLoading}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:px-5 sm:text-xs"
         >
           {isSubmitting ? "Saving..." : submitLabel}
         </button>

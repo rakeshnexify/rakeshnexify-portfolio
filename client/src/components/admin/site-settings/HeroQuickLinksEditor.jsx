@@ -1,4 +1,5 @@
 import { useState } from "react";
+// rnx-site-settings-hero-links-v482
 
 import MediaField from "../media/MediaField";
 import { createEmptyHeroQuickLink } from "../../../utils/siteSettingsForm";
@@ -132,8 +133,8 @@ function HeroQuickLinksEditor({
   const groupError = getFieldError(fieldErrors, "hero.quickLinks");
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <section className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-950/60 sm:p-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="font-bold text-slate-900">Hero Quick Links</h3>
 
@@ -260,7 +261,7 @@ function HeroQuickLinksEditor({
                 </div>
 
                 {isExpanded && (
-                  <div id={editorId} className="grid gap-4 p-4 lg:grid-cols-2">
+                  <div id={editorId} className="grid gap-2 p-4 lg:grid-cols-2">
                     <div>
                       <label
                         htmlFor={labelField}
@@ -280,7 +281,7 @@ function HeroQuickLinksEditor({
                         onChange={(event) =>
                           updateItem(index, "label", event.target.value)
                         }
-                        className={`mt-2 min-h-11 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                        className={`mt-2 min-h-9 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
                           labelError
                             ? "border-red-400 focus:border-red-500"
                             : "border-slate-300 focus:border-brand-500"
@@ -316,7 +317,7 @@ function HeroQuickLinksEditor({
                         onChange={(event) =>
                           updateItem(index, "url", event.target.value)
                         }
-                        className={`mt-2 min-h-11 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                        className={`mt-2 min-h-9 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
                           urlError
                             ? "border-red-400 focus:border-red-500"
                             : "border-slate-300 focus:border-brand-500"

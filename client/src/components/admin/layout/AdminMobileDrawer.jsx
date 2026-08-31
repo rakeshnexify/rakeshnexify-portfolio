@@ -138,28 +138,28 @@ function AdminMobileDrawer({
       <button
         aria-label="Close admin navigation"
         className="admin-reference-drawer-backdrop absolute inset-0 cursor-default"
-        onClick={onClose}
+        onPointerDown={onClose}
         type="button"
       />
 
       <aside
         aria-labelledby="admin-mobile-drawer-title"
         aria-modal="true"
-        className="admin-reference-mobile-drawer absolute inset-y-0 left-0 z-[80] flex w-[min(88vw,330px)] flex-col overflow-hidden text-white"
+        className="rnx-admin-sidebar-clean-v499 admin-reference-mobile-drawer absolute inset-y-0 left-0 z-[80] flex w-[min(86vw,304px)] flex-col overflow-hidden text-white"
         ref={drawerRef}
         role="dialog"
         tabIndex={-1}
       >
-        <div className="admin-reference-sidebar-brand flex h-[62px] shrink-0 items-center gap-3 px-4">
+        <div className="admin-reference-sidebar-brand flex h-14 shrink-0 items-center gap-2.5 px-3">
           <span
             aria-hidden="true"
-            className="admin-reference-logo flex size-9 shrink-0 items-center justify-center rounded-xl text-[11px] font-black tracking-[0.06em]"
+            className="admin-reference-logo flex size-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-black tracking-[0.06em]"
           >
             RN
           </span>
 
           <p
-            className="min-w-0 flex-1 truncate text-[15px] font-black tracking-tight"
+            className="min-w-0 flex-1 truncate text-[14px] font-black tracking-tight"
             id="admin-mobile-drawer-title"
           >
             Rakesh<span className="text-blue-500">Nexify</span>
@@ -167,17 +167,17 @@ function AdminMobileDrawer({
 
           <button
             aria-label="Close admin navigation"
-            className="admin-reference-icon-button inline-flex size-9 shrink-0 items-center justify-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="admin-reference-icon-button inline-flex size-8 shrink-0 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             onClick={onClose}
             ref={closeButtonRef}
             title="Close navigation"
             type="button"
           >
-            <AdminIcon name="close" size={18} />
+            <AdminIcon name="close" size={16} />
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-3 py-2 [scrollbar-color:rgb(49_64_83)_transparent] [scrollbar-width:thin]">
+        <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-2 py-1.5 [scrollbar-color:rgb(49_64_83)_transparent] [scrollbar-width:thin]">
           <AdminNavigation
             isRailExpanded
             onNavigate={onClose}
@@ -185,11 +185,11 @@ function AdminMobileDrawer({
           />
         </div>
 
-        <div className="admin-reference-sidebar-footer shrink-0 p-3">
-          <div className="admin-reference-mobile-profile flex items-center gap-3 rounded-xl px-3 py-3">
+        <div className="admin-reference-sidebar-footer shrink-0 p-2">
+          <div className="admin-reference-mobile-profile flex items-center gap-2.5 rounded-lg px-2.5 py-2">
             <span
               aria-hidden="true"
-              className="admin-reference-avatar flex size-9 shrink-0 items-center justify-center rounded-full text-[11px] font-black"
+              className="admin-reference-avatar flex size-8 shrink-0 items-center justify-center rounded-full text-[10px] font-black"
             >
               {String(adminName)
                 .trim()
@@ -201,23 +201,23 @@ function AdminMobileDrawer({
             </span>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold text-white">
+              <p className="truncate text-[11px] font-bold text-white">
                 {adminName}
               </p>
 
-              <p className="mt-0.5 truncate text-[10px] capitalize text-slate-400">
+              <p className="mt-0.5 truncate text-[9px] capitalize text-slate-400">
                 {adminRole.replace("-", " ")}
               </p>
             </div>
 
             <button
               aria-label="Logout"
-              className="admin-reference-icon-button inline-flex size-9 shrink-0 items-center justify-center rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+              className="admin-reference-icon-button inline-flex size-8 shrink-0 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
               onClick={onLogout}
               title="Logout"
               type="button"
             >
-              <AdminIcon name="logout" size={17} />
+              <AdminIcon name="logout" size={16} />
             </button>
           </div>
         </div>

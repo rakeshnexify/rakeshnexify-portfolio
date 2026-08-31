@@ -24,17 +24,21 @@ const proficiencyLabels = {
 };
 
 const proficiencyStyles = {
-  familiar: "bg-slate-100 text-slate-700",
-  proficient: "bg-blue-50 text-blue-700",
-  advanced: "bg-violet-50 text-violet-700",
-  expert: "bg-emerald-50 text-emerald-700",
+  familiar:
+    "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+  proficient:
+    "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
+  advanced:
+    "bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300",
+  expert:
+    "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
 };
 
 const inputClassName =
-  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-950 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 motion-reduce:transition-none";
+  "mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 sm:min-h-10 sm:px-3 sm:text-sm";
 
 const labelClassName =
-  "text-xs font-bold uppercase tracking-[0.14em] text-slate-500";
+  "text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400 sm:text-[11px]";
 
 function createApiFilters(filters) {
   const apiFilters = {
@@ -388,37 +392,42 @@ function AdminSkillsPage() {
   const canDeleteSkills = ["super-admin", "admin"].includes(admin?.role);
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-              Content
+    <main className="rnx-admin-skills-compact-v473 min-h-screen bg-slate-100 dark:bg-slate-950">
+      <section className="mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-6 sm:py-5 lg:px-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-600 dark:text-brand-300">
+              Skills
             </p>
 
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-0.5 text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
               Skills
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Manage professional skills, proficiency, experience, publishing
-              state and display priority.
+            <p className="mt-0.5 max-w-2xl text-[11px] leading-4 text-slate-500 dark:text-slate-400 sm:text-xs sm:leading-5">
+              Manage skill expertise, experience, visibility and display order.
             </p>
           </div>
 
-          <Link
-            to="/admin/skills/new"
-            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-          >
-            Add Skill
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex min-h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+              {isLoading ? "..." : resultCount} total
+            </span>
+
+            <Link
+              to="/admin/skills/new"
+              className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-3.5 text-xs font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950 sm:min-h-10 sm:px-4 sm:text-sm"
+            >
+              Add Skill
+            </Link>
+          </div>
         </header>
 
         <form
           onSubmit={handleFilterSubmit}
-          className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+          className="mt-3 rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3"
         >
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
             <div>
               <label htmlFor="skill-search" className={labelClassName}>
                 Search
@@ -436,10 +445,7 @@ function AdminSkillsPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="skill-category-filter"
-                className={labelClassName}
-              >
+              <label htmlFor="skill-category-filter" className={labelClassName}>
                 Category
               </label>
 
@@ -453,111 +459,118 @@ function AdminSkillsPage() {
                 className={inputClassName}
               />
             </div>
-
-            <div>
-              <label
-                htmlFor="skill-proficiency-filter"
-                className={labelClassName}
-              >
-                Proficiency
-              </label>
-
-              <select
-                id="skill-proficiency-filter"
-                name="proficiencyLevel"
-                value={formFilters.proficiencyLevel}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="">All levels</option>
-                <option value="familiar">Familiar</option>
-                <option value="proficient">Proficient</option>
-                <option value="advanced">Advanced</option>
-                <option value="expert">Expert</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="skill-visibility-filter"
-                className={labelClassName}
-              >
-                Visibility
-              </label>
-
-              <select
-                id="skill-visibility-filter"
-                name="visibility"
-                value={formFilters.visibility}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All Skills</option>
-                <option value="visible">Visible</option>
-                <option value="hidden">Hidden</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="skill-featured-filter"
-                className={labelClassName}
-              >
-                Display type
-              </label>
-
-              <select
-                id="skill-featured-filter"
-                name="featured"
-                value={formFilters.featured}
-                onChange={handleFilterChange}
-                className={inputClassName}
-              >
-                <option value="all">All types</option>
-                <option value="featured">Featured</option>
-                <option value="standard">Standard</option>
-              </select>
-            </div>
           </div>
 
-          <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <details className="group mt-2 rounded-lg border border-slate-200 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-950/50">
+            <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between gap-3 px-2.5 text-[11px] font-semibold text-slate-600 marker:hidden dark:text-slate-300">
+              <span>More Filters</span>
+
+              <span
+                aria-hidden="true"
+                className="text-slate-400 transition group-open:rotate-180"
+              >
+                &#9662;
+              </span>
+            </summary>
+
+            <div className="grid gap-2 border-t border-slate-200 p-2.5 dark:border-slate-800 sm:grid-cols-3">
+              <div>
+                <label
+                  htmlFor="skill-proficiency-filter"
+                  className={labelClassName}
+                >
+                  Proficiency
+                </label>
+
+                <select
+                  id="skill-proficiency-filter"
+                  name="proficiencyLevel"
+                  value={formFilters.proficiencyLevel}
+                  onChange={handleFilterChange}
+                  className={inputClassName}
+                >
+                  <option value="">All levels</option>
+                  <option value="familiar">Familiar</option>
+                  <option value="proficient">Proficient</option>
+                  <option value="advanced">Advanced</option>
+                  <option value="expert">Expert</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="skill-visibility-filter"
+                  className={labelClassName}
+                >
+                  Visibility
+                </label>
+
+                <select
+                  id="skill-visibility-filter"
+                  name="visibility"
+                  value={formFilters.visibility}
+                  onChange={handleFilterChange}
+                  className={inputClassName}
+                >
+                  <option value="all">All Skills</option>
+                  <option value="visible">Visible</option>
+                  <option value="hidden">Hidden</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="skill-featured-filter"
+                  className={labelClassName}
+                >
+                  Display Type
+                </label>
+
+                <select
+                  id="skill-featured-filter"
+                  name="featured"
+                  value={formFilters.featured}
+                  onChange={handleFilterChange}
+                  className={inputClassName}
+                >
+                  <option value="all">All types</option>
+                  <option value="featured">Featured</option>
+                  <option value="standard">Standard</option>
+                </select>
+              </div>
+            </div>
+          </details>
+
+          <div className="mt-2 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={handleClearFilters}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-brand-700 dark:hover:text-brand-300"
             >
               Clear
             </button>
 
             <button
               type="submit"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+              className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-3.5 text-xs font-semibold text-white transition hover:bg-brand-700"
             >
-              Apply Filters
+              Apply
             </button>
           </div>
         </form>
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-800">
-              {isLoading
-                ? "Loading Skills..."
-                : `${resultCount} Skill${resultCount === 1 ? "" : "s"}`}
-            </p>
-
-            {!isLoading && (
-              <p className="mt-1 text-xs text-slate-500">
-                Showing the records matching the applied filters.
-              </p>
-            )}
-          </div>
+        <div className="mt-3 flex items-center justify-between gap-3 border-b border-slate-200 pb-2.5 dark:border-slate-800">
+          <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            {isLoading
+              ? "Loading Skills..."
+              : `${resultCount} result${resultCount === 1 ? "" : "s"}`}
+          </p>
 
           <button
             type="button"
             onClick={handleRefresh}
             disabled={isLoading}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transition-none"
+            className="inline-flex min-h-8 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 text-[11px] font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-brand-700 dark:hover:text-brand-300"
           >
             Refresh
           </button>
@@ -567,7 +580,7 @@ function AdminSkillsPage() {
           {successMessage && (
             <div
               role="status"
-              className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium leading-6 text-emerald-700"
+              className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300"
             >
               {successMessage}
             </div>
@@ -576,7 +589,7 @@ function AdminSkillsPage() {
           {error && (
             <div
               role="alert"
-              className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
+              className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
             >
               {error}
             </div>
@@ -584,36 +597,32 @@ function AdminSkillsPage() {
         </div>
 
         {isLoading && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-          >
+          <div role="status" aria-live="polite" className="mt-3 space-y-2">
             <span className="sr-only">Loading Skills...</span>
 
-            {[1, 2, 3, 4, 5, 6].map((placeholder) => (
+            {[1, 2, 3, 4, 5].map((placeholder) => (
               <div
                 key={placeholder}
-                className="h-80 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
+                className="h-20 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none"
               />
             ))}
           </div>
         )}
 
         {!isLoading && !error && skills.length === 0 && (
-          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
-            <p className="text-base font-bold text-slate-950">
+          <div className="mt-3 rounded-xl border border-dashed border-slate-300 bg-white px-5 py-8 text-center dark:border-slate-700 dark:bg-slate-900">
+            <p className="text-sm font-bold text-slate-950 dark:text-white">
               No Skills found
             </p>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Change the filters or create the first Skill.
             </p>
           </div>
         )}
 
         {!isLoading && skills.length > 0 && (
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-3 space-y-2">
             {skills.map((skill) => {
               const proficiencyLabel =
                 proficiencyLabels[skill.proficiencyLevel] ||
@@ -622,41 +631,17 @@ function AdminSkillsPage() {
 
               const proficiencyStyle =
                 proficiencyStyles[skill.proficiencyLevel] ||
-                "bg-slate-100 text-slate-700";
+                "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
 
               const isActionPending = actionSkillId === skill._id;
 
               return (
                 <article
                   key={skill._id}
-                  className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-                      Order {skill.order ?? 0}
-                    </span>
-
-                    <div className="flex flex-wrap justify-end gap-2">
-                      {skill.isFeatured && (
-                        <span className="rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
-                          Featured
-                        </span>
-                      )}
-
-                      <span
-                        className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
-                          skill.isVisible
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {skill.isVisible ? "Visible" : "Hidden"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex items-start gap-3">
-                    <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-slate-950 text-base font-bold text-white">
+                  <div className="flex min-w-0 items-start gap-2.5">
+                    <div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-lg border border-slate-200 bg-slate-950 text-xs font-bold text-white dark:border-slate-700 sm:size-11">
                       {skill.iconUrl ? (
                         <img
                           src={skill.iconUrl}
@@ -671,104 +656,124 @@ function AdminSkillsPage() {
                       )}
                     </div>
 
-                    <div className="min-w-0">
-                      <h2 className="break-words text-lg font-bold text-slate-950">
-                        {skill.name}
-                      </h2>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <h2 className="truncate text-sm font-bold text-slate-950 dark:text-white sm:text-[15px]">
+                              {skill.name}
+                            </h2>
 
-                      <p className="mt-1 break-all text-xs font-semibold text-brand-700">
-                        {skill.slug}
-                      </p>
+                            <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${proficiencyStyle}`}>
+                              {proficiencyLabel}
+                            </span>
+
+                            <span
+                              className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
+                                skill.isVisible
+                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
+                                  : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                              }`}
+                            >
+                              {skill.isVisible ? "Visible" : "Hidden"}
+                            </span>
+
+                            {skill.isFeatured && (
+                              <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                                Featured
+                              </span>
+                            )}
+
+                            <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                              #{skill.order ?? 0}
+                            </span>
+                          </div>
+
+                          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500 dark:text-slate-400 sm:text-[11px]">
+                            <span className="font-semibold text-brand-700 dark:text-brand-300">
+                              {skill.category}
+                            </span>
+
+                            <span aria-hidden="true">/</span>
+                            <span>{formatExperience(skill.yearsOfExperience)}</span>
+
+                            {skill.proficiencyPercent !== null &&
+                              skill.proficiencyPercent !== undefined && (
+                                <>
+                                  <span aria-hidden="true">/</span>
+                                  <span>{skill.proficiencyPercent}%</span>
+                                </>
+                              )}
+
+                            <span aria-hidden="true">/</span>
+                            <span>Updated {formatDate(skill.updatedAt)}</span>
+                          </div>
+
+                          {skill.description && (
+                            <p className="mt-1 line-clamp-1 text-[11px] leading-4 text-slate-500 dark:text-slate-400 sm:text-xs">
+                              {skill.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex shrink-0 items-center justify-end gap-1.5 self-end sm:self-start">
+                          <Link
+                            to={`/admin/skills/${skill._id}/edit`}
+                            className="inline-flex min-h-8 items-center justify-center rounded-lg bg-brand-600 px-3 text-[11px] font-semibold text-white transition hover:bg-brand-700"
+                          >
+                            Edit
+                          </Link>
+
+                          <details className="group relative">
+                            <summary
+                              className="grid size-8 cursor-pointer list-none place-items-center rounded-lg border border-slate-300 bg-white text-base font-bold leading-none text-slate-600 marker:hidden transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-brand-700 dark:hover:text-brand-300"
+                              aria-label={`More actions for ${skill.name}`}
+                            >
+                              <span aria-hidden="true">&#8942;</span>
+                            </summary>
+
+                            <div className="absolute right-0 z-20 mt-1.5 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white p-1 shadow-xl dark:border-slate-700 dark:bg-slate-950">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleVisibility(skill)}
+                                disabled={actionSkillId !== ""}
+                                className="flex min-h-8 w-full items-center rounded-md px-2.5 text-left text-[11px] font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                              >
+                                {isActionPending
+                                  ? "Working..."
+                                  : skill.isVisible
+                                    ? "Hide from public"
+                                    : "Show publicly"}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleToggleFeatured(skill)}
+                                disabled={actionSkillId !== ""}
+                                className="flex min-h-8 w-full items-center rounded-md px-2.5 text-left text-[11px] font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                              >
+                                {isActionPending
+                                  ? "Working..."
+                                  : skill.isFeatured
+                                    ? "Make standard"
+                                    : "Make featured"}
+                              </button>
+
+                              {canDeleteSkills && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteSkill(skill)}
+                                  disabled={actionSkillId !== ""}
+                                  className="flex min-h-8 w-full items-center rounded-md px-2.5 text-left text-[11px] font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-300 dark:hover:bg-red-950/50"
+                                >
+                                  {isActionPending ? "Working..." : "Delete"}
+                                </button>
+                              )}
+                            </div>
+                          </details>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-lg bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-700">
-                      {skill.category}
-                    </span>
-
-                    <span
-                      className={`rounded-lg px-2.5 py-1 text-xs font-bold ${proficiencyStyle}`}
-                    >
-                      {proficiencyLabel}
-                    </span>
-                  </div>
-
-                  {skill.description && (
-                    <p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-600">
-                      {skill.description}
-                    </p>
-                  )}
-
-                  <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-slate-100 pt-4 text-sm">
-                    <div>
-                      <dt className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                        Experience
-                      </dt>
-
-                      <dd className="mt-1 font-semibold text-slate-700">
-                        {formatExperience(skill.yearsOfExperience)}
-                      </dd>
-                    </div>
-
-                    <div>
-                      <dt className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                        Updated
-                      </dt>
-
-                      <dd className="mt-1 font-semibold text-slate-700">
-                        {formatDate(skill.updatedAt)}
-                      </dd>
-                    </div>
-                  </dl>
-
-                  <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
-                    <Link
-                      to={`/admin/skills/${skill._id}/edit`}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
-                    >
-                      Edit
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleVisibility(skill)}
-                      disabled={actionSkillId !== ""}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                    >
-                      {isActionPending
-                        ? "Working..."
-                        : skill.isVisible
-                          ? "Hide"
-                          : "Show"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleFeatured(skill)}
-                      disabled={actionSkillId !== ""}
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition-colors hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                    >
-                      {isActionPending
-                        ? "Working..."
-                        : skill.isFeatured
-                          ? "Make Standard"
-                          : "Make Featured"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteSkill(skill)}
-                      disabled={actionSkillId !== "" || !canDeleteSkills}
-                      title={
-                        canDeleteSkills
-                          ? "Permanently delete Skill"
-                          : "Your role cannot permanently delete Skills"
-                      }
-                      className="inline-flex min-h-10 items-center justify-center rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none"
-                    >
-                      {isActionPending ? "Working..." : "Delete"}
-                    </button>
                   </div>
                 </article>
               );

@@ -73,16 +73,16 @@ function AdminNavigationItem({
 
   const linkLayout = isRailExpanded
     ? depth > 0
-      ? "pl-8 pr-2"
-      : "px-2"
-    : "justify-center px-2";
+      ? "pl-7 pr-1.5"
+      : "px-1.5"
+    : "justify-center px-1.5";
 
   return (
     <li>
-      <div className="flex items-stretch gap-1">
+      <div className="flex items-stretch gap-0.5">
         <Link
           aria-current={isActive ? "page" : undefined}
-          className={`admin-reference-nav-link group relative flex min-h-9 min-w-0 flex-1 items-center rounded-lg text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${linkLayout} ${
+          className={`admin-reference-nav-link group relative flex min-h-[34px] min-w-0 flex-1 items-center rounded-lg text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${linkLayout} ${
             isActive ? "is-active" : ""
           } ${hasActiveDescendant ? "has-active-child" : ""}`}
           onClick={() => {
@@ -96,16 +96,16 @@ function AdminNavigationItem({
           <span
             aria-hidden="true"
             className={`admin-reference-nav-icon flex shrink-0 items-center justify-center ${
-              depth > 0 ? "size-6" : "size-7"
+              depth > 0 ? "size-5" : "size-6"
             }`}
           >
-            <AdminIcon name={item.icon} size={depth > 0 ? 15 : 16} />
+            <AdminIcon name={item.icon} size={depth > 0 ? 14 : 15} />
           </span>
 
           <span
             className={`min-w-0 truncate transition-[width,opacity,margin] duration-150 motion-reduce:transition-none ${
               isRailExpanded
-                ? "ml-2 w-auto flex-1 opacity-100"
+                ? "ml-1.5 w-auto flex-1 opacity-100"
                 : "ml-0 w-0 overflow-hidden opacity-0"
             }`}
           >
@@ -115,7 +115,7 @@ function AdminNavigationItem({
           {!isRailExpanded ? (
             <span
               aria-hidden="true"
-              className="admin-reference-tooltip pointer-events-none absolute left-[calc(100%+0.7rem)] top-1/2 z-50 hidden -translate-y-1/2 whitespace-nowrap px-3 py-2 text-xs font-semibold group-hover:block group-focus-visible:block"
+              className="admin-reference-tooltip pointer-events-none absolute left-[calc(100%+0.55rem)] top-1/2 z-50 hidden -translate-y-1/2 whitespace-nowrap px-2.5 py-1.5 text-[10px] font-semibold group-hover:block group-focus-visible:block"
             >
               {item.label}
             </span>
@@ -127,13 +127,13 @@ function AdminNavigationItem({
             aria-controls={childrenId}
             aria-expanded={isOpen}
             aria-label={`${isOpen ? "Collapse" : "Expand"} ${item.label}`}
-            className="admin-reference-nav-expand flex w-7 shrink-0 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            className="admin-reference-nav-expand flex w-6 shrink-0 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             onClick={toggleChildren}
             type="button"
           >
             <AdminIcon
               name={isOpen ? "chevronDown" : "chevronRight"}
-              size={13}
+              size={12}
             />
           </button>
         ) : null}
@@ -141,7 +141,7 @@ function AdminNavigationItem({
 
       {hasChildren && isRailExpanded && isOpen ? (
         <ul
-          className="admin-reference-nav-children mt-1 space-y-0.5"
+          className="admin-reference-nav-children mt-0.5 space-y-0.5"
           id={childrenId}
         >
           {item.children.map((child) => (
@@ -180,7 +180,7 @@ function AdminNavigationContent({
       aria-label="Admin navigation"
       className={`min-w-0 ${className}`.trim()}
     >
-      <div className={isRailExpanded ? "space-y-4" : "space-y-2"}>
+      <div className={isRailExpanded ? "space-y-3" : "space-y-1.5"}>
         {groups.map((group) => (
           <section
             aria-labelledby={`${idPrefix}-group-${group.key}`}
@@ -189,7 +189,7 @@ function AdminNavigationContent({
             <h2
               className={
                 isRailExpanded
-                  ? "admin-reference-nav-group mb-1.5 px-2 text-[9px] font-semibold uppercase tracking-[0.13em]"
+                  ? "admin-reference-nav-group mb-1 px-1.5 text-[8px] font-semibold uppercase tracking-[0.12em]"
                   : "sr-only"
               }
               id={`${idPrefix}-group-${group.key}`}
@@ -197,7 +197,7 @@ function AdminNavigationContent({
               {group.label}
             </h2>
 
-            <ul className="space-y-0.5">
+            <ul className="space-y-px">
               {group.items.map((item) => (
                 <AdminNavigationItem
                   idPrefix={idPrefix}

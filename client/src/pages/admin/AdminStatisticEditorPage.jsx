@@ -264,54 +264,44 @@ function AdminStatisticEditorPage({
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          <div
-            role="status"
-            aria-live="polite"
-            className="max-w-5xl space-y-4"
-          >
-            <span className="sr-only">
-              Loading statistic details...
-            </span>
-
-            <div className="h-28 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
-
-            <div className="h-96 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none" />
+      <main className="min-h-screen bg-slate-100 dark:bg-slate-950">
+        <section className="mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-6 lg:px-8">
+          <div role="status" aria-live="polite" className="mx-auto max-w-6xl space-y-2">
+            <span className="sr-only">Loading statistic details...</span>
+            <div className="h-16 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none" />
+            <div className="h-72 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none" />
           </div>
         </section>
       </main>
     );
   }
 
-  if (
-    isEditMode &&
-    loadError
-  ) {
+  if (isEditMode && loadError) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main className="min-h-screen bg-slate-100 dark:bg-slate-950">
+        <section className="mx-auto w-full max-w-[1440px] px-3 py-4 sm:px-6 lg:px-8">
           <div
             role="alert"
-            className="max-w-2xl rounded-2xl border border-red-200 bg-white p-5 shadow-sm sm:p-6"
+            className="mx-auto max-w-xl rounded-xl border border-red-200 bg-white p-3 shadow-sm dark:border-red-900/60 dark:bg-slate-900 sm:p-4"
           >
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-red-600 dark:text-red-300">
               Statistic Error
             </p>
 
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-1 text-lg font-bold tracking-tight text-slate-950 dark:text-white sm:text-xl">
               Statistic could not be opened
             </h1>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
               {loadError}
             </p>
 
             <Link
               to="/admin/statistics"
-              className="mt-5 inline-flex min-h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-300 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+              className="mt-3 inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
             >
-              â† Return to Statistics
+              <span aria-hidden="true">&larr;</span>
+              <span className="ml-1.5">Return to Statistics</span>
             </Link>
           </div>
         </section>
@@ -320,65 +310,43 @@ function AdminStatisticEditorPage({
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mx-auto max-w-5xl">
+    <main className="rnx-admin-statistic-editor-v486 min-h-screen bg-slate-100 dark:bg-slate-950">
+      <section className="mx-auto w-full max-w-[1440px] px-3 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+        <div className="mx-auto max-w-6xl">
           <Link
             to="/admin/statistics"
-            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+            className="inline-flex min-h-8 items-center gap-1.5 text-[11px] font-semibold text-slate-500 transition hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-300"
           >
             <span aria-hidden="true">&larr;</span>
-
-            Statistics Management
+            Statistics
           </Link>
 
-          <header className="mt-3">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
-              {isEditMode
-                ? "Update Statistic"
-                : "Create Statistic"}
+          <header className="mt-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-600 dark:text-brand-300">
+              {isEditMode ? "Edit Statistic" : "New Statistic"}
             </p>
 
-            <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            <h1 className="mt-0.5 break-words text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-[22px]">
               {isEditMode
-                ? `Edit ${
-                    statistic?.label ||
-                    "Statistic"
-                  }`
-                : "Add a New Statistic"}
+                ? `Edit ${statistic?.label || "Statistic"}`
+                : "Add Statistic"}
             </h1>
 
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            <p className="mt-0.5 max-w-3xl text-[11px] leading-4 text-slate-500 dark:text-slate-400 sm:text-xs">
               {isEditMode
-                ? "Update the statistic value, label, icon, display order and publication controls."
-                : "Create a reusable portfolio statistic that can be managed through the Admin CMS."}
+                ? "Update metric value, display settings and public state."
+                : "Create a reusable portfolio metric managed through the Admin CMS."}
             </p>
           </header>
 
-          <div className="mt-6">
+          <div className="mt-2">
             <StatisticForm
-              key={
-                isEditMode
-                  ? statistic?._id
-                  : "new-statistic"
-              }
-              initialValues={
-                initialValues
-              }
-              onSubmit={
-                handleSubmit
-              }
-              submitLabel={
-                isEditMode
-                  ? "Update Statistic"
-                  : "Create Statistic"
-              }
-              accessToken={
-                accessToken
-              }
-              onMediaUnauthorized={
-                handleMediaUnauthorized
-              }
+              key={isEditMode ? statistic?._id : "new-statistic"}
+              initialValues={initialValues}
+              onSubmit={handleSubmit}
+              submitLabel={isEditMode ? "Update Statistic" : "Create Statistic"}
+              accessToken={accessToken}
+              onMediaUnauthorized={handleMediaUnauthorized}
             />
           </div>
         </div>

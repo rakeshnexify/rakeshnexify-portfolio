@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router";
 
 import SiteSettingsForm from "../../components/admin/site-settings/SiteSettingsForm";
-import { getSiteSettingsPage } from "../../config/siteSettingsPages";
+import {
+  getSiteSettingsPage,
+  siteSettingsPageDefinitions,
+} from "../../config/siteSettingsPages";
 import useAdminAuth from "../../hooks/useAdminAuth";
 import useSiteSettings from "../../hooks/useSiteSettings";
 
@@ -187,12 +190,12 @@ function AdminSiteSettingsEditorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <section className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+    <main className="rnx-admin-site-settings-editor-v482 min-h-screen bg-slate-100 dark:bg-slate-950">
+      <section className="mx-auto w-full max-w-[1440px] px-3 py-3.5 sm:px-6 sm:py-4 lg:px-8">
+        <div className="mx-auto max-w-7xl">
           <Link
             to="/admin/site-settings"
-            className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-slate-600 transition-colors hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 motion-reduce:transition-none"
+            className="inline-flex min-h-8 items-center gap-1.5 text-[11px] font-semibold text-slate-500 transition hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-300"
           >
             <span aria-hidden="true">
               &larr;
@@ -201,17 +204,17 @@ function AdminSiteSettingsEditorPage() {
             All Site Settings
           </Link>
 
-          <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <header className="min-w-0">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-600">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-600 dark:text-brand-300">
                 Website Management
               </p>
 
-              <h1 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              <h1 className="mt-0.5 break-words text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-[22px]">
                 {pageDefinition.title}
               </h1>
 
-              <p className="mt-2 max-w-3xl break-words text-sm leading-6 text-slate-600">
+              <p className="mt-0.5 max-w-3xl break-words text-[11px] leading-4 text-slate-500 dark:text-slate-400 sm:text-xs">
                 {pageDefinition.description}
               </p>
             </header>
@@ -219,7 +222,7 @@ function AdminSiteSettingsEditorPage() {
             {settings && (
               <aside
                 aria-label={`${pageDefinition.title} status`}
-                className="shrink-0 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm"
+                className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm dark:border-slate-800 dark:bg-slate-900"
               >
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
                   Last updated
@@ -244,6 +247,30 @@ function AdminSiteSettingsEditorPage() {
             )}
           </div>
 
+
+          <nav
+            aria-label="Site Settings categories"
+            className="mt-2.5 flex gap-1.5 overflow-x-auto pb-1"
+          >
+            {siteSettingsPageDefinitions.map((page) => {
+              const isActive = page.key === pageDefinition.key;
+
+              return (
+                <Link
+                  key={page.key}
+                  to={page.path}
+                  className={`inline-flex min-h-8 shrink-0 items-center rounded-lg border px-2.5 text-[10px] font-semibold transition ${
+                    isActive
+                      ? "border-brand-600 bg-brand-600 text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                  }`}
+                >
+                  {page.shortTitle}
+                </Link>
+              );
+            })}
+          </nav>
+
           {successMessage && (
             <div
               role="status"
@@ -263,7 +290,7 @@ function AdminSiteSettingsEditorPage() {
             <div
               role="status"
               aria-live="polite"
-              className="mt-6 space-y-5"
+              className="mt-2.5 space-y-2"
             >
               <span className="sr-only">
                 Loading {pageDefinition.title}...
@@ -272,7 +299,7 @@ function AdminSiteSettingsEditorPage() {
               {[1, 2].map((placeholder) => (
                 <div
                   key={placeholder}
-                  className="h-64 animate-pulse rounded-2xl border border-slate-200 bg-white motion-reduce:animate-none"
+                  className="h-28 animate-pulse rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none"
                 />
               ))}
             </div>
@@ -306,7 +333,7 @@ function AdminSiteSettingsEditorPage() {
           )}
 
           {!isLoading && !loadError && settings && (
-            <div className="mt-6">
+            <div className="mt-2.5">
               <SiteSettingsForm
                 key={`${settings.updatedAt || settings._id || "main"}-${pageDefinition.key}`}
                 initialValues={settings}
@@ -314,7 +341,7 @@ function AdminSiteSettingsEditorPage() {
                 cancelPath="/admin/site-settings"
                 cancelLabel="Back to Settings"
                 onSubmit={handleSubmit}
-                submitLabel={`Save ${pageDefinition.shortTitle} Settings`}
+                submitLabel={`Save ${pageDefinition.shortTitle}`}
                 accessToken={accessToken}
                 onMediaUnauthorized={handleMediaUnauthorized}
               />

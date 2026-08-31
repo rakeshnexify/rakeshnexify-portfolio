@@ -1,4 +1,5 @@
 import { createEmptyAboutIdentityRole } from "../../../utils/siteSettingsForm";
+// rnx-site-settings-roles-v482
 
 const MAX_IDENTITY_ROLES = 30;
 
@@ -73,8 +74,8 @@ function AboutIdentityRolesEditor({
   const groupError = getFieldError(fieldErrors, "about.identityRoles");
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <section className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-950/60 sm:p-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="font-bold text-slate-900">
             Animated Identity Roles

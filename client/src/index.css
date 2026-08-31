@@ -14203,3 +14203,116 @@ a.admin-dashboard-list-row:hover {
     transition: none;
   }
 }
+
+
+/* =========================================================
+   RNX ADMIN SIDEBAR CLEAN UX v499
+   Compact navigation + deterministic outside-click support.
+   ========================================================= */
+
+.rnx-admin-sidebar-clean-v499 .admin-reference-nav-link {
+  border: 1px solid transparent;
+  border-radius: 0.55rem;
+  color: #bdc9d8;
+}
+
+.rnx-admin-sidebar-clean-v499 .admin-reference-nav-link:hover,
+.rnx-admin-sidebar-clean-v499 .admin-reference-nav-link.has-active-child {
+  border-color: rgb(50 69 94 / 0.42);
+  background: rgb(255 255 255 / 0.028);
+  color: #f4f8fd;
+}
+
+.rnx-admin-sidebar-clean-v499 .admin-reference-nav-link.is-active {
+  border-color: rgb(58 111 226 / 0.32);
+  background: linear-gradient(
+    90deg,
+    rgb(37 86 191 / 0.34),
+    rgb(43 57 124 / 0.25)
+  );
+  color: #ffffff;
+  box-shadow:
+    inset 2px 0 0 rgb(70 132 255 / 0.92),
+    inset 0 1px rgb(255 255 255 / 0.025);
+}
+
+.rnx-admin-sidebar-clean-v499 .admin-reference-nav-icon {
+  color: #8fa1b8;
+}
+
+.rnx-admin-sidebar-clean-v499
+  .admin-reference-nav-link.is-active
+  .admin-reference-nav-icon {
+  color: #d8e7ff;
+}
+
+.rnx-admin-sidebar-clean-v499 .admin-reference-nav-group {
+  color: #64748a;
+}
+
+.rnx-admin-sidebar-clean-v499 .admin-reference-nav-expand,
+.rnx-admin-sidebar-clean-v499 .admin-reference-collapse {
+  border-radius: 0.55rem;
+}
+
+.rnx-admin-sidebar-clean-v499 .admin-reference-nav-children {
+  margin-left: 0.7rem;
+  border-left-color: #17273a;
+  padding-left: 0.25rem;
+}
+
+.rnx-admin-sidebar-clean-v499 .admin-reference-sidebar-footer {
+  background: rgb(8 17 30 / 0.96);
+}
+
+
+/* =========================================================
+   RNX PUBLIC HORIZONTAL OVERFLOW FIX v502
+   Keep navbar menus vertically visible while containing the
+   animated technology-header sweep to the viewport width.
+   ========================================================= */
+
+body.public-theme-active .public-tech-header {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+body.public-theme-active .public-tech-header::after {
+  inset: 0;
+  filter: none;
+  transform: none;
+  background-size: 260% 100%;
+  background-position: 120% 50%;
+  animation: public-tech-header-energy-sweep-contained 9s ease-in-out infinite;
+  will-change: background-position, opacity;
+}
+
+@keyframes public-tech-header-energy-sweep-contained {
+  0%,
+  12% {
+    background-position: 120% 50%;
+    opacity: 0;
+  }
+
+  34% {
+    opacity: 0.95;
+  }
+
+  68% {
+    background-position: -20% 50%;
+    opacity: 0.72;
+  }
+
+  88%,
+  100% {
+    background-position: -120% 50%;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.public-theme-active .public-tech-header::after {
+    animation: none !important;
+    background-position: 50% 50%;
+  }
+}

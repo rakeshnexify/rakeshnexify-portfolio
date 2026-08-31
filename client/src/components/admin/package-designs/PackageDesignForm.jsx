@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router";
 
 import MediaField from "../media/MediaField";
 
@@ -13,17 +14,17 @@ import {
 } from "../../../utils/packageDesignForm";
 
 const inputClasses =
-  "mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm";
 
 const textareaClasses =
-  "mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm";
 
 function FieldError({ message }) {
   if (!message) {
     return null;
   }
 
-  return <p className="mt-2 text-sm font-medium text-red-600">{message}</p>;
+  return <p className="mt-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{message}</p>;
 }
 
 function PackageDesignForm({
@@ -298,30 +299,31 @@ function PackageDesignForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form onSubmit={handleSubmit} noValidate className="rnx-admin-package-design-form-v489 rnx-admin-package-design-form-balanced-v490 space-y-2">
       {submitError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300 xl:col-span-2"
         >
           {submitError}
         </div>
       )}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">
+            <div className="space-y-2 xl:columns-2 xl:gap-2 xl:space-y-0">
+<section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
           Package and Design Identity
         </h2>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+        <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
           A design belongs to one existing Service Package. Service context is
           derived from that package automatically.
         </p>
 
-        <div className="mt-6">
+        <div className="mt-2">
           <label
             htmlFor="package-design-service-package"
-            className="text-sm font-semibold text-slate-700"
+            className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
           >
             Service Package *
           </label>
@@ -347,18 +349,18 @@ function PackageDesignForm({
           <FieldError message={getFieldError("servicePackage")} />
 
           {sortedServicePackages.length === 0 && (
-            <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-700">
+            <p className="mt-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-2 text-[10px] leading-4 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
               No Service Packages are available yet. Create a Service Package
               first, then return to this editor.
             </p>
           )}
         </div>
 
-        <div className="mt-5 grid gap-5 md:grid-cols-2">
+        <div className="mt-2 grid gap-2 md:grid-cols-2">
           <div>
             <label
               htmlFor="package-design-name"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Design name *
             </label>
@@ -380,7 +382,7 @@ function PackageDesignForm({
           <div>
             <label
               htmlFor="package-design-slug"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Design slug *
             </label>
@@ -401,10 +403,10 @@ function PackageDesignForm({
           </div>
         </div>
 
-        <div className="mt-5">
+        <div className="mt-2">
           <label
             htmlFor="package-design-short-description"
-            className="text-sm font-semibold text-slate-700"
+            className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
           >
             Short description *
           </label>
@@ -415,24 +417,24 @@ function PackageDesignForm({
             value={formValues.shortDescription}
             onChange={handleInputChange}
             disabled={isSubmitting}
-            rows={3}
+            rows={2}
             maxLength={500}
             placeholder="Briefly explain this design and who it suits."
             className={textareaClasses}
           />
 
-          <div className="mt-2 flex items-start justify-between gap-4">
+          <div className="mt-0.5 flex items-start justify-between gap-2">
             <FieldError message={getFieldError("shortDescription")} />
-            <span className="ml-auto text-xs text-slate-400">
+            <span className="ml-auto text-[9px] text-slate-400 sm:text-[10px]">
               {formValues.shortDescription.length}/500
             </span>
           </div>
         </div>
 
-        <div className="mt-5">
+        <div className="mt-2">
           <label
             htmlFor="package-design-description"
-            className="text-sm font-semibold text-slate-700"
+            className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
           >
             Full description
           </label>
@@ -443,7 +445,7 @@ function PackageDesignForm({
             value={formValues.description}
             onChange={handleInputChange}
             disabled={isSubmitting}
-            rows={6}
+            rows={2}
             maxLength={5000}
             placeholder="Add complete visual style, layout and design notes."
             className={textareaClasses}
@@ -453,10 +455,10 @@ function PackageDesignForm({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">Thumbnail</h2>
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">Thumbnail</h2>
 
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <div className="mt-2 grid gap-2 lg:grid-cols-2">
           <MediaField
             id="package-design-thumbnail-url"
             name="thumbnailUrl"
@@ -476,7 +478,7 @@ function PackageDesignForm({
           <div>
             <label
               htmlFor="package-design-thumbnail-alt"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Thumbnail alt text
             </label>
@@ -497,11 +499,11 @@ function PackageDesignForm({
         </div>
 
         {formValues.thumbnailUrl && (
-          <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+          <div className="mt-2 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950/60">
             <img
               src={formValues.thumbnailUrl}
               alt={formValues.thumbnailAlt || "Package Design thumbnail preview"}
-              className="h-56 w-full object-cover"
+              className="h-24 w-full object-cover sm:h-28"
               onError={(event) => {
                 event.currentTarget.style.display = "none";
               }}
@@ -510,11 +512,11 @@ function PackageDesignForm({
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-xl font-bold text-slate-950">Screenshots</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+            <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">Screenshots</h2>
+            <p className="mt-0.5 max-w-3xl text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
               Add desktop, tablet and mobile previews. Screenshot URLs must be
               unique within this design.
             </p>
@@ -527,7 +529,7 @@ function PackageDesignForm({
               isSubmitting ||
               formValues.screenshots.length >= PACKAGE_DESIGN_MAX_SCREENSHOTS
             }
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-4 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-8 items-center justify-center rounded-lg border border-brand-200 bg-brand-50 px-2.5 text-[10px] font-semibold text-brand-700 transition hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-brand-900 dark:bg-brand-950/40 dark:text-brand-300"
           >
             + Add Screenshot
           </button>
@@ -535,7 +537,7 @@ function PackageDesignForm({
 
         <FieldError message={getFieldError("screenshots")} />
 
-        <div className="mt-6 space-y-5">
+        <div className="mt-2 space-y-1.5">
           {formValues.screenshots.map((screenshot, index) => (
             <article
               key={screenshot.clientKey}
@@ -551,7 +553,7 @@ function PackageDesignForm({
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   <button
                     type="button"
                     onClick={() => handleMoveScreenshot(index, -1)}
@@ -607,7 +609,7 @@ function PackageDesignForm({
                 <div>
                   <label
                     htmlFor={`package-design-screenshot-alt-${index}`}
-                    className="text-sm font-semibold text-slate-700"
+                    className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
                   >
                     Alt text
                   </label>
@@ -628,11 +630,11 @@ function PackageDesignForm({
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-5 md:grid-cols-2">
+              <div className="mt-2 grid gap-2 md:grid-cols-2">
                 <div>
                   <label
                     htmlFor={`package-design-screenshot-device-${index}`}
-                    className="text-sm font-semibold text-slate-700"
+                    className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
                   >
                     Device
                   </label>
@@ -663,7 +665,7 @@ function PackageDesignForm({
                 <div>
                   <label
                     htmlFor={`package-design-screenshot-order-${index}`}
-                    className="text-sm font-semibold text-slate-700"
+                    className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
                   >
                     Order
                   </label>
@@ -707,18 +709,18 @@ function PackageDesignForm({
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">Live Demo</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">Live Demo</h2>
+        <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
           Live Demo is a normal website URL, so it stays a standard HTTP/HTTPS
           field rather than a Media asset.
         </p>
 
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+        <div className="mt-2 grid gap-2 lg:grid-cols-2">
           <div>
             <label
               htmlFor="package-design-live-demo-url"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Live demo URL
             </label>
@@ -738,7 +740,7 @@ function PackageDesignForm({
           <div>
             <label
               htmlFor="package-design-live-demo-label"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Live demo label
             </label>
@@ -768,8 +770,8 @@ function PackageDesignForm({
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">
+      <section className="h-fit break-inside-avoid rounded-xl border border-slate-200 xl:mb-2 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <h2 className="text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
           Publication Controls
         </h2>
 
@@ -777,7 +779,7 @@ function PackageDesignForm({
           <div>
             <label
               htmlFor="package-design-order"
-              className="text-sm font-semibold text-slate-700"
+              className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]"
             >
               Display order
             </label>
@@ -796,7 +798,7 @@ function PackageDesignForm({
             <FieldError message={getFieldError("order")} />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-1.5 sm:grid-cols-3">
             {[
               [
                 "isDefault",
@@ -816,7 +818,7 @@ function PackageDesignForm({
             ].map(([name, label, description]) => (
               <label
                 key={name}
-                className="flex cursor-pointer gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="flex cursor-pointer gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60"
               >
                 <input
                   name={name}
@@ -827,10 +829,10 @@ function PackageDesignForm({
                   className="mt-1 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                 />
                 <span>
-                  <span className="block text-sm font-bold text-slate-800">
+                  <span className="block text-[10px] font-bold text-slate-800 dark:text-slate-200 sm:text-[11px]">
                     {label}
                   </span>
-                  <span className="mt-1 block text-xs leading-5 text-slate-500">
+                  <span className="mt-0.5 block text-[8px] leading-3 text-slate-500 dark:text-slate-400 sm:text-[9px]">
                     {description}
                   </span>
                 </span>
@@ -841,12 +843,20 @@ function PackageDesignForm({
 
         <FieldError message={getFieldError("isDefault")} />
       </section>
+      </div>
 
-      <div className="flex justify-end">
+<div className="sticky bottom-2 z-20 flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:flex-row sm:items-center sm:justify-end xl:col-span-2">
+        <Link
+          to="/admin/package-designs"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+        >
+          Cancel
+        </Link>
+
         <button
           type="submit"
           disabled={isSubmitting || sortedServicePackages.length === 0}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:px-5 sm:text-xs"
         >
           {isSubmitting ? "Saving..." : submitLabel}
         </button>

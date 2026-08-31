@@ -1,4 +1,5 @@
 import { useState } from "react";
+// rnx-site-settings-platforms-v482
 
 import MediaField from "../media/MediaField";
 import { createEmptyPlatform } from "../../../utils/siteSettingsForm";
@@ -141,8 +142,8 @@ function PlatformSettingsEditor({
   const groupError = getFieldError(fieldErrors, fieldName);
 
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-      <div className="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
+    <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+      <div className="flex flex-col gap-2.5 border-b border-slate-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-xl font-bold text-slate-950">{title}</h2>
 
@@ -172,14 +173,14 @@ function PlatformSettingsEditor({
       {groupError && (
         <p
           role="alert"
-          className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+          className="mt-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
         >
           {groupError}
         </p>
       )}
 
       {platformItems.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
+        <div className="mt-2.5 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-5 dark:border-slate-700 dark:bg-slate-950/60 text-center">
           <p className="font-semibold text-slate-700">No platforms added</p>
 
           <p className="mt-2 text-sm text-slate-500">
@@ -187,7 +188,7 @@ function PlatformSettingsEditor({
           </p>
         </div>
       ) : (
-        <div className="mt-5 space-y-3">
+        <div className="mt-2.5 space-y-3">
           {platformItems.map((platform, index) => {
             const nameField = `${fieldName}.${index}.name`;
             const usernameField = `${fieldName}.${index}.username`;
@@ -212,7 +213,7 @@ function PlatformSettingsEditor({
             return (
               <article
                 key={`${fieldName}-${index}`}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950/60"
               >
                 <div
                   className={`flex items-center gap-3 bg-white px-4 py-3 ${
@@ -279,7 +280,7 @@ function PlatformSettingsEditor({
                 {isExpanded && (
                   <div
                     id={editorId}
-                    className="grid gap-5 p-4 sm:p-5 lg:grid-cols-2"
+                    className="grid gap-2.5 p-4 sm:p-5 lg:grid-cols-2"
                   >
                     <div>
                       <label
@@ -299,7 +300,7 @@ function PlatformSettingsEditor({
                         onChange={(event) =>
                           updatePlatform(index, "name", event.target.value)
                         }
-                        className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                        className={`mt-2 min-h-9 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
                           nameError
                             ? "border-red-400 focus:border-red-500"
                             : "border-slate-300 focus:border-brand-500"
@@ -338,7 +339,7 @@ function PlatformSettingsEditor({
                             event.target.value,
                           )
                         }
-                        className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                        className={`mt-2 min-h-9 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
                           usernameError
                             ? "border-red-400 focus:border-red-500"
                             : "border-slate-300 focus:border-brand-500"
@@ -386,7 +387,7 @@ function PlatformSettingsEditor({
                         onChange={(event) =>
                           updatePlatform(index, "url", event.target.value)
                         }
-                        className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                        className={`mt-2 min-h-9 w-full rounded-xl border bg-white px-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:cursor-not-allowed disabled:bg-slate-100 ${
                           urlError
                             ? "border-red-400 focus:border-red-500"
                             : "border-slate-300 focus:border-brand-500"

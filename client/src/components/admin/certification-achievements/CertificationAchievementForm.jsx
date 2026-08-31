@@ -14,7 +14,13 @@ import {
 } from "../../../utils/certificationAchievementForm";
 
 const inputClasses =
-  "mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+  "mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm";
+
+const textareaClasses =
+  "mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm";
+
+const labelClasses =
+  "text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]";
 
 function CertificationAchievementFieldError({ id, message }) {
   if (!message) {
@@ -22,7 +28,10 @@ function CertificationAchievementFieldError({ id, message }) {
   }
 
   return (
-    <p id={id} className="mt-2 text-sm font-semibold text-red-600">
+    <p
+      id={id}
+      className="mt-0.5 text-[10px] font-semibold text-red-600 dark:text-red-400"
+    >
       {message}
     </p>
   );
@@ -235,39 +244,32 @@ function CertificationAchievementForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="rnx-admin-certification-achievement-form-v480 space-y-2"
+    >
       {submitError && (
-        <div
-          role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700"
-        >
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
           {submitError}
         </div>
       )}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Record Identity
-        </p>
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+            Credential Details
+          </p>
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
+            Identity, Issuer and Timeline
+          </h2>
+        </div>
 
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Certification, License, Award or Achievement
-        </h2>
-
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Create an independently publishable professional credential or
-          achievement without duplicating Education or Experience content.
-        </p>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-x-3 gap-y-2 md:grid-cols-2 xl:grid-cols-4">
           <div>
-            <label
-              htmlFor="certification-achievement-type"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="certification-achievement-type" className={labelClasses}>
               Type <span className="text-red-600">*</span>
             </label>
-
             <select
               id="certification-achievement-type"
               name="type"
@@ -275,33 +277,22 @@ function CertificationAchievementForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               aria-invalid={Boolean(getFieldError("type"))}
-              aria-describedby={
-                getFieldError("type") ? getErrorId("type") : undefined
-              }
+              aria-describedby={getFieldError("type") ? getErrorId("type") : undefined}
               className={inputClasses}
             >
               {certificationAchievementTypes.map((recordType) => (
                 <option key={recordType} value={recordType}>
-                  {certificationAchievementTypeLabels[recordType] ||
-                    recordType}
+                  {certificationAchievementTypeLabels[recordType] || recordType}
                 </option>
               ))}
             </select>
-
-            <CertificationAchievementFieldError
-              id={getErrorId("type")}
-              message={getFieldError("type")}
-            />
+            <CertificationAchievementFieldError id={getErrorId("type")} message={getFieldError("type")} />
           </div>
 
-          <div>
-            <label
-              htmlFor="certification-achievement-title"
-              className="text-sm font-semibold text-slate-700"
-            >
+          <div className="xl:col-span-2">
+            <label htmlFor="certification-achievement-title" className={labelClasses}>
               Title <span className="text-red-600">*</span>
             </label>
-
             <input
               id="certification-achievement-title"
               name="title"
@@ -311,27 +302,17 @@ function CertificationAchievementForm({
               disabled={isSubmitting}
               placeholder="MongoDB Associate Developer"
               aria-invalid={Boolean(getFieldError("title"))}
-              aria-describedby={
-                getFieldError("title") ? getErrorId("title") : undefined
-              }
+              aria-describedby={getFieldError("title") ? getErrorId("title") : undefined}
               className={inputClasses}
             />
-
-            <CertificationAchievementFieldError
-              id={getErrorId("title")}
-              message={getFieldError("title")}
-            />
+            <CertificationAchievementFieldError id={getErrorId("title")} message={getFieldError("title")} />
           </div>
 
           <div>
-            <label
-              htmlFor="certification-achievement-issuer"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="certification-achievement-issuer" className={labelClasses}>
               Issuer / Organization{" "}
               {issuerIsRequired && <span className="text-red-600">*</span>}
             </label>
-
             <input
               id="certification-achievement-issuer"
               name="issuerName"
@@ -341,28 +322,16 @@ function CertificationAchievementForm({
               disabled={isSubmitting}
               placeholder="MongoDB"
               aria-invalid={Boolean(getFieldError("issuerName"))}
-              aria-describedby={
-                getFieldError("issuerName")
-                  ? getErrorId("issuerName")
-                  : undefined
-              }
+              aria-describedby={getFieldError("issuerName") ? getErrorId("issuerName") : undefined}
               className={inputClasses}
             />
-
-            <CertificationAchievementFieldError
-              id={getErrorId("issuerName")}
-              message={getFieldError("issuerName")}
-            />
+            <CertificationAchievementFieldError id={getErrorId("issuerName")} message={getFieldError("issuerName")} />
           </div>
 
-          <div>
-            <label
-              htmlFor="certification-achievement-slug"
-              className="text-sm font-semibold text-slate-700"
-            >
+          <div className="xl:col-span-2">
+            <label htmlFor="certification-achievement-slug" className={labelClasses}>
               URL Slug <span className="text-red-600">*</span>
             </label>
-
             <input
               id="certification-achievement-slug"
               name="slug"
@@ -373,43 +342,19 @@ function CertificationAchievementForm({
               disabled={isSubmitting}
               placeholder="mongodb-associate-developer-mongodb-2026-08-09"
               aria-invalid={Boolean(getFieldError("slug"))}
-              aria-describedby={
-                getFieldError("slug") ? getErrorId("slug") : undefined
-              }
+              aria-describedby={getFieldError("slug") ? getErrorId("slug") : undefined}
               className={inputClasses}
             />
-
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Automatically generated from title, issuer and issue date until
-              manually edited.
+            <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+              Auto-generated until manually edited.
             </p>
-
-            <CertificationAchievementFieldError
-              id={getErrorId("slug")}
-              message={getFieldError("slug")}
-            />
+            <CertificationAchievementFieldError id={getErrorId("slug")} message={getFieldError("slug")} />
           </div>
-        </div>
-      </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Timeline
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Issue and Expiration Dates
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
           <div>
-            <label
-              htmlFor="certification-achievement-issue-date"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="certification-achievement-issue-date" className={labelClasses}>
               Issue Date <span className="text-red-600">*</span>
             </label>
-
             <input
               id="certification-achievement-issue-date"
               name="issueDate"
@@ -418,28 +363,16 @@ function CertificationAchievementForm({
               onChange={handleInputChange}
               disabled={isSubmitting}
               aria-invalid={Boolean(getFieldError("issueDate"))}
-              aria-describedby={
-                getFieldError("issueDate")
-                  ? getErrorId("issueDate")
-                  : undefined
-              }
+              aria-describedby={getFieldError("issueDate") ? getErrorId("issueDate") : undefined}
               className={inputClasses}
             />
-
-            <CertificationAchievementFieldError
-              id={getErrorId("issueDate")}
-              message={getFieldError("issueDate")}
-            />
+            <CertificationAchievementFieldError id={getErrorId("issueDate")} message={getFieldError("issueDate")} />
           </div>
 
           <div>
-            <label
-              htmlFor="certification-achievement-expiration-date"
-              className="text-sm font-semibold text-slate-700"
-            >
+            <label htmlFor="certification-achievement-expiration-date" className={labelClasses}>
               Expiration Date
             </label>
-
             <input
               id="certification-achievement-expiration-date"
               name="expirationDate"
@@ -448,442 +381,288 @@ function CertificationAchievementForm({
               onChange={handleInputChange}
               disabled={isSubmitting || formValues.doesNotExpire}
               aria-invalid={Boolean(getFieldError("expirationDate"))}
-              aria-describedby={
-                getFieldError("expirationDate")
-                  ? getErrorId("expirationDate")
-                  : undefined
-              }
+              aria-describedby={getFieldError("expirationDate") ? getErrorId("expirationDate") : undefined}
               className={inputClasses}
             />
+            <CertificationAchievementFieldError id={getErrorId("expirationDate")} message={getFieldError("expirationDate")} />
+          </div>
 
-            <CertificationAchievementFieldError
-              id={getErrorId("expirationDate")}
-              message={getFieldError("expirationDate")}
+          <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+            <input
+              name="doesNotExpire"
+              type="checkbox"
+              checked={formValues.doesNotExpire}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+              className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
             />
-          </div>
-
-          <div className="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="doesNotExpire"
-                type="checkbox"
-                checked={formValues.doesNotExpire}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-              />
-
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  This credential does not expire
-                </span>
-
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  Expiration date will be cleared when this option is enabled.
-                </span>
+            <span className="min-w-0">
+              <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                Does Not Expire
               </span>
-            </label>
-          </div>
+              <span className="mt-0.5 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                Expiration date is cleared when enabled.
+              </span>
+            </span>
+          </label>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Public Content
-        </p>
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+            Content and Publishing
+          </p>
+          <h2 className="mt-0.5 text-[13px] font-bold text-slate-950 dark:text-white sm:text-sm">
+            Description, Evidence, Relations and Visibility
+          </h2>
+        </div>
 
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Description and Credential Details
-        </h2>
-
-        <div className="mt-7 space-y-6">
-          <div>
-            <label
-              htmlFor="certification-achievement-short-description"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Short Description <span className="text-red-600">*</span>
-            </label>
-
-            <textarea
-              id="certification-achievement-short-description"
-              name="shortDescription"
-              rows="4"
-              value={formValues.shortDescription}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="Briefly explain what this credential or achievement validates."
-              aria-invalid={Boolean(getFieldError("shortDescription"))}
-              aria-describedby={
-                getFieldError("shortDescription")
-                  ? getErrorId("shortDescription")
-                  : undefined
-              }
-              className={`${inputClasses} py-3`}
-            />
-
-            <CertificationAchievementFieldError
-              id={getErrorId("shortDescription")}
-              message={getFieldError("shortDescription")}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="certification-achievement-description"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Full Description
-            </label>
-
-            <textarea
-              id="certification-achievement-description"
-              name="description"
-              rows="7"
-              value={formValues.description}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="Add useful context, scope, skills demonstrated or why this achievement matters."
-              aria-invalid={Boolean(getFieldError("description"))}
-              aria-describedby={
-                getFieldError("description")
-                  ? getErrorId("description")
-                  : undefined
-              }
-              className={`${inputClasses} py-3`}
-            />
-
-            <CertificationAchievementFieldError
-              id={getErrorId("description")}
-              message={getFieldError("description")}
-            />
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
+        <div className="mt-2 grid gap-2 xl:grid-cols-2 xl:items-start">
+          <div className="space-y-2">
             <div>
-              <label
-                htmlFor="certification-achievement-credential-id"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Credential ID
+              <label htmlFor="certification-achievement-short-description" className={labelClasses}>
+                Short Description <span className="text-red-600">*</span>
               </label>
+              <textarea
+                id="certification-achievement-short-description"
+                name="shortDescription"
+                rows={2}
+                value={formValues.shortDescription}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                placeholder="Briefly explain what this credential or achievement validates."
+                aria-invalid={Boolean(getFieldError("shortDescription"))}
+                aria-describedby={getFieldError("shortDescription") ? getErrorId("shortDescription") : undefined}
+                className={textareaClasses}
+              />
+              <CertificationAchievementFieldError id={getErrorId("shortDescription")} message={getFieldError("shortDescription")} />
+            </div>
 
+            <div>
+              <label htmlFor="certification-achievement-description" className={labelClasses}>
+                Full Description
+              </label>
+              <textarea
+                id="certification-achievement-description"
+                name="description"
+                rows={3}
+                value={formValues.description}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                placeholder="Add context, scope, skills demonstrated or why this achievement matters."
+                aria-invalid={Boolean(getFieldError("description"))}
+                aria-describedby={getFieldError("description") ? getErrorId("description") : undefined}
+                className={textareaClasses}
+              />
+              <CertificationAchievementFieldError id={getErrorId("description")} message={getFieldError("description")} />
+            </div>
+
+            <div className="grid gap-2 md:grid-cols-2">
+              <div>
+                <label htmlFor="certification-achievement-credential-id" className={labelClasses}>
+                  Credential ID
+                </label>
+                <input
+                  id="certification-achievement-credential-id"
+                  name="credentialId"
+                  type="text"
+                  value={formValues.credentialId}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  placeholder="ABC-123456"
+                  aria-invalid={Boolean(getFieldError("credentialId"))}
+                  aria-describedby={getFieldError("credentialId") ? getErrorId("credentialId") : undefined}
+                  className={inputClasses}
+                />
+                <CertificationAchievementFieldError id={getErrorId("credentialId")} message={getFieldError("credentialId")} />
+              </div>
+
+              <div>
+                <label htmlFor="certification-achievement-verification-url" className={labelClasses}>
+                  Verification URL
+                </label>
+                <input
+                  id="certification-achievement-verification-url"
+                  name="verificationUrl"
+                  type="url"
+                  value={formValues.verificationUrl}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  placeholder="https://issuer.example/verify/ABC-123456"
+                  aria-invalid={Boolean(getFieldError("verificationUrl"))}
+                  aria-describedby={getFieldError("verificationUrl") ? getErrorId("verificationUrl") : undefined}
+                  className={inputClasses}
+                />
+                <CertificationAchievementFieldError id={getErrorId("verificationUrl")} message={getFieldError("verificationUrl")} />
+              </div>
+            </div>
+
+            <div className="grid gap-2 md:grid-cols-2">
+              <div>
+                <label htmlFor="certification-achievement-related-education" className={labelClasses}>
+                  Related Education
+                </label>
+                <select
+                  id="certification-achievement-related-education"
+                  name="relatedEducation"
+                  value={formValues.relatedEducation}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  aria-invalid={Boolean(getFieldError("relatedEducation"))}
+                  aria-describedby={getFieldError("relatedEducation") ? getErrorId("relatedEducation") : undefined}
+                  className={inputClasses}
+                >
+                  <option value="">No related Education record</option>
+                  {sortedEducationOptions.map((education) => (
+                    <option key={education._id} value={education._id}>
+                      {createEducationOptionLabel(education)}
+                    </option>
+                  ))}
+                </select>
+                <CertificationAchievementFieldError id={getErrorId("relatedEducation")} message={getFieldError("relatedEducation")} />
+              </div>
+
+              <div>
+                <label htmlFor="certification-achievement-related-experience" className={labelClasses}>
+                  Related Experience
+                </label>
+                <select
+                  id="certification-achievement-related-experience"
+                  name="relatedExperience"
+                  value={formValues.relatedExperience}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  aria-invalid={Boolean(getFieldError("relatedExperience"))}
+                  aria-describedby={getFieldError("relatedExperience") ? getErrorId("relatedExperience") : undefined}
+                  className={inputClasses}
+                >
+                  <option value="">No related Experience record</option>
+                  {sortedExperienceOptions.map((experience) => (
+                    <option key={experience._id} value={experience._id}>
+                      {createExperienceOptionLabel(experience)}
+                    </option>
+                  ))}
+                </select>
+                <CertificationAchievementFieldError id={getErrorId("relatedExperience")} message={getFieldError("relatedExperience")} />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <MediaField
+              id="certification-achievement-media-url"
+              name="mediaUrl"
+              label="Evidence Media URL"
+              value={formValues.mediaUrl}
+              onChange={handleInputChange}
+              accessToken={accessToken}
+              allowedTypes={["document", "image", "svg"]}
+              pickerTitle="Choose Certification / Achievement Media"
+              placeholder="https://..."
+              helpText="Choose document, image or SVG from Media Library, or paste a URL."
+              error={getFieldError("mediaUrl")}
+              disabled={isSubmitting}
+              onUnauthorized={onMediaUnauthorized}
+            />
+
+            <div>
+              <label htmlFor="certification-achievement-media-alt" className={labelClasses}>
+                Media Alt Text
+              </label>
               <input
-                id="certification-achievement-credential-id"
-                name="credentialId"
+                id="certification-achievement-media-alt"
+                name="mediaAlt"
                 type="text"
-                value={formValues.credentialId}
+                value={formValues.mediaAlt}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
-                placeholder="ABC-123456"
-                aria-invalid={Boolean(getFieldError("credentialId"))}
-                aria-describedby={
-                  getFieldError("credentialId")
-                    ? getErrorId("credentialId")
-                    : undefined
-                }
+                placeholder="MongoDB Associate Developer certificate"
+                aria-invalid={Boolean(getFieldError("mediaAlt"))}
+                aria-describedby={getFieldError("mediaAlt") ? getErrorId("mediaAlt") : undefined}
                 className={inputClasses}
               />
-
-              <CertificationAchievementFieldError
-                id={getErrorId("credentialId")}
-                message={getFieldError("credentialId")}
-              />
+              <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                Media Library alt text fills this only while blank.
+              </p>
+              <CertificationAchievementFieldError id={getErrorId("mediaAlt")} message={getFieldError("mediaAlt")} />
             </div>
 
-            <div>
-              <label
-                htmlFor="certification-achievement-verification-url"
-                className="text-sm font-semibold text-slate-700"
-              >
-                Verification URL
+            <div className="grid gap-2 md:grid-cols-3">
+              <div>
+                <label htmlFor="certification-achievement-order" className={labelClasses}>
+                  Display Order
+                </label>
+                <input
+                  id="certification-achievement-order"
+                  name="order"
+                  type="number"
+                  min="0"
+                  max="1000000"
+                  step="1"
+                  value={formValues.order}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  aria-invalid={Boolean(getFieldError("order"))}
+                  aria-describedby={getFieldError("order") ? getErrorId("order") : undefined}
+                  className={inputClasses}
+                />
+                <CertificationAchievementFieldError id={getErrorId("order")} message={getFieldError("order")} />
+              </div>
+
+              <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+                <input
+                  name="isVisible"
+                  type="checkbox"
+                  checked={formValues.isVisible}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+                />
+                <span className="min-w-0">
+                  <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                    Publicly Visible
+                  </span>
+                  <span className="mt-0.5 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                    Show on public credential pages.
+                  </span>
+                </span>
               </label>
 
-              <input
-                id="certification-achievement-verification-url"
-                name="verificationUrl"
-                type="url"
-                value={formValues.verificationUrl}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                placeholder="https://issuer.example/verify/ABC-123456"
-                aria-invalid={Boolean(getFieldError("verificationUrl"))}
-                aria-describedby={
-                  getFieldError("verificationUrl")
-                    ? getErrorId("verificationUrl")
-                    : undefined
-                }
-                className={inputClasses}
-              />
-
-              <CertificationAchievementFieldError
-                id={getErrorId("verificationUrl")}
-                message={getFieldError("verificationUrl")}
-              />
+              <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+                <input
+                  name="isFeatured"
+                  type="checkbox"
+                  checked={formValues.isFeatured}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+                />
+                <span className="min-w-0">
+                  <span className="block text-[11px] font-semibold text-slate-800 dark:text-slate-200">
+                    Featured Record
+                  </span>
+                  <span className="mt-0.5 block text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                    Prioritise in featured displays.
+                  </span>
+                </span>
+              </label>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Evidence Media
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Certificate, Badge or Award Evidence
-        </h2>
-
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Use the Media Library or keep a manual external URL. PDFs remain
-          links rather than inline images.
-        </p>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <MediaField
-            id="certification-achievement-media-url"
-            name="mediaUrl"
-            label="Media URL"
-            value={formValues.mediaUrl}
-            onChange={handleInputChange}
-            accessToken={accessToken}
-            allowedTypes={["document", "image", "svg"]}
-            pickerTitle="Choose Certification / Achievement Media"
-            placeholder="https://..."
-            helpText="Compatible Media Library types: document, image and SVG."
-            error={getFieldError("mediaUrl")}
-            disabled={isSubmitting}
-            onUnauthorized={onMediaUnauthorized}
-          />
-
-          <div>
-            <label
-              htmlFor="certification-achievement-media-alt"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Media Alt Text
-            </label>
-
-            <input
-              id="certification-achievement-media-alt"
-              name="mediaAlt"
-              type="text"
-              value={formValues.mediaAlt}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="MongoDB Associate Developer certificate"
-              aria-invalid={Boolean(getFieldError("mediaAlt"))}
-              aria-describedby={
-                getFieldError("mediaAlt")
-                  ? getErrorId("mediaAlt")
-                  : undefined
-              }
-              className={inputClasses}
-            />
-
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Media Library alt text fills this only when the field is blank.
-            </p>
-
-            <CertificationAchievementFieldError
-              id={getErrorId("mediaAlt")}
-              message={getFieldError("mediaAlt")}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Optional Relations
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Link Existing Education or Experience
-        </h2>
-
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Relations provide context only. They do not copy or synchronize
-          Education certificates or Experience achievement bullets.
-        </p>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="certification-achievement-related-education"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Related Education
-            </label>
-
-            <select
-              id="certification-achievement-related-education"
-              name="relatedEducation"
-              value={formValues.relatedEducation}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              aria-invalid={Boolean(getFieldError("relatedEducation"))}
-              aria-describedby={
-                getFieldError("relatedEducation")
-                  ? getErrorId("relatedEducation")
-                  : undefined
-              }
-              className={inputClasses}
-            >
-              <option value="">No related Education record</option>
-
-              {sortedEducationOptions.map((education) => (
-                <option key={education._id} value={education._id}>
-                  {createEducationOptionLabel(education)}
-                </option>
-              ))}
-            </select>
-
-            <CertificationAchievementFieldError
-              id={getErrorId("relatedEducation")}
-              message={getFieldError("relatedEducation")}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="certification-achievement-related-experience"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Related Experience
-            </label>
-
-            <select
-              id="certification-achievement-related-experience"
-              name="relatedExperience"
-              value={formValues.relatedExperience}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              aria-invalid={Boolean(getFieldError("relatedExperience"))}
-              aria-describedby={
-                getFieldError("relatedExperience")
-                  ? getErrorId("relatedExperience")
-                  : undefined
-              }
-              className={inputClasses}
-            >
-              <option value="">No related Experience record</option>
-
-              {sortedExperienceOptions.map((experience) => (
-                <option key={experience._id} value={experience._id}>
-                  {createExperienceOptionLabel(experience)}
-                </option>
-              ))}
-            </select>
-
-            <CertificationAchievementFieldError
-              id={getErrorId("relatedExperience")}
-              message={getFieldError("relatedExperience")}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-brand-600">
-          Publishing Controls
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-slate-950">
-          Display Order and Visibility
-        </h2>
-
-        <div className="mt-7 grid gap-6 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="certification-achievement-order"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Display Order
-            </label>
-
-            <input
-              id="certification-achievement-order"
-              name="order"
-              type="number"
-              min="0"
-              max="1000000"
-              step="1"
-              value={formValues.order}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              aria-invalid={Boolean(getFieldError("order"))}
-              aria-describedby={
-                getFieldError("order") ? getErrorId("order") : undefined
-              }
-              className={inputClasses}
-            />
-
-            <CertificationAchievementFieldError
-              id={getErrorId("order")}
-              message={getFieldError("order")}
-            />
-          </div>
-
-          <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isVisible"
-                type="checkbox"
-                checked={formValues.isVisible}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-              />
-
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Publicly Visible
-                </span>
-
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  Include this record in the public Certifications &
-                  Achievements experience.
-                </span>
-              </span>
-            </label>
-
-            <label className="flex cursor-pointer items-start gap-3">
-              <input
-                name="isFeatured"
-                type="checkbox"
-                checked={formValues.isFeatured}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="mt-1 size-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
-              />
-
-              <span>
-                <span className="block font-semibold text-slate-800">
-                  Featured Record
-                </span>
-
-                <span className="mt-1 block text-sm leading-6 text-slate-500">
-                  Prioritize this record in the future homepage preview.
-                </span>
-              </span>
-            </label>
-          </div>
-        </div>
-      </section>
-
-      <div className="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-end">
+      <div className="flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-end">
         <Link
           to="/admin/achievements"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
         >
           Cancel
         </Link>
-
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-7 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:px-5 sm:text-xs"
         >
           {isSubmitting ? "Saving..." : submitLabel}
         </button>

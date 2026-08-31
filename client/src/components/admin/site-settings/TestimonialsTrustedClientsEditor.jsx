@@ -1,5 +1,6 @@
 import { createEmptyTestimonialTrustedClient } from "../../../utils/siteSettingsForm";
 import MediaField from "../media/MediaField";
+// rnx-site-settings-trusted-v482
 
 const MAX_TRUSTED_CLIENTS = 12;
 
@@ -70,8 +71,8 @@ function TestimonialsTrustedClientsEditor({
   const groupError = getFieldError("testimonialsSection.trustedClients");
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 dark:border-slate-700 dark:bg-slate-950/60 sm:p-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="font-bold text-slate-900">
             Showcase Clients / Brands
@@ -133,12 +134,12 @@ function TestimonialsTrustedClientsEditor({
                 key={`testimonial-showcase-client-${index}`}
                 className="rounded-xl border border-slate-200 bg-white p-4"
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+                <div className="flex flex-col gap-2 lg:flex-row lg:items-start">
                   <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-brand-50 text-xs font-black text-brand-700">
                     {String(index + 1).padStart(2, "0")}
                   </span>
 
-                  <div className="grid min-w-0 flex-1 gap-4 lg:grid-cols-2">
+                  <div className="grid min-w-0 flex-1 gap-2 lg:grid-cols-2">
                     <div>
                       <label
                         htmlFor={nameField}
@@ -158,7 +159,7 @@ function TestimonialsTrustedClientsEditor({
                         onChange={(event) =>
                           updateClient(index, "name", event.target.value)
                         }
-                        className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+                        className="mt-2 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 disabled:cursor-not-allowed disabled:bg-slate-100"
                       />
 
                       {getFieldError(nameField) && (
@@ -190,7 +191,7 @@ function TestimonialsTrustedClientsEditor({
                         onChange={(event) =>
                           updateClient(index, "logoAlt", event.target.value)
                         }
-                        className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+                        className="mt-2 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 disabled:cursor-not-allowed disabled:bg-slate-100"
                       />
 
                       {getFieldError(logoAltField) && (

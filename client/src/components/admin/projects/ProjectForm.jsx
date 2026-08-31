@@ -87,7 +87,7 @@ function ProjectFieldError({ message }) {
     return null;
   }
 
-  return <p className="mt-2 text-sm font-medium text-red-600">{message}</p>;
+  return <p className="mt-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">{message}</p>;
 }
 
 function ProjectForm({
@@ -354,1012 +354,955 @@ function ProjectForm({
     }
   }
 
+  const inputClasses =
+    "mt-1 min-h-9 w-full rounded-lg border border-slate-300 bg-white px-2.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:min-h-10 sm:px-3 sm:text-sm";
+
+  const textareaClasses =
+    "mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-[13px] text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 disabled:cursor-not-allowed disabled:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500 dark:focus:ring-brand-950/60 dark:disabled:bg-slate-900 sm:px-3 sm:py-2 sm:text-sm";
+
+  const labelClasses =
+    "text-[10px] font-semibold text-slate-700 dark:text-slate-300 sm:text-[11px]";
+
+  const allErrorKeys = [
+    ...Object.keys(localErrors),
+    ...Object.keys(serverErrors),
+  ];
+
+  const hasImageErrors = allErrorKeys.some(
+    (fieldName) => fieldName === "images" || fieldName.startsWith("images."),
+  );
+
+  const hasResultErrors = allErrorKeys.some(
+    (fieldName) => fieldName === "results" || fieldName.startsWith("results."),
+  );
+
+  const hasCaseStudyErrors = allErrorKeys.some(
+    (fieldName) =>
+      fieldName === "caseStudy" ||
+      fieldName === "caseStudyOrder" ||
+      fieldName.startsWith("caseStudy."),
+  );
+
+  const hasSeoErrors = allErrorKeys.some(
+    (fieldName) => fieldName === "seo" || fieldName.startsWith("seo"),
+  );
+
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-8">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="rnx-admin-project-form-v492 space-y-2"
+    >
       {submitError && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-medium leading-6 text-red-700"
+          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
         >
           {submitError}
         </div>
       )}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">Basic Information</h2>
-
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Add the public project name, URL slug and complete description.
-        </p>
-
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
-          <div>
-            <label
-              htmlFor="project-title"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Project title *
-            </label>
-
-            <input
-              id="project-title"
-              name="title"
-              type="text"
-              value={formValues.title}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="MERN E-commerce Store"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <ProjectFieldError message={getFieldError("title")} />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-slug"
-              className="text-sm font-semibold text-slate-700"
-            >
-              URL slug *
-            </label>
-
-            <input
-              id="project-slug"
-              name="slug"
-              type="text"
-              value={formValues.slug}
-              onChange={handleInputChange}
-              onBlur={handleSlugBlur}
-              disabled={isSubmitting}
-              placeholder="mern-ecommerce-store"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <ProjectFieldError message={getFieldError("slug")} />
-          </div>
-        </div>
-
-        <div className="mt-5">
-          <label
-            htmlFor="project-short-description"
-            className="text-sm font-semibold text-slate-700"
-          >
-            Short description *
-          </label>
-
-          <textarea
-            id="project-short-description"
-            name="shortDescription"
-            value={formValues.shortDescription}
-            onChange={handleInputChange}
-            disabled={isSubmitting}
-            rows={3}
-            maxLength={350}
-            placeholder="Write a short description for project cards."
-            className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-          />
-
-          <div className="mt-2 flex items-start justify-between gap-4">
-            <ProjectFieldError message={getFieldError("shortDescription")} />
-
-            <span className="ml-auto text-xs text-slate-400">
-              {formValues.shortDescription.length}
-              /350
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-5">
-          <label
-            htmlFor="project-description"
-            className="text-sm font-semibold text-slate-700"
-          >
-            Full description
-          </label>
-
-          <textarea
-            id="project-description"
-            name="description"
-            value={formValues.description}
-            onChange={handleInputChange}
-            disabled={isSubmitting}
-            rows={8}
-            maxLength={10000}
-            placeholder="Explain the project purpose, workflow and important details."
-            className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-          />
-
-          <ProjectFieldError message={getFieldError("description")} />
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">Project Details</h2>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="project-category"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Category
-            </label>
-
-            <input
-              id="project-category"
-              name="category"
-              type="text"
-              value={formValues.category}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="E-commerce"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-type"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Project type
-            </label>
-
-            <select
-              id="project-type"
-              name="projectType"
-              value={formValues.projectType}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            >
-              <option value="personal">Personal</option>
-
-              <option value="client">Client</option>
-
-              <option value="company">Company</option>
-
-              <option value="open-source">Open Source</option>
-
-              <option value="practice">Practice</option>
-            </select>
-
-            <ProjectFieldError
-              message={getFieldError("projectType", "project type")}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-client"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Client or company
-            </label>
-
-            <input
-              id="project-client"
-              name="clientName"
-              type="text"
-              value={formValues.clientName}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="UniQuick Mart Pvt. Ltd."
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-role"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Your role
-            </label>
-
-            <input
-              id="project-role"
-              name="role"
-              type="text"
-              value={formValues.role}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="Full-Stack Developer"
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-status"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Project status
-            </label>
-
-            <select
-              id="project-status"
-              name="status"
-              value={formValues.status}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            >
-              <option value="planning">Planning</option>
-
-              <option value="in-progress">In Development</option>
-
-              <option value="completed">Completed</option>
-
-              <option value="maintained">Active Project</option>
-
-              <option value="archived">Archived</option>
-            </select>
-
-            <ProjectFieldError
-              message={getFieldError("status", "project status")}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-order"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Display order
-            </label>
-
-            <input
-              id="project-order"
-              name="order"
-              type="number"
-              min="0"
-              step="1"
-              value={formValues.order}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <ProjectFieldError message={getFieldError("order")} />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-started-at"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Start date
-            </label>
-
-            <input
-              id="project-started-at"
-              name="startedAt"
-              type="date"
-              value={formValues.startedAt}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <ProjectFieldError message={getFieldError("startedAt")} />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-completed-at"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Completion date
-            </label>
-
-            <input
-              id="project-completed-at"
-              name="completedAt"
-              type="date"
-              value={formValues.completedAt}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <ProjectFieldError message={getFieldError("completedAt")} />
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <label className="flex cursor-pointer items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <input
-              name="isVisible"
-              type="checkbox"
-              checked={formValues.isVisible}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              className="mt-1 size-4 accent-brand-600"
-            />
-
-            <span>
-              <span className="block text-sm font-bold text-slate-900">
-                Visible on portfolio
-              </span>
-
-              <span className="mt-1 block text-sm leading-6 text-slate-500">
-                Visitors can view the project card and case-study page.
-              </span>
-            </span>
-          </label>
-
-          <label className="flex cursor-pointer items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <input
-              name="isFeatured"
-              type="checkbox"
-              checked={formValues.isFeatured}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              className="mt-1 size-4 accent-brand-600"
-            />
-
-            <span>
-              <span className="block text-sm font-bold text-slate-900">
-                Featured project
-              </span>
-
-              <span className="mt-1 block text-sm leading-6 text-slate-500">
-                Highlight this project before standard projects.
-              </span>
-            </span>
-          </label>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-slate-950">
-              Case Study Publication
-            </h2>
-
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-              Publish this existing Project inside the Case Studies experience
-              without creating duplicate project content or a second detail
-              page.
-            </p>
-          </div>
-
-          <span
-            className={`inline-flex w-fit rounded-full px-3 py-1.5 text-xs font-bold ${
-              formValues.caseStudyIsPublished
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-slate-100 text-slate-600"
-            }`}
-          >
-            {formValues.caseStudyIsPublished
-              ? "Published as Case Study"
-              : "Not a Case Study"}
-          </span>
-        </div>
-
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
-          <label className="flex cursor-pointer items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <input
-              name="caseStudyIsPublished"
-              type="checkbox"
-              checked={formValues.caseStudyIsPublished}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              className="mt-1 size-4 accent-brand-600"
-            />
-
-            <span>
-              <span className="block text-sm font-bold text-slate-900">
-                Publish as Case Study
-              </span>
-
-              <span className="mt-1 block text-sm leading-6 text-slate-500">
-                Include this visible Project in the Case Studies homepage
-                section and dedicated Case Studies page.
-              </span>
-            </span>
-          </label>
-
-          <label
-            className={`flex items-start gap-4 rounded-2xl border p-4 ${
-              formValues.caseStudyIsPublished
-                ? "cursor-pointer border-slate-200 bg-slate-50"
-                : "cursor-not-allowed border-slate-200 bg-slate-100 opacity-60"
-            }`}
-          >
-            <input
-              name="caseStudyIsFeatured"
-              type="checkbox"
-              checked={formValues.caseStudyIsFeatured}
-              onChange={handleInputChange}
-              disabled={isSubmitting || !formValues.caseStudyIsPublished}
-              className="mt-1 size-4 accent-brand-600"
-            />
-
-            <span>
-              <span className="block text-sm font-bold text-slate-900">
-                Featured Case Study
-              </span>
-
-              <span className="mt-1 block text-sm leading-6 text-slate-500">
-                Prioritize this Case Study before standard published Case
-                Studies.
-              </span>
-            </span>
-          </label>
-        </div>
-
-        <div className="mt-5 max-w-sm">
-          <label
-            htmlFor="project-case-study-order"
-            className="text-sm font-semibold text-slate-700"
-          >
-            Case Study display order
-          </label>
-
-          <input
-            id="project-case-study-order"
-            name="caseStudyOrder"
-            type="number"
-            min="0"
-            step="1"
-            value={formValues.caseStudyOrder}
-            onChange={handleInputChange}
-            disabled={isSubmitting}
-            className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-          />
-
-          <ProjectFieldError
-            message={getFieldError(
-              "caseStudy.order",
-              "caseStudyOrder",
-              "caseStudy",
-            )}
-          />
-
-          <p className="mt-2 text-xs leading-5 text-slate-500">
-            Featured status is evaluated first, then this Case Study order,
-            then the normal Project order.
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div>
+          <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300 sm:text-[10px]">
+            Project Details
           </p>
+
+          <h2 className="mt-0.5 text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
+            Identity, Timeline and Public Display
+          </h2>
         </div>
 
-        <ProjectFieldError message={getFieldError("caseStudy")} />
-      </section>
+        <div className="mt-2 grid gap-2 xl:grid-cols-2 xl:items-start">
+          <div className="grid gap-x-3 gap-y-2 md:grid-cols-2">
+            <div>
+              <label htmlFor="project-title" className={labelClasses}>
+                Project Title *
+              </label>
+              <input
+                id="project-title"
+                name="title"
+                type="text"
+                value={formValues.title}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                placeholder="UniQuick Mart"
+                className={inputClasses}
+              />
+              <ProjectFieldError message={getFieldError("title")} />
+            </div>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">
-          Technologies and Content
-        </h2>
+            <div>
+              <label htmlFor="project-slug" className={labelClasses}>
+                URL Slug *
+              </label>
+              <input
+                id="project-slug"
+                name="slug"
+                type="text"
+                value={formValues.slug}
+                onChange={handleInputChange}
+                onBlur={handleSlugBlur}
+                disabled={isSubmitting}
+                placeholder="uniquick-mart"
+                className={inputClasses}
+              />
+              <ProjectFieldError message={getFieldError("slug")} />
+            </div>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Enter one item per line or separate items using commas.
-        </p>
-
-        <div className="mt-6 grid gap-5 lg:grid-cols-2">
-          <div>
-            <label
-              htmlFor="project-technologies"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Technologies
-            </label>
-
-            <textarea
-              id="project-technologies"
-              name="technologies"
-              value={formValues.technologies}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={7}
-              placeholder={"MongoDB\nExpress.js\nReact\nNode.js"}
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-features"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Project features
-            </label>
-
-            <textarea
-              id="project-features"
-              name="features"
-              value={formValues.features}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={7}
-              placeholder={
-                "Authentication\nAdmin dashboard\nResponsive interface"
-              }
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-challenges"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Challenges
-            </label>
-
-            <textarea
-              id="project-challenges"
-              name="challenges"
-              value={formValues.challenges}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={6}
-              placeholder="Describe important development challenges."
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-solutions"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Solutions
-            </label>
-
-            <textarea
-              id="project-solutions"
-              name="solutions"
-              value={formValues.solutions}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={6}
-              placeholder="Explain how each challenge was solved."
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">Project Media</h2>
-
-        <div className="mt-6">
-          <MediaField
-            id="project-cover-image"
-            name="coverImageUrl"
-            label="Cover image URL"
-            value={formValues.coverImageUrl}
-            onChange={handleInputChange}
-            accessToken={accessToken}
-            allowedTypes={["image", "svg"]}
-            pickerTitle="Choose Project Cover"
-            placeholder="https://..."
-            helpText="Paste an external URL or choose an existing image/SVG from the Media Library."
-            error={getFieldError("coverImageUrl")}
-            disabled={isSubmitting}
-            onUnauthorized={onMediaUnauthorized}
-          />
-        </div>
-
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h3 className="font-bold text-slate-950">Project Screenshots</h3>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Add multiple screenshot URLs for the case-study gallery.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleAddImage}
-            disabled={isSubmitting}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            + Add Screenshot
-          </button>
-        </div>
-
-        {formValues.images.length === 0 && (
-          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
-            No project screenshots added.
-          </div>
-        )}
-
-        <div className="mt-5 space-y-5">
-          {formValues.images.map((image, index) => (
-            <div
-              key={`project-image-${index}`}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <h4 className="font-bold text-slate-900">
-                  Screenshot {index + 1}
-                </h4>
-
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(index)}
-                  disabled={isSubmitting}
-                  className="text-sm font-semibold text-red-600 transition hover:text-red-700 disabled:opacity-50"
-                >
-                  Remove
-                </button>
-              </div>
-
-              <div className="mt-5 grid gap-5 lg:grid-cols-2">
-                <div className="lg:col-span-2">
-                  <MediaField
-                    id={`project-image-${index}-url`}
-                    name={`images.${index}.url`}
-                    label="Screenshot URL *"
-                    value={image.url}
-                    onChange={(event, selectedMedia) => {
-                      handleImageChange(index, "url", event.target.value);
-
-                      if (selectedMedia?.altText && !image.alt.trim()) {
-                        handleImageChange(index, "alt", selectedMedia.altText);
-                      }
-                    }}
-                    accessToken={accessToken}
-                    allowedTypes={["image", "svg"]}
-                    pickerTitle={`Choose Screenshot ${index + 1}`}
-                    placeholder="https://..."
-                    helpText="Paste an external URL or select an image/SVG from Media."
-                    error={getFieldError(`images.${index}.url`, "images")}
-                    disabled={isSubmitting}
-                    onUnauthorized={onMediaUnauthorized}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">
-                    Alternative text
-                  </label>
-
-                  <input
-                    type="text"
-                    value={image.alt}
-                    onChange={(event) =>
-                      handleImageChange(index, "alt", event.target.value)
-                    }
-                    disabled={isSubmitting}
-                    placeholder="Homepage screenshot"
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">
-                    Display order
-                  </label>
-
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={image.order}
-                    onChange={(event) =>
-                      handleImageChange(index, "order", event.target.value)
-                    }
-                    disabled={isSubmitting}
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-                  />
-
-                  <ProjectFieldError
-                    message={getFieldError(`images.${index}.order`)}
-                  />
-                </div>
-
-                <div className="lg:col-span-2">
-                  <label className="text-sm font-semibold text-slate-700">
-                    Caption
-                  </label>
-
-                  <textarea
-                    value={image.caption}
-                    onChange={(event) =>
-                      handleImageChange(index, "caption", event.target.value)
-                    }
-                    disabled={isSubmitting}
-                    rows={2}
-                    placeholder="Optional screenshot caption."
-                    className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-                  />
-                </div>
+            <div className="md:col-span-2">
+              <label htmlFor="project-short-description" className={labelClasses}>
+                Short Description *
+              </label>
+              <textarea
+                id="project-short-description"
+                name="shortDescription"
+                value={formValues.shortDescription}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                rows={2}
+                maxLength={300}
+                placeholder="Briefly explain the project and its value."
+                className={textareaClasses}
+              />
+              <div className="mt-0.5 flex items-start justify-between gap-2">
+                <ProjectFieldError message={getFieldError("shortDescription")} />
+                <span className="ml-auto shrink-0 text-[9px] text-slate-400 sm:text-[10px]">
+                  {formValues.shortDescription.length}/300
+                </span>
               </div>
             </div>
-          ))}
+
+            <div className="md:col-span-2">
+              <label htmlFor="project-description" className={labelClasses}>
+                Full Description
+              </label>
+              <textarea
+                id="project-description"
+                name="description"
+                value={formValues.description}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                rows={3}
+                placeholder="Add complete project context, scope and implementation details."
+                className={textareaClasses}
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-x-3 gap-y-2 sm:grid-cols-2 xl:grid-cols-3">
+            <div>
+              <label htmlFor="project-category" className={labelClasses}>
+                Category
+              </label>
+              <input
+                id="project-category"
+                name="category"
+                type="text"
+                value={formValues.category}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                placeholder="E-commerce"
+                className={inputClasses}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="project-type" className={labelClasses}>
+                Project Type
+              </label>
+              <select
+                id="project-type"
+                name="projectType"
+                value={formValues.projectType}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                className={inputClasses}
+              >
+                <option value="personal">Personal</option>
+                <option value="client">Client</option>
+                <option value="company">Company</option>
+                <option value="open-source">Open Source</option>
+                <option value="practice">Practice</option>
+              </select>
+              <ProjectFieldError
+                message={getFieldError("projectType", "project type")}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="project-status" className={labelClasses}>
+                Status
+              </label>
+              <select
+                id="project-status"
+                name="status"
+                value={formValues.status}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                className={inputClasses}
+              >
+                <option value="planning">Planning</option>
+                <option value="in-progress">In Development</option>
+                <option value="completed">Completed</option>
+                <option value="maintained">Active Project</option>
+                <option value="archived">Archived</option>
+              </select>
+              <ProjectFieldError
+                message={getFieldError("status", "project status")}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="project-client" className={labelClasses}>
+                Client / Company
+              </label>
+              <input
+                id="project-client"
+                name="clientName"
+                type="text"
+                value={formValues.clientName}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                placeholder="UniQuick Mart Pvt. Ltd."
+                className={inputClasses}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="project-role" className={labelClasses}>
+                Your Role
+              </label>
+              <input
+                id="project-role"
+                name="role"
+                type="text"
+                value={formValues.role}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                placeholder="Full-Stack Developer"
+                className={inputClasses}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="project-order" className={labelClasses}>
+                Display Order
+              </label>
+              <input
+                id="project-order"
+                name="order"
+                type="number"
+                min="0"
+                step="1"
+                value={formValues.order}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                className={inputClasses}
+              />
+              <ProjectFieldError message={getFieldError("order")} />
+            </div>
+
+            <div>
+              <label htmlFor="project-started-at" className={labelClasses}>
+                Start Date
+              </label>
+              <input
+                id="project-started-at"
+                name="startedAt"
+                type="date"
+                value={formValues.startedAt}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                className={inputClasses}
+              />
+              <ProjectFieldError message={getFieldError("startedAt")} />
+            </div>
+
+            <div>
+              <label htmlFor="project-completed-at" className={labelClasses}>
+                Completion Date
+              </label>
+              <input
+                id="project-completed-at"
+                name="completedAt"
+                type="date"
+                value={formValues.completedAt}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                className={inputClasses}
+              />
+              <ProjectFieldError message={getFieldError("completedAt")} />
+            </div>
+
+            <div className="grid gap-1.5 sm:col-span-2 sm:grid-cols-2 xl:col-span-3">
+              <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+                <input
+                  name="isVisible"
+                  type="checkbox"
+                  checked={formValues.isVisible}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+                />
+                <span>
+                  <span className="block text-[10px] font-semibold text-slate-800 dark:text-slate-200 sm:text-[11px]">
+                    Visible
+                  </span>
+                  <span className="mt-0.5 block text-[8px] leading-3 text-slate-500 dark:text-slate-400 sm:text-[9px]">
+                    Show project publicly.
+                  </span>
+                </span>
+              </label>
+
+              <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60">
+                <input
+                  name="isFeatured"
+                  type="checkbox"
+                  checked={formValues.isFeatured}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 dark:border-slate-600 dark:bg-slate-900"
+                />
+                <span>
+                  <span className="block text-[10px] font-semibold text-slate-800 dark:text-slate-200 sm:text-[11px]">
+                    Featured
+                  </span>
+                  <span className="mt-0.5 block text-[8px] leading-3 text-slate-500 dark:text-slate-400 sm:text-[9px]">
+                    Prioritize this project.
+                  </span>
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-slate-950">
-              Project Results
-            </h2>
+      <section className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-3">
+        <div>
+          <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300 sm:text-[10px]">
+            Content, Media & Publishing
+          </p>
 
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              Add measurable outcomes or important achievements.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleAddResult}
-            disabled={isSubmitting}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            + Add Result
-          </button>
+          <h2 className="mt-0.5 text-[12px] font-bold text-slate-950 dark:text-white sm:text-[13px]">
+            Technologies, Gallery, Results, Links and Advanced Controls
+          </h2>
         </div>
 
-        {formValues.results.length === 0 && (
-          <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
-            No project results added.
-          </div>
-        )}
-
-        <div className="mt-5 space-y-4">
-          {formValues.results.map((result, index) => (
-            <div
-              key={`project-result-${index}`}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="font-bold text-slate-900">Result {index + 1}</h3>
-
-                <button
-                  type="button"
-                  onClick={() => handleRemoveResult(index)}
+        <div className="mt-2 grid gap-2 xl:grid-cols-2 xl:items-start">
+          <div className="space-y-2">
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <label htmlFor="project-technologies" className={labelClasses}>
+                  Technologies
+                </label>
+                <textarea
+                  id="project-technologies"
+                  name="technologies"
+                  value={formValues.technologies}
+                  onChange={handleInputChange}
                   disabled={isSubmitting}
-                  className="text-sm font-semibold text-red-600 transition hover:text-red-700 disabled:opacity-50"
-                >
-                  Remove
-                </button>
+                  rows={3}
+                  placeholder={"MongoDB\nExpress.js\nReact\nNode.js"}
+                  className={textareaClasses}
+                />
               </div>
 
-              <div className="mt-5 grid gap-5 md:grid-cols-2">
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">
-                    Label
-                  </label>
+              <div>
+                <label htmlFor="project-features" className={labelClasses}>
+                  Features
+                </label>
+                <textarea
+                  id="project-features"
+                  name="features"
+                  value={formValues.features}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  rows={3}
+                  placeholder={"Authentication\nAdmin dashboard\nResponsive interface"}
+                  className={textareaClasses}
+                />
+              </div>
 
-                  <input
-                    type="text"
-                    value={result.label}
-                    onChange={(event) =>
-                      handleResultChange(index, "label", event.target.value)
-                    }
-                    disabled={isSubmitting}
-                    placeholder="Performance"
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-                  />
+              <div>
+                <label htmlFor="project-challenges" className={labelClasses}>
+                  Challenges
+                </label>
+                <textarea
+                  id="project-challenges"
+                  name="challenges"
+                  value={formValues.challenges}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  rows={2}
+                  placeholder="Important development challenges."
+                  className={textareaClasses}
+                />
+              </div>
 
-                  <ProjectFieldError
-                    message={getFieldError(`results.${index}.label`, "results")}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-semibold text-slate-700">
-                    Value
-                  </label>
-
-                  <input
-                    type="text"
-                    value={result.value}
-                    onChange={(event) =>
-                      handleResultChange(index, "value", event.target.value)
-                    }
-                    disabled={isSubmitting}
-                    placeholder="90+ score"
-                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-                  />
-
-                  <ProjectFieldError
-                    message={getFieldError(`results.${index}.value`)}
-                  />
-                </div>
+              <div>
+                <label htmlFor="project-solutions" className={labelClasses}>
+                  Solutions
+                </label>
+                <textarea
+                  id="project-solutions"
+                  name="solutions"
+                  value={formValues.solutions}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  rows={2}
+                  placeholder="How the challenges were solved."
+                  className={textareaClasses}
+                />
               </div>
             </div>
-          ))}
-        </div>
-      </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">Project Links</h2>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <div>
-            <label
-              htmlFor="project-live-url"
-              className="text-sm font-semibold text-slate-700"
+            <details
+              className="group rounded-lg border border-slate-200 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-950/50"
+              open={hasResultErrors ? true : undefined}
             >
-              Live project URL
-            </label>
+              <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between gap-2 px-2.5 text-[10px] font-semibold text-slate-700 marker:hidden dark:text-slate-200 sm:text-[11px]">
+                <span>Project Results ({formValues.results.length})</span>
+                <span className="text-[9px] font-semibold text-slate-400">
+                  Manage
+                </span>
+              </summary>
 
-            <input
-              id="project-live-url"
-              name="liveUrl"
-              type="url"
-              value={formValues.liveUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="https://..."
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
+              <div className="border-t border-slate-200 p-2.5 dark:border-slate-700">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[9px] leading-3.5 text-slate-500 dark:text-slate-400">
+                    Add measurable outcomes or achievements.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleAddResult}
+                    disabled={isSubmitting}
+                    className="inline-flex min-h-8 shrink-0 items-center justify-center rounded-lg border border-brand-200 bg-brand-50 px-2.5 text-[9px] font-semibold text-brand-700 transition hover:bg-brand-100 disabled:opacity-50 dark:border-brand-900 dark:bg-brand-950/40 dark:text-brand-300"
+                  >
+                    + Result
+                  </button>
+                </div>
+
+                {formValues.results.length === 0 ? (
+                  <p className="mt-2 rounded-lg border border-dashed border-slate-300 px-3 py-3 text-center text-[10px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                    No results added.
+                  </p>
+                ) : (
+                  <div className="mt-2 space-y-1.5">
+                    {formValues.results.map((result, index) => (
+                      <div
+                        key={`project-result-${index}`}
+                        className="grid gap-1.5 rounded-lg border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-900 sm:grid-cols-[1fr_1fr_auto] sm:items-start"
+                      >
+                        <div>
+                          <label className={labelClasses}>Label</label>
+                          <input
+                            type="text"
+                            value={result.label}
+                            onChange={(event) =>
+                              handleResultChange(index, "label", event.target.value)
+                            }
+                            disabled={isSubmitting}
+                            placeholder="Performance"
+                            className={inputClasses}
+                          />
+                          <ProjectFieldError
+                            message={getFieldError(
+                              `results.${index}.label`,
+                              "results",
+                            )}
+                          />
+                        </div>
+
+                        <div>
+                          <label className={labelClasses}>Value</label>
+                          <input
+                            type="text"
+                            value={result.value}
+                            onChange={(event) =>
+                              handleResultChange(index, "value", event.target.value)
+                            }
+                            disabled={isSubmitting}
+                            placeholder="90+ score"
+                            className={inputClasses}
+                          />
+                          <ProjectFieldError
+                            message={getFieldError(`results.${index}.value`)}
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveResult(index)}
+                          disabled={isSubmitting}
+                          className="mt-1 inline-flex min-h-8 items-center justify-center rounded-lg border border-red-200 bg-white px-2.5 text-[9px] font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900/60 dark:bg-slate-950 dark:text-red-300 sm:mt-5"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <ProjectFieldError message={getFieldError("results")} />
+              </div>
+            </details>
           </div>
 
-          <div>
-            <label
-              htmlFor="project-source-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              Source code URL
-            </label>
-
-            <input
-              id="project-source-url"
-              name="sourceCodeUrl"
-              type="url"
-              value={formValues.sourceCodeUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="https://github.com/..."
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-case-study-url"
-              className="text-sm font-semibold text-slate-700"
-            >
-              External case-study URL
-            </label>
-
-            <input
-              id="project-case-study-url"
-              name="caseStudyUrl"
-              type="url"
-              value={formValues.caseStudyUrl}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              placeholder="https://..."
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-          </div>
-
-          <div>
+          <div className="space-y-2">
             <MediaField
-              id="project-video-url"
-              name="videoUrl"
-              label="Project video URL"
-              value={formValues.videoUrl}
-              onChange={handleInputChange}
-              accessToken={accessToken}
-              allowedTypes={["video"]}
-              pickerTitle="Choose Project Video"
-              placeholder="https://youtube.com/... or Media URL"
-              helpText="YouTube/external URL can still be entered manually, or choose an uploaded MP4/WebM asset."
-              error={getFieldError("links.videoUrl", "videoUrl", "links")}
-              disabled={isSubmitting}
-              onUnauthorized={onMediaUnauthorized}
-            />
-          </div>
-        </div>
-
-        <ProjectFieldError message={getFieldError("links")} />
-      </section>
-
-      <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-xl font-bold text-slate-950">SEO Settings</h2>
-
-        <div className="mt-6 space-y-5">
-          <div>
-            <label
-              htmlFor="project-seo-title"
-              className="text-sm font-semibold text-slate-700"
-            >
-              SEO title
-            </label>
-
-            <input
-              id="project-seo-title"
-              name="seoTitle"
-              type="text"
-              value={formValues.seoTitle}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              maxLength={70}
-              className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <ProjectFieldError
-              message={getFieldError("seo.title", "seoTitle", "seo")}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-seo-description"
-              className="text-sm font-semibold text-slate-700"
-            >
-              SEO description
-            </label>
-
-            <textarea
-              id="project-seo-description"
-              name="seoDescription"
-              value={formValues.seoDescription}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={3}
-              maxLength={180}
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <ProjectFieldError
-              message={getFieldError(
-                "seo.description",
-                "seoDescription",
-                "seo",
-              )}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="project-seo-keywords"
-              className="text-sm font-semibold text-slate-700"
-            >
-              SEO keywords
-            </label>
-
-            <textarea
-              id="project-seo-keywords"
-              name="seoKeywords"
-              value={formValues.seoKeywords}
-              onChange={handleInputChange}
-              disabled={isSubmitting}
-              rows={3}
-              placeholder="mern project, react portfolio"
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100"
-            />
-
-            <ProjectFieldError
-              message={getFieldError("seo.keywords", "seoKeywords", "seo")}
-            />
-          </div>
-
-          <div>
-            <MediaField
-              id="project-seo-image"
-              name="seoOgImageUrl"
-              label="Social sharing image URL"
-              value={formValues.seoOgImageUrl}
+              id="project-cover-image"
+              name="coverImageUrl"
+              label="Cover Image URL"
+              value={formValues.coverImageUrl}
               onChange={handleInputChange}
               accessToken={accessToken}
               allowedTypes={["image", "svg"]}
-              pickerTitle="Choose Social Sharing Image"
+              pickerTitle="Choose Project Cover"
               placeholder="https://..."
-              helpText="Paste an external URL or reuse an image from the Media Library."
-              error={getFieldError("seo.ogImageUrl", "seoOgImageUrl", "seo")}
+              helpText="Paste a URL or choose an image/SVG from Media Library."
+              error={getFieldError("coverImageUrl")}
               disabled={isSubmitting}
               onUnauthorized={onMediaUnauthorized}
             />
+
+            <details
+              className="group rounded-lg border border-slate-200 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-950/50"
+              open={hasImageErrors ? true : undefined}
+            >
+              <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between gap-2 px-2.5 text-[10px] font-semibold text-slate-700 marker:hidden dark:text-slate-200 sm:text-[11px]">
+                <span>Screenshots ({formValues.images.length})</span>
+                <span className="text-[9px] font-semibold text-slate-400">
+                  Manage
+                </span>
+              </summary>
+
+              <div className="border-t border-slate-200 p-2.5 dark:border-slate-700">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[9px] leading-3.5 text-slate-500 dark:text-slate-400">
+                    Gallery images for the project and case study.
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleAddImage}
+                    disabled={isSubmitting}
+                    className="inline-flex min-h-8 shrink-0 items-center justify-center rounded-lg border border-brand-200 bg-brand-50 px-2.5 text-[9px] font-semibold text-brand-700 transition hover:bg-brand-100 disabled:opacity-50 dark:border-brand-900 dark:bg-brand-950/40 dark:text-brand-300"
+                  >
+                    + Screenshot
+                  </button>
+                </div>
+
+                {formValues.images.length === 0 ? (
+                  <p className="mt-2 rounded-lg border border-dashed border-slate-300 px-3 py-3 text-center text-[10px] text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                    No screenshots added.
+                  </p>
+                ) : (
+                  <div className="mt-2 space-y-1.5">
+                    {formValues.images.map((image, index) => (
+                      <details
+                        key={`project-image-${index}`}
+                        className="group/item rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                        open={
+                          getFieldError(`images.${index}.url`) ||
+                          getFieldError(`images.${index}.order`)
+                            ? true
+                            : undefined
+                        }
+                      >
+                        <summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-2 px-2 marker:hidden">
+                          <span className="truncate text-[9px] font-semibold text-slate-700 dark:text-slate-200 sm:text-[10px]">
+                            Screenshot {index + 1}
+                            {image.alt ? ` - ${image.alt}` : ""}
+                          </span>
+                          <span className="text-[8px] font-semibold text-slate-400">
+                            Edit
+                          </span>
+                        </summary>
+
+                        <div className="grid gap-2 border-t border-slate-200 p-2 dark:border-slate-700 sm:grid-cols-2">
+                          <div className="sm:col-span-2">
+                            <MediaField
+                              id={`project-image-${index}-url`}
+                              name={`images.${index}.url`}
+                              label="Screenshot URL *"
+                              value={image.url}
+                              onChange={(event, selectedMedia) => {
+                                handleImageChange(
+                                  index,
+                                  "url",
+                                  event.target.value,
+                                );
+
+                                if (selectedMedia?.altText && !image.alt.trim()) {
+                                  handleImageChange(
+                                    index,
+                                    "alt",
+                                    selectedMedia.altText,
+                                  );
+                                }
+                              }}
+                              accessToken={accessToken}
+                              allowedTypes={["image", "svg"]}
+                              pickerTitle={`Choose Screenshot ${index + 1}`}
+                              placeholder="https://..."
+                              helpText="Paste a URL or choose compatible Media."
+                              error={getFieldError(
+                                `images.${index}.url`,
+                                "images",
+                              )}
+                              disabled={isSubmitting}
+                              onUnauthorized={onMediaUnauthorized}
+                            />
+                          </div>
+
+                          <div>
+                            <label className={labelClasses}>
+                              Alternative Text
+                            </label>
+                            <input
+                              type="text"
+                              value={image.alt}
+                              onChange={(event) =>
+                                handleImageChange(
+                                  index,
+                                  "alt",
+                                  event.target.value,
+                                )
+                              }
+                              disabled={isSubmitting}
+                              placeholder="Homepage screenshot"
+                              className={inputClasses}
+                            />
+                          </div>
+
+                          <div>
+                            <label className={labelClasses}>Display Order</label>
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              value={image.order}
+                              onChange={(event) =>
+                                handleImageChange(
+                                  index,
+                                  "order",
+                                  event.target.value,
+                                )
+                              }
+                              disabled={isSubmitting}
+                              className={inputClasses}
+                            />
+                            <ProjectFieldError
+                              message={getFieldError(`images.${index}.order`)}
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className={labelClasses}>Caption</label>
+                            <textarea
+                              value={image.caption}
+                              onChange={(event) =>
+                                handleImageChange(
+                                  index,
+                                  "caption",
+                                  event.target.value,
+                                )
+                              }
+                              disabled={isSubmitting}
+                              rows={2}
+                              placeholder="Optional screenshot caption."
+                              className={textareaClasses}
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(index)}
+                              disabled={isSubmitting}
+                              className="inline-flex min-h-8 items-center justify-center rounded-lg border border-red-200 bg-white px-2.5 text-[9px] font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900/60 dark:bg-slate-950 dark:text-red-300"
+                            >
+                              Remove Screenshot
+                            </button>
+                          </div>
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                )}
+
+                <ProjectFieldError message={getFieldError("images")} />
+              </div>
+            </details>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <label htmlFor="project-live-url" className={labelClasses}>
+                  Live Project URL
+                </label>
+                <input
+                  id="project-live-url"
+                  name="liveUrl"
+                  type="url"
+                  value={formValues.liveUrl}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  placeholder="https://..."
+                  className={inputClasses}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="project-source-url" className={labelClasses}>
+                  Source Code URL
+                </label>
+                <input
+                  id="project-source-url"
+                  name="sourceCodeUrl"
+                  type="url"
+                  value={formValues.sourceCodeUrl}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  placeholder="https://github.com/..."
+                  className={inputClasses}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="project-case-study-url" className={labelClasses}>
+                  External Case Study URL
+                </label>
+                <input
+                  id="project-case-study-url"
+                  name="caseStudyUrl"
+                  type="url"
+                  value={formValues.caseStudyUrl}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  placeholder="https://..."
+                  className={inputClasses}
+                />
+              </div>
+
+              <MediaField
+                id="project-video-url"
+                name="videoUrl"
+                label="Project Video URL"
+                value={formValues.videoUrl}
+                onChange={handleInputChange}
+                accessToken={accessToken}
+                allowedTypes={["video"]}
+                pickerTitle="Choose Project Video"
+                placeholder="https://youtube.com/... or Media URL"
+                helpText="Enter an external URL or choose uploaded video Media."
+                error={getFieldError("links.videoUrl", "videoUrl", "links")}
+                disabled={isSubmitting}
+                onUnauthorized={onMediaUnauthorized}
+              />
+            </div>
+
+            <ProjectFieldError message={getFieldError("links")} />
+
+            <details
+              className="group rounded-lg border border-slate-200 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-950/50"
+              open={hasCaseStudyErrors ? true : undefined}
+            >
+              <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between gap-2 px-2.5 text-[10px] font-semibold text-slate-700 marker:hidden dark:text-slate-200 sm:text-[11px]">
+                <span>Case Study Publishing</span>
+                <span
+                  className={`rounded px-1.5 py-0.5 text-[8px] font-bold ${
+                    formValues.caseStudyIsPublished
+                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"
+                      : "bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                  }`}
+                >
+                  {formValues.caseStudyIsPublished ? "Published" : "Off"}
+                </span>
+              </summary>
+
+              <div className="grid gap-1.5 border-t border-slate-200 p-2.5 dark:border-slate-700 sm:grid-cols-2">
+                <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-900">
+                  <input
+                    name="caseStudyIsPublished"
+                    type="checkbox"
+                    checked={formValues.caseStudyIsPublished}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                    className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  />
+                  <span>
+                    <span className="block text-[10px] font-semibold text-slate-800 dark:text-slate-200">
+                      Publish as Case Study
+                    </span>
+                    <span className="mt-0.5 block text-[8px] leading-3 text-slate-500 dark:text-slate-400">
+                      Include in Case Studies.
+                    </span>
+                  </span>
+                </label>
+
+                <label
+                  className={`flex items-start gap-2 rounded-lg border p-2 ${
+                    formValues.caseStudyIsPublished
+                      ? "cursor-pointer border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+                      : "cursor-not-allowed border-slate-200 bg-slate-100 opacity-60 dark:border-slate-800 dark:bg-slate-900"
+                  }`}
+                >
+                  <input
+                    name="caseStudyIsFeatured"
+                    type="checkbox"
+                    checked={formValues.caseStudyIsFeatured}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting || !formValues.caseStudyIsPublished}
+                    className="mt-0.5 size-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  />
+                  <span>
+                    <span className="block text-[10px] font-semibold text-slate-800 dark:text-slate-200">
+                      Featured Case Study
+                    </span>
+                    <span className="mt-0.5 block text-[8px] leading-3 text-slate-500 dark:text-slate-400">
+                      Prioritize among Case Studies.
+                    </span>
+                  </span>
+                </label>
+
+                <div className="sm:col-span-2 sm:max-w-48">
+                  <label htmlFor="project-case-study-order" className={labelClasses}>
+                    Case Study Order
+                  </label>
+                  <input
+                    id="project-case-study-order"
+                    name="caseStudyOrder"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formValues.caseStudyOrder}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                    className={inputClasses}
+                  />
+                  <ProjectFieldError
+                    message={getFieldError(
+                      "caseStudy.order",
+                      "caseStudyOrder",
+                      "caseStudy",
+                    )}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <ProjectFieldError message={getFieldError("caseStudy")} />
+                </div>
+              </div>
+            </details>
+
+            <details
+              className="group rounded-lg border border-slate-200 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-950/50"
+              open={hasSeoErrors ? true : undefined}
+            >
+              <summary className="flex min-h-9 cursor-pointer list-none items-center justify-between gap-2 px-2.5 text-[10px] font-semibold text-slate-700 marker:hidden dark:text-slate-200 sm:text-[11px]">
+                <span>SEO Settings</span>
+                <span className="text-[9px] font-semibold text-slate-400">
+                  Advanced
+                </span>
+              </summary>
+
+              <div className="grid gap-2 border-t border-slate-200 p-2.5 dark:border-slate-700">
+                <div>
+                  <label htmlFor="project-seo-title" className={labelClasses}>
+                    SEO Title
+                  </label>
+                  <input
+                    id="project-seo-title"
+                    name="seoTitle"
+                    type="text"
+                    value={formValues.seoTitle}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                    maxLength={70}
+                    className={inputClasses}
+                  />
+                  <ProjectFieldError
+                    message={getFieldError("seo.title", "seoTitle", "seo")}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="project-seo-description" className={labelClasses}>
+                    SEO Description
+                  </label>
+                  <textarea
+                    id="project-seo-description"
+                    name="seoDescription"
+                    value={formValues.seoDescription}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                    rows={2}
+                    maxLength={180}
+                    className={textareaClasses}
+                  />
+                  <ProjectFieldError
+                    message={getFieldError(
+                      "seo.description",
+                      "seoDescription",
+                      "seo",
+                    )}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="project-seo-keywords" className={labelClasses}>
+                    SEO Keywords
+                  </label>
+                  <textarea
+                    id="project-seo-keywords"
+                    name="seoKeywords"
+                    value={formValues.seoKeywords}
+                    onChange={handleInputChange}
+                    disabled={isSubmitting}
+                    rows={2}
+                    placeholder="mern project, react portfolio"
+                    className={textareaClasses}
+                  />
+                  <ProjectFieldError
+                    message={getFieldError(
+                      "seo.keywords",
+                      "seoKeywords",
+                      "seo",
+                    )}
+                  />
+                </div>
+
+                <MediaField
+                  id="project-seo-image"
+                  name="seoOgImageUrl"
+                  label="Social Sharing Image URL"
+                  value={formValues.seoOgImageUrl}
+                  onChange={handleInputChange}
+                  accessToken={accessToken}
+                  allowedTypes={["image", "svg"]}
+                  pickerTitle="Choose Social Sharing Image"
+                  placeholder="https://..."
+                  helpText="Paste a URL or reuse an image from Media Library."
+                  error={getFieldError(
+                    "seo.ogImageUrl",
+                    "seoOgImageUrl",
+                    "seo",
+                  )}
+                  disabled={isSubmitting}
+                  onUnauthorized={onMediaUnauthorized}
+                />
+              </div>
+            </details>
           </div>
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-end">
+      <div className="sticky bottom-2 z-20 flex flex-col-reverse gap-1.5 rounded-xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:flex-row sm:items-center sm:justify-end">
         <Link
           to="/admin/projects"
-          className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-600"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-[11px] font-semibold text-slate-700 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
         >
           Cancel
         </Link>
@@ -1367,9 +1310,9 @@ function ProjectForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+          className="inline-flex min-h-9 items-center justify-center rounded-lg bg-brand-600 px-4 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10 sm:px-5 sm:text-xs"
         >
-          {isSubmitting ? "Saving project..." : submitLabel}
+          {isSubmitting ? "Saving..." : submitLabel}
         </button>
       </div>
     </form>
