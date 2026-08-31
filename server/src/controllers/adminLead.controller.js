@@ -9,6 +9,7 @@ import Lead, {
 import Service from "../models/Service.js";
 import { createAuditLog } from "../services/auditLog.service.js";
 import { createEventNotification } from "../services/notification.service.js";
+import { sendStoredEventNotificationPushSafely } from "../services/pushNotification.service.js";
 
 const ACTIVE_LEAD_STATUSES = [
   "new",
@@ -1462,6 +1463,11 @@ async function createAdminLead(req, res, next) {
       createdLeadId = lead._id;
     });
 
+    void sendStoredEventNotificationPushSafely(
+      "lead",
+      createdLeadId,
+    );
+
     const savedLead = await populateLeadDetailQuery(
       Lead.findById(createdLeadId),
     ).lean();
@@ -1913,6 +1919,11 @@ async function convertContactMessageToLead(req, res, next) {
 
       createdLeadId = lead._id;
     });
+
+    void sendStoredEventNotificationPushSafely(
+      "lead",
+      createdLeadId,
+    );
 
     const savedLead = await populateLeadDetailQuery(
       Lead.findById(createdLeadId),

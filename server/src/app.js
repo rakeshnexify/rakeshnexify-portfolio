@@ -24,6 +24,7 @@ import adminNotificationRoutes from "./routes/adminNotification.routes.js";
 import adminPackageDesignRoutes from "./routes/adminPackageDesign.routes.js";
 import adminPostRoutes from "./routes/adminPost.routes.js";
 import adminProjectRoutes from "./routes/adminProject.routes.js";
+import adminPushRoutes from "./routes/adminPush.routes.js";
 import adminServiceRoutes from "./routes/adminService.routes.js";
 import adminServicePackageRoutes from "./routes/adminServicePackage.routes.js";
 import adminServiceOrderRoutes from "./routes/adminServiceOrder.routes.js";
@@ -183,6 +184,7 @@ app.use("/api/admin/projects", adminProjectRoutes);
 app.use("/api/admin/companies", adminCompanyRoutes);
 app.use("/api/admin/media", adminMediaRoutes);
 app.use("/api/admin/notifications", adminNotificationRoutes);
+app.use("/api/admin/push", adminPushRoutes);
 app.use(
   "/api/admin/contact-messages",
   adminContactMessageRoutes,

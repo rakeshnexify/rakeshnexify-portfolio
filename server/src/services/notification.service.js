@@ -1,6 +1,9 @@
 import Notification, {
   NOTIFICATION_TYPES,
 } from "../models/Notification.js";
+import {
+  sendAdminPushNotificationSafely,
+} from "./pushNotification.service.js";
 
 const NOTIFICATION_DEFINITIONS = {
   "contact-message": {
@@ -110,7 +113,7 @@ function buildNotificationPayload(type, resource) {
   };
 }
 
-async function createEventNotification(
+async function persistEventNotification(
   {
     type,
     resource,
@@ -130,7 +133,7 @@ async function createEventNotification(
     options.session = session;
   }
 
-  await Notification.updateOne(
+  const result = await Notification.updateOne(
     {
       eventKey: payload.eventKey,
     },
@@ -140,12 +143,41 @@ async function createEventNotification(
     options,
   );
 
-  return payload.eventKey;
+  return {
+    eventKey: payload.eventKey,
+    created:
+      result.upsertedCount === 1,
+    payload,
+  };
+}
+
+async function createEventNotification(
+  args,
+  options,
+) {
+  const result =
+    await persistEventNotification(
+      args,
+      options,
+    );
+
+  return result.eventKey;
 }
 
 async function createEventNotificationSafely(args) {
   try {
-    return await createEventNotification(args);
+    const result =
+      await persistEventNotification(
+        args,
+      );
+
+    if (result.created) {
+      void sendAdminPushNotificationSafely(
+        result.payload,
+      );
+    }
+
+    return result.eventKey;
   } catch (error) {
     console.error(
       `Notification creation failed for ${args?.type || "unknown"}:`,

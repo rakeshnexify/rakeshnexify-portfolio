@@ -5,6 +5,7 @@ import AdminUser from "../models/AdminUser.js";
 import Lead from "../models/Lead.js";
 import { createAuditLog } from "../services/auditLog.service.js";
 import { createEventNotification } from "../services/notification.service.js";
+import { sendStoredEventNotificationPushSafely } from "../services/pushNotification.service.js";
 
 const allowedListQueryFields = new Set([
   "page",
@@ -1511,6 +1512,11 @@ async function convertAppointmentToLead(req, res, next) {
         fieldErrors,
       });
     }
+
+    void sendStoredEventNotificationPushSafely(
+      "lead",
+      resultLead._id,
+    );
 
     return res.status(201).json({
       success: true,
