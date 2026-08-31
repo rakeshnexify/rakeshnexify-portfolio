@@ -506,7 +506,7 @@ function normalizeUploadProgress(loaded, total) {
 }
 
 function createXhrResponseError(xhr) {
-  let responseData = null;
+  let responseData;
 
   try {
     responseData = xhr.responseText ? JSON.parse(xhr.responseText) : null;

@@ -158,7 +158,7 @@ function normalizeRelatedProjectIds(value) {
   const normalizedIds = [];
 
   for (const item of value) {
-    let projectId = "";
+    let projectId;
 
     if (typeof item === "string") {
       projectId = item.trim();
