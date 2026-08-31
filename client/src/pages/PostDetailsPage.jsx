@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 
 import Container from "../components/layout/Container";
@@ -191,11 +191,14 @@ function PostDetailsPage({ expectedType = "blog" }) {
   const { settings } = useSiteSettings();
 
   const featuredImageUrl = String(post?.featuredImageUrl || "").trim();
-  const [hasFeaturedImageError, setHasFeaturedImageError] = useState(false);
+  const [
+    failedFeaturedImageUrl,
+    setFailedFeaturedImageUrl,
+  ] = useState("");
 
-  useEffect(() => {
-    setHasFeaturedImageError(false);
-  }, [featuredImageUrl]);
+  const hasFeaturedImageError =
+    Boolean(featuredImageUrl) &&
+    failedFeaturedImageUrl === featuredImageUrl;
 
   const safeExpectedType = expectedType === "news" ? "news" : "blog";
   const typeLabel = safeExpectedType === "news" ? "News" : "Blog";
@@ -546,7 +549,7 @@ function PostDetailsPage({ expectedType = "blog" }) {
                       }
                       className="max-h-[36rem] w-full rounded-3xl border border-slate-200 object-cover shadow-sm"
                       onError={() => {
-                        setHasFeaturedImageError(true);
+                        setFailedFeaturedImageUrl(featuredImageUrl);
                       }}
                     />
                   ) : (

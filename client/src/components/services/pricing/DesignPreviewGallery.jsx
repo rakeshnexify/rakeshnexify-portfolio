@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const devices = ["desktop", "tablet", "mobile"];
 
@@ -25,22 +25,46 @@ function DesignPreviewGallery({ design }) {
     [screenshots],
   );
 
-  const [activeDevice, setActiveDevice] = useState("");
-  const [activeUrl, setActiveUrl] = useState("");
+  const firstDevice =
+    availableDevices.includes("desktop")
+      ? "desktop"
+      : availableDevices[0] || "";
 
-  useEffect(() => {
-    const firstDevice =
-      availableDevices.includes("desktop")
-        ? "desktop"
-        : availableDevices[0] || "";
+  const firstScreenshot = screenshots.find(
+    (screenshot) => screenshot.device === firstDevice,
+  );
 
-    const firstScreenshot = screenshots.find(
-      (screenshot) => screenshot.device === firstDevice,
+  const defaultActiveUrl =
+    firstScreenshot?.url || design?.thumbnailUrl || "";
+
+  const selectionSourceKey = JSON.stringify([
+    design?._id || "",
+    design?.thumbnailUrl || "",
+    screenshots.map((screenshot) => [
+      screenshot?.device || "",
+      screenshot?.url || "",
+      screenshot?.order || 0,
+    ]),
+  ]);
+
+  const [selection, setSelection] = useState(null);
+
+  const hasCurrentSelection =
+    selection?.sourceKey === selectionSourceKey &&
+    availableDevices.includes(selection.device) &&
+    screenshots.some(
+      (screenshot) =>
+        screenshot.device === selection.device &&
+        screenshot.url === selection.url,
     );
 
-    setActiveDevice(firstDevice);
-    setActiveUrl(firstScreenshot?.url || design?.thumbnailUrl || "");
-  }, [availableDevices, design?._id, design?.thumbnailUrl, screenshots]);
+  const activeDevice = hasCurrentSelection
+    ? selection.device
+    : firstDevice;
+
+  const activeUrl = hasCurrentSelection
+    ? selection.url
+    : defaultActiveUrl;
 
   const deviceScreenshots = activeDevice
     ? screenshots.filter((item) => item.device === activeDevice)
@@ -53,8 +77,19 @@ function DesignPreviewGallery({ design }) {
   function chooseDevice(device) {
     const first = screenshots.find((item) => item.device === device);
 
-    setActiveDevice(device);
-    setActiveUrl(first?.url || design?.thumbnailUrl || "");
+    setSelection({
+      sourceKey: selectionSourceKey,
+      device,
+      url: first?.url || design?.thumbnailUrl || "",
+    });
+  }
+
+  function chooseScreenshot(url) {
+    setSelection({
+      sourceKey: selectionSourceKey,
+      device: activeDevice,
+      url,
+    });
   }
 
   if (!design) {
@@ -121,7 +156,7 @@ function DesignPreviewGallery({ design }) {
             <button
               key={`${screenshot.url}-${index}`}
               type="button"
-              onClick={() => setActiveUrl(screenshot.url)}
+              onClick={() => chooseScreenshot(screenshot.url)}
               className={`grid size-8 place-items-center rounded-lg text-xs font-bold ${
                 screenshot.url === activeUrl
                   ? "bg-brand-600 text-white"

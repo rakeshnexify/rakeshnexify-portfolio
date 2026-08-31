@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -153,7 +152,7 @@ function getErrorId(fieldName) {
   return `appointment-update-${fieldName}-error`;
 }
 
-function AppointmentUpdateForm({
+function AppointmentUpdateFormFields({
   appointment,
   admin,
   canUpdate = false,
@@ -165,12 +164,6 @@ function AppointmentUpdateForm({
   const [values, setValues] = useState(() =>
     createInitialValues(appointment),
   );
-
-  useEffect(() => {
-    setValues(
-      createInitialValues(appointment),
-    );
-  }, [appointment]);
 
   const assignmentOptions = useMemo(
     () =>
@@ -604,6 +597,22 @@ function AppointmentUpdateForm({
         ) : null}
       </form>
     </section>
+  );
+}
+
+function AppointmentUpdateForm(props) {
+  const appointmentKey = [
+    getRecordId(props.appointment),
+    JSON.stringify(
+      createInitialValues(props.appointment),
+    ),
+  ].join("|");
+
+  return (
+    <AppointmentUpdateFormFields
+      key={appointmentKey}
+      {...props}
+    />
   );
 }
 

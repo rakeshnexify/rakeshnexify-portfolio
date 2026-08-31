@@ -64,97 +64,92 @@ function MediaPicker({
     ];
   }, [allowedTypes]);
 
-  const allowedTypesKey = normalizedAllowedTypes.join("|");
-
   const hasTypeRestriction = normalizedAllowedTypes.length > 0;
 
   const typeOptions = hasTypeRestriction
     ? normalizedAllowedTypes
     : ALL_MEDIA_TYPES;
 
-  useEffect(() => {
-    setFilters((currentFilters) => {
-      if (!hasTypeRestriction) {
-        if (
-          !currentFilters.mediaType &&
-          (!Array.isArray(currentFilters.mediaTypes) ||
-            currentFilters.mediaTypes.length === 0)
-        ) {
-          return currentFilters;
-        }
-
-        return {
-          ...currentFilters,
-          mediaType: "",
-          mediaTypes: [],
-          page: 1,
-        };
-      }
-
-      if (normalizedAllowedTypes.length === 1) {
-        const onlyAllowedType = normalizedAllowedTypes[0];
-
-        if (
-          currentFilters.mediaType === onlyAllowedType &&
-          (!Array.isArray(currentFilters.mediaTypes) ||
-            currentFilters.mediaTypes.length === 0)
-        ) {
-          return currentFilters;
-        }
-
-        return {
-          ...currentFilters,
-          mediaType: onlyAllowedType,
-          mediaTypes: [],
-          page: 1,
-        };
-      }
-
+  const effectiveFilters = useMemo(() => {
+    if (!hasTypeRestriction) {
       if (
-        currentFilters.mediaType &&
-        normalizedAllowedTypes.includes(currentFilters.mediaType)
+        !filters.mediaType &&
+        (!Array.isArray(filters.mediaTypes) ||
+          filters.mediaTypes.length === 0)
       ) {
-        if (
-          !Array.isArray(currentFilters.mediaTypes) ||
-          currentFilters.mediaTypes.length === 0
-        ) {
-          return currentFilters;
-        }
-
-        return {
-          ...currentFilters,
-          mediaTypes: [],
-          page: 1,
-        };
-      }
-
-      if (
-        !currentFilters.mediaType &&
-        areSameMediaTypes(
-          currentFilters.mediaTypes,
-          normalizedAllowedTypes,
-        )
-      ) {
-        return currentFilters;
+        return filters;
       }
 
       return {
-        ...currentFilters,
+        ...filters,
         mediaType: "",
-        mediaTypes: normalizedAllowedTypes,
+        mediaTypes: [],
         page: 1,
       };
-    });
-  }, [allowedTypesKey, hasTypeRestriction, normalizedAllowedTypes]);
+    }
+
+    if (normalizedAllowedTypes.length === 1) {
+      const onlyAllowedType = normalizedAllowedTypes[0];
+
+      if (
+        filters.mediaType === onlyAllowedType &&
+        (!Array.isArray(filters.mediaTypes) ||
+          filters.mediaTypes.length === 0)
+      ) {
+        return filters;
+      }
+
+      return {
+        ...filters,
+        mediaType: onlyAllowedType,
+        mediaTypes: [],
+        page: 1,
+      };
+    }
+
+    if (
+      filters.mediaType &&
+      normalizedAllowedTypes.includes(filters.mediaType)
+    ) {
+      if (
+        !Array.isArray(filters.mediaTypes) ||
+        filters.mediaTypes.length === 0
+      ) {
+        return filters;
+      }
+
+      return {
+        ...filters,
+        mediaTypes: [],
+        page: 1,
+      };
+    }
+
+    if (
+      !filters.mediaType &&
+      areSameMediaTypes(
+        filters.mediaTypes,
+        normalizedAllowedTypes,
+      )
+    ) {
+      return filters;
+    }
+
+    return {
+      ...filters,
+      mediaType: "",
+      mediaTypes: normalizedAllowedTypes,
+      page: 1,
+    };
+  }, [filters, hasTypeRestriction, normalizedAllowedTypes]);
 
   const hasMultipleAllowedTypes =
     hasTypeRestriction && normalizedAllowedTypes.length > 1;
 
   const selectedTypeOption =
-    hasMultipleAllowedTypes && !filters.mediaType
+    hasMultipleAllowedTypes && !effectiveFilters.mediaType
       ? "__compatible__"
-      : filters.mediaType;
-
+      : effectiveFilters.mediaType;
 
   const {
     media,
@@ -166,7 +161,7 @@ function MediaPicker({
     isLoading,
     error,
     errorMessage,
-  } = useAdminMedia(accessToken, filters);
+  } = useAdminMedia(accessToken, effectiveFilters);
 
   useEffect(() => {
     if (error?.status === 401) {
@@ -176,9 +171,6 @@ function MediaPicker({
 
   useEffect(() => {
     if (!accessToken) {
-      setFolders([]);
-      setAreFoldersLoading(false);
-
       return undefined;
     }
 
@@ -224,10 +216,21 @@ function MediaPicker({
     };
   }, [accessToken, onUnauthorized]);
 
+  const visibleFolders = accessToken
+    ? folders
+    : [];
+
+  const isVisibleFoldersLoading =
+    Boolean(accessToken) && areFoldersLoading;
+
+  function updateFilters(updater) {
+    setFilters(() => updater(effectiveFilters));
+  }
+
   function handleSearchSubmit(event) {
     event.preventDefault();
 
-    setFilters((currentFilters) => ({
+    updateFilters((currentFilters) => ({
       ...currentFilters,
       search: formSearch.trim(),
       page: 1,
@@ -235,7 +238,7 @@ function MediaPicker({
   }
 
   function handleFolderSelect(folder) {
-    setFilters((currentFilters) => ({
+    updateFilters((currentFilters) => ({
       ...currentFilters,
       folder,
       page: 1,
@@ -245,7 +248,7 @@ function MediaPicker({
   function handleTypeChange(event) {
     const selectedType = event.target.value;
 
-    setFilters((currentFilters) => {
+    updateFilters((currentFilters) => {
       if (selectedType === "__compatible__") {
         return {
           ...currentFilters,
@@ -269,7 +272,7 @@ function MediaPicker({
       return;
     }
 
-    setFilters((currentFilters) => ({
+    updateFilters((currentFilters) => ({
       ...currentFilters,
       page: nextPage,
     }));
@@ -329,7 +332,7 @@ function MediaPicker({
             All Folders
           </button>
 
-          {folders.map((folderRecord) => (
+          {visibleFolders.map((folderRecord) => (
             <button
               key={folderRecord.folder}
               type="button"
@@ -345,7 +348,7 @@ function MediaPicker({
           ))}
         </div>
 
-        {areFoldersLoading && (
+        {isVisibleFoldersLoading && (
           <p className="mt-2 text-xs font-semibold text-slate-400">
             Loading folders...
           </p>
