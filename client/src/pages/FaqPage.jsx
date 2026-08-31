@@ -54,7 +54,10 @@ function FaqPage() {
   const description =
     cleanText(sectionContent.description) || defaultContent.description;
 
-  const publicFaqs = Array.isArray(faqs) ? faqs : [];
+  const publicFaqs = useMemo(
+    () => (Array.isArray(faqs) ? faqs : []),
+    [faqs],
+  );
 
   const categories = useMemo(() => {
     const categoryMap = new Map();

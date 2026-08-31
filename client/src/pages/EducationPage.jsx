@@ -174,9 +174,13 @@ function EducationPage() {
 
   const seoTitle = `Education | ${brandName}`;
 
-  const education = Array.isArray(educationRecords)
-    ? educationRecords
-    : [];
+  const education = useMemo(
+    () =>
+      Array.isArray(educationRecords)
+        ? educationRecords
+        : [],
+    [educationRecords],
+  );
 
   const currentEducationCount = education.filter(
     (record) => record?.isCurrentlyStudying,

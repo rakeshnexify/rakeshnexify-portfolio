@@ -52,29 +52,36 @@ function getErrorMessage(error, fallbackMessage) {
 }
 
 export default function useExperience(filters = {}) {
+  const {
+    current,
+    employmentType,
+    featured,
+    search,
+  } = filters;
+
   const normalizedFilters = useMemo(
     () => ({
-      search: String(filters.search || "").trim(),
+      search: String(search || "").trim(),
 
-      employmentType: String(filters.employmentType || "")
+      employmentType: String(employmentType || "")
         .trim()
         .toLowerCase(),
 
       current:
-        typeof filters.current === "boolean"
-          ? filters.current
+        typeof current === "boolean"
+          ? current
           : undefined,
 
       featured:
-        typeof filters.featured === "boolean"
-          ? filters.featured
+        typeof featured === "boolean"
+          ? featured
           : undefined,
     }),
     [
-      filters.current,
-      filters.employmentType,
-      filters.featured,
-      filters.search,
+      current,
+      employmentType,
+      featured,
+      search,
     ],
   );
 

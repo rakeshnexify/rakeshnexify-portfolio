@@ -243,9 +243,17 @@ function PostDetailsPage({ expectedType = "blog" }) {
         .map((keyword) => keyword.trim())
         .filter(Boolean);
 
-  const tags = Array.isArray(post?.tags)
-    ? post.tags.filter((tag) => typeof tag === "string" && tag.trim())
-    : [];
+  const tags = useMemo(
+    () =>
+      Array.isArray(post?.tags)
+        ? post.tags.filter(
+            (tag) =>
+              typeof tag === "string" &&
+              tag.trim(),
+          )
+        : [],
+    [post],
+  );
 
   const defaultSeo = defaultPostSeo[safeExpectedType];
 

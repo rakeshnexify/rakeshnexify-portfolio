@@ -193,9 +193,13 @@ function ExperiencePage() {
 
   const seoTitle = `Experience | ${brandName}`;
 
-  const experience = Array.isArray(experienceRecords)
-    ? experienceRecords
-    : [];
+  const experience = useMemo(
+    () =>
+      Array.isArray(experienceRecords)
+        ? experienceRecords
+        : [],
+    [experienceRecords],
+  );
 
   const currentExperienceCount = experience.filter(
     (record) => record?.isCurrent,

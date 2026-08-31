@@ -109,10 +109,13 @@ function CertificationAchievementsPage() {
   const seoKeywords = [...globalSeoKeywords, ...defaultKeywords];
   const socialSharingImage = String(seo.ogImageUrl || "").trim();
 
-  const records = Array.isArray(achievementRecords)
-    ? achievementRecords
-    : [];
-
+  const records = useMemo(
+    () =>
+      Array.isArray(achievementRecords)
+        ? achievementRecords
+        : [],
+    [achievementRecords],
+  );
 
   const pageTitle = `Certifications & Achievements | ${brandName}`;
 

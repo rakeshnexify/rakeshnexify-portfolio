@@ -93,21 +93,38 @@ function getErrorMessage(error) {
 }
 
 export default function useAdminMedia(accessToken, filters = {}) {
-  const mediaTypesKey = Array.isArray(filters.mediaTypes)
-    ? filters.mediaTypes.join("|")
-    : String(filters.mediaTypes || "");
+  const {
+    folder,
+    limit: filterLimit,
+    mediaType,
+    mediaTypes,
+    page: filterPage,
+    search,
+    sort,
+    tag,
+  } = filters;
 
   const normalizedFilters = useMemo(
-    () => normalizeFiltersForHook(filters),
+    () =>
+      normalizeFiltersForHook({
+        folder,
+        limit: filterLimit,
+        mediaType,
+        mediaTypes,
+        page: filterPage,
+        search,
+        sort,
+        tag,
+      }),
     [
-      filters.folder,
-      filters.limit,
-      filters.mediaType,
-      mediaTypesKey,
-      filters.page,
-      filters.search,
-      filters.sort,
-      filters.tag,
+      filterLimit,
+      filterPage,
+      folder,
+      mediaType,
+      mediaTypes,
+      search,
+      sort,
+      tag,
     ],
   );
 

@@ -84,15 +84,11 @@ function PackageOrderActions({
     }
 
     const previousOverflow = document.body.style.overflow;
+    const orderButton = orderButtonRef.current;
 
     document.body.style.overflow = "hidden";
 
     const focusTimer = window.setTimeout(() => {
-      if (submittedOrder) {
-        successButtonRef.current?.focus();
-        return;
-      }
-
       firstFieldRef.current?.focus();
     }, 0);
 
@@ -101,7 +97,7 @@ function PackageOrderActions({
       document.body.style.overflow = previousOverflow;
 
       window.setTimeout(() => {
-        orderButtonRef.current?.focus();
+        orderButton?.focus();
       }, 0);
     };
   }, [open]);

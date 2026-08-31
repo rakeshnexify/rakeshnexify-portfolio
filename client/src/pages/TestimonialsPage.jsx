@@ -114,9 +114,13 @@ function TestimonialsPage() {
     cleanText(sectionContent.description) ||
     defaultPageContent.description;
 
-  const publicTestimonials = Array.isArray(testimonials)
-    ? testimonials
-    : [];
+  const publicTestimonials = useMemo(
+    () =>
+      Array.isArray(testimonials)
+        ? testimonials
+        : [],
+    [testimonials],
+  );
 
   const hasActiveFilters = Boolean(
     cleanText(filters.search) || filters.rating,
