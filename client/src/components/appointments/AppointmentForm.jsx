@@ -181,11 +181,15 @@ function AppointmentForm() {
   const submitControllerRef = useRef(null);
   const mountedRef = useRef(true);
 
-  const servicePreselectionAppliedRef =
-    useRef(false);
+  const [
+    hasServiceSelectionOverride,
+    setHasServiceSelectionOverride,
+  ] = useState(false);
 
-  const packagePreselectionAppliedRef =
-    useRef(false);
+  const [
+    hasPackageSelectionOverride,
+    setHasPackageSelectionOverride,
+  ] = useState(false);
 
   const requestedServiceSlug = String(
     searchParams.get("service") || "",
@@ -214,14 +218,44 @@ function AppointmentForm() {
     [services],
   );
 
+  const queryService = useMemo(
+    () =>
+      serviceOptions.find(
+        (service) =>
+          String(service?.slug || "") ===
+          requestedServiceSlug,
+      ) || null,
+    [
+      requestedServiceSlug,
+      serviceOptions,
+    ],
+  );
+
+  const canUseQueryService =
+    !hasServiceSelectionOverride &&
+    !isServicesLoading &&
+    !servicesError &&
+    Boolean(
+      requestedServiceSlug &&
+        queryService?._id,
+    );
+
+  const effectiveServiceId =
+    canUseQueryService
+      ? String(queryService._id)
+      : values.service;
+
   const selectedService = useMemo(
     () =>
       serviceOptions.find(
         (service) =>
           getServiceId(service) ===
-          values.service,
+          effectiveServiceId,
       ) || null,
-    [serviceOptions, values.service],
+    [
+      effectiveServiceId,
+      serviceOptions,
+    ],
   );
 
   const {
@@ -234,29 +268,66 @@ function AppointmentForm() {
     enabled: Boolean(selectedService),
   });
 
+  const queryPackage = useMemo(
+    () =>
+      servicePackages.find(
+        (servicePackage) =>
+          String(
+            servicePackage?.slug || "",
+          ) === requestedPackageSlug &&
+          String(
+            servicePackage?.service?._id ||
+              "",
+          ) ===
+            String(
+              selectedService?._id || "",
+            ),
+      ) || null,
+    [
+      requestedPackageSlug,
+      selectedService,
+      servicePackages,
+    ],
+  );
+
+  const canUseQueryPackage =
+    !hasPackageSelectionOverride &&
+    Boolean(requestedPackageSlug) &&
+    Boolean(requestedServiceSlug) &&
+    !packagesLoading &&
+    !packagesError &&
+    selectedService?.slug ===
+      requestedServiceSlug &&
+    Boolean(queryPackage?._id);
+
+  const effectivePackageId =
+    canUseQueryPackage
+      ? String(queryPackage._id)
+      : values.servicePackage;
+
   const selectedPackage = useMemo(
     () =>
       servicePackages.find(
         (servicePackage) =>
           getPackageId(servicePackage) ===
-          values.servicePackage,
+          effectivePackageId,
       ) || null,
     [
+      effectivePackageId,
       servicePackages,
-      values.servicePackage,
     ],
   );
 
-  const queryService = useMemo(
-    () =>
-      serviceOptions.find(
-        (service) =>
-          String(service?.slug || "") ===
-          requestedServiceSlug,
-      ) || null,
+  const effectiveValues = useMemo(
+    () => ({
+      ...values,
+      service: effectiveServiceId,
+      servicePackage: effectivePackageId,
+    }),
     [
-      requestedServiceSlug,
-      serviceOptions,
+      effectivePackageId,
+      effectiveServiceId,
+      values,
     ],
   );
 
@@ -322,118 +393,6 @@ function AppointmentForm() {
   }, [servicesRefreshKey]);
 
   useEffect(() => {
-    if (
-      servicePreselectionAppliedRef.current ||
-      isServicesLoading ||
-      servicesError
-    ) {
-      return;
-    }
-
-    servicePreselectionAppliedRef.current =
-      true;
-
-    if (
-      !requestedServiceSlug ||
-      !queryService?._id
-    ) {
-      packagePreselectionAppliedRef.current =
-        true;
-
-      return;
-    }
-
-    setValues((currentValues) => ({
-      ...currentValues,
-      service: String(queryService._id),
-      servicePackage: "",
-    }));
-  }, [
-    isServicesLoading,
-    queryService,
-    requestedServiceSlug,
-    servicesError,
-  ]);
-
-  useEffect(() => {
-    if (
-      packagePreselectionAppliedRef.current
-    ) {
-      return;
-    }
-
-    if (!requestedPackageSlug) {
-      packagePreselectionAppliedRef.current =
-        true;
-
-      return;
-    }
-
-    if (!requestedServiceSlug) {
-      packagePreselectionAppliedRef.current =
-        true;
-
-      return;
-    }
-
-    if (
-      !servicePreselectionAppliedRef.current ||
-      packagesLoading
-    ) {
-      return;
-    }
-
-    if (
-      !selectedService ||
-      selectedService.slug !==
-        requestedServiceSlug
-    ) {
-      packagePreselectionAppliedRef.current =
-        true;
-
-      return;
-    }
-
-    if (packagesError) {
-      return;
-    }
-
-    const queryPackage =
-      servicePackages.find(
-        (servicePackage) =>
-          String(
-            servicePackage?.slug || "",
-          ) === requestedPackageSlug &&
-          String(
-            servicePackage?.service?._id ||
-              "",
-          ) ===
-            String(selectedService._id),
-      ) || null;
-
-    packagePreselectionAppliedRef.current =
-      true;
-
-    if (!queryPackage?._id) {
-      return;
-    }
-
-    setValues((currentValues) => ({
-      ...currentValues,
-      servicePackage: String(
-        queryPackage._id,
-      ),
-    }));
-  }, [
-    packagesError,
-    packagesLoading,
-    requestedPackageSlug,
-    requestedServiceSlug,
-    selectedService,
-    servicePackages,
-  ]);
-
-  useEffect(() => {
     if (!submittedAppointment) {
       return;
     }
@@ -464,6 +423,9 @@ function AppointmentForm() {
     } = event.target;
 
     if (name === "service") {
+      setHasServiceSelectionOverride(true);
+      setHasPackageSelectionOverride(true);
+
       setValues((currentValues) => ({
         ...currentValues,
         service: value,
@@ -475,8 +437,18 @@ function AppointmentForm() {
         "servicePackage",
       );
 
-      packagePreselectionAppliedRef.current =
-        true;
+      return;
+    }
+
+    if (name === "servicePackage") {
+      setHasPackageSelectionOverride(true);
+
+      setValues((currentValues) => ({
+        ...currentValues,
+        servicePackage: value,
+      }));
+
+      clearFieldErrors("servicePackage");
 
       return;
     }
@@ -517,10 +489,13 @@ function AppointmentForm() {
     setFormStatus(null);
 
     const validation =
-      validateAppointmentValues(values, {
-        services: serviceOptions,
-        servicePackages,
-      });
+      validateAppointmentValues(
+        effectiveValues,
+        {
+          services: serviceOptions,
+          servicePackages,
+        },
+      );
 
     if (!validation.isValid) {
       setFieldErrors(
@@ -648,6 +623,9 @@ function AppointmentForm() {
   }
 
   function handleRequestAnother() {
+    setHasServiceSelectionOverride(true);
+    setHasPackageSelectionOverride(true);
+
     setValues(
       createAppointmentInitialValues(),
     );
@@ -1235,7 +1213,7 @@ function AppointmentForm() {
           <select
             id="appointment-service"
             name="service"
-            value={values.service}
+            value={effectiveServiceId}
             onChange={handleChange}
             disabled={
               isSubmitting ||
@@ -1329,7 +1307,7 @@ function AppointmentForm() {
           <select
             id="appointment-servicePackage"
             name="servicePackage"
-            value={values.servicePackage}
+            value={effectivePackageId}
             onChange={handleChange}
             disabled={
               isSubmitting ||
