@@ -25,6 +25,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.8.0",
     "multer": "^2.2.0",
+    "nodemailer": "9.0.6",
     "sanitize-html": "^2.17.6",
     "web-push": "3.6.7"
   },

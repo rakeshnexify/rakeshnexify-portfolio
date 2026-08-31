@@ -2,6 +2,9 @@ import Notification, {
   NOTIFICATION_TYPES,
 } from "../models/Notification.js";
 import {
+  sendAdminEmailNotificationSafely,
+} from "./emailNotification.service.js";
+import {
   sendAdminPushNotificationSafely,
 } from "./pushNotification.service.js";
 
@@ -173,6 +176,10 @@ async function createEventNotificationSafely(args) {
 
     if (result.created) {
       void sendAdminPushNotificationSafely(
+        result.payload,
+      );
+
+      void sendAdminEmailNotificationSafely(
         result.payload,
       );
     }
