@@ -18,11 +18,13 @@ export default function useServicePackages({
   const [error, setError] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const canLoad = Boolean(
+    enabled &&
+      String(service || "").trim(),
+  );
+
   useEffect(() => {
-    if (!enabled || !String(service || "").trim()) {
-      setServicePackages([]);
-      setIsLoading(false);
-      setError("");
+    if (!canLoad) {
       return undefined;
     }
 
@@ -69,16 +71,22 @@ export default function useServicePackages({
     return () => {
       controller.abort();
     };
-  }, [enabled, group, refreshKey, service]);
+  }, [canLoad, group, refreshKey, service]);
 
   const refreshServicePackages = useCallback(() => {
     setRefreshKey((currentKey) => currentKey + 1);
   }, []);
 
   return {
-    servicePackages,
-    isLoading,
-    error,
+    servicePackages: canLoad
+      ? servicePackages
+      : [],
+    isLoading: canLoad
+      ? isLoading
+      : false,
+    error: canLoad
+      ? error
+      : "",
     refreshServicePackages,
   };
 }

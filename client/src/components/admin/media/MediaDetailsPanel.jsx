@@ -46,29 +46,24 @@ function createReferenceLabel(reference) {
   );
 }
 
-function MediaDetailsPanel({
+function MediaDetailsPanelContent({
   accessToken,
   mediaId,
+  media,
+  usageCount,
+  isReferenced,
+  references,
+  resourceTypes,
+  isLoading,
+  error,
+  errorMessage,
+  refreshMediaItem,
   canEdit = true,
   canDelete = false,
   onChanged,
   onDeleted,
   onUnauthorized,
 }) {
-  const {
-    media,
-    usageCount,
-    isReferenced,
-    references,
-    resourceTypes,
-    isLoading,
-    error,
-    errorMessage,
-    refreshMediaItem,
-  } = useAdminMediaItem(accessToken, mediaId, {
-    enabled: Boolean(mediaId),
-  });
-
   const mutationControllerRef = useRef(null);
 
   const [values, setValues] = useState(() => createMediaFormValues());
@@ -78,18 +73,6 @@ function MediaDetailsPanel({
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
-
-  useEffect(() => {
-    if (!media) {
-      return;
-    }
-
-    setValues(createMediaFormValues(media));
-    setFieldErrors({});
-    setActionError("");
-    setSuccessMessage("");
-    setCopyMessage("");
-  }, [media]);
 
   useEffect(() => {
     if (error?.status === 401) {
@@ -812,6 +795,43 @@ function MediaDetailsPanel({
         </form>
       </div>
     </aside>
+  );
+}
+
+function MediaDetailsPanel({
+  accessToken,
+  mediaId,
+  canEdit = true,
+  canDelete = false,
+  onChanged,
+  onDeleted,
+  onUnauthorized,
+}) {
+  const mediaDetails = useAdminMediaItem(
+    accessToken,
+    mediaId,
+    {
+      enabled: Boolean(mediaId),
+    },
+  );
+
+  const mediaEditorKey = JSON.stringify([
+    mediaId || "",
+    mediaDetails.media || null,
+  ]);
+
+  return (
+    <MediaDetailsPanelContent
+      key={mediaEditorKey}
+      accessToken={accessToken}
+      mediaId={mediaId}
+      {...mediaDetails}
+      canEdit={canEdit}
+      canDelete={canDelete}
+      onChanged={onChanged}
+      onDeleted={onDeleted}
+      onUnauthorized={onUnauthorized}
+    />
   );
 }
 

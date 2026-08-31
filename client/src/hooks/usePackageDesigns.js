@@ -19,17 +19,15 @@ export default function usePackageDesigns({
   const [error, setError] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
 
-  useEffect(() => {
-    const canLoad =
-      enabled &&
+  const canLoad = Boolean(
+    enabled &&
       String(service || "").trim() &&
       String(group || "").trim() &&
-      String(packageSlug || "").trim();
+      String(packageSlug || "").trim(),
+  );
 
+  useEffect(() => {
     if (!canLoad) {
-      setPackageDesigns([]);
-      setIsLoading(false);
-      setError("");
       return undefined;
     }
 
@@ -77,16 +75,22 @@ export default function usePackageDesigns({
     return () => {
       controller.abort();
     };
-  }, [enabled, group, packageSlug, refreshKey, service]);
+  }, [canLoad, group, packageSlug, refreshKey, service]);
 
   const refreshPackageDesigns = useCallback(() => {
     setRefreshKey((currentKey) => currentKey + 1);
   }, []);
 
   return {
-    packageDesigns,
-    isLoading,
-    error,
+    packageDesigns: canLoad
+      ? packageDesigns
+      : [],
+    isLoading: canLoad
+      ? isLoading
+      : false,
+    error: canLoad
+      ? error
+      : "",
     refreshPackageDesigns,
   };
 }
