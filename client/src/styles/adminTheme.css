@@ -1825,3 +1825,174 @@ body.admin-theme-active[data-admin-theme="light"]
   transform: none;
   filter: saturate(0.7);
 }
+
+/* =========================================================
+   ADMIN NOTIFICATIONS
+   ========================================================= */
+
+body.admin-theme-active .admin-notification-panel {
+  border-color: var(--admin-color-border-strong);
+  background: var(--admin-color-surface);
+  color: var(--admin-color-text);
+  box-shadow:
+    0 22px 55px rgb(2 8 23 / 0.28),
+    inset 0 1px rgb(255 255 255 / 0.04);
+}
+
+body.admin-theme-active .admin-notification-header {
+  border-color: var(--admin-color-border);
+  background: var(--admin-color-surface);
+}
+
+body.admin-theme-active .admin-notification-header p:first-child {
+  color: var(--admin-color-text-strong);
+}
+
+body.admin-theme-active .admin-notification-header p:last-child,
+body.admin-theme-active .admin-notification-item time,
+body.admin-theme-active .admin-notification-refreshing {
+  color: var(--admin-color-text-muted);
+}
+
+body.admin-theme-active .admin-notification-badge {
+  border: 2px solid var(--admin-color-surface);
+  background: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 2px 7px rgb(220 38 38 / 0.3);
+}
+
+body.admin-theme-active .admin-notification-mark-all,
+body.admin-theme-active .admin-notification-mark-one,
+body.admin-theme-active .admin-notification-retry {
+  border: 1px solid var(--admin-color-border);
+  background: var(--admin-color-surface-elevated);
+  color: var(--admin-color-primary);
+}
+
+body.admin-theme-active
+  :is(
+    .admin-notification-mark-all,
+    .admin-notification-mark-one,
+    .admin-notification-retry
+  ):hover:not(:disabled) {
+  border-color: var(--admin-color-border-strong);
+  background: var(--admin-color-surface-hover);
+  color: var(--admin-color-primary-hover);
+}
+
+body.admin-theme-active .admin-notification-error {
+  border-color: rgb(244 63 94 / 0.22);
+  background: rgb(244 63 94 / 0.08);
+  color: #fb7185;
+}
+
+body.admin-theme-active .admin-notification-state {
+  color: var(--admin-color-text-muted);
+}
+
+body.admin-theme-active .admin-notification-state > span {
+  border: 1px solid var(--admin-color-border);
+  background: var(--admin-color-surface-elevated);
+  color: var(--admin-color-text-secondary);
+}
+
+body.admin-theme-active .admin-notification-state p:first-of-type {
+  color: var(--admin-color-text-strong);
+}
+
+body.admin-theme-active .admin-notification-item {
+  color: var(--admin-color-text);
+}
+
+body.admin-theme-active .admin-notification-item + .admin-notification-item {
+  margin-top: 0.125rem;
+}
+
+body.admin-theme-active .admin-notification-item:hover {
+  background: var(--admin-color-surface-hover);
+}
+
+body.admin-theme-active .admin-notification-item-unread {
+  background: color-mix(
+    in srgb,
+    var(--admin-color-primary-soft) 72%,
+    var(--admin-color-surface)
+  );
+}
+
+body.admin-theme-active .admin-notification-item-unread:hover {
+  background: color-mix(
+    in srgb,
+    var(--admin-color-primary-soft) 88%,
+    var(--admin-color-surface-hover)
+  );
+}
+
+body.admin-theme-active .admin-notification-item button > span:last-child > span:first-child {
+  color: var(--admin-color-text-strong);
+}
+
+body.admin-theme-active .admin-notification-item button > span:last-child > span:nth-child(2) {
+  color: var(--admin-color-text-secondary);
+}
+
+body.admin-theme-active .admin-notification-type-icon {
+  border: 1px solid var(--admin-color-border);
+  background: var(--admin-color-surface-elevated);
+  color: var(--admin-color-primary);
+}
+
+body.admin-theme-active .admin-notification-unread-dot {
+  background: var(--admin-color-primary);
+  box-shadow: 0 0 0 3px var(--admin-color-primary-soft);
+}
+
+body.admin-theme-active .admin-notification-skeleton {
+  border: 1px solid var(--admin-color-border);
+  background:
+    linear-gradient(
+      100deg,
+      var(--admin-color-surface-elevated) 20%,
+      var(--admin-color-surface-hover) 40%,
+      var(--admin-color-surface-elevated) 60%
+    );
+  background-size: 220% 100%;
+}
+
+body.admin-theme-active .admin-notification-refreshing {
+  border-color: var(--admin-color-border);
+  background: var(--admin-color-surface-elevated);
+}
+
+body.admin-theme-active .admin-notification-list {
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--admin-color-border-strong)
+    transparent;
+}
+
+body.admin-theme-active .admin-notification-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+body.admin-theme-active .admin-notification-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--admin-color-border-strong);
+}
+
+body.admin-theme-active[data-admin-theme="light"]
+  .admin-notification-panel {
+  box-shadow:
+    0 22px 55px rgb(15 23 42 / 0.16),
+    inset 0 1px rgb(255 255 255 / 0.8);
+}
+
+@media (max-width: 639px) {
+  body.admin-theme-active .admin-notification-panel {
+    max-height: calc(100dvh - 82px);
+  }
+
+  body.admin-theme-active .admin-notification-list {
+    max-height: min(58dvh, 410px);
+  }
+}

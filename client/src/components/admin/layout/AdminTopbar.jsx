@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router";
 
 import { getAdminNavigationGroupsForRole } from "../../../config/adminNavigation";
 import { AdminIcon } from "./adminIcons";
+import AdminNotificationsMenu from "./AdminNotificationsMenu";
 import AdminThemeToggle from "./AdminThemeToggle";
 
 const CREATE_ACTIONS = [
@@ -176,6 +177,8 @@ function AdminTopbar({ admin, onOpenNavigation, onLogout }) {
           </details>
 
           <AdminThemeToggle />
+
+          <AdminNotificationsMenu />
 
           <Link
             aria-label="Open Contact Messages"
