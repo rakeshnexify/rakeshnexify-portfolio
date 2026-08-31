@@ -382,8 +382,8 @@ function ContactSection() {
 
           {methods.length > 0 && (
             <div className={styles.methods}>
-              {methods.map((method) => (
-                <ContactMethod key={method.key} {...method} />
+              {methods.map(({ key, ...method }) => (
+                <ContactMethod key={key} {...method} />
               ))}
             </div>
           )}

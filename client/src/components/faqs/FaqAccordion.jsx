@@ -16,7 +16,7 @@ function FaqAccordionItem({
     return (
       <details
         className="public-faq-item"
-        defaultOpen={index === 2}
+        open={index === 2}
       >
         <summary className="public-faq-summary">
           <span className="public-faq-question-icon" aria-hidden="true">
