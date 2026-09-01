@@ -14,8 +14,6 @@ import PublicCTAButton from "../layout/PublicCTAButton";
 import Section from "../layout/Section";
 import SectionHeading from "../layout/SectionHeading";
 import HomeTestimonialCard from "../testimonials/HomeTestimonialCard";
-
-import "../testimonials/HomeTestimonialCard.module.css";
 import styles from "./TestimonialsSection.module.css";
 
 const SITE_URL = "https://rakeshnexify.com";

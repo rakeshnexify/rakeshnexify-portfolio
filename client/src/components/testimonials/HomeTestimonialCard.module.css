@@ -1,8 +1,6 @@
-/* Intentionally global rnx-home-testimonial-* selectors.
- * The card is home-section specific and keeps the standalone Testimonials page untouched.
- */
+/* Scoped home testimonial card styles. Standalone Testimonials page remains untouched. */
 
-:global(.rnx-home-testimonial-card) {
+.card {
   --testimonial-card-bg: rgb(255 255 255 / 0.84);
   --testimonial-card-border: rgb(99 102 241 / 0.13);
   --testimonial-card-text: #172033;
@@ -33,7 +31,7 @@
     box-shadow 220ms ease;
 }
 
-:global(.rnx-home-testimonial-card)::before {
+.card::before {
   position: absolute;
   inset: auto -2.8rem -3.8rem auto;
   width: 9rem;
@@ -48,7 +46,7 @@
   pointer-events: none;
 }
 
-:global(.rnx-home-testimonial-card[data-featured="true"]) {
+.card[data-featured="true"] {
   border-color: rgb(99 102 241 / 0.23);
   box-shadow:
     0 20px 46px rgb(30 41 59 / 0.09),
@@ -56,14 +54,14 @@
     inset 0 1px 0 rgb(255 255 255 / 0.88);
 }
 
-:global(.rnx-home-testimonial-card-topline) {
+.topline {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
-:global(.rnx-home-testimonial-quote) {
+.quote {
   display: inline-grid;
   width: 2rem;
   height: 2rem;
@@ -72,12 +70,12 @@
   filter: drop-shadow(0 5px 10px rgb(99 102 241 / 0.15));
 }
 
-:global(.rnx-home-testimonial-quote svg) {
+.quote svg {
   width: 100%;
   height: 100%;
 }
 
-:global(.rnx-home-testimonial-rating) {
+.rating {
   flex: 0 0 auto;
   color: rgb(203 213 225 / 0.78);
   font-size: 0.95rem;
@@ -85,12 +83,12 @@
   line-height: 1;
 }
 
-:global(.rnx-home-testimonial-rating [data-filled="true"]) {
+.rating [data-filled="true"] {
   color: var(--testimonial-card-star);
   text-shadow: 0 3px 10px rgb(247 181 0 / 0.17);
 }
 
-:global(.rnx-home-testimonial-review) {
+.review {
   display: -webkit-box;
   min-width: 0;
   margin: 1rem 0 0;
@@ -103,7 +101,7 @@
   -webkit-line-clamp: 5;
 }
 
-:global(.rnx-home-testimonial-divider) {
+.divider {
   width: 100%;
   height: 1px;
   margin: auto 0 1rem;
@@ -115,14 +113,14 @@
   );
 }
 
-:global(.rnx-home-testimonial-client) {
+.client {
   display: flex;
   min-width: 0;
   align-items: center;
   gap: 0.85rem;
 }
 
-:global(.rnx-home-testimonial-avatar) {
+.avatar {
   position: relative;
   display: grid;
   width: 2.9rem;
@@ -148,7 +146,7 @@
   font-weight: 800;
 }
 
-:global(.rnx-home-testimonial-avatar img) {
+.avatar img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -156,11 +154,11 @@
   object-fit: cover;
 }
 
-:global(.rnx-home-testimonial-client-copy) {
+.clientCopy {
   min-width: 0;
 }
 
-:global(.rnx-home-testimonial-name) {
+.name {
   margin: 0;
   overflow: hidden;
   color: var(--testimonial-card-text);
@@ -171,7 +169,7 @@
   white-space: nowrap;
 }
 
-:global(.rnx-home-testimonial-meta) {
+.meta {
   margin: 0.24rem 0 0;
   overflow: hidden;
   color: var(--testimonial-card-muted);
@@ -182,13 +180,13 @@
   white-space: nowrap;
 }
 
-:global(.rnx-home-testimonial-meta a) {
+.meta a {
   color: var(--testimonial-card-brand);
   text-decoration: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  :global(.rnx-home-testimonial-card:hover) {
+  .card:hover {
     border-color: rgb(99 102 241 / 0.26);
     box-shadow:
       0 26px 52px rgb(30 41 59 / 0.12),
@@ -197,14 +195,14 @@
     transform: translateY(-5px);
   }
 
-  :global(.rnx-home-testimonial-meta a:hover) {
+  .meta a:hover {
     text-decoration: underline;
     text-underline-offset: 0.16rem;
   }
 }
 
 :global(body.public-theme-active[data-public-theme="dark"])
-  :global(.rnx-home-testimonial-card) {
+  .card {
   --testimonial-card-bg: rgb(10 22 42 / 0.86);
   --testimonial-card-border: rgb(129 140 248 / 0.16);
   --testimonial-card-text: #f5f7ff;
@@ -220,7 +218,7 @@
 }
 
 :global(body.public-theme-active[data-public-theme="dark"])
-  :global(.rnx-home-testimonial-avatar) {
+  .avatar {
   border-color: rgb(129 140 248 / 0.18);
   background:
     radial-gradient(circle at 30% 20%, #7584ff, transparent 52%),
@@ -232,24 +230,24 @@
 }
 
 :global(body.public-theme-active[data-public-theme="dark"])
-  :global(.rnx-home-testimonial-rating) {
+  .rating {
   color: rgb(71 85 105 / 0.8);
 }
 
 @media (max-width: 639px) {
-  :global(.rnx-home-testimonial-card) {
+  .card {
     min-height: 15.8rem;
     padding: 1.15rem;
   }
 
-  :global(.rnx-home-testimonial-review) {
+  .review {
     font-size: 0.84rem;
     -webkit-line-clamp: 5;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :global(.rnx-home-testimonial-card) {
+  .card {
     transition: none;
   }
 }

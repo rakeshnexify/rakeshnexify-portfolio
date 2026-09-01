@@ -1,3 +1,5 @@
+import styles from "./HomeTestimonialCard.module.css";
+
 function cleanText(value) {
   return String(value ?? "").trim();
 }
@@ -78,12 +80,12 @@ function HomeTestimonialCard({ testimonial }) {
 
   return (
     <article
-      className="rnx-home-testimonial-card"
+      className={styles.card}
       data-featured={testimonial?.isFeatured ? "true" : "false"}
     >
-      <div className="rnx-home-testimonial-card-topline">
+      <div className={styles.topline}>
         <span
-          className="rnx-home-testimonial-quote"
+          className={styles.quote}
           aria-hidden="true"
         >
           <QuoteIcon />
@@ -91,7 +93,7 @@ function HomeTestimonialCard({ testimonial }) {
 
         {rating > 0 && (
           <span
-            className="rnx-home-testimonial-rating"
+            className={styles.rating}
             aria-label={`${rating} out of 5 stars`}
           >
             <span aria-hidden="true">
@@ -109,15 +111,15 @@ function HomeTestimonialCard({ testimonial }) {
       </div>
 
       {reviewText && (
-        <blockquote className="rnx-home-testimonial-review">
+        <blockquote className={styles.review}>
           {reviewText}
         </blockquote>
       )}
 
-      <div className="rnx-home-testimonial-divider" aria-hidden="true" />
+      <div className={styles.divider} aria-hidden="true" />
 
-      <footer className="rnx-home-testimonial-client">
-        <div className="rnx-home-testimonial-avatar">
+      <footer className={styles.client}>
+        <div className={styles.avatar}>
           {profileImageUrl ? (
             <img
               src={profileImageUrl}
@@ -132,11 +134,11 @@ function HomeTestimonialCard({ testimonial }) {
           )}
         </div>
 
-        <div className="rnx-home-testimonial-client-copy">
-          <p className="rnx-home-testimonial-name">{clientName}</p>
+        <div className={styles.clientCopy}>
+          <p className={styles.name}>{clientName}</p>
 
           {(clientRole || companyName) && (
-            <p className="rnx-home-testimonial-meta">
+            <p className={styles.meta}>
               {clientRole && <span>{clientRole}</span>}
               {clientRole && companyName && (
                 <span aria-hidden="true">, </span>
