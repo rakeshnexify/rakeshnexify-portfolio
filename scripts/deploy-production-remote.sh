@@ -31,7 +31,9 @@ cd "$REPO"
 [[ -z "$(git status --porcelain)" ]] || fail "Remote Git clone is dirty."
 [[ "$(git rev-parse HEAD)" == "$COMMIT" ]] || fail "Remote Git HEAD does not match deployment commit."
 
+set +u
 source "$NODE_ENV_DIR/bin/activate"
+set -u
 command -v node >/dev/null 2>&1 || fail "Node environment unavailable."
 command -v npm >/dev/null 2>&1 || fail "npm unavailable."
 
