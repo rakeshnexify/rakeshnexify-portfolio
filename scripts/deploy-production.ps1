@@ -94,7 +94,7 @@ Get-ChildItem $dist -Recurse -File |
     Where-Object { $_.Extension -in @(".js", ".css", ".html", ".json", ".map", ".txt") } |
     ForEach-Object {
         $text = [System.IO.File]::ReadAllText($_.FullName)
-        if ($text -match "localhost:5000" -or $text -match "http://localhost" -or $text -match "https://localhost") {
+        if ($text -match "(?i)(?:https?://)?localhost:5000(?:/|\\b)") {
             $bad += $_.FullName
         }
     }
