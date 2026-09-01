@@ -30,8 +30,7 @@ function Invoke-Ssh([string]$Command) {
 Write-Host "==> Verifying local repository"
 Set-Location $Repo
 
-$branch = (& git branch --show-current).Trim()
-if ($branch -ne "main") {
+if ((& git branch --show-current).Trim() -ne "main") {
     throw "Deploy requires branch main."
 }
 
@@ -94,17 +93,17 @@ Get-ChildItem $dist -Recurse -File |
     Where-Object { $_.Extension -in @(".js", ".css", ".html", ".json", ".map", ".txt") } |
     ForEach-Object {
         $text = [System.IO.File]::ReadAllText($_.FullName)
-        if ($text -match "(?i)(?:https?://)?localhost:5000(?:/|\\b)") {
+        if ($text -match "(?i)(?:https?://)?localhost:5000(?:/|\b)") {
             $bad += $_.FullName
         }
     }
 
 if ($bad.Count -gt 0) {
-    throw "Localhost reference found in production bundle: $($bad -join ', ')"
+    throw "Production API localhost reference found: $($bad -join ', ')"
 }
 
-Write-Host "==> Verifying production SSH"
-Invoke-Ssh "test -d '$RemoteRepo/.git' && test -d '/home8/uniquick/rakeshnexify-app' && test -f '/home8/uniquick/rakeshnexify-app/server/passenger.cjs'"
+Write-Host "==> Verifying production SSH and current health"
+Invoke-Ssh "set -e; test -d '$RemoteRepo/.git'; test -d '/home8/uniquick/rakeshnexify-app'; test -f '/home8/uniquick/rakeshnexify-app/server/passenger.cjs'; curl -fsS --max-time 15 'https://rakeshnexify.com/api/health' | grep -q '""success"":true'"
 
 $tempRoot = Join-Path $env:TEMP ("rnx-deploy-" + $head)
 $stage = Join-Path $tempRoot "stage"
@@ -117,15 +116,13 @@ if (Test-Path $tempRoot) {
 New-Item -ItemType Directory -Path $stage -Force | Out-Null
 
 try {
-    Write-Host "==> Packaging exact Git commit + production dist"
+    Write-Host "==> Packaging exact Git server + production dist"
     Run "git" @(
         "archive",
         "--format=zip",
         "--output=$gitZip",
         $head,
-        "server",
-        "package.json",
-        "package-lock.json"
+        "server"
     )
 
     Expand-Archive -Path $gitZip -DestinationPath $stage -Force
@@ -160,8 +157,7 @@ try {
     }
 
     Write-Host "==> Deploying production"
-    $remoteCommand = "bash '$RemoteRepo/scripts/deploy-production-remote.sh' '$head' '$remoteArchive'"
-    Invoke-Ssh $remoteCommand
+    Invoke-Ssh "bash '$RemoteRepo/scripts/deploy-production-remote.sh' '$head' '$remoteArchive'"
 
     Write-Host ""
     Write-Host "PASS: Production deployed successfully."
