@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-COMMIT="${1:-}"
-ARCHIVE="${2:-}"
+ACTION="${1:-}"
+COMMIT="${2:-}"
+ARCHIVE="${3:-}"
 
 APP="/home8/uniquick/rakeshnexify-app"
 REPO="/home8/uniquick/rakeshnexify-repo"
@@ -10,153 +11,258 @@ NODE_ENV_DIR="/home8/uniquick/nodevenv/rakeshnexify-app/24"
 DEPLOY_ROOT="/home8/uniquick/rakeshnexify-deploy"
 BACKUPS="$DEPLOY_ROOT/backups"
 STAGING="$DEPLOY_ROOT/staging"
-SITE="https://rakeshnexify.com/api/health"
+STATE_ROOT="$DEPLOY_ROOT/pending"
 
 fail() {
   echo "ERROR: $*" >&2
   exit 1
 }
 
-[[ "$COMMIT" =~ ^[0-9a-f]{40}$ ]] || fail "Invalid commit."
-[[ -f "$ARCHIVE" ]] || fail "Release archive not found."
-[[ -d "$APP" ]] || fail "Production app missing."
-[[ -d "$REPO/.git" ]] || fail "cPanel Git repository missing."
-[[ -f "$APP/server/passenger.cjs" ]] || fail "Passenger bootstrap missing."
-[[ -x "$NODE_ENV_DIR/bin/node" ]] || fail "CloudLinux Node binary missing."
-[[ -x "$NODE_ENV_DIR/bin/npm" ]] || fail "CloudLinux npm binary missing."
-
-for tool in git tar curl cp mv rm mkdir touch grep; do
-  command -v "$tool" >/dev/null 2>&1 || fail "Required tool missing: $tool"
-done
-
-export PATH="$NODE_ENV_DIR/bin:$PATH"
-export NODE_ENV="production"
-
-cd "$REPO"
-[[ -z "$(git status --porcelain)" ]] || fail "Remote Git clone is dirty."
-[[ "$(git rev-parse HEAD)" == "$COMMIT" ]] || fail "Remote Git HEAD does not match deployment commit."
-
-curl -k -fsS --resolve rakeshnexify.com:443:167.235.9.123 --max-time 15 "$SITE" | grep -q '"success":true' || fail "Current production is not healthy."
-
-mkdir -p "$BACKUPS" "$STAGING" "$APP/client" "$APP/server" "$APP/tmp"
-
-STAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP="$BACKUPS/pre-$COMMIT-$STAMP.tgz"
-STAGE="$STAGING/$COMMIT-$STAMP"
-OLD_MODULES="$DEPLOY_ROOT/rollback-node_modules-$COMMIT-$STAMP"
-MUTATED=0
-HAD_OLD_MODULES=0
-
-cleanup() {
-  rm -rf "$STAGE" 2>/dev/null || true
+validate_commit() {
+  [[ "$COMMIT" =~ ^[0-9a-f]{40}$ ]] || fail "Invalid commit."
 }
-trap cleanup EXIT
 
-rollback() {
-  local code=$?
-  if [[ "$MUTATED" -eq 1 ]]; then
-    echo "==> Deployment failed. Rolling back."
-    rm -rf "$APP/client/dist" "$APP/server/src" "$APP/server/node_modules"
-    tar -xzf "$BACKUP" -C "$APP"
+validate_common() {
+  validate_commit
+  [[ -d "$APP" ]] || fail "Production app missing."
+  [[ -d "$REPO/.git" ]] || fail "cPanel Git repository missing."
+  [[ -f "$APP/server/passenger.cjs" ]] || fail "Passenger bootstrap missing."
+  [[ -x "$NODE_ENV_DIR/bin/node" ]] || fail "CloudLinux Node binary missing."
+  [[ -x "$NODE_ENV_DIR/bin/npm" ]] || fail "CloudLinux npm binary missing."
 
-    if [[ "$HAD_OLD_MODULES" -eq 1 && -d "$OLD_MODULES" ]]; then
-      mv "$OLD_MODULES" "$APP/server/node_modules"
+  for tool in git tar cp mv rm mkdir touch grep find sort awk xargs cat; do
+    command -v "$tool" >/dev/null 2>&1 || fail "Required tool missing: $tool"
+  done
+}
+
+state_dir() {
+  printf '%s/%s' "$STATE_ROOT" "$COMMIT"
+}
+
+read_state() {
+  local dir
+  dir="$(state_dir)"
+  [[ -d "$dir" ]] || fail "Pending deployment state not found for $COMMIT."
+
+  BACKUP_PATH="$(cat "$dir/backup")"
+  OLD_MODULES_PATH="$(cat "$dir/old-modules")"
+  ARCHIVE_PATH="$(cat "$dir/archive")"
+  HAD_OLD_MODULES="$(cat "$dir/had-old-modules")"
+  HAD_DEPLOYED_MARKER="$(cat "$dir/had-deployed-marker")"
+
+  [[ "$BACKUP_PATH" == "$BACKUPS/"* ]] || fail "Invalid backup state."
+  [[ "$OLD_MODULES_PATH" == "$DEPLOY_ROOT/rollback-node_modules-"* ]] || fail "Invalid node_modules state."
+  [[ "$ARCHIVE_PATH" == "$DEPLOY_ROOT/incoming/"* ]] || fail "Invalid archive state."
+  [[ "$HAD_OLD_MODULES" =~ ^[01]$ ]] || fail "Invalid node_modules flag."
+  [[ "$HAD_DEPLOYED_MARKER" =~ ^[01]$ ]] || fail "Invalid deployed-marker flag."
+}
+
+restore_release() {
+  read_state
+
+  echo "==> Restoring previous production release"
+  rm -rf "$APP/client/dist" "$APP/server/src" "$APP/server/node_modules"
+  tar -xzf "$BACKUP_PATH" -C "$APP"
+
+  if [[ "$HAD_OLD_MODULES" -eq 1 ]]; then
+    [[ -d "$OLD_MODULES_PATH" ]] || fail "Rollback node_modules missing."
+    mv "$OLD_MODULES_PATH" "$APP/server/node_modules"
+  fi
+
+  if [[ "$HAD_DEPLOYED_MARKER" -eq 0 ]]; then
+    rm -f "$APP/.deployed-commit"
+  fi
+
+  touch "$APP/tmp/restart.txt"
+}
+
+prune_old_artifacts() {
+  find "$BACKUPS" -maxdepth 1 -type f -name 'pre-*.tgz' -printf '%T@ %p\n' 2>/dev/null |
+    sort -nr |
+    awk 'NR>5 {sub(/^[^ ]+ /,""); print}' |
+    xargs -r rm -f
+
+  find "$DEPLOY_ROOT/incoming" -maxdepth 1 -type f -name 'rnx-*.tgz' -mtime +1 -delete 2>/dev/null || true
+}
+
+deploy_release() {
+  validate_common
+  [[ -f "$ARCHIVE" ]] || fail "Release archive not found."
+
+  export PATH="$NODE_ENV_DIR/bin:$PATH"
+  export NODE_ENV="production"
+
+  cd "$REPO"
+  [[ -z "$(git status --porcelain)" ]] || fail "Remote Git clone is dirty."
+  [[ "$(git rev-parse HEAD)" == "$COMMIT" ]] || fail "Remote Git HEAD does not match deployment commit."
+
+  mkdir -p "$BACKUPS" "$STAGING" "$STATE_ROOT" "$APP/client" "$APP/server" "$APP/tmp"
+
+  if find "$STATE_ROOT" -mindepth 1 -maxdepth 1 -type d -print -quit | grep -q .; then
+    fail "Another deployment is pending external verification."
+  fi
+
+  local stamp backup stage old_modules dir
+  local had_old_modules=0
+  local had_deployed_marker=0
+  local mutated=0
+
+  stamp="$(date +%Y%m%d-%H%M%S)"
+  backup="$BACKUPS/pre-$COMMIT-$stamp.tgz"
+  stage="$STAGING/$COMMIT-$stamp"
+  old_modules="$DEPLOY_ROOT/rollback-node_modules-$COMMIT-$stamp"
+  dir="$(state_dir)"
+
+  cleanup_stage() {
+    rm -rf "$stage" 2>/dev/null || true
+  }
+
+  internal_rollback() {
+    local code=$?
+    trap - ERR
+    set +e
+
+    if [[ "$mutated" -eq 1 && -d "$dir" ]]; then
+      echo "==> Remote apply failed. Restoring previous release."
+      restore_release
+      local restore_code=$?
+      if [[ "$restore_code" -eq 0 ]]; then
+        echo "ROLLBACK ACTION PASS: Previous files restored; external health verification is required."
+      else
+        echo "ROLLBACK ACTION CRITICAL: Failed to restore previous files." >&2
+      fi
     fi
 
-    touch "$APP/tmp/restart.txt"
-    sleep 4
+    rm -rf "$dir" 2>/dev/null || true
+    rm -f "$ARCHIVE" 2>/dev/null || true
+    cleanup_stage
+    exit "$code"
+  }
 
-    if curl -k -fsS --resolve rakeshnexify.com:443:167.235.9.123 --max-time 15 "$SITE" | grep -q '"success":true'; then
-      echo "ROLLBACK PASS: Previous production release restored."
-    else
-      echo "ROLLBACK WARNING: Previous release restored but health check still fails." >&2
+  trap cleanup_stage EXIT
+  trap internal_rollback ERR
+
+  mkdir -p "$stage"
+
+  echo "==> Validating release archive"
+  tar -tzf "$ARCHIVE" >/dev/null
+
+  echo "==> Extracting staged release"
+  tar -xzf "$ARCHIVE" -C "$stage"
+
+  [[ -f "$stage/client/dist/index.html" ]] || fail "Staged client dist missing."
+  [[ -d "$stage/server/src" ]] || fail "Staged server/src missing."
+  [[ -f "$stage/server/package.json" ]] || fail "Staged server package.json missing."
+  [[ -f "$stage/server/package-lock.json" ]] || fail "Staged server package-lock.json missing."
+  [[ -f "$stage/server/passenger.cjs" ]] || fail "Staged passenger.cjs missing."
+  [[ ! -e "$stage/.env" ]] || fail "Release contains root .env."
+  [[ ! -e "$stage/client/.env" ]] || fail "Release contains client .env."
+  [[ ! -e "$stage/server/.env" ]] || fail "Release contains server .env."
+
+  echo "==> Installing production server dependencies in staging"
+  (
+    cd "$stage/server"
+    npm ci --omit=dev --no-audit --no-fund
+  )
+
+  [[ -d "$stage/server/node_modules" ]] || fail "Staged server node_modules missing."
+  [[ -d "$stage/server/node_modules/dotenv" ]] || fail "dotenv missing from staged server dependencies."
+
+  echo "==> Creating rollback backup"
+  backup_items=()
+  for item in client/dist server/src server/package.json server/package-lock.json server/passenger.cjs .deployed-commit; do
+    if [[ -e "$APP/$item" ]]; then
+      backup_items+=("$item")
     fi
+  done
+  ( cd "$APP" && tar -czf "$backup" "${backup_items[@]}" )
+
+  if [[ -d "$APP/server/node_modules" ]]; then
+    had_old_modules=1
   fi
-  exit "$code"
+  if [[ -f "$APP/.deployed-commit" ]]; then
+    had_deployed_marker=1
+  fi
+
+  mkdir -p "$dir"
+  printf '%s\n' "$backup" > "$dir/backup"
+  printf '%s\n' "$old_modules" > "$dir/old-modules"
+  printf '%s\n' "$ARCHIVE" > "$dir/archive"
+  printf '%s\n' "$had_old_modules" > "$dir/had-old-modules"
+  printf '%s\n' "$had_deployed_marker" > "$dir/had-deployed-marker"
+
+  echo "==> Installing staged application files"
+  mutated=1
+
+  if [[ "$had_old_modules" -eq 1 ]]; then
+    rm -rf "$old_modules"
+    mv "$APP/server/node_modules" "$old_modules"
+  fi
+
+  rm -rf "$APP/client/dist" "$APP/server/src"
+  mv "$stage/client/dist" "$APP/client/dist"
+  mv "$stage/server/src" "$APP/server/src"
+  mv "$stage/server/node_modules" "$APP/server/node_modules"
+
+  cp -f "$stage/server/package.json" "$APP/server/package.json"
+  cp -f "$stage/server/package-lock.json" "$APP/server/package-lock.json"
+  cp -f "$stage/server/passenger.cjs" "$APP/server/passenger.cjs"
+
+  echo "$COMMIT" > "$APP/.deployed-commit"
+
+  echo "==> Restarting Passenger"
+  touch "$APP/tmp/restart.txt"
+
+  trap - ERR
+  echo "PENDING_EXTERNAL_HEALTH: $COMMIT applied. Desktop must verify public health before finalize."
 }
-trap rollback ERR
 
-mkdir -p "$STAGE"
+finalize_release() {
+  validate_common
+  read_state
 
-echo "==> Validating release archive"
-tar -tzf "$ARCHIVE" >/dev/null
+  [[ -f "$APP/.deployed-commit" ]] || fail "Deployed commit marker missing."
+  [[ "$(tr -cd '0-9a-fA-F' < "$APP/.deployed-commit")" == "$COMMIT" ]] || fail "Deployed commit marker mismatch."
 
-echo "==> Extracting staged release"
-tar -xzf "$ARCHIVE" -C "$STAGE"
+  echo "==> Finalizing externally verified release"
 
-[[ -f "$STAGE/client/dist/index.html" ]] || fail "Staged client dist missing."
-[[ -d "$STAGE/server/src" ]] || fail "Staged server/src missing."
-[[ -f "$STAGE/server/package.json" ]] || fail "Staged server package.json missing."
-[[ -f "$STAGE/server/package-lock.json" ]] || fail "Staged server package-lock.json missing."
-[[ -f "$STAGE/server/passenger.cjs" ]] || fail "Staged passenger.cjs missing."
-[[ ! -e "$STAGE/.env" ]] || fail "Release contains root .env."
-[[ ! -e "$STAGE/client/.env" ]] || fail "Release contains client .env."
-[[ ! -e "$STAGE/server/.env" ]] || fail "Release contains server .env."
-
-echo "==> Installing production server dependencies in staging"
-(
-  cd "$STAGE/server"
-  npm ci --omit=dev --no-audit --no-fund
-)
-
-[[ -d "$STAGE/server/node_modules" ]] || fail "Staged server node_modules missing."
-[[ -d "$STAGE/server/node_modules/dotenv" ]] || fail "dotenv missing from staged server dependencies."
-
-echo "==> Creating rollback backup"
-backup_items=()
-for item in client/dist server/src server/package.json server/package-lock.json server/passenger.cjs; do
-  if [[ -e "$APP/$item" ]]; then
-    backup_items+=("$item")
+  if [[ "$HAD_OLD_MODULES" -eq 1 ]]; then
+    rm -rf "$OLD_MODULES_PATH"
   fi
-done
-( cd "$APP" && tar -czf "$BACKUP" "${backup_items[@]}" )
 
-echo "==> Installing staged application files"
-MUTATED=1
+  rm -f "$ARCHIVE_PATH"
+  rm -rf "$(state_dir)"
 
-if [[ -d "$APP/server/node_modules" ]]; then
-  HAD_OLD_MODULES=1
-  rm -rf "$OLD_MODULES"
-  mv "$APP/server/node_modules" "$OLD_MODULES"
-fi
+  prune_old_artifacts
+  echo "FINALIZE PASS: $COMMIT retained as production."
+}
 
-rm -rf "$APP/client/dist" "$APP/server/src"
-mv "$STAGE/client/dist" "$APP/client/dist"
-mv "$STAGE/server/src" "$APP/server/src"
-mv "$STAGE/server/node_modules" "$APP/server/node_modules"
+rollback_release() {
+  validate_common
+  read_state
 
-cp -f "$STAGE/server/package.json" "$APP/server/package.json"
-cp -f "$STAGE/server/package-lock.json" "$APP/server/package-lock.json"
-cp -f "$STAGE/server/passenger.cjs" "$APP/server/passenger.cjs"
+  restore_release
 
-echo "$COMMIT" > "$APP/.deployed-commit"
+  rm -f "$ARCHIVE_PATH"
+  rm -rf "$(state_dir)"
 
-echo "==> Restarting Passenger"
-touch "$APP/tmp/restart.txt"
+  echo "ROLLBACK ACTION PASS: Previous release files restored and Passenger restart requested."
+  echo "External desktop health verification is required."
+}
 
-echo "==> Production health check"
-healthy=0
-for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-  if curl -k -fsS --resolve rakeshnexify.com:443:167.235.9.123 --max-time 15 "$SITE" | grep -q '"success":true'; then
-    healthy=1
-    break
-  fi
-  sleep 3
-done
-
-[[ "$healthy" -eq 1 ]] || false
-
-trap - ERR
-MUTATED=0
-
-rm -rf "$OLD_MODULES"
-rm -f "$ARCHIVE"
-
-find "$BACKUPS" -maxdepth 1 -type f -name 'pre-*.tgz' -printf '%T@ %p\n' 2>/dev/null |
-  sort -nr |
-  awk 'NR>5 {sub(/^[^ ]+ /,""); print}' |
-  xargs -r rm -f
-
-find "$DEPLOY_ROOT/incoming" -maxdepth 1 -type f -name 'rnx-*.tgz' -mtime +1 -delete 2>/dev/null || true
-
-echo "PASS: $COMMIT is live and healthy."
+case "$ACTION" in
+  deploy)
+    deploy_release
+    ;;
+  finalize)
+    validate_commit
+    finalize_release
+    ;;
+  rollback)
+    validate_commit
+    rollback_release
+    ;;
+  *)
+    fail "Usage: $0 {deploy|finalize|rollback} <40-char-commit> [archive]"
+    ;;
+esac

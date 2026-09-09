@@ -11,7 +11,10 @@ $SshHost = "uniquick@uniquickmart.com"
 $SshPort = 1980
 $SshKey = Join-Path $env:USERPROFILE ".ssh\rakeshnexify_cpanel"
 $RemoteRepo = "/home8/uniquick/rakeshnexify-repo"
+$RemoteApp = "/home8/uniquick/rakeshnexify-app"
 $RemoteDeployRoot = "/home8/uniquick/rakeshnexify-deploy"
+$HealthUrl = "https://rakeshnexify.com/api/health"
+$ExpectedHealthMessage = "RakeshNexify Portfolio API is running."
 
 function Run([string]$File, [string[]]$CommandArgs) {
     & $File @CommandArgs
@@ -25,6 +28,50 @@ function Invoke-Ssh([string]$Command) {
     if ($LASTEXITCODE -ne 0) {
         throw "Remote command failed."
     }
+}
+
+function Invoke-SshCapture([string]$Command) {
+    $result = & ssh -i $SshKey -p $SshPort $SshHost $Command
+    if ($LASTEXITCODE -ne 0) {
+        throw "Remote command failed."
+    }
+    return (($result | Out-String).Trim())
+}
+
+function Test-ExternalHealth(
+    [string]$Label,
+    [int]$Attempts = 1,
+    [int]$DelaySeconds = 0
+) {
+    for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
+        try {
+            $probeUrl = $HealthUrl + "?probe=" + [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+            $response = Invoke-WebRequest `
+                -Uri $probeUrl `
+                -UseBasicParsing `
+                -TimeoutSec 15 `
+                -Headers @{ "Cache-Control" = "no-cache" }
+
+            if ([int]$response.StatusCode -eq 200) {
+                $payload = $response.Content | ConvertFrom-Json
+                if ($payload.success -eq $true -and [string]$payload.message -eq $ExpectedHealthMessage) {
+                    Write-Host "PASS: $Label external health ($attempt/$Attempts)"
+                    return $true
+                }
+            }
+
+            Write-Host "WARN: $Label external health returned an unexpected response ($attempt/$Attempts)."
+        }
+        catch {
+            Write-Host "WARN: $Label external health failed ($attempt/$Attempts): $($_.Exception.Message)"
+        }
+
+        if ($attempt -lt $Attempts -and $DelaySeconds -gt 0) {
+            Start-Sleep -Seconds $DelaySeconds
+        }
+    }
+
+    return $false
 }
 
 Write-Host "==> Verifying local repository"
@@ -102,8 +149,18 @@ if ($bad.Count -gt 0) {
     throw "Production API localhost reference found: $($bad -join ', ')"
 }
 
-Write-Host "==> Verifying production SSH and current health"
-Invoke-Ssh "set -e; test -d '$RemoteRepo/.git'; test -d '/home8/uniquick/rakeshnexify-app'; test -f '/home8/uniquick/rakeshnexify-app/server/passenger.cjs'; curl -k -fsS --resolve rakeshnexify.com:443:167.235.9.123 --max-time 15 'https://rakeshnexify.com/api/health' >/dev/null"
+Write-Host "==> Verifying current production externally"
+if (-not (Test-ExternalHealth -Label "Current production" -Attempts 3 -DelaySeconds 2)) {
+    throw "Current public production is not healthy from this desktop. Deployment stopped before mutation."
+}
+
+Write-Host "==> Verifying production SSH"
+Invoke-Ssh "set -e; test -d '$RemoteRepo/.git'; test -d '$RemoteApp'; test -f '$RemoteApp/server/passenger.cjs'"
+
+$previousCommit = Invoke-SshCapture "set -e; test -f '$RemoteApp/.deployed-commit'; tr -cd '0-9a-fA-F' < '$RemoteApp/.deployed-commit'"
+if ($previousCommit -notmatch '^[0-9a-fA-F]{40}$') {
+    throw "Production deployed commit marker is invalid."
+}
 
 $tempRoot = Join-Path $env:TEMP ("rnx-deploy-" + $head)
 $stage = Join-Path $tempRoot "stage"
@@ -114,6 +171,9 @@ if (Test-Path $tempRoot) {
     Remove-Item $tempRoot -Recurse -Force
 }
 New-Item -ItemType Directory -Path $stage -Force | Out-Null
+
+$remoteArchive = "$RemoteDeployRoot/incoming/rnx-$head.tgz"
+$remoteApplied = $false
 
 try {
     Write-Host "==> Packaging exact Git server + production dist"
@@ -144,8 +204,6 @@ try {
 
     Run "tar" @("-czf", $archive, "-C", $stage, ".")
 
-    $remoteArchive = "$RemoteDeployRoot/incoming/rnx-$head.tgz"
-
     Write-Host "==> Updating cPanel Git clone to $head"
     $updateRepo = "set -e; cd '$RemoteRepo'; test -z `"`$(git status --porcelain)`"; git fetch origin main; git checkout main >/dev/null 2>&1; git merge --ff-only origin/main; test `"`$(git rev-parse HEAD)`" = '$head'; mkdir -p '$RemoteDeployRoot/incoming'"
     Invoke-Ssh $updateRepo
@@ -156,13 +214,80 @@ try {
         throw "SCP upload failed."
     }
 
-    Write-Host "==> Deploying production"
-    Invoke-Ssh "bash '$RemoteRepo/scripts/deploy-production-remote.sh' '$head' '$remoteArchive'"
+    Write-Host "==> Applying production release"
+    Invoke-Ssh "bash '$RemoteRepo/scripts/deploy-production-remote.sh' deploy '$head' '$remoteArchive'"
+    $remoteApplied = $true
+
+    Write-Host "==> Verifying NEW production externally"
+    if (-not (Test-ExternalHealth -Label "New production" -Attempts 12 -DelaySeconds 3)) {
+        Write-Host "FAIL: New production external health did not recover. Rolling back." -ForegroundColor Red
+
+        Invoke-Ssh "bash '$RemoteRepo/scripts/deploy-production-remote.sh' rollback '$head'"
+        $remoteApplied = $false
+
+        $restoredCommit = Invoke-SshCapture "set -e; tr -cd '0-9a-fA-F' < '$RemoteApp/.deployed-commit'"
+        if ($restoredCommit -ne $previousCommit) {
+            throw "Rollback ran, but deployed commit marker was not restored to $previousCommit."
+        }
+
+        if (-not (Test-ExternalHealth -Label "Rolled-back production" -Attempts 8 -DelaySeconds 3)) {
+            throw "CRITICAL: Release rollback completed, but restored production is not externally healthy."
+        }
+
+        throw "Deployment failed external health verification. Previous production $previousCommit was restored and verified healthy."
+    }
+
+    # Public health is now good. From this point forward, control-plane/finalize
+    # failures must NOT roll back an externally healthy new release automatically.
+    $remoteApplied = $false
+
+    $deployedCommit = Invoke-SshCapture "set -e; tr -cd '0-9a-fA-F' < '$RemoteApp/.deployed-commit'"
+    if ($deployedCommit -ne $head) {
+        Write-Host "FAIL: External health passed but deployed commit marker is wrong. Rolling back." -ForegroundColor Red
+
+        Invoke-Ssh "bash '$RemoteRepo/scripts/deploy-production-remote.sh' rollback '$head'"
+
+        if (-not (Test-ExternalHealth -Label "Rolled-back production" -Attempts 8 -DelaySeconds 3)) {
+            throw "CRITICAL: Commit verification failed; rollback completed but production is not externally healthy."
+        }
+
+        throw "Deployment commit marker verification failed. Previous production was restored."
+    }
+
+    Write-Host "==> Finalizing release after external health PASS"
+    try {
+        Invoke-Ssh "bash '$RemoteRepo/scripts/deploy-production-remote.sh' finalize '$head'"
+    }
+    catch {
+        throw "New production is externally healthy at $head, but remote finalize/cleanup failed. No automatic rollback was attempted."
+    }
 
     Write-Host ""
     Write-Host "PASS: Production deployed successfully."
     Write-Host "Commit: $head"
     Write-Host "URL: https://rakeshnexify.com"
+}
+catch {
+    if ($remoteApplied) {
+        Write-Host "WARN: Deployment stopped after remote apply. Attempting guarded rollback." -ForegroundColor Yellow
+        try {
+            Invoke-Ssh "bash '$RemoteRepo/scripts/deploy-production-remote.sh' rollback '$head'"
+            $remoteApplied = $false
+
+            $restoredCommit = Invoke-SshCapture "set -e; tr -cd '0-9a-fA-F' < '$RemoteApp/.deployed-commit'"
+            if ($restoredCommit -eq $previousCommit -and
+                (Test-ExternalHealth -Label "Emergency rolled-back production" -Attempts 8 -DelaySeconds 3)) {
+                Write-Host "ROLLBACK PASS: Previous production restored and externally healthy." -ForegroundColor Green
+            } else {
+                Write-Host "ROLLBACK WARNING: Rollback action ran, but restoration could not be fully verified." -ForegroundColor Red
+            }
+        }
+        catch {
+            Write-Host "ROLLBACK CRITICAL: Automatic rollback action failed: $($_.Exception.Message)" -ForegroundColor Red
+        }
+    }
+
+    throw
 }
 finally {
     if (Test-Path $tempRoot) {
