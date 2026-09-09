@@ -11,6 +11,46 @@ function getErrorMessage(error) {
     : "Dynamic website settings could not be loaded.";
 }
 
+function getFaviconType(url) {
+  const cleanUrl = String(url || "")
+    .split(/[?#]/, 1)[0]
+    .toLowerCase();
+
+  if (cleanUrl.endsWith(".svg")) return "image/svg+xml";
+  if (cleanUrl.endsWith(".ico")) return "image/x-icon";
+  if (cleanUrl.endsWith(".png")) return "image/png";
+  if (cleanUrl.endsWith(".jpg") || cleanUrl.endsWith(".jpeg")) {
+    return "image/jpeg";
+  }
+  if (cleanUrl.endsWith(".webp")) return "image/webp";
+
+  return "";
+}
+
+function updateDocumentFavicon(faviconUrl) {
+  const safeUrl = String(faviconUrl || "").trim();
+
+  if (!safeUrl) return;
+
+  let iconLink = document.head.querySelector('link[rel~="icon"]');
+
+  if (!iconLink) {
+    iconLink = document.createElement("link");
+    iconLink.setAttribute("rel", "icon");
+    document.head.appendChild(iconLink);
+  }
+
+  const faviconType = getFaviconType(safeUrl);
+
+  if (faviconType) {
+    iconLink.setAttribute("type", faviconType);
+  } else {
+    iconLink.removeAttribute("type");
+  }
+
+  iconLink.setAttribute("href", safeUrl);
+}
+
 function SiteSettingsProvider({ children }) {
   const [settings, setSettings] = useState(siteData);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +88,13 @@ function SiteSettingsProvider({ children }) {
       controller.abort();
     };
   }, []);
+
+  useEffect(() => {
+
+    updateDocumentFavicon(settings?.brand?.faviconUrl);
+
+  }, [settings?.brand?.faviconUrl]);
+
 
   const refreshSettings = useCallback(async () => {
     setIsLoading(true);
