@@ -103,7 +103,7 @@ if ($bad.Count -gt 0) {
 }
 
 Write-Host "==> Verifying production SSH and current health"
-Invoke-Ssh "set -e; test -d '$RemoteRepo/.git'; test -d '/home8/uniquick/rakeshnexify-app'; test -f '/home8/uniquick/rakeshnexify-app/server/passenger.cjs'; curl -fsS --max-time 15 'https://rakeshnexify.com/api/health' >/dev/null"
+Invoke-Ssh "set -e; test -d '$RemoteRepo/.git'; test -d '/home8/uniquick/rakeshnexify-app'; test -f '/home8/uniquick/rakeshnexify-app/server/passenger.cjs'; curl -k -fsS --resolve rakeshnexify.com:443:167.235.9.123 --max-time 15 'https://rakeshnexify.com/api/health' >/dev/null"
 
 $tempRoot = Join-Path $env:TEMP ("rnx-deploy-" + $head)
 $stage = Join-Path $tempRoot "stage"

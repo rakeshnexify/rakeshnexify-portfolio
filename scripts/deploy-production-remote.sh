@@ -36,7 +36,7 @@ cd "$REPO"
 [[ -z "$(git status --porcelain)" ]] || fail "Remote Git clone is dirty."
 [[ "$(git rev-parse HEAD)" == "$COMMIT" ]] || fail "Remote Git HEAD does not match deployment commit."
 
-curl -fsS --max-time 15 "$SITE" | grep -q '"success":true' || fail "Current production is not healthy."
+curl -k -fsS --resolve rakeshnexify.com:443:167.235.9.123 --max-time 15 "$SITE" | grep -q '"success":true' || fail "Current production is not healthy."
 
 mkdir -p "$BACKUPS" "$STAGING" "$APP/client" "$APP/server" "$APP/tmp"
 
@@ -66,7 +66,7 @@ rollback() {
     touch "$APP/tmp/restart.txt"
     sleep 4
 
-    if curl -fsS --max-time 15 "$SITE" | grep -q '"success":true'; then
+    if curl -k -fsS --resolve rakeshnexify.com:443:167.235.9.123 --max-time 15 "$SITE" | grep -q '"success":true'; then
       echo "ROLLBACK PASS: Previous production release restored."
     else
       echo "ROLLBACK WARNING: Previous release restored but health check still fails." >&2
@@ -137,7 +137,7 @@ touch "$APP/tmp/restart.txt"
 echo "==> Production health check"
 healthy=0
 for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-  if curl -fsS --max-time 15 "$SITE" | grep -q '"success":true'; then
+  if curl -k -fsS --resolve rakeshnexify.com:443:167.235.9.123 --max-time 15 "$SITE" | grep -q '"success":true'; then
     healthy=1
     break
   fi
