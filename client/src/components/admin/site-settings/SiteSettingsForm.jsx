@@ -179,7 +179,7 @@ Specific commercial terms such as pricing, project scope, delivery timelines, re
 
 ## Disclaimer
 
-The website and its content are provided on an “as available” basis for general information and business communication purposes. No guarantee is made that the website will always be uninterrupted, error free or suitable for every purpose.
+The website and its content are provided on an â€œas availableâ€ basis for general information and business communication purposes. No guarantee is made that the website will always be uninterrupted, error free or suitable for every purpose.
 
 ## Limitation of Liability
 
@@ -1870,7 +1870,7 @@ function SiteSettingsForm({
               onChange={handleFieldChange}
               error={getFieldError("brand.tagline", "brand")}
               disabled={isSubmitting}
-              placeholder="Developer Ãƒâ€šÃ‚Â· Creator Ãƒâ€šÃ‚Â· Entrepreneur"
+              placeholder="Developer ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Creator ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Entrepreneur"
               maxLength={150}
             />
           </div>
@@ -3261,7 +3261,7 @@ function SiteSettingsForm({
             accessToken={accessToken}
             allowedTypes={["image", "svg"]}
             pickerTitle="Choose Social Sharing Image"
-            helpText="Paste an external URL or choose an image/SVG from the Media Library. JPG or PNG is generally safest for social sharing."
+            helpText="Choose a public JPG or PNG where possible; 1200 x 630 is recommended. This image is used in crawler-visible Open Graph and Twitter sharing metadata."
             onUnauthorized={onMediaUnauthorized}
             previewAlt="Social sharing preview"
             previewClassName="max-h-32 w-full object-contain"

@@ -247,6 +247,8 @@ function PageSeo({
       });
     }
 
+    const socialImageAlt = `${safeBrandName} social sharing image`;
+
     if (imageUrl) {
       updateMeta({
         attribute: "property",
@@ -255,9 +257,27 @@ function PageSeo({
       });
 
       updateMeta({
+        attribute: "property",
+        value: "og:image:secure_url",
+        content: imageUrl,
+      });
+
+      updateMeta({
+        attribute: "property",
+        value: "og:image:alt",
+        content: socialImageAlt,
+      });
+
+      updateMeta({
         attribute: "name",
         value: "twitter:image",
         content: imageUrl,
+      });
+
+      updateMeta({
+        attribute: "name",
+        value: "twitter:image:alt",
+        content: socialImageAlt,
       });
     } else {
       removeMeta({
@@ -266,8 +286,23 @@ function PageSeo({
       });
 
       removeMeta({
+        attribute: "property",
+        value: "og:image:secure_url",
+      });
+
+      removeMeta({
+        attribute: "property",
+        value: "og:image:alt",
+      });
+
+      removeMeta({
         attribute: "name",
         value: "twitter:image",
+      });
+
+      removeMeta({
+        attribute: "name",
+        value: "twitter:image:alt",
       });
     }
 

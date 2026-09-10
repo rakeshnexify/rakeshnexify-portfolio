@@ -57,6 +57,8 @@ import subscriberRoutes from "./routes/subscriber.routes.js";
 import testimonialRoutes from "./routes/testimonial.routes.js";
 import teamMemberRoutes from "./routes/teamMember.routes.js";
 
+import { renderSocialMetadataHtml } from "./services/socialMetadata.service.js";
+
 const app = express();
 
 function readTrustProxyHops() {
@@ -97,6 +99,11 @@ const currentDirectoryPath = path.dirname(currentFilePath);
 const clientDistPath = path.resolve(
   currentDirectoryPath,
   "../../client/dist",
+);
+
+const clientIndexPath = path.join(
+  clientDistPath,
+  "index.html",
 );
 
 app.use(helmet(helmetOptions));
@@ -241,7 +248,7 @@ if (isProduction) {
    */
   app.get(
     "/{*splat}",
-    (req, res, next) => {
+    async (req, res, next) => {
       const isApiRequest =
         req.path === "/api" ||
         req.path.startsWith("/api/");
@@ -251,17 +258,25 @@ if (isProduction) {
         return;
       }
 
-      res.sendFile(
-        path.join(
-          clientDistPath,
-          "index.html",
-        ),
-        (error) => {
-          if (error) {
-            next(error);
-          }
-        },
-      );
+      try {
+        const html =
+          await renderSocialMetadataHtml({
+            indexPath: clientIndexPath,
+            pathname: req.path,
+          });
+
+        res.setHeader(
+          "Cache-Control",
+          "no-cache",
+        );
+
+        res
+          .status(200)
+          .type("html")
+          .send(html);
+      } catch (error) {
+        next(error);
+      }
     },
   );
 }
