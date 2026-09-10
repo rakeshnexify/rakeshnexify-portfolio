@@ -167,20 +167,11 @@ function HeroSection() {
                 className="public-hero-technologies"
                 aria-label="Hero quick links"
               >
-                {quickLinks.map((item, index) => (
+                {quickLinks.map((item) => (
                   <div
                     className="contents"
                     key={`${item.label}-${item.url}`}
                   >
-                    {index > 0 && (
-                      <span
-                        className="public-hero-tech-separator"
-                        aria-hidden="true"
-                      >
-                        â€¢
-                      </span>
-                    )}
-
                     <HeroQuickLink item={item}>
                       {item.iconUrl && (
                         <span

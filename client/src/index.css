@@ -683,7 +683,7 @@ body.public-theme-active a[class*="inline-flex"][class*="min-h-"]:active {
 }
 
 /* =========================================================
-   PUBLIC HERO — PREMIUM TECHNICAL COVER COMPOSITION
+   PUBLIC HERO â€” PREMIUM TECHNICAL COVER COMPOSITION
    The Hero keeps all existing dynamic content/behavior while
    presenting it in a compact cover + identity + content flow.
    ========================================================= */
@@ -1592,16 +1592,6 @@ body.public-theme-active[data-public-theme="dark"] .public-hero-tech-image {
   opacity: 0.96;
 }
 
-body.public-theme-active .public-hero-tech-separator {
-  color:
-    color-mix(
-      in srgb,
-      var(--public-color-primary) 68%,
-      var(--public-color-border)
-    );
-  font-size: 0.72rem;
-}
-
 @keyframes public-hero-shell-glow {
   0% {
     transform: translateX(-50%) scale(0.95);
@@ -1803,10 +1793,6 @@ body.public-theme-active .public-hero-tech-separator {
     padding: 0;
   }
 
-  body.public-theme-active .public-hero-tech-separator {
-    display: none;
-  }
-
   body.public-theme-active .public-hero-technologies {
     margin-top: 0.88rem;
     gap: 0.46rem;
@@ -1851,7 +1837,7 @@ body.public-theme-active .public-hero-tech-separator {
 }
 
 /* -------------------------------------------------------------------------- */
-/* PUBLIC ABOUT — DEVELOPER BLUEPRINT SYSTEM                                  */
+/* PUBLIC ABOUT â€” DEVELOPER BLUEPRINT SYSTEM                                  */
 /* -------------------------------------------------------------------------- */
 
 body.public-theme-active .public-about-section {
