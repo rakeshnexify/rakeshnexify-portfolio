@@ -683,7 +683,7 @@ body.public-theme-active a[class*="inline-flex"][class*="min-h-"]:active {
 }
 
 /* =========================================================
-   PUBLIC HERO â€” PREMIUM TECHNICAL COVER COMPOSITION
+   PUBLIC HERO Ã¢â‚¬â€ PREMIUM TECHNICAL COVER COMPOSITION
    The Hero keeps all existing dynamic content/behavior while
    presenting it in a compact cover + identity + content flow.
    ========================================================= */
@@ -1837,7 +1837,7 @@ body.public-theme-active[data-public-theme="dark"] .public-hero-tech-image {
 }
 
 /* -------------------------------------------------------------------------- */
-/* PUBLIC ABOUT â€” DEVELOPER BLUEPRINT SYSTEM                                  */
+/* PUBLIC ABOUT Ã¢â‚¬â€ DEVELOPER BLUEPRINT SYSTEM                                  */
 /* -------------------------------------------------------------------------- */
 
 body.public-theme-active .public-about-section {
@@ -3319,16 +3319,11 @@ body.public-theme-active[data-public-theme="dark"] .public-about-platform-tile {
 
   body.public-theme-active .public-about-work-content {
     min-height: 2.75rem;
-    animation: none;
   }
 
   body.public-theme-active .public-about-work-track {
     min-height: 2px;
     overflow-anchor: none;
-  }
-
-  body.public-theme-active .public-about-work-track span {
-    animation: none;
   }
 
   body.public-theme-active .public-about-platform-grid {
@@ -3869,10 +3864,19 @@ body.public-theme-active .public-statistic-icon-ring {
 }
 
 body.public-theme-active .public-statistic-icon-image {
+  display: block;
   width: clamp(2.35rem, 2.5vw, 2.8rem);
   height: clamp(2.35rem, 2.5vw, 2.8rem);
-  object-fit: contain;
-  object-position: center;
+  flex: 0 0 auto;
+  background: currentColor;
+  -webkit-mask-image: var(--public-statistic-icon-mask);
+  mask-image: var(--public-statistic-icon-mask);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 body.public-theme-active .public-statistic-icon-svg {

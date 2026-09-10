@@ -415,7 +415,7 @@ function StatisticForm({
 
             <div>
               <label htmlFor="statistic-accent" className={labelClasses}>
-                Card Accent
+                Card & Icon Accent
               </label>
 
               <select
@@ -433,6 +433,10 @@ function StatisticForm({
                 <option value="pink">Pink</option>
                 <option value="emerald">Emerald</option>
               </select>
+
+              <p className="mt-0.5 text-[9px] leading-3.5 text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                Also colors transparent monochrome icons selected from Media Library.
+              </p>
 
               <StatisticFieldError message={getFieldError("accent")} />
             </div>

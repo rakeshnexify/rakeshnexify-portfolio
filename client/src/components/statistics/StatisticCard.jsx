@@ -163,12 +163,12 @@ function StatisticIcon({ statistic }) {
 
   if (iconUrl) {
     return (
-      <img
-        src={iconUrl}
-        alt=""
-        loading="lazy"
-        decoding="async"
+      <span
+        aria-hidden="true"
         className="public-statistic-icon-image"
+        style={{
+          "--public-statistic-icon-mask": `url(${JSON.stringify(iconUrl)})`,
+        }}
       />
     );
   }

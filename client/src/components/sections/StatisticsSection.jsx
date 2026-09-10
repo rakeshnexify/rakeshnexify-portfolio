@@ -7,6 +7,8 @@ import Section from "../layout/Section";
 import StatisticCard from "../statistics/StatisticCard";
 
 import PublicSectionEyebrow from "../layout/PublicSectionEyebrow";
+
+const STATISTICS_LOOP_COPIES = 4;
 function sortStatistics(firstStatistic, secondStatistic) {
   const firstOrder = Number(firstStatistic?.order);
   const secondOrder = Number(secondStatistic?.order);
@@ -33,10 +35,7 @@ function StatisticsSection() {
 
   const { settings } = useSiteSettings();
   const trackRef = useRef(null);
-  const rowShellRef = useRef(null);
   const animationFrameRef = useRef(0);
-  const isAutoScrollPausedRef = useRef(false);
-  const manualPauseUntilRef = useRef(0);
   const autoScrollPositionRef = useRef(0);
 
   const sectionContent = settings?.statisticsSection || {};
@@ -58,20 +57,23 @@ function StatisticsSection() {
     return [...sourceStatistics].sort(sortStatistics);
   }, [loadedStatistics]);
 
-  const hasOverflowStatistics = statistics.length > 6;
+  const shouldAutoScroll = statistics.length > 1;
 
   const carouselStatistics = useMemo(() => {
-    if (!hasOverflowStatistics) {
+    if (!shouldAutoScroll) {
       return statistics;
     }
 
-    return [...statistics, ...statistics];
-  }, [hasOverflowStatistics, statistics]);
+    return Array.from(
+      { length: STATISTICS_LOOP_COPIES },
+      () => statistics,
+    ).flat();
+  }, [shouldAutoScroll, statistics]);
 
   useEffect(() => {
     const track = trackRef.current;
 
-    if (!track || !hasOverflowStatistics) {
+    if (!track || !shouldAutoScroll) {
       return undefined;
     }
 
@@ -83,10 +85,11 @@ function StatisticsSection() {
       return undefined;
     }
 
-    const speedPixelsPerSecond = 26;
+    const speedPixelsPerSecond = 24;
     let previousTimestamp = 0;
 
-    autoScrollPositionRef.current = track.scrollLeft;
+    autoScrollPositionRef.current = 0;
+    track.scrollLeft = 0;
 
     function animate(timestamp) {
       if (!previousTimestamp) {
@@ -100,65 +103,39 @@ function StatisticsSection() {
 
       previousTimestamp = timestamp;
 
-      const isTemporarilyPaused =
-        isAutoScrollPausedRef.current ||
-        performance.now() < manualPauseUntilRef.current;
+      const firstItem = track.children[0];
+      const nextCycleItem = track.children[statistics.length];
 
-      const loopWidth = track.scrollWidth / 2;
+      const loopWidth =
+        firstItem && nextCycleItem
+          ? nextCycleItem.offsetLeft - firstItem.offsetLeft
+          : 0;
 
-      if (!isTemporarilyPaused && loopWidth > track.clientWidth) {
+      if (
+        loopWidth > 0 &&
+        track.scrollWidth > track.clientWidth
+      ) {
         autoScrollPositionRef.current +=
           speedPixelsPerSecond * elapsedSeconds;
 
-        if (autoScrollPositionRef.current >= loopWidth) {
+        while (autoScrollPositionRef.current >= loopWidth) {
           autoScrollPositionRef.current -= loopWidth;
         }
 
         track.scrollLeft = autoScrollPositionRef.current;
-      } else if (Math.abs(track.scrollLeft - autoScrollPositionRef.current) > 1) {
-        autoScrollPositionRef.current = track.scrollLeft;
       }
 
-      animationFrameRef.current = window.requestAnimationFrame(animate);
+      animationFrameRef.current =
+        window.requestAnimationFrame(animate);
     }
 
-    animationFrameRef.current = window.requestAnimationFrame(animate);
+    animationFrameRef.current =
+      window.requestAnimationFrame(animate);
 
     return () => {
       window.cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [hasOverflowStatistics]);
-
-  function setAutoScrollPaused(isPaused) {
-    isAutoScrollPausedRef.current = isPaused;
-  }
-
-  function scrollStatistics(direction) {
-    const track = trackRef.current;
-
-    if (!track) {
-      return;
-    }
-
-    const firstCard = track.querySelector(".public-statistic-card");
-    const cardWidth = firstCard?.getBoundingClientRect().width || 280;
-    const computedStyles = window.getComputedStyle(track);
-    const gap = Number.parseFloat(computedStyles.columnGap) || 16;
-    const distance = (cardWidth + gap) * 2;
-
-    manualPauseUntilRef.current = performance.now() + 1500;
-
-    const targetLeft = track.scrollLeft + direction * distance;
-
-    track.scrollTo({
-      left: targetLeft,
-      behavior: "smooth",
-    });
-
-    window.setTimeout(() => {
-      autoScrollPositionRef.current = track.scrollLeft;
-    }, 350);
-  }
+  }, [shouldAutoScroll, statistics.length]);
 
   if (!isLoading && !error && statistics.length === 0) {
     return null;
@@ -232,66 +209,19 @@ function StatisticsSection() {
           )}
 
           {statistics.length > 0 && (
-            <div
-              ref={rowShellRef}
-              className={[
-                "public-statistics-row-shell",
-                hasOverflowStatistics
-                  ? "public-statistics-row-shell-scrollable"
-                  : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              onPointerDown={() => setAutoScrollPaused(true)}
-              onPointerUp={() => setAutoScrollPaused(false)}
-              onPointerCancel={() => setAutoScrollPaused(false)}
-              onPointerLeave={() => setAutoScrollPaused(false)}
-            >
-              {hasOverflowStatistics && (
-                <>
-                  <button
-                    type="button"
-                    className="public-statistics-edge-control public-statistics-edge-control-left"
-                    onMouseEnter={() => setAutoScrollPaused(true)}
-                    onMouseLeave={() => setAutoScrollPaused(false)}
-                    onFocus={() => setAutoScrollPaused(true)}
-                    onBlur={() => setAutoScrollPaused(false)}
-                    onClick={() => scrollStatistics(-1)}
-                    aria-label="Scroll statistics left"
-                    title="Previous statistics"
-                  >
-                    <span aria-hidden="true">←</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="public-statistics-edge-control public-statistics-edge-control-right"
-                    onMouseEnter={() => setAutoScrollPaused(true)}
-                    onMouseLeave={() => setAutoScrollPaused(false)}
-                    onFocus={() => setAutoScrollPaused(true)}
-                    onBlur={() => setAutoScrollPaused(false)}
-                    onClick={() => scrollStatistics(1)}
-                    aria-label="Scroll statistics right"
-                    title="Next statistics"
-                  >
-                    <span aria-hidden="true">→</span>
-                  </button>
-
-                  <span className="public-statistics-count">
-                    {String(statistics.length).padStart(2, "0")} metrics
-                  </span>
-                </>
-              )}
+            <div className="public-statistics-row-shell">
+              <span className="public-statistics-count">
+                {String(statistics.length).padStart(2, "0")} metrics
+              </span>
 
               <div
                 ref={trackRef}
                 className="public-statistics-track"
                 aria-label="Portfolio statistics"
-                tabIndex={statistics.length > 6 ? 0 : undefined}
               >
                 {carouselStatistics.map((statistic, index) => {
                   const isDuplicate =
-                    hasOverflowStatistics && index >= statistics.length;
+                    shouldAutoScroll && index >= statistics.length;
 
                   return (
                     <div
