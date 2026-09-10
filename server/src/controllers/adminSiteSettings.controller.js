@@ -82,6 +82,7 @@ const ownerStringFields = [
 ];
 
 const heroStringFields = [
+  "profileImageUrl",
   "coverImageUrl",
   "eyebrow",
   "heading",
@@ -90,7 +91,7 @@ const heroStringFields = [
 
 const buttonStringFields = ["label", "url"];
 
-const aboutStringFields = ["eyebrow", "heading", "description"];
+const aboutStringFields = ["profileImageUrl", "eyebrow", "heading", "description"];
 
 const listingSectionStringFields = ["eyebrow", "heading", "description"];
 

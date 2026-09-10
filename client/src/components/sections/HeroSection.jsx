@@ -102,6 +102,9 @@ function HeroSection() {
     hero.description ||
     "I create responsive websites, MERN applications, e-commerce platforms and scalable digital solutions.";
 
+  const profileImageUrl = String(
+    hero.profileImageUrl || owner.profileImageUrl || "",
+  ).trim();
   const coverImageUrl = String(hero.coverImageUrl || "").trim();
   const quickLinks = getVisibleHeroQuickLinks(hero);
 
@@ -133,10 +136,10 @@ function HeroSection() {
 
           <div className="public-hero-body">
             <div className="public-hero-identity">
-              {owner.profileImageUrl && (
+              {profileImageUrl && (
                 <div className="public-hero-profile-ring">
                   <img
-                    src={owner.profileImageUrl}
+                    src={profileImageUrl}
                     alt={owner.name || "Portfolio owner"}
                     className="public-hero-profile-image"
                     fetchPriority="high"
@@ -174,7 +177,7 @@ function HeroSection() {
                         className="public-hero-tech-separator"
                         aria-hidden="true"
                       >
-                        •
+                        â€¢
                       </span>
                     )}
 

@@ -1686,7 +1686,7 @@ function SiteSettingsForm({
               onChange={handleFieldChange}
               error={getFieldError("brand.tagline", "brand")}
               disabled={isSubmitting}
-              placeholder="Developer · Creator · Entrepreneur"
+              placeholder="Developer Â· Creator Â· Entrepreneur"
               maxLength={150}
             />
           </div>
@@ -1729,7 +1729,7 @@ function SiteSettingsForm({
       <SettingsCard
         isVisible={isPanelActive("owner")}
         title="Owner Profile"
-        description="Manage the portfolio owner information shown in the Hero and About sections."
+        description="Manage the portfolio owner identity, location and resume. Hero and About images are managed separately in their own sections."
       >
         <div className="grid gap-2.5 lg:grid-cols-2">
           <TextInput
@@ -1785,24 +1785,7 @@ function SiteSettingsForm({
             onUnauthorized={onMediaUnauthorized}
           />
 
-          <div className="lg:col-span-2">
-            <ImageUrlField
-              id="settings-owner-image"
-              name="owner.profileImageUrl"
-              label="Profile image URL"
-              value={formValues.owner.profileImageUrl}
-              onChange={handleFieldChange}
-              error={getFieldError("owner.profileImageUrl", "owner")}
-              disabled={isSubmitting}
-              accessToken={accessToken}
-              allowedTypes={["image", "svg"]}
-              pickerTitle="Choose Owner Profile Image"
-              helpText="Paste an external URL or choose an image/SVG from the Media Library."
-              onUnauthorized={onMediaUnauthorized}
-              previewAlt="Portfolio owner profile preview"
-              previewClassName="mx-auto size-24 rounded-lg object-cover"
-            />
-          </div>
+
         </div>
       </SettingsCard>
 
@@ -1812,6 +1795,23 @@ function SiteSettingsForm({
         description="Control the technical cover image, main heading, introduction, dynamic quick links and call-to-action settings."
       >
         <div className="grid gap-2.5">
+          <ImageUrlField
+            id="settings-hero-profile-image"
+            name="hero.profileImageUrl"
+            label="Hero Profile Image"
+            value={formValues.hero.profileImageUrl}
+            onChange={handleFieldChange}
+            error={getFieldError("hero.profileImageUrl", "hero")}
+            disabled={isSubmitting}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose Hero Profile Image"
+            helpText="Choose the portrait shown only in the Hero section. Existing sites fall back to the legacy Owner image until this field is saved."
+            onUnauthorized={onMediaUnauthorized}
+            previewAlt="Hero profile image preview"
+            previewClassName="mx-auto size-24 rounded-lg object-cover"
+          />
+
           <ImageUrlField
             id="settings-hero-cover-image"
             name="hero.coverImageUrl"
@@ -1950,6 +1950,23 @@ function SiteSettingsForm({
         description="Manage the public About content, animated identity roles and manually linked rotating work items."
       >
         <div className="grid gap-2.5">
+          <ImageUrlField
+            id="settings-about-profile-image"
+            name="about.profileImageUrl"
+            label="About Profile Image"
+            value={formValues.about.profileImageUrl}
+            onChange={handleFieldChange}
+            error={getFieldError("about.profileImageUrl", "about")}
+            disabled={isSubmitting}
+            accessToken={accessToken}
+            allowedTypes={["image", "svg"]}
+            pickerTitle="Choose About Profile Image"
+            helpText="Choose the portrait shown only in the About section. Existing sites fall back to the legacy Owner image until this field is saved."
+            onUnauthorized={onMediaUnauthorized}
+            previewAlt="About profile image preview"
+            previewClassName="mx-auto size-24 rounded-lg object-cover"
+          />
+
           <TextInput
             id="settings-about-eyebrow"
             name="about.eyebrow"

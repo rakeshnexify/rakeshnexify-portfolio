@@ -362,7 +362,9 @@ function AboutSection() {
   const location = String(owner.location || "").trim();
   const availability = String(contact.availability || "").trim();
 
-  const profileImageUrl = String(owner.profileImageUrl || "").trim();
+  const profileImageUrl = String(
+    about.profileImageUrl || owner.profileImageUrl || "",
+  ).trim();
   const resumeUrl = String(owner.resumeUrl || "").trim();
 
   const aboutHeading = String(about.heading || about.title || "").trim();

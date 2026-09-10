@@ -708,6 +708,10 @@ function createSiteSettingsFormValues(settings = {}) {
     },
 
     hero: {
+      profileImageUrl:
+        cleanString(hero.profileImageUrl) ||
+        cleanString(owner.profileImageUrl),
+
       coverImageUrl: cleanString(hero.coverImageUrl),
 
       eyebrow: cleanString(hero.eyebrow),
@@ -724,6 +728,10 @@ function createSiteSettingsFormValues(settings = {}) {
     },
 
     about: {
+      profileImageUrl:
+        cleanString(about.profileImageUrl) ||
+        cleanString(owner.profileImageUrl),
+
       eyebrow: cleanString(about.eyebrow),
 
       heading: cleanString(about.heading) || cleanString(about.title),
@@ -940,6 +948,8 @@ function createSiteSettingsPayload(formValues = {}) {
     },
 
     hero: {
+      profileImageUrl: values.hero.profileImageUrl,
+
       coverImageUrl: values.hero.coverImageUrl,
 
       eyebrow: values.hero.eyebrow,
@@ -966,6 +976,8 @@ function createSiteSettingsPayload(formValues = {}) {
     },
 
     about: {
+      profileImageUrl: values.about.profileImageUrl,
+
       eyebrow: values.about.eyebrow,
 
       heading: values.about.heading,

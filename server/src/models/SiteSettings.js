@@ -39,7 +39,7 @@ const brandSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: 150,
-      default: "Developer · Creator · Entrepreneur",
+      default: "Developer Â· Creator Â· Entrepreneur",
     },
     logoUrl: {
       type: String,
@@ -143,6 +143,12 @@ const heroQuickLinkSchema = new mongoose.Schema(
 
 const heroSchema = new mongoose.Schema(
   {
+    profileImageUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
     coverImageUrl: {
       type: String,
       trim: true,
@@ -264,6 +270,13 @@ const aboutIdentityRoleSchema = new mongoose.Schema(
 
 const aboutSchema = new mongoose.Schema(
   {
+    profileImageUrl: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+
     eyebrow: {
       type: String,
       trim: true,

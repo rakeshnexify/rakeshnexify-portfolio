@@ -12,7 +12,7 @@ const siteSettingsPageDefinitions = [
     title: "Owner Profile",
     shortTitle: "Owner",
     description:
-      "Manage the portfolio owner name, professional title, location, image and resume.",
+      "Manage the portfolio owner name, professional title, location and resume.",
     path: "/admin/site-settings/owner",
   },
   {
@@ -20,7 +20,7 @@ const siteSettingsPageDefinitions = [
     title: "Hero Section",
     shortTitle: "Hero",
     description:
-      "Manage the homepage Hero heading, introduction and action buttons.",
+      "Manage the homepage Hero profile image, heading, introduction and action buttons.",
     path: "/admin/site-settings/hero",
   },
   {
@@ -28,7 +28,7 @@ const siteSettingsPageDefinitions = [
     title: "About Section",
     shortTitle: "About",
     description:
-      "Manage the About heading, description and professional highlights.",
+      "Manage the About profile image, heading, description and professional highlights.",
     path: "/admin/site-settings/about",
   },
   {
