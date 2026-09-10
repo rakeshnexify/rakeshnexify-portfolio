@@ -89,6 +89,117 @@ const footerNavigationSectionKeys = new Set(
     .map((section) => section.key),
 );
 
+const PRIVACY_POLICY_STARTER_TEMPLATE = `This Privacy Policy explains how information is collected, used and protected when someone visits or interacts with this website or related services.
+
+## Information We Collect
+
+We may collect information you voluntarily provide when you contact us, request a service, subscribe to updates or submit a form on this website.
+
+- Name, email address, phone number or other contact details
+- Project or service requirements shared through forms or messages
+- Communication history related to enquiries, support or collaboration
+
+## Technical and Usage Data
+
+We may automatically receive limited technical information to improve website performance, security and user experience.
+
+- Browser, device and operating system details
+- Pages viewed, session activity and approximate analytics data
+- Error, diagnostic and security related logs
+
+## How We Use Information
+
+Information may be used to respond to enquiries, deliver services, improve the website and maintain normal business communication.
+
+- To communicate about projects, services or support requests
+- To improve website usability, performance and content quality
+- To maintain records, security controls and operational reliability
+
+## Sharing and Disclosure
+
+Information is not sold. It may only be shared when reasonably necessary to operate the website, deliver requested services or comply with legal obligations.
+
+- Trusted service providers that support hosting, communication or analytics
+- Professional advisers or legal authorities when required by law
+- Business collaborators only when relevant to a requested project or service
+
+## Data Security
+
+Reasonable technical and organisational safeguards are used to help protect information. However, no website or online transmission can be guaranteed to be completely secure.
+
+## Data Retention
+
+Information is retained only for as long as reasonably necessary for communication, service delivery, compliance or legitimate business needs.
+
+## Your Choices and Rights
+
+You may request access, correction or deletion of your personal information where applicable. You may also contact us to ask questions about data handling practices.
+
+## Third-Party Links
+
+This website may contain links to third-party services or platforms. Their privacy practices are governed by their own policies and terms.
+
+## Policy Updates
+
+This Privacy Policy may be updated from time to time to reflect operational, legal or service changes. The latest version published on this page applies.
+
+## Contact Us
+
+If you have questions about this Privacy Policy, please contact us using the website contact information.`;
+
+const TERMS_CONDITIONS_STARTER_TEMPLATE = `These Terms & Conditions govern access to and use of this website, its content and any related services. By using the website, you agree to these terms.
+
+## Acceptance of Terms
+
+By accessing, browsing or using this website, you confirm that you accept these Terms & Conditions and agree to comply with them.
+
+## Website and Service Use
+
+The website is provided to share information, showcase work and support legitimate business enquiries or collaborations.
+
+- Use the website only for lawful purposes
+- Do not attempt to misuse forms, security features or website functionality
+- Do not copy, interfere with or disrupt the website in an abusive manner
+
+## User Responsibilities
+
+You are responsible for ensuring that information you provide is accurate, appropriate and does not violate any law or third-party rights.
+
+## Intellectual Property
+
+Unless otherwise stated, website content, branding, layouts, graphics, written content and original work displayed here are protected by applicable intellectual property rights.
+
+## Third-Party Services and Links
+
+The website may reference or link to third-party platforms, tools or websites. We are not responsible for their content, availability or practices.
+
+## Project, Payment and Service Terms
+
+Specific commercial terms such as pricing, project scope, delivery timelines, revisions or payment arrangements may be defined separately in proposals, invoices, agreements or service discussions.
+
+## Disclaimer
+
+The website and its content are provided on an “as available” basis for general information and business communication purposes. No guarantee is made that the website will always be uninterrupted, error free or suitable for every purpose.
+
+## Limitation of Liability
+
+To the maximum extent permitted by law, we are not liable for indirect, incidental or consequential loss arising from the use of this website or reliance on its content.
+
+## Suspension or Termination
+
+Access to this website or related services may be restricted, suspended or terminated where necessary for security, maintenance, legal compliance or misuse prevention.
+
+## Changes to These Terms
+
+These Terms & Conditions may be updated from time to time. Continued use of the website after updates means you accept the revised terms.
+
+## Governing Law
+
+These Terms & Conditions are governed by the laws applicable to the business location and any relevant jurisdiction requirements.
+
+## Contact Us
+
+For questions about these Terms & Conditions, please contact us using the website contact information.`;
 const IDOMERE_BLOG_NEWS_URL = "https://idomere.com/blog";
 
 function getCombinedBlogNewsLabel(blogSection, newsSection) {
@@ -1360,6 +1471,22 @@ function SiteSettingsForm({
     );
   }
 
+  function applyLegalStarterTemplate(pageKey, title, content) {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      legal: {
+        ...currentValues.legal,
+        [pageKey]: {
+          ...currentValues.legal?.[pageKey],
+          title,
+          content,
+        },
+      },
+    }));
+
+    clearFieldErrorGroup(`legal.${pageKey}`);
+    setSubmitError("");
+  }
   function handleHeroQuickLinksChange(nextItems) {
     const items = Array.isArray(nextItems) ? nextItems : [];
 
@@ -1743,7 +1870,7 @@ function SiteSettingsForm({
               onChange={handleFieldChange}
               error={getFieldError("brand.tagline", "brand")}
               disabled={isSubmitting}
-              placeholder="Developer Ã‚Â· Creator Ã‚Â· Entrepreneur"
+              placeholder="Developer Ãƒâ€šÃ‚Â· Creator Ãƒâ€šÃ‚Â· Entrepreneur"
               maxLength={150}
             />
           </div>
@@ -2775,6 +2902,34 @@ function SiteSettingsForm({
                 required={formValues.legal.privacyPolicy.isPublished}
               />
 
+              <div className="rounded-xl border border-dashed border-brand-300/40 bg-brand-50/60 p-3 dark:border-brand-500/30 dark:bg-brand-950/20">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-700 dark:text-brand-300">
+                      Starter structure
+                    </p>
+                    <p className="mt-1 text-[11px] leading-5 text-slate-600 dark:text-slate-300">
+                      Load a complete Privacy Policy outline with common headings, clauses and bullet points, then edit it to match your real business process.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      applyLegalStarterTemplate(
+                        "privacyPolicy",
+                        "Privacy Policy",
+                        PRIVACY_POLICY_STARTER_TEMPLATE,
+                      )
+                    }
+                    disabled={isSubmitting}
+                    className="inline-flex min-h-9 items-center justify-center rounded-lg border border-brand-600 bg-brand-600 px-3 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Load starter template
+                  </button>
+                </div>
+              </div>
+
               <TextareaInput
                 id="settings-legal-privacy-content"
                 name="legal.privacyPolicy.content"
@@ -2783,10 +2938,10 @@ function SiteSettingsForm({
                 onChange={handleFieldChange}
                 error={getFieldError("legal.privacyPolicy.content", "legal.privacyPolicy", "legal")}
                 disabled={isSubmitting}
-                rows={14}
+                rows={18}
                 maxLength={8000}
-                placeholder="Write the complete Privacy Policy here. Use blank lines between paragraphs."
-                helpText="Draft content stays private until Published is enabled."
+                placeholder={`Use "##" for section headings, "###" for subheadings, "-" for bullet points and blank lines between sections.\n\nExample:\n## Information We Collect\n- Name and contact details\n- Project requirements`}
+                helpText='Draft content stays private until Published is enabled. Use "##" headings and list markers so the public page renders as a full structured legal document.'
                 required={formValues.legal.privacyPolicy.isPublished}
               />
 
@@ -2855,6 +3010,34 @@ function SiteSettingsForm({
                 required={formValues.legal.termsConditions.isPublished}
               />
 
+              <div className="rounded-xl border border-dashed border-brand-300/40 bg-brand-50/60 p-3 dark:border-brand-500/30 dark:bg-brand-950/20">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-700 dark:text-brand-300">
+                      Starter structure
+                    </p>
+                    <p className="mt-1 text-[11px] leading-5 text-slate-600 dark:text-slate-300">
+                      Load a complete Terms & Conditions outline with standard clauses, responsibilities, disclaimer and limitation sections.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      applyLegalStarterTemplate(
+                        "termsConditions",
+                        "Terms & Conditions",
+                        TERMS_CONDITIONS_STARTER_TEMPLATE,
+                      )
+                    }
+                    disabled={isSubmitting}
+                    className="inline-flex min-h-9 items-center justify-center rounded-lg border border-brand-600 bg-brand-600 px-3 text-[11px] font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Load starter template
+                  </button>
+                </div>
+              </div>
+
               <TextareaInput
                 id="settings-legal-terms-content"
                 name="legal.termsConditions.content"
@@ -2863,10 +3046,10 @@ function SiteSettingsForm({
                 onChange={handleFieldChange}
                 error={getFieldError("legal.termsConditions.content", "legal.termsConditions", "legal")}
                 disabled={isSubmitting}
-                rows={14}
+                rows={18}
                 maxLength={8000}
-                placeholder="Write the complete Terms & Conditions here. Use blank lines between paragraphs."
-                helpText="Draft content stays private until Published is enabled."
+                placeholder={`Use "##" for section headings, "###" for subheadings, "-" for bullet points and blank lines between sections.\n\nExample:\n## Acceptance of Terms\nShort summary...\n\n## User Responsibilities\n- Provide accurate information`}
+                helpText='Draft content stays private until Published is enabled. Use "##" headings and list markers so the public page renders as a full structured legal document.'
                 required={formValues.legal.termsConditions.isPublished}
               />
 
