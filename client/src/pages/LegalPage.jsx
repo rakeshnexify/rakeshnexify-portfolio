@@ -143,7 +143,7 @@ function renderSectionBlock(block, keyPrefix) {
     return (
       <h3
         key={`${keyPrefix}-heading`}
-        className="text-lg font-semibold tracking-tight text-white"
+        className="text-base font-semibold tracking-tight text-white sm:text-lg"
       >
         {block.text}
       </h3>
@@ -154,7 +154,7 @@ function renderSectionBlock(block, keyPrefix) {
     return (
       <ul
         key={`${keyPrefix}-unordered`}
-        className="space-y-2 pl-5 text-sm leading-7 text-slate-300 marker:text-brand-400 list-disc"
+        className="list-disc space-y-2 pl-5 text-sm leading-7 text-slate-300 marker:text-brand-400"
       >
         {block.items.map((item, itemIndex) => (
           <li key={`${keyPrefix}-unordered-${itemIndex}`}>{item}</li>
@@ -167,7 +167,7 @@ function renderSectionBlock(block, keyPrefix) {
     return (
       <ol
         key={`${keyPrefix}-ordered`}
-        className="space-y-2 pl-5 text-sm leading-7 text-slate-300 marker:text-brand-400 list-decimal"
+        className="list-decimal space-y-2 pl-5 text-sm leading-7 text-slate-300 marker:text-brand-400"
       >
         {block.items.map((item, itemIndex) => (
           <li key={`${keyPrefix}-ordered-${itemIndex}`}>{item}</li>
@@ -247,31 +247,31 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
         tabIndex={-1}
         className="min-h-[calc(100vh-5rem)] overflow-x-hidden bg-slate-950 px-4 py-8 text-white sm:px-6 sm:py-10 lg:px-8"
       >
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
           <section className="rounded-[24px] border border-slate-800 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98),_rgba(30,41,59,0.94))] px-5 py-4 shadow-[0_18px_60px_rgba(15,23,42,0.35)] sm:px-6">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-300">
-                    Legal
-                  </span>
-                  <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-300">
-                    {isPublished ? "Published" : "Draft"}
-                  </span>
-                  <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-300">
-                    Updated {publishedDateLabel}
-                  </span>
-                </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-brand-300">
+                  Legal
+                </span>
 
-                <div className="mt-3 flex flex-col gap-2 xl:flex-row xl:items-baseline xl:gap-5">
-                  <h1 className="shrink-0 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                    {title}
-                  </h1>
+                <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-300">
+                  {isPublished ? "Published" : "Draft"}
+                </span>
 
-                  <p className="max-w-4xl text-sm leading-6 text-slate-300">
-                    {summary}
-                  </p>
-                </div>
+                <span className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-300">
+                  Updated {publishedDateLabel}
+                </span>
+              </div>
+
+              <div className="mt-3 flex flex-col gap-2 xl:flex-row xl:items-baseline xl:gap-5">
+                <h1 className="shrink-0 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                  {title}
+                </h1>
+
+                <p className="max-w-4xl text-sm leading-6 text-slate-300">
+                  {summary}
+                </p>
               </div>
             </div>
           </section>
@@ -290,7 +290,6 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
                 <div className="h-8 w-56 animate-pulse rounded bg-slate-800 motion-reduce:animate-none" />
                 <div className="h-4 w-full animate-pulse rounded bg-slate-800/80 motion-reduce:animate-none" />
                 <div className="h-4 w-5/6 animate-pulse rounded bg-slate-800/80 motion-reduce:animate-none" />
-                <div className="h-4 w-2/3 animate-pulse rounded bg-slate-800/80 motion-reduce:animate-none" />
               </div>
             </section>
           ) : !isPublished ? (
@@ -310,40 +309,35 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
               </div>
             </section>
           ) : (
-            <section className="grid gap-6 lg:sticky lg:top-[5.5rem] lg:h-[calc(100vh-6.5rem)] lg:min-h-0 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-stretch">
-              <aside className="space-y-5 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pr-2">
-                <div className="rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-300">
-                    Quick navigation
-                  </p>
-
-                  <div className="mt-4 space-y-2">
-                    {sections.map((section, index) => (
-                      <a
-                        key={section.id}
-                        href={`#${section.id}`}
-                        className="flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2.5 transition hover:border-brand-500/50 hover:bg-slate-900"
-                      >
-                        <span className="mt-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-300">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                        <span className="text-sm leading-5 text-slate-200">
-                          {section.title}
-                        </span>
-                      </a>
-                    ))}
-                  </div>
+            <>
+              <nav
+                aria-label={`${title} sections`}
+                className="sticky top-[5.25rem] z-20 rounded-2xl border border-slate-800 bg-slate-950/95 p-2 shadow-lg backdrop-blur"
+              >
+                <div className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1">
+                  {sections.map((section, index) => (
+                    <a
+                      key={section.id}
+                      href={`#${section.id}`}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5 text-[11px] font-semibold leading-none text-slate-200 transition hover:border-brand-500 hover:bg-brand-500/10 hover:text-white"
+                    >
+                      <span className="text-[10px] font-bold text-brand-300">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span>{section.title}</span>
+                    </a>
+                  ))}
                 </div>
-              </aside>
+              </nav>
 
-              <article className="space-y-5 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pr-2">
+              <article className="space-y-4">
                 {intro.length > 0 && (
-                  <section className="rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm sm:p-6">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-300">
+                  <section className="rounded-[22px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm sm:p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-300">
                       Introduction
                     </p>
 
-                    <div className="mt-4 space-y-4">
+                    <div className="mt-3 space-y-4">
                       {intro.map((paragraph, index) => (
                         <p
                           key={`intro-${index}`}
@@ -360,24 +354,25 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
                   <section
                     key={section.id}
                     id={section.id}
-                    className="scroll-mt-24 rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm sm:p-6"
+                    className="scroll-mt-36 rounded-[22px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm sm:p-6"
                   >
                     <div className="flex flex-wrap items-start gap-3 border-b border-slate-800 pb-4">
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-brand-400/30 bg-brand-500/10 text-xs font-bold text-brand-200">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-brand-400/30 bg-brand-500/10 text-[11px] font-bold text-brand-200">
                         {String(index + 1).padStart(2, "0")}
                       </span>
 
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">
                           Section
                         </p>
-                        <h2 className="mt-1 text-2xl font-bold tracking-tight text-white">
+
+                        <h2 className="mt-1 text-xl font-bold tracking-tight text-white sm:text-2xl">
                           {section.title}
                         </h2>
                       </div>
                     </div>
 
-                    <div className="mt-5 space-y-4">
+                    <div className="mt-4 space-y-4">
                       {section.blocks.map((block, blockIndex) =>
                         renderSectionBlock(
                           block,
@@ -388,72 +383,70 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
                   </section>
                 ))}
               </article>
-            </section>
-          )}
 
-          {!isLoading && isPublished && (
-            <section className="rounded-[24px] border border-slate-800 bg-slate-900/70 px-4 py-4 shadow-sm sm:px-5">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-center">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Status
-                  </p>
-                  <p className="mt-1 truncate text-sm font-semibold text-white">
-                    Published
-                  </p>
-                </div>
+              <section className="rounded-[22px] border border-slate-800 bg-slate-900/70 px-4 py-4 shadow-sm sm:px-5">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-center">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Status
+                    </p>
+                    <p className="mt-1 truncate text-sm font-semibold text-white">
+                      Published
+                    </p>
+                  </div>
 
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Last updated
-                  </p>
-                  <p className="mt-1 truncate text-sm font-semibold text-white">
-                    {publishedDateLabel}
-                  </p>
-                </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Last updated
+                    </p>
+                    <p className="mt-1 truncate text-sm font-semibold text-white">
+                      {publishedDateLabel}
+                    </p>
+                  </div>
 
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Website
-                  </p>
-                  <p className="mt-1 truncate text-sm font-semibold text-white">
-                    {brandName}
-                  </p>
-                </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Website
+                    </p>
+                    <p className="mt-1 truncate text-sm font-semibold text-white">
+                      {brandName}
+                    </p>
+                  </div>
 
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Email
-                  </p>
-                  {contactEmail ? (
-                    <a
-                      href={`mailto:${contactEmail}`}
-                      className="mt-1 block truncate text-sm font-semibold text-brand-300 transition hover:text-brand-200"
-                    >
-                      {contactEmail}
-                    </a>
-                  ) : (
-                    <p className="mt-1 text-sm text-slate-500">—</p>
-                  )}
-                </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Email
+                    </p>
+                    {contactEmail ? (
+                      <a
+                        href={`mailto:${contactEmail}`}
+                        className="mt-1 block truncate text-sm font-semibold text-brand-300 transition hover:text-brand-200"
+                      >
+                        {contactEmail}
+                      </a>
+                    ) : (
+                      <p className="mt-1 text-sm text-slate-500">—</p>
+                    )}
+                  </div>
 
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Phone
-                  </p>
-                  {contactPhone ? (
-                    <a
-                      href={`tel:${contactPhone}`}
-                      className="mt-1 block truncate text-sm font-semibold text-brand-300 transition hover:text-brand-200"
-                    >
-                      {contactPhone}
-                    </a>
-                  ) : (
-                    <p className="mt-1 text-sm text-slate-500">—</p>
-                  )}
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      Phone
+                    </p>
+                    {contactPhone ? (
+                      <a
+                        href={`tel:${contactPhone}`}
+                        className="mt-1 block truncate text-sm font-semibold text-brand-300 transition hover:text-brand-200"
+                      >
+                        {contactPhone}
+                      </a>
+                    ) : (
+                      <p className="mt-1 text-sm text-slate-500">—</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            </>
           )}
         </div>
       </main>
