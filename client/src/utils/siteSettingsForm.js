@@ -126,13 +126,13 @@ const defaultPlatformGroups = {
 const defaultFooterLegalLinks = [
   {
     label: "Privacy Policy",
-    url: "#privacy",
+    url: "/privacy-policy",
     isVisible: true,
     order: 1,
   },
   {
-    label: "Terms",
-    url: "#terms",
+    label: "Terms & Conditions",
+    url: "/terms-and-conditions",
     isVisible: true,
     order: 2,
   },
@@ -601,6 +601,19 @@ function normalizePlatforms(value, fallbackPlatforms = []) {
     );
 }
 
+function normalizeLegacyLegalRoute(value) {
+  const url = cleanString(value);
+
+  if (url === "#privacy") {
+    return "/privacy-policy";
+  }
+
+  if (url === "#terms") {
+    return "/terms-and-conditions";
+  }
+
+  return url;
+}
 function createEmptyLegalLink(order = 1) {
   return {
     label: "",
@@ -613,10 +626,20 @@ function createEmptyLegalLink(order = 1) {
 function normalizeLegalLink(link, index) {
   const numericOrder = Number(link?.order);
 
-  return {
-    label: cleanString(link?.label),
+  const sourceUrl =
+    cleanString(link?.url) || cleanString(link?.href);
 
-    url: cleanString(link?.url) || cleanString(link?.href),
+  const normalizedUrl = normalizeLegacyLegalRoute(sourceUrl);
+
+  const normalizedLabel =
+    sourceUrl === "#terms" && cleanString(link?.label) === "Terms"
+      ? "Terms & Conditions"
+      : cleanString(link?.label);
+
+  return {
+    label: normalizedLabel,
+
+    url: normalizedUrl,
 
     isVisible: link?.isVisible !== false,
 
@@ -665,6 +688,29 @@ function normalizeFooter(footer = {}) {
   };
 }
 
+function normalizeLegalPage(page = {}, defaultTitle = "") {
+  return {
+    title: cleanString(page?.title) || defaultTitle,
+    content: cleanString(page?.content),
+    seoTitle: cleanString(page?.seoTitle),
+    seoDescription: cleanString(page?.seoDescription),
+    isPublished: page?.isPublished === true,
+    publishedAt: page?.publishedAt || null,
+  };
+}
+
+function normalizeLegalSettings(value = {}) {
+  return {
+    privacyPolicy: normalizeLegalPage(
+      value?.privacyPolicy,
+      "Privacy Policy",
+    ),
+    termsConditions: normalizeLegalPage(
+      value?.termsConditions,
+      "Terms & Conditions",
+    ),
+  };
+}
 function createSiteSettingsFormValues(settings = {}) {
   const brand = settings?.brand || {};
   const owner = settings?.owner || {};
@@ -672,6 +718,7 @@ function createSiteSettingsFormValues(settings = {}) {
   const about = settings?.about || {};
   const contact = settings?.contact || {};
   const seo = settings?.seo || {};
+  const legal = normalizeLegalSettings(settings?.legal);
 
   const primaryButton = hero.primaryButton || hero.primaryAction || {};
 
@@ -785,6 +832,8 @@ function createSiteSettingsFormValues(settings = {}) {
 
       availability: cleanString(contact.availability),
     },
+
+    legal,
 
     seo: {
       title: cleanString(seo.title),
@@ -919,6 +968,26 @@ function createTestimonialsSectionPayload(section) {
   };
 }
 
+function createLegalPagePayload(page) {
+  return {
+    title: cleanString(page?.title),
+    content: cleanString(page?.content),
+    seoTitle: cleanString(page?.seoTitle),
+    seoDescription: cleanString(page?.seoDescription),
+    isPublished: page?.isPublished === true,
+  };
+}
+
+function createLegalSettingsPayload(formValues = {}) {
+  const values = createSiteSettingsFormValues(formValues);
+
+  return {
+    legal: {
+      privacyPolicy: createLegalPagePayload(values.legal.privacyPolicy),
+      termsConditions: createLegalPagePayload(values.legal.termsConditions),
+    },
+  };
+}
 function createSiteSettingsPayload(formValues = {}) {
   const values = createSiteSettingsFormValues(formValues);
 
@@ -1171,6 +1240,7 @@ export {
   createEmptyPlatform,
   createEmptyTestimonialTrustedClient,
   createKeywordsArray,
+  createLegalSettingsPayload,
   createSiteSettingsFormValues,
   createSiteSettingsPayload,
   defaultFooterLegalLinks,

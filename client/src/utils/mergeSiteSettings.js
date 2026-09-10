@@ -4,6 +4,7 @@ const DYNAMIC_OBJECT_KEYS = [
   "hero",
   "about",
   "contact",
+  "legal",
   "seo",
 ];
 

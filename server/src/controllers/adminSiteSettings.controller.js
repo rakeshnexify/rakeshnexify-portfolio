@@ -132,6 +132,13 @@ const contactStringFields = [
   "availability",
 ];
 
+const legalPageStringFields = [
+  "title",
+  "content",
+  "seoTitle",
+  "seoDescription",
+];
+
 const seoStringFields = ["title", "description", "ogImageUrl"];
 
 const footerStringFields = [
@@ -895,6 +902,66 @@ function appendContactPayload(payload, contactValue) {
   });
 }
 
+function appendLegalPagePayload(payload, pageValue, prefix) {
+  const page = ensureObject(pageValue, prefix);
+
+  appendStringFields(payload, page, prefix, legalPageStringFields);
+
+  if (hasOwnProperty(page, "isPublished")) {
+    const isPublished = cleanBoolean(
+      page.isPublished,
+      `${prefix}.isPublished`,
+    );
+
+    const title = cleanString(page.title);
+    const content = cleanString(page.content);
+
+    if (isPublished && !title) {
+      throw createHttpError(
+        "Published legal pages require a title.",
+        400,
+        {
+          [`${prefix}.title`]:
+            "Add a title before publishing this legal page.",
+        },
+      );
+    }
+
+    if (isPublished && !content) {
+      throw createHttpError(
+        "Published legal pages require content.",
+        400,
+        {
+          [`${prefix}.content`]:
+            "Add legal page content before publishing.",
+        },
+      );
+    }
+
+    payload[`${prefix}.isPublished`] = isPublished;
+    payload[`${prefix}.publishedAt`] = isPublished ? new Date() : null;
+  }
+}
+
+function appendLegalPayload(payload, legalValue) {
+  const legal = ensureObject(legalValue, "legal");
+
+  if (hasOwnProperty(legal, "privacyPolicy")) {
+    appendLegalPagePayload(
+      payload,
+      legal.privacyPolicy,
+      "legal.privacyPolicy",
+    );
+  }
+
+  if (hasOwnProperty(legal, "termsConditions")) {
+    appendLegalPagePayload(
+      payload,
+      legal.termsConditions,
+      "legal.termsConditions",
+    );
+  }
+}
 function appendSeoPayload(payload, seoValue) {
   const seo = ensureObject(seoValue, "seo");
 
@@ -1325,6 +1392,10 @@ function buildSiteSettingsPayload(requestBody) {
 
   if (hasOwnProperty(body, "contact")) {
     appendContactPayload(payload, body.contact);
+  }
+
+  if (hasOwnProperty(body, "legal")) {
+    appendLegalPayload(payload, body.legal);
   }
 
   if (hasOwnProperty(body, "seo")) {

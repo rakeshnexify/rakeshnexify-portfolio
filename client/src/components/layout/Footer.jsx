@@ -112,6 +112,19 @@ function getFooterServices(services) {
   return [...servicesByKey.values()].sort(sortByOrder).slice(0, 6);
 }
 
+function normalizeLegacyLegalRoute(value) {
+  const url = getSafePublicUrl(value);
+
+  if (url === "#privacy") {
+    return "/privacy-policy";
+  }
+
+  if (url === "#terms") {
+    return "/terms-and-conditions";
+  }
+
+  return url;
+}
 function getLegalLinks(footer) {
   const sourceLegalLinks = Array.isArray(footer?.legalLinks)
     ? footer.legalLinks
@@ -120,8 +133,13 @@ function getLegalLinks(footer) {
   const legalLinksByKey = new Map();
 
   sourceLegalLinks.forEach((link, index) => {
-    const label = String(link?.label || "").trim();
-    const url = getSafePublicUrl(link?.url || link?.href);
+    const sourceUrl = String(link?.url || link?.href || "").trim();
+    const url = normalizeLegacyLegalRoute(sourceUrl);
+    const sourceLabel = String(link?.label || "").trim();
+    const label =
+      sourceUrl === "#terms" && sourceLabel === "Terms"
+        ? "Terms & Conditions"
+        : sourceLabel;
 
     if (!link || link.isVisible === false || !label || !url) {
       return;

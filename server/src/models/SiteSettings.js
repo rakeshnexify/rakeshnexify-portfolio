@@ -39,7 +39,7 @@ const brandSchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: 150,
-      default: "Developer Â· Creator Â· Entrepreneur",
+      default: "Developer Ã‚Â· Creator Ã‚Â· Entrepreneur",
     },
     logoUrl: {
       type: String,
@@ -641,13 +641,13 @@ const footerSchema = new mongoose.Schema(
       default: () => [
         {
           label: "Privacy Policy",
-          url: "#privacy",
+          url: "/privacy-policy",
           isVisible: true,
           order: 1,
         },
         {
-          label: "Terms",
-          url: "#terms",
+          label: "Terms & Conditions",
+          url: "/terms-and-conditions",
           isVisible: true,
           order: 2,
         },
@@ -705,6 +705,85 @@ const contactSchema = new mongoose.Schema(
   },
 );
 
+const legalPageSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      trim: true,
+      maxlength: [120, "Legal page title cannot exceed 120 characters."],
+      default: "",
+    },
+
+    content: {
+      type: String,
+      trim: true,
+      maxlength: [8000, "Legal page content cannot exceed 8000 characters."],
+      default: "",
+    },
+
+    seoTitle: {
+      type: String,
+      trim: true,
+      maxlength: [70, "Legal page SEO title cannot exceed 70 characters."],
+      default: "",
+    },
+
+    seoDescription: {
+      type: String,
+      trim: true,
+      maxlength: [180, "Legal page SEO description cannot exceed 180 characters."],
+      default: "",
+    },
+
+    isPublished: {
+      type: Boolean,
+      default: false,
+      validate: {
+        validator(value) {
+          if (!value) {
+            return true;
+          }
+
+          return Boolean(
+            String(this.title || "").trim() &&
+              String(this.content || "").trim(),
+          );
+        },
+        message:
+          "Published legal pages require both a title and content.",
+      },
+    },
+
+    publishedAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    _id: false,
+  },
+);
+
+const legalSchema = new mongoose.Schema(
+  {
+    privacyPolicy: {
+      type: legalPageSchema,
+      default: () => ({
+        title: "Privacy Policy",
+      }),
+    },
+
+    termsConditions: {
+      type: legalPageSchema,
+      default: () => ({
+        title: "Terms & Conditions",
+      }),
+    },
+  },
+  {
+    _id: false,
+  },
+);
 const seoSchema = new mongoose.Schema(
   {
     title: {
@@ -1103,6 +1182,11 @@ const siteSettingsSchema = new mongoose.Schema(
 
     contact: {
       type: contactSchema,
+      default: () => ({}),
+    },
+
+    legal: {
+      type: legalSchema,
       default: () => ({}),
     },
 

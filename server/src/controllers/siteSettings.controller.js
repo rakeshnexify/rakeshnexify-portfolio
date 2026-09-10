@@ -21,6 +21,22 @@ function getOrderedArray(items) {
   return [...items].sort(sortByOrder);
 }
 
+function serializePublishedLegalPage(page) {
+  if (!page || page.isPublished !== true) {
+    return {
+      isPublished: false,
+    };
+  }
+
+  return {
+    title: String(page.title || "").trim(),
+    content: String(page.content || "").trim(),
+    seoTitle: String(page.seoTitle || "").trim(),
+    seoDescription: String(page.seoDescription || "").trim(),
+    isPublished: true,
+    publishedAt: page.publishedAt || null,
+  };
+}
 function serializePublicSettings(settings) {
   const publicSettings =
     typeof settings?.toObject === "function"
@@ -55,6 +71,16 @@ function serializePublicSettings(settings) {
       workItems: getOrderedArray(publicSettings.about.workItems),
     };
   }
+
+  const legal =
+    publicSettings.legal && typeof publicSettings.legal === "object"
+      ? publicSettings.legal
+      : {};
+
+  publicSettings.legal = {
+    privacyPolicy: serializePublishedLegalPage(legal.privacyPolicy),
+    termsConditions: serializePublishedLegalPage(legal.termsConditions),
+  };
 
   const footer =
     publicSettings.footer && typeof publicSettings.footer === "object"

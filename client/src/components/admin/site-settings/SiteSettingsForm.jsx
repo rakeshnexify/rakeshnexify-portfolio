@@ -7,6 +7,7 @@ import { publicNavigationDestinations } from "../../../utils/publicNavigation";
 import MediaField from "../media/MediaField";
 
 import {
+  createLegalSettingsPayload,
   createSiteSettingsFormValues,
   createSiteSettingsPayload,
 } from "../../../utils/siteSettingsForm";
@@ -410,6 +411,56 @@ function validatePlatformGroup(formValues, fieldName, errors) {
   });
 }
 
+function validateLegalPage(page, prefix, errors) {
+  const title = String(page?.title || "").trim();
+  const content = String(page?.content || "").trim();
+  const seoTitle = String(page?.seoTitle || "").trim();
+  const seoDescription = String(page?.seoDescription || "").trim();
+
+  if (title.length > 120) {
+    errors[`${prefix}.title`] =
+      "Legal page title cannot exceed 120 characters.";
+  }
+
+  if (content.length > 8000) {
+    errors[`${prefix}.content`] =
+      "Legal page content cannot exceed 8000 characters.";
+  }
+
+  if (seoTitle.length > 70) {
+    errors[`${prefix}.seoTitle`] =
+      "SEO title cannot exceed 70 characters.";
+  }
+
+  if (seoDescription.length > 180) {
+    errors[`${prefix}.seoDescription`] =
+      "SEO description cannot exceed 180 characters.";
+  }
+
+  if (page?.isPublished === true && !title) {
+    errors[`${prefix}.title`] =
+      "Add a title before publishing this legal page.";
+  }
+
+  if (page?.isPublished === true && !content) {
+    errors[`${prefix}.content`] =
+      "Add content before publishing this legal page.";
+  }
+}
+
+function validateLegalPages(formValues, errors) {
+  validateLegalPage(
+    formValues?.legal?.privacyPolicy,
+    "legal.privacyPolicy",
+    errors,
+  );
+
+  validateLegalPage(
+    formValues?.legal?.termsConditions,
+    "legal.termsConditions",
+    errors,
+  );
+}
 function validateLegalLinks(formValues, errors) {
   const legalLinks = formValues?.footer?.legalLinks;
 
@@ -903,6 +954,7 @@ function validateSiteSettingsForm(formValues) {
 
   validateHeroQuickLinks(formValues, errors);
   validateAboutIdentityRoles(formValues, errors);
+  validateLegalPages(formValues, errors);
   validateAboutWorkItems(formValues, errors);
 
   platformGroupFields.forEach((fieldName) => {
@@ -1600,7 +1652,12 @@ function SiteSettingsForm({
       setServerErrors({});
       setSubmitError("");
 
-      await onSubmit(createSiteSettingsPayload(formValues));
+      const payload =
+        activePageKey === "legal"
+          ? createLegalSettingsPayload(formValues)
+          : createSiteSettingsPayload(formValues);
+
+      await onSubmit(payload);
     } catch (error) {
       setServerErrors(error?.fieldErrors || {});
 
@@ -1686,7 +1743,7 @@ function SiteSettingsForm({
               onChange={handleFieldChange}
               error={getFieldError("brand.tagline", "brand")}
               disabled={isSubmitting}
-              placeholder="Developer Â· Creator Â· Entrepreneur"
+              placeholder="Developer Ã‚Â· Creator Ã‚Â· Entrepreneur"
               maxLength={150}
             />
           </div>
@@ -2674,6 +2731,173 @@ function SiteSettingsForm({
         </>
       )}
 
+      <SettingsCard
+        isVisible={isPanelActive("legal")}
+        title="Legal Pages"
+        description="Draft, review and publish the Privacy Policy and Terms & Conditions independently."
+      >
+        <div className="grid gap-3 xl:grid-cols-2">
+          <section className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/50 sm:p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+                  Privacy
+                </p>
+                <h3 className="mt-0.5 text-sm font-bold text-slate-950 dark:text-white">
+                  Privacy Policy
+                </h3>
+              </div>
+
+              <label className="inline-flex cursor-pointer items-center gap-2 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  name="legal.privacyPolicy.isPublished"
+                  checked={formValues.legal.privacyPolicy.isPublished}
+                  onChange={handleFieldChange}
+                  disabled={isSubmitting}
+                  className="size-4 accent-brand-600"
+                />
+                Published
+              </label>
+            </div>
+
+            <div className="grid gap-2.5">
+              <TextInput
+                id="settings-legal-privacy-title"
+                name="legal.privacyPolicy.title"
+                label="Page title"
+                value={formValues.legal.privacyPolicy.title}
+                onChange={handleFieldChange}
+                error={getFieldError("legal.privacyPolicy.title", "legal.privacyPolicy", "legal")}
+                disabled={isSubmitting}
+                maxLength={120}
+                placeholder="Privacy Policy"
+                required={formValues.legal.privacyPolicy.isPublished}
+              />
+
+              <TextareaInput
+                id="settings-legal-privacy-content"
+                name="legal.privacyPolicy.content"
+                label="Policy content"
+                value={formValues.legal.privacyPolicy.content}
+                onChange={handleFieldChange}
+                error={getFieldError("legal.privacyPolicy.content", "legal.privacyPolicy", "legal")}
+                disabled={isSubmitting}
+                rows={14}
+                maxLength={8000}
+                placeholder="Write the complete Privacy Policy here. Use blank lines between paragraphs."
+                helpText="Draft content stays private until Published is enabled."
+                required={formValues.legal.privacyPolicy.isPublished}
+              />
+
+              <TextInput
+                id="settings-legal-privacy-seo-title"
+                name="legal.privacyPolicy.seoTitle"
+                label="SEO title"
+                value={formValues.legal.privacyPolicy.seoTitle}
+                onChange={handleFieldChange}
+                error={getFieldError("legal.privacyPolicy.seoTitle", "legal.privacyPolicy", "legal")}
+                disabled={isSubmitting}
+                maxLength={70}
+                placeholder="Privacy Policy | RakeshNexify"
+              />
+
+              <TextareaInput
+                id="settings-legal-privacy-seo-description"
+                name="legal.privacyPolicy.seoDescription"
+                label="SEO description"
+                value={formValues.legal.privacyPolicy.seoDescription}
+                onChange={handleFieldChange}
+                error={getFieldError("legal.privacyPolicy.seoDescription", "legal.privacyPolicy", "legal")}
+                disabled={isSubmitting}
+                rows={2}
+                maxLength={180}
+                placeholder="Short search description for the Privacy Policy."
+              />
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/50 sm:p-4">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-300">
+                  Terms
+                </p>
+                <h3 className="mt-0.5 text-sm font-bold text-slate-950 dark:text-white">
+                  Terms & Conditions
+                </h3>
+              </div>
+
+              <label className="inline-flex cursor-pointer items-center gap-2 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  name="legal.termsConditions.isPublished"
+                  checked={formValues.legal.termsConditions.isPublished}
+                  onChange={handleFieldChange}
+                  disabled={isSubmitting}
+                  className="size-4 accent-brand-600"
+                />
+                Published
+              </label>
+            </div>
+
+            <div className="grid gap-2.5">
+              <TextInput
+                id="settings-legal-terms-title"
+                name="legal.termsConditions.title"
+                label="Page title"
+                value={formValues.legal.termsConditions.title}
+                onChange={handleFieldChange}
+                error={getFieldError("legal.termsConditions.title", "legal.termsConditions", "legal")}
+                disabled={isSubmitting}
+                maxLength={120}
+                placeholder="Terms & Conditions"
+                required={formValues.legal.termsConditions.isPublished}
+              />
+
+              <TextareaInput
+                id="settings-legal-terms-content"
+                name="legal.termsConditions.content"
+                label="Terms content"
+                value={formValues.legal.termsConditions.content}
+                onChange={handleFieldChange}
+                error={getFieldError("legal.termsConditions.content", "legal.termsConditions", "legal")}
+                disabled={isSubmitting}
+                rows={14}
+                maxLength={8000}
+                placeholder="Write the complete Terms & Conditions here. Use blank lines between paragraphs."
+                helpText="Draft content stays private until Published is enabled."
+                required={formValues.legal.termsConditions.isPublished}
+              />
+
+              <TextInput
+                id="settings-legal-terms-seo-title"
+                name="legal.termsConditions.seoTitle"
+                label="SEO title"
+                value={formValues.legal.termsConditions.seoTitle}
+                onChange={handleFieldChange}
+                error={getFieldError("legal.termsConditions.seoTitle", "legal.termsConditions", "legal")}
+                disabled={isSubmitting}
+                maxLength={70}
+                placeholder="Terms & Conditions | RakeshNexify"
+              />
+
+              <TextareaInput
+                id="settings-legal-terms-seo-description"
+                name="legal.termsConditions.seoDescription"
+                label="SEO description"
+                value={formValues.legal.termsConditions.seoDescription}
+                onChange={handleFieldChange}
+                error={getFieldError("legal.termsConditions.seoDescription", "legal.termsConditions", "legal")}
+                disabled={isSubmitting}
+                rows={2}
+                maxLength={180}
+                placeholder="Short search description for the Terms & Conditions."
+              />
+            </div>
+          </section>
+        </div>
+      </SettingsCard>
       <SettingsCard
         isVisible={isPanelActive("footer")}
         title="Footer Content"

@@ -64,6 +64,14 @@ const siteSettingsPageDefinitions = [
     path: "/admin/site-settings/navigation",
   },
   {
+    key: "legal",
+    title: "Legal Pages",
+    shortTitle: "Legal",
+    description:
+      "Manage Privacy Policy and Terms & Conditions content, SEO and publication status.",
+    path: "/admin/site-settings/legal",
+  },
+  {
     key: "footer",
     title: "Footer Settings",
     shortTitle: "Footer",

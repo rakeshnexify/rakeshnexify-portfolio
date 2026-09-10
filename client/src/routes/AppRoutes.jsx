@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 import AdminLayout from "../components/admin/layout/AdminLayout";
 import PageSeo from "../components/seo/PageSeo";
 import HomePage from "../pages/HomePage";
+import LegalPage from "../pages/LegalPage";
 import ContactPage from "../pages/ContactPage";
 import NotFoundPage from "../pages/NotFoundPage";
 import AdminAuditLogDetailPage from "../pages/admin/AdminAuditLogDetailPage";
@@ -251,6 +252,26 @@ function AppRoutes() {
         <Route element={<PublicSiteRoute />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route
+            path="/privacy-policy"
+            element={
+              <LegalPage
+                pageKey="privacyPolicy"
+                canonicalPath="/privacy-policy"
+                defaultTitle="Privacy Policy"
+              />
+            }
+          />
+          <Route
+            path="/terms-and-conditions"
+            element={
+              <LegalPage
+                pageKey="termsConditions"
+                canonicalPath="/terms-and-conditions"
+                defaultTitle="Terms & Conditions"
+              />
+            }
+          />
 
           <Route path="/skills" element={<Navigate to="/#skills" replace />} />
           <Route path="/services" element={<Navigate to="/#services" replace />} />
