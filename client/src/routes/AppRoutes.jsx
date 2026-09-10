@@ -15,8 +15,7 @@ import AdminCertificationAchievementEditorPage from "../pages/admin/AdminCertifi
 import AdminCertificationAchievementsPage from "../pages/admin/AdminCertificationAchievementsPage";
 import AdminClientPartnerEditorPage from "../pages/admin/AdminClientPartnerEditorPage";
 import AdminClientsPartnersPage from "../pages/admin/AdminClientsPartnersPage";
-import AdminCompaniesPage from "../pages/admin/AdminCompaniesPage";
-import AdminCompanyEditorPage from "../pages/admin/AdminCompanyEditorPage";
+
 import AdminContactMessagesPage from "../pages/admin/AdminContactMessagesPage";
 import AdminDashboardPage from "../pages/admin/AdminDashboardPage";
 import AdminEducationEditorPage from "../pages/admin/AdminEducationEditorPage";
@@ -524,16 +523,6 @@ function AppRoutes() {
             <Route
               path="/admin/projects/:id/edit"
               element={<AdminProjectEditorPage mode="edit" />}
-            />
-
-            <Route path="/admin/companies" element={<AdminCompaniesPage />} />
-            <Route
-              path="/admin/companies/new"
-              element={<AdminCompanyEditorPage mode="create" />}
-            />
-            <Route
-              path="/admin/companies/:id/edit"
-              element={<AdminCompanyEditorPage mode="edit" />}
             />
 
             <Route

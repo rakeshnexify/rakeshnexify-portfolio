@@ -179,7 +179,7 @@ Specific commercial terms such as pricing, project scope, delivery timelines, re
 
 ## Disclaimer
 
-The website and its content are provided on an â€œas availableâ€ basis for general information and business communication purposes. No guarantee is made that the website will always be uninterrupted, error free or suitable for every purpose.
+The website and its content are provided on an Ã¢â‚¬Å“as availableÃ¢â‚¬Â basis for general information and business communication purposes. No guarantee is made that the website will always be uninterrupted, error free or suitable for every purpose.
 
 ## Limitation of Liability
 
@@ -1870,7 +1870,7 @@ function SiteSettingsForm({
               onChange={handleFieldChange}
               error={getFieldError("brand.tagline", "brand")}
               disabled={isSubmitting}
-              placeholder="Developer ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Creator ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Entrepreneur"
+              placeholder="Developer ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Creator ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Entrepreneur"
               maxLength={150}
             />
           </div>
@@ -3350,9 +3350,8 @@ function SiteSettingsForm({
                     {section.key === "companies" && (
                       <p className="mt-2 max-w-2xl text-xs leading-5 text-slate-500">
                         This is a Navbar-only dropdown. Edit its parent label,
-                        visibility and Navbar order here. Manage submenu company
-                        names, website URLs, status, relationship and display
-                        order in Company Menu.
+                        visibility and Navbar order here. Existing eligible
+                        Company records continue to supply its submenu links.
                       </p>
                     )}
 

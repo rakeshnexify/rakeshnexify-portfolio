@@ -204,14 +204,7 @@ const ADMIN_NAVIGATION_GROUPS = [
         description: "Manage public Site Settings and Navigation",
         activePrefixes: ["/admin/site-settings"],
       },
-      {
-        key: "companies",
-        label: "Company Menu",
-        route: "/admin/companies",
-        icon: "companies",
-        description: "Manage Companies dropdown links",
-        activePrefixes: ["/admin/companies"],
-      },
+
       {
         key: "statistics",
         label: "Statistics",
