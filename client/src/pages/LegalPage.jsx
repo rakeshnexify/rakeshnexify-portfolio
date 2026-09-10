@@ -310,25 +310,6 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
             </section>
           ) : (
             <>
-              <nav
-                aria-label={`${title} sections`}
-                className="sticky top-[5.25rem] z-20 rounded-2xl border border-slate-800 bg-slate-950/95 p-2 shadow-lg backdrop-blur"
-              >
-                <div className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1">
-                  {sections.map((section, index) => (
-                    <a
-                      key={section.id}
-                      href={`#${section.id}`}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900 px-3 py-1.5 text-[11px] font-semibold leading-none text-slate-200 transition hover:border-brand-500 hover:bg-brand-500/10 hover:text-white"
-                    >
-                      <span className="text-[10px] font-bold text-brand-300">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <span>{section.title}</span>
-                    </a>
-                  ))}
-                </div>
-              </nav>
 
               <article className="space-y-4">
                 {intro.length > 0 && (
@@ -425,7 +406,7 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
                         {contactEmail}
                       </a>
                     ) : (
-                      <p className="mt-1 text-sm text-slate-500">—</p>
+                      <p className="mt-1 text-sm text-slate-500">â€”</p>
                     )}
                   </div>
 
@@ -441,7 +422,7 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
                         {contactPhone}
                       </a>
                     ) : (
-                      <p className="mt-1 text-sm text-slate-500">—</p>
+                      <p className="mt-1 text-sm text-slate-500">â€”</p>
                     )}
                   </div>
                 </div>
