@@ -214,6 +214,13 @@ deploy_release() {
   touch "$APP/tmp/restart.txt"
 
   trap - ERR
+
+  # cleanup_stage closes over the function-local $stage variable.
+  # Run it while $stage is still in scope, then remove the EXIT trap so
+  # Bash does not invoke it after deploy_release returns under set -u.
+  cleanup_stage
+  trap - EXIT
+
   echo "PENDING_EXTERNAL_HEALTH: $COMMIT applied. Desktop must verify public health before finalize."
 }
 
