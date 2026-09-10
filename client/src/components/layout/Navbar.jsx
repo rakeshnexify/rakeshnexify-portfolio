@@ -5,10 +5,7 @@ import siteData from "../../data/siteData";
 import useCompanyNavigation from "../../hooks/useCompanyNavigation";
 import usePublicTheme from "../../hooks/usePublicTheme";
 import useSiteSettings from "../../hooks/useSiteSettings";
-import {
-  createPinnedNavigationLayout,
-  getNavbarNavigationItems,
-} from "../../utils/publicNavigation";
+import { getNavbarNavigationItems } from "../../utils/publicNavigation";
 import CompanyNavigationMenu from "../navigation/CompanyNavigationMenu";
 
 import Logo from "../ui/Logo";
@@ -74,15 +71,12 @@ function NavbarLink({
   section,
   isActive,
   isMobile = false,
-  isTablet = false,
   isDark = false,
   onNavigate,
 }) {
   const baseClasses = isMobile
     ? "min-w-0 break-words rounded-xl px-4 py-3 text-sm font-semibold transition"
-    : isTablet
-      ? "min-w-0 max-w-20 truncate border-b-2 px-1.5 py-2 text-[13px] font-semibold transition-colors"
-      : "max-w-24 truncate border-b-2 py-2 text-sm font-semibold transition-colors xl:max-w-28";
+    : "shrink-0 whitespace-nowrap border-b-2 px-0.5 py-2 text-[10px] font-semibold transition-colors min-[1080px]:px-1 min-[1080px]:text-[11px] xl:text-sm";
 
   const stateClasses = isMobile
     ? isActive
@@ -154,15 +148,12 @@ function Navbar() {
   const { companies: companyNavigationCompanies } = useCompanyNavigation();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [activeSectionKey, setActiveSectionKey] = useState("hero");
   const { theme: navbarTheme, toggleTheme: toggleNavbarTheme } =
     usePublicTheme();
 
   const mobileMenuRef = useRef(null);
   const mobileMenuButtonRef = useRef(null);
-  const moreMenuRef = useRef(null);
-  const moreMenuButtonRef = useRef(null);
 
   const brandName =
     String(settings?.brand?.name || siteData.brand?.name || "").trim() ||
@@ -194,40 +185,14 @@ function Navbar() {
     (section) => section.key === "companies",
   );
 
-  const desktopNavigationLayout = useMemo(
-    () => createPinnedNavigationLayout(navigationSections, navigationSections.length),
-    [navigationSections],
-  );
-  const tabletNavigationLayout = useMemo(
-    () => createPinnedNavigationLayout(navigationSections, 5),
-    [navigationSections],
-  );
-
-  const desktopNavigationSections = desktopNavigationLayout.directItems;
-  const tabletNavigationSections = tabletNavigationLayout.directItems;
-  const overflowNavigationSections = desktopNavigationLayout.overflowItems;
+  const desktopNavigationSections = navigationSections;
   const isDarkNavbar = navbarTheme === "dark";
-
-  const isOverflowSectionActive = overflowNavigationSections.some(
-    (section) => section.key === activeSectionKey,
-  );
 
   const headerClasses =
     "public-tech-header sticky top-0 z-50";
 
   const headerPanelClasses =
-    "public-tech-navbar-row relative flex min-h-20 min-w-0 items-center justify-between gap-4 overflow-visible sm:gap-6 md:max-lg:min-h-[72px] md:max-lg:gap-3";
-
-  const desktopMoreButtonClasses = isOverflowSectionActive
-    ? isDarkNavbar
-      ? "bg-white/10 text-cyan-200"
-      : "bg-brand-50 text-brand-600"
-    : isDarkNavbar
-      ? "text-slate-100 hover:bg-white/10 hover:text-cyan-200"
-      : "text-slate-600 hover:bg-white/70 hover:text-brand-600";
-
-  const desktopMoreMenuClasses =
-    "public-tech-menu-panel absolute right-0 top-full z-[80] mt-3 w-64 overflow-hidden rounded-2xl p-2";
+    "public-tech-navbar-row relative flex min-h-20 min-w-0 items-center justify-between gap-2 overflow-visible sm:gap-3 md:max-xl:min-h-[72px] min-[900px]:gap-2 xl:gap-4";
 
   const themeToggleClasses = isDarkNavbar
     ? "public-tech-nav-control text-slate-100 hover:text-cyan-200"
@@ -242,10 +207,6 @@ function Navbar() {
 
   function closeMobileMenu() {
     setIsMenuOpen(false);
-  }
-
-  function closeMoreMenu() {
-    setIsMoreMenuOpen(false);
   }
 
   function goToHomepageSection(sectionId, sectionKey) {
@@ -273,44 +234,22 @@ function Navbar() {
     closeMobileMenu();
   }
 
-  function navigateFromMoreMenu(section) {
-    closeMoreMenu();
-
-    if (section.type === "section") {
-      goToHomepageSection(section.targetId, section.key);
-    }
-  }
-
   useEffect(() => {
     function handleEscapeKey(event) {
-      if (event.key !== "Escape") {
+      if (event.key !== "Escape" || !isMenuOpen) {
         return;
       }
 
-      if (isMoreMenuOpen) {
-        setIsMoreMenuOpen(false);
+      setIsMenuOpen(false);
 
-        requestAnimationFrame(() => {
-          moreMenuButtonRef.current?.focus();
-        });
-
-        return;
-      }
-
-      if (isMenuOpen) {
-        setIsMenuOpen(false);
-
-        requestAnimationFrame(() => {
-          mobileMenuButtonRef.current?.focus();
-        });
-      }
+      requestAnimationFrame(() => {
+        mobileMenuButtonRef.current?.focus();
+      });
     }
 
     function handleWindowResize() {
-      if (window.innerWidth >= 1024) {
+      if (window.innerWidth >= 900) {
         setIsMenuOpen(false);
-      } else {
-        setIsMoreMenuOpen(false);
       }
     }
 
@@ -321,7 +260,7 @@ function Navbar() {
       document.removeEventListener("keydown", handleEscapeKey);
       window.removeEventListener("resize", handleWindowResize);
     };
-  }, [isMenuOpen, isMoreMenuOpen]);
+  }, [isMenuOpen]);
 
   useEffect(() => {
     if (!isMenuOpen) {
@@ -347,24 +286,6 @@ function Navbar() {
       document.removeEventListener("pointerdown", handleOutsideClick);
     };
   }, [isMenuOpen]);
-
-  useEffect(() => {
-    if (!isMoreMenuOpen) {
-      return undefined;
-    }
-
-    function handleOutsideClick(event) {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
-        setIsMoreMenuOpen(false);
-      }
-    }
-
-    document.addEventListener("pointerdown", handleOutsideClick);
-
-    return () => {
-      document.removeEventListener("pointerdown", handleOutsideClick);
-    };
-  }, [isMoreMenuOpen]);
 
   useEffect(() => {
     let animationFrameId = 0;
@@ -455,7 +376,7 @@ function Navbar() {
                 event.preventDefault();
                 goToHomepageSection("home", "hero");
               }}
-              className="inline-flex min-w-0 max-w-full shrink-0 md:hidden lg:inline-flex"
+              className="inline-flex min-w-0 max-w-full shrink-0 md:hidden xl:inline-flex"
             >
               <Logo
                 showTagline />
@@ -468,55 +389,23 @@ function Navbar() {
                 event.preventDefault();
                 goToHomepageSection("home", "hero");
               }}
-              className="hidden min-w-0 max-w-[176px] shrink-0 md:inline-flex lg:hidden"
+              className="hidden min-w-0 max-w-[154px] shrink-0 md:inline-flex xl:hidden"
             >
               <Logo
                 showTagline
                 className={`!gap-2 ${
                   isDarkNavbar ? "[&_p:last-child]:!text-slate-300" : ""
                 }`}
-                iconClassName="!h-10 !w-10 !rounded-xl"
-                textClassName={`!text-base ${
+                iconClassName="!h-9 !w-9 !rounded-xl"
+                textClassName={`!text-sm ${
                   isDarkNavbar ? "!text-white" : "!text-slate-950"
                 }`}
               />
             </a>
 
-            {tabletNavigationSections.length > 0 && (
-              <nav
-                className="hidden min-w-0 flex-1 items-center justify-center gap-1 overflow-hidden md:flex lg:hidden min-[900px]:gap-2"
-                aria-label="Tablet navigation"
-              >
-                {tabletNavigationSections.map((section) =>
-                  section.key === "companies" ? (
-                    <CompanyNavigationMenu
-                      key={section.key}
-                      label={section.label}
-                      companies={companyNavigationCompanies}
-                      variant="tablet"
-                      isDark={isDarkNavbar}
-                    />
-                  ) : (
-                    <NavbarLink
-                      key={section.key}
-                      section={section}
-                      isActive={activeSectionKey === section.key}
-                      isTablet
-                      isDark={isDarkNavbar}
-                      onNavigate={
-                        section.type !== "section"
-                          ? closeMobileMenu
-                          : goToHomepageSection
-                      }
-                    />
-                  ),
-                )}
-              </nav>
-            )}
-
             {navigationSections.length > 0 && (
               <nav
-                className="rnx-public-desktop-nav hidden min-w-0 flex-1 items-center gap-4 overflow-x-auto lg:flex xl:gap-5"
+                className="rnx-public-desktop-nav hidden min-w-0 flex-1 items-center justify-center gap-1.5 overflow-visible min-[900px]:flex min-[1080px]:gap-2 xl:gap-4"
                 aria-label="Main navigation"
               >
                 {desktopNavigationSections.map((section) =>
@@ -542,62 +431,6 @@ function Navbar() {
                   ),
                 )}
 
-                {overflowNavigationSections.length > 0 && (
-                  <div ref={moreMenuRef} className="relative shrink-0">
-                    <button
-                      ref={moreMenuButtonRef}
-                      type="button"
-                      aria-haspopup="true"
-                      aria-expanded={isMoreMenuOpen}
-                      aria-controls="desktop-more-navigation"
-                      onClick={() => {
-                        setIsMoreMenuOpen((currentValue) => !currentValue);
-                      }}
-                      className={`inline-flex min-h-10 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 ${desktopMoreButtonClasses}`}
-                    >
-                      More
-
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 20 20"
-                        className={`size-4 transition-transform ${
-                          isMoreMenuOpen ? "rotate-180" : ""
-                        }`}
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-
-                    {isMoreMenuOpen && (
-                      <div
-                        id="desktop-more-navigation"
-                        className={desktopMoreMenuClasses}
-                      >
-                        <div className="flex max-h-[70vh] min-w-0 flex-col gap-1 overflow-y-auto">
-                          {overflowNavigationSections.map((section) => (
-                            <NavbarLink
-                              key={section.key}
-                              section={section}
-                              isActive={activeSectionKey === section.key}
-                              isMobile
-                              isDark={isDarkNavbar}
-                              onNavigate={
-                                section.type !== "section"
-                                  ? closeMoreMenu
-                                  : () => navigateFromMoreMenu(section)
-                              }
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
               </nav>
             )}
 
@@ -606,7 +439,7 @@ function Navbar() {
                 aria-label={`Switch to ${isDarkNavbar ? "light" : "dark"} theme`}
                 aria-pressed={isDarkNavbar}
                 onClick={toggleNavbarTheme}
-                className={`ml-auto hidden size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 lg:grid ${themeToggleClasses}`}
+                className={`ml-auto hidden size-9 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 min-[900px]:grid xl:size-10 ${themeToggleClasses}`}
               >
                 {isDarkNavbar ? (
                   <svg
@@ -640,7 +473,7 @@ function Navbar() {
             {contactSection && (
               <Link
                 to={contactSection.href}
-                className="hidden min-h-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 lg:inline-flex"
+                className="hidden min-h-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 px-3 text-xs font-semibold text-white transition hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 min-[900px]:inline-flex xl:min-h-10 xl:px-4 xl:text-sm"
               >
                 {contactSection.label}
               </Link>
@@ -652,7 +485,7 @@ function Navbar() {
                 aria-label={`Switch to ${isDarkNavbar ? "light" : "dark"} theme`}
                 aria-pressed={isDarkNavbar}
                 onClick={toggleNavbarTheme}
-                className={`ml-auto grid size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 lg:hidden ${themeToggleClasses}`}
+                className={`ml-auto grid size-10 shrink-0 place-items-center rounded-xl transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 min-[900px]:hidden ${themeToggleClasses}`}
               >
                 {isDarkNavbar ? (
                   <svg
@@ -698,7 +531,7 @@ function Navbar() {
                   onClick={() => {
                     setIsMenuOpen((currentValue) => !currentValue);
                   }}
-                  className={`grid size-11 shrink-0 place-items-center rounded-xl border transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 md:max-lg:size-10 lg:hidden ${mobileMenuButtonClasses}`}
+                  className={`grid size-11 shrink-0 place-items-center rounded-xl border transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/20 md:size-10 min-[900px]:hidden ${mobileMenuButtonClasses}`}
                 >
                   {isMenuOpen ? (
                     <svg
