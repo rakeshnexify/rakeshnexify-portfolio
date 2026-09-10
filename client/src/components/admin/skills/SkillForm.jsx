@@ -115,6 +115,16 @@ function SkillForm({
     setSubmitError("");
   }
 
+  function clearColorField(fieldName) {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [fieldName]: "",
+    }));
+
+    clearFieldErrors(fieldName);
+    setSubmitError("");
+  }
+
   function handleSlugBlur() {
     setFormValues((currentValues) => ({
       ...currentValues,
@@ -468,6 +478,101 @@ function SkillForm({
             />
           </div>
 
+          <div className="md:col-span-1 xl:col-span-2">
+            <label htmlFor="skill-accent-color" className={labelClasses}>
+              Skill Accent Color
+            </label>
+
+            <div className="mt-1 flex items-center gap-1.5">
+              <input
+                type="color"
+                name="accentColor"
+                value={formValues.accentColor || "#2563eb"}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                aria-label="Choose Skill accent color"
+                className="h-9 w-11 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-1 dark:border-slate-700 dark:bg-slate-950"
+              />
+
+              <input
+                id="skill-accent-color"
+                name="accentColor"
+                type="text"
+                value={formValues.accentColor}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                maxLength={7}
+                placeholder="#2563eb"
+                aria-invalid={Boolean(getFieldError("accentColor"))}
+                className={inputClasses}
+              />
+
+              <button
+                type="button"
+                onClick={() => clearColorField("accentColor")}
+                disabled={isSubmitting || !formValues.accentColor}
+                className="min-h-9 shrink-0 rounded-lg border border-slate-300 bg-white px-2 text-[10px] font-semibold text-slate-600 transition hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+              >
+                Default
+              </button>
+            </div>
+
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+              Controls this Skill card tint, percentage and progress color.
+            </p>
+
+            <SkillFieldError message={getFieldError("accentColor")} />
+          </div>
+
+          <div className="md:col-span-1 xl:col-span-2">
+            <label htmlFor="skill-icon-color" className={labelClasses}>
+              Icon Color
+            </label>
+
+            <div className="mt-1 flex items-center gap-1.5">
+              <input
+                type="color"
+                name="iconColor"
+                value={
+                  formValues.iconColor ||
+                  formValues.accentColor ||
+                  "#2563eb"
+                }
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                aria-label="Choose Skill icon color"
+                className="h-9 w-11 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-1 dark:border-slate-700 dark:bg-slate-950"
+              />
+
+              <input
+                id="skill-icon-color"
+                name="iconColor"
+                type="text"
+                value={formValues.iconColor}
+                onChange={handleInputChange}
+                disabled={isSubmitting}
+                maxLength={7}
+                placeholder="#16a34a"
+                aria-invalid={Boolean(getFieldError("iconColor"))}
+                className={inputClasses}
+              />
+
+              <button
+                type="button"
+                onClick={() => clearColorField("iconColor")}
+                disabled={isSubmitting || !formValues.iconColor}
+                className="min-h-9 shrink-0 rounded-lg border border-slate-300 bg-white px-2 text-[10px] font-semibold text-slate-600 transition hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+              >
+                Original
+              </button>
+            </div>
+
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+              Set a color to recolor the icon. Leave blank to preserve the original Media icon.
+            </p>
+
+            <SkillFieldError message={getFieldError("iconColor")} />
+          </div>
           <label className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-950/60 md:col-span-1 xl:col-span-2">
             <input
               name="isVisible"

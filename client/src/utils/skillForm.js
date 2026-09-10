@@ -17,6 +17,8 @@ function createDefaultSkillFormValues() {
     yearsOfExperience: "",
     icon: "",
     iconUrl: "",
+    accentColor: "",
+    iconColor: "",
     order: "0",
     isFeatured: false,
     isVisible: true,
@@ -70,6 +72,10 @@ function createSkillFormValues(skill = {}) {
 
     iconUrl: skill.iconUrl || "",
 
+    accentColor: skill.accentColor || "",
+
+    iconColor: skill.iconColor || "",
+
     order: String(skill.order ?? 0),
 
     isFeatured: Boolean(skill.isFeatured),
@@ -118,6 +124,14 @@ function createSkillPayload(formValues = {}) {
     icon: String(formValues.icon || "").trim(),
 
     iconUrl: String(formValues.iconUrl || "").trim(),
+
+    accentColor: String(formValues.accentColor || "")
+      .trim()
+      .toLowerCase(),
+
+    iconColor: String(formValues.iconColor || "")
+      .trim()
+      .toLowerCase(),
 
     order: Number(formValues.order || 0),
 
@@ -236,6 +250,22 @@ function validateSkillFormValues(formValues = {}) {
   } else if (!isValidHttpUrl(payload.iconUrl)) {
     fieldErrors.iconUrl =
       "Skill icon URL must be a valid HTTP or HTTPS URL.";
+  }
+
+  if (
+    payload.accentColor &&
+    !/^#[0-9a-f]{6}$/.test(payload.accentColor)
+  ) {
+    fieldErrors.accentColor =
+      "Skill accent color must be a 6-digit hex color.";
+  }
+
+  if (
+    payload.iconColor &&
+    !/^#[0-9a-f]{6}$/.test(payload.iconColor)
+  ) {
+    fieldErrors.iconColor =
+      "Icon color must be a 6-digit hex color.";
   }
 
   if (

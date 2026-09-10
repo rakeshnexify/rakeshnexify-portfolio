@@ -36,6 +36,12 @@ const proficiencyDetails = {
   },
 };
 
+function normaliseHexColor(value) {
+  const cleanValue = String(value || "").trim().toLowerCase();
+
+  return /^#[0-9a-f]{6}$/.test(cleanValue) ? cleanValue : "";
+}
+
 function createSkillInitials(value) {
   const initials = String(value || "")
     .trim()
@@ -76,6 +82,8 @@ function normaliseSkill(skill = {}, index = 0) {
         : null,
     icon: String(skill.icon || "").trim(),
     iconUrl: String(skill.iconUrl || "").trim(),
+    accentColor: normaliseHexColor(skill.accentColor),
+    iconColor: normaliseHexColor(skill.iconColor),
     featured: Boolean(skill.isFeatured ?? skill.featured),
   };
 }
@@ -98,31 +106,54 @@ function SkillIcon({ skill, compact = false }) {
       ? skill.icon
       : createSkillInitials(skill.name);
 
+  const iconColor =
+    skill.iconColor || skill.accentColor || "#2563eb";
+
   return (
     <div
       className={
         compact
           ? "public-skill-icon"
-          : "relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-xl font-black text-slate-900 shadow-sm ring-4 ring-slate-100"
+          : "relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-xl font-black shadow-sm ring-4 ring-slate-100"
       }
+      style={{
+        color: iconColor,
+        "--skill-icon-color": iconColor,
+      }}
     >
       <span aria-hidden="true">{fallbackText}</span>
 
-      {skill.iconUrl && (
-        <img
-          src={skill.iconUrl}
-          alt=""
-          loading="lazy"
-          className={
-            compact
-              ? "absolute inset-0 size-full object-contain p-2"
-              : "absolute inset-0 size-full bg-white object-contain p-3"
-          }
-          onError={(event) => {
-            event.currentTarget.hidden = true;
-          }}
-        />
-      )}
+      {skill.iconUrl &&
+        (skill.iconColor ? (
+          <span
+            aria-hidden="true"
+            className={
+              compact
+                ? "public-skill-icon-media"
+                : "public-skill-icon-media public-skill-icon-media-large"
+            }
+            style={{
+              "--public-skill-icon-mask": `url(${JSON.stringify(
+                skill.iconUrl,
+              )})`,
+            }}
+          />
+        ) : (
+          <img
+            src={skill.iconUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className={
+              compact
+                ? "absolute inset-0 size-full object-contain p-1.5"
+                : "absolute inset-0 size-full bg-white object-contain p-3"
+            }
+            onError={(event) => {
+              event.currentTarget.hidden = true;
+            }}
+          />
+        ))}
     </div>
   );
 }
@@ -152,10 +183,18 @@ function CompactSkillCard({ skill }) {
       : "",
   ]
     .filter(Boolean)
-    .join(" • ");
+    .join(" â€¢ ");
+
+  const accentColor = skill.accentColor || "#2563eb";
 
   return (
-    <article className="public-skill-card">
+    <article
+      className="public-skill-card"
+      style={{
+        "--skill-accent": accentColor,
+        "--skill-icon-color": skill.iconColor || accentColor,
+      }}
+    >
       <div className="public-skill-card-top">
         <SkillIcon skill={skill} compact />
 

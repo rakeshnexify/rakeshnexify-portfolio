@@ -14,6 +14,8 @@ const editableStringFields = [
   "category",
   "icon",
   "iconUrl",
+  "accentColor",
+  "iconColor",
 ];
 
 function createHttpError(message, statusCode = 400, fieldErrors = {}) {
@@ -134,6 +136,29 @@ function cleanProficiencyLevel(value) {
   return cleanValue;
 }
 
+function cleanOptionalHexColor(value, fieldName) {
+  const cleanValue = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  if (!cleanValue) {
+    return "";
+  }
+
+  if (!/^#[0-9a-f]{6}$/.test(cleanValue)) {
+    const label =
+      fieldName === "iconColor"
+        ? "Icon color"
+        : "Skill accent color";
+
+    throw createHttpError(`${label} must be a 6-digit hex color.`, 400, {
+      [fieldName]: `${label} must be a 6-digit hex color.`,
+    });
+  }
+
+  return cleanValue;
+}
+
 function buildSkillPayload(requestBody = {}) {
   if (
     requestBody === null ||
@@ -161,6 +186,17 @@ function buildSkillPayload(requestBody = {}) {
 
     if (fieldName === "category") {
       payload.category = normalizeCategory(cleanValue);
+      return;
+    }
+
+    if (
+      fieldName === "accentColor" ||
+      fieldName === "iconColor"
+    ) {
+      payload[fieldName] = cleanOptionalHexColor(
+        cleanValue,
+        fieldName,
+      );
       return;
     }
 

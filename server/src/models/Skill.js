@@ -37,6 +37,12 @@ function isValidHttpUrl(value) {
   }
 }
 
+function isValidOptionalHexColor(value) {
+  const cleanValue = String(value || "").trim();
+
+  return !cleanValue || /^#[0-9a-fA-F]{6}$/.test(cleanValue);
+}
+
 const skillSchema = new mongoose.Schema(
   {
     name: {
@@ -133,6 +139,30 @@ const skillSchema = new mongoose.Schema(
       validate: {
         validator: isValidHttpUrl,
         message: "Skill icon URL must be a valid HTTP or HTTPS URL.",
+      },
+    },
+
+    accentColor: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: [7, "Skill accent color cannot exceed 7 characters."],
+      default: "",
+      validate: {
+        validator: isValidOptionalHexColor,
+        message: "Skill accent color must be a 6-digit hex color.",
+      },
+    },
+
+    iconColor: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: [7, "Skill icon color cannot exceed 7 characters."],
+      default: "",
+      validate: {
+        validator: isValidOptionalHexColor,
+        message: "Skill icon color must be a 6-digit hex color.",
       },
     },
 
