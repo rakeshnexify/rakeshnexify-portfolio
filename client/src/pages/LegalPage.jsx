@@ -338,7 +338,7 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
           ) : (
             <section className="grid gap-6 lg:sticky lg:top-[5.5rem] lg:h-[calc(100vh-6.5rem)] lg:min-h-0 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-stretch">
               <aside className="space-y-5 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:pr-2">
-                <div className="rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm lg:sticky lg:top-0">
+                <div className="rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-300">
                     Quick navigation
                   </p>
@@ -361,7 +361,7 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
                   </div>
                 </div>
 
-                <div className="rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm lg:sticky lg:top-0">
+                <div className="rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-300">
                     Document details
                   </p>
@@ -397,7 +397,7 @@ function LegalPage({ pageKey, canonicalPath, defaultTitle }) {
                 </div>
 
                 {(contactEmail || contactPhone) && (
-                  <div className="rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm lg:sticky lg:top-0">
+                  <div className="rounded-[24px] border border-slate-800 bg-slate-900/70 p-5 shadow-sm">
                     <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-300">
                       Legal contact
                     </p>
