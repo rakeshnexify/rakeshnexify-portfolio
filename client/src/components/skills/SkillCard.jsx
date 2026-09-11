@@ -121,7 +121,9 @@ function SkillIcon({ skill, compact = false }) {
         "--skill-icon-color": iconColor,
       }}
     >
-      <span aria-hidden="true">{fallbackText}</span>
+      {!skill.iconUrl && (
+        <span aria-hidden="true">{fallbackText}</span>
+      )}
 
       {skill.iconUrl &&
         (skill.iconColor ? (
@@ -183,7 +185,7 @@ function CompactSkillCard({ skill }) {
       : "",
   ]
     .filter(Boolean)
-    .join(" â€¢ ");
+    .join(" Ã¢â‚¬Â¢ ");
 
   const accentColor = skill.accentColor || "#2563eb";
 
