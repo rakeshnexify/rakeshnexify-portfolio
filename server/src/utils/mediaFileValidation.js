@@ -483,6 +483,34 @@ const SVG_POST_SANITIZE_FORBIDDEN_PATTERNS = Object.freeze([
   /\ssrc\s*=/i,
   /\sstyle\s*=/i,
 ]);
+
+const SVG_SAFE_STYLE_PROPERTIES = Object.freeze(
+  new Set([
+    "fill",
+    "fill-opacity",
+    "fill-rule",
+    "stroke",
+    "stroke-width",
+    "stroke-linecap",
+    "stroke-linejoin",
+    "stroke-miterlimit",
+    "stroke-dasharray",
+    "stroke-dashoffset",
+    "stroke-opacity",
+    "opacity",
+    "clip-path",
+    "mask",
+    "display",
+    "visibility",
+    "stop-color",
+    "stop-opacity",
+    "text-anchor",
+    "font-family",
+    "font-size",
+    "font-weight",
+  ]),
+);
+
 function normalizeMimeType(value) {
   return String(value ?? "")
     .split(";")[0]
@@ -823,6 +851,329 @@ function createSvgTransformTags() {
   );
 }
 
+function isSafeSvgStyleValue(value) {
+  const normalizedValue = String(
+    value ?? "",
+  ).trim();
+
+  if (
+    !normalizedValue ||
+    normalizedValue.length > 512
+  ) {
+    return false;
+  }
+
+  if (
+    /javascript\s*:/i.test(
+      normalizedValue,
+    ) ||
+    /vbscript\s*:/i.test(
+      normalizedValue,
+    ) ||
+    /data\s*:/i.test(
+      normalizedValue,
+    ) ||
+    /expression\s*\(/i.test(
+      normalizedValue,
+    ) ||
+    /@import\b/i.test(
+      normalizedValue,
+    ) ||
+    /behavior\s*:/i.test(
+      normalizedValue,
+    ) ||
+    /-moz-binding\s*:/i.test(
+      normalizedValue,
+    )
+  ) {
+    return false;
+  }
+
+  return hasOnlySafeSvgUrlReferences(
+    normalizedValue,
+  );
+}
+
+function parseSafeSvgStyleDeclarations(
+  declarationSource,
+) {
+  const declarations = {};
+
+  String(declarationSource ?? "")
+    .split(";")
+    .forEach((declaration) => {
+      const separatorIndex =
+        declaration.indexOf(":");
+
+      if (separatorIndex <= 0) {
+        return;
+      }
+
+      const propertyName =
+        declaration
+          .slice(0, separatorIndex)
+          .trim()
+          .toLowerCase();
+
+      let propertyValue =
+        declaration
+          .slice(separatorIndex + 1)
+          .trim();
+
+      propertyValue =
+        propertyValue.replace(
+          /\s*!important\s*$/i,
+          "",
+        );
+
+      if (
+        !SVG_SAFE_STYLE_PROPERTIES.has(
+          propertyName,
+        ) ||
+        !isSafeSvgStyleValue(
+          propertyValue,
+        )
+      ) {
+        return;
+      }
+
+      declarations[propertyName] =
+        propertyValue;
+    });
+
+  return declarations;
+}
+
+function extractSafeSvgClassStyleRules(
+  svgSource,
+) {
+  const rules = [];
+
+  const styleBlockPattern =
+    /<style\b[^>]*>([\s\S]*?)<\/style\s*>/gi;
+
+  let styleBlockMatch;
+
+  while (
+    (
+      styleBlockMatch =
+        styleBlockPattern.exec(
+          String(svgSource ?? ""),
+        )
+    )
+  ) {
+    const styleSource =
+      String(
+        styleBlockMatch[1] ?? "",
+      ).replace(
+        /\/\*[\s\S]*?\*\//g,
+        "",
+      );
+
+    const rulePattern =
+      /([^{}]+)\{([^{}]*)\}/g;
+
+    let ruleMatch;
+
+    while (
+      (
+        ruleMatch =
+          rulePattern.exec(
+            styleSource,
+          )
+      )
+    ) {
+      const selectors =
+        String(
+          ruleMatch[1] ?? "",
+        )
+          .split(",")
+          .map((selector) =>
+            selector.trim(),
+          )
+          .filter((selector) =>
+            /^\.[A-Za-z_][A-Za-z0-9_-]*$/.test(
+              selector,
+            ),
+          )
+          .map((selector) =>
+            selector.slice(1),
+          );
+
+      if (selectors.length === 0) {
+        continue;
+      }
+
+      const declarations =
+        parseSafeSvgStyleDeclarations(
+          ruleMatch[2],
+        );
+
+      if (
+        Object.keys(
+          declarations,
+        ).length === 0
+      ) {
+        continue;
+      }
+
+      rules.push({
+        classNames:
+          new Set(selectors),
+        declarations,
+      });
+    }
+  }
+
+  return rules;
+}
+
+function escapeSvgAttributeValue(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function setSvgPresentationAttribute(
+  tagSource,
+  attributeName,
+  attributeValue,
+) {
+  const escapedValue =
+    escapeSvgAttributeValue(
+      attributeValue,
+    );
+
+  const escapedAttributeName =
+    String(attributeName).replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&",
+    );
+
+  const existingAttributePattern =
+    new RegExp(
+      `\\s${escapedAttributeName}\\s*=\\s*(["'])[^"']*\\1`,
+      "i",
+    );
+
+  if (
+    existingAttributePattern.test(
+      tagSource,
+    )
+  ) {
+    return tagSource.replace(
+      existingAttributePattern,
+      ` ${attributeName}="${escapedValue}"`,
+    );
+  }
+
+  return tagSource.replace(
+    /\s*\/?>$/,
+    (closingSource) => {
+      const isSelfClosing =
+        /\/>$/.test(
+          closingSource,
+        );
+
+      return (
+        ` ${attributeName}="${escapedValue}"` +
+        (
+          isSelfClosing
+            ? " />"
+            : ">"
+        )
+      );
+    },
+  );
+}
+
+function inlineSafeSvgClassStyles(
+  svgSource,
+) {
+  const source = String(
+    svgSource ?? "",
+  );
+
+  const rules =
+    extractSafeSvgClassStyleRules(
+      source,
+    );
+
+  const sourceWithoutStyleBlocks =
+    source.replace(
+      /<style\b[^>]*>[\s\S]*?<\/style\s*>/gi,
+      "",
+    );
+
+  if (rules.length === 0) {
+    return sourceWithoutStyleBlocks;
+  }
+
+  return sourceWithoutStyleBlocks.replace(
+    /<[A-Za-z][A-Za-z0-9:-]*(?:\s[^<>]*?)?\/?>/g,
+    (tagSource) => {
+      const classMatch =
+        tagSource.match(
+          /\sclass\s*=\s*(["'])(.*?)\1/i,
+        );
+
+      if (!classMatch) {
+        return tagSource;
+      }
+
+      const classNames =
+        new Set(
+          String(
+            classMatch[2] ?? "",
+          )
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean),
+        );
+
+      const computedStyle = {};
+
+      rules.forEach((rule) => {
+        const matchesRule =
+          Array.from(
+            rule.classNames,
+          ).some((className) =>
+            classNames.has(
+              className,
+            ),
+          );
+
+        if (matchesRule) {
+          Object.assign(
+            computedStyle,
+            rule.declarations,
+          );
+        }
+      });
+
+      return Object.entries(
+        computedStyle,
+      ).reduce(
+        (
+          currentTagSource,
+          [
+            attributeName,
+            attributeValue,
+          ],
+        ) =>
+          setSvgPresentationAttribute(
+            currentTagSource,
+            attributeName,
+            attributeValue,
+          ),
+        tagSource,
+      );
+    },
+  );
+}
+
 function hasSafeSvgDrawableContent(
   svgSource,
 ) {
@@ -917,8 +1268,13 @@ function sanitizeSvgSource(svgSource) {
     svgSource,
   );
 
+  const sourceWithSafeClassStyles =
+    inlineSafeSvgClassStyles(
+      svgSource,
+    );
+
   const sanitized = sanitizeHtml(
-    svgSource,
+    sourceWithSafeClassStyles,
     {
       allowedTags: SVG_ALLOWED_TAGS,
 
