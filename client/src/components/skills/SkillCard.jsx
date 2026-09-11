@@ -185,7 +185,7 @@ function CompactSkillCard({ skill }) {
       : "",
   ]
     .filter(Boolean)
-    .join(" Ã¢â‚¬Â¢ ");
+    .join(" \u2022 ");
 
   const accentColor = skill.accentColor || "#2563eb";
 
