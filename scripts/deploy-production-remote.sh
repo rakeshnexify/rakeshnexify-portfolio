@@ -159,11 +159,24 @@ deploy_release() {
   [[ ! -e "$stage/client/.env" ]] || fail "Release contains client .env."
   [[ ! -e "$stage/server/.env" ]] || fail "Release contains server .env."
 
-  echo "==> Installing production server dependencies in staging"
-  (
-    cd "$stage/server"
-    npm ci --omit=dev --no-audit --no-fund
-  )
+  if git diff --no-index --quiet -- "$stage/server/package.json" "$APP/server/package.json" &&
+     git diff --no-index --quiet -- "$stage/server/package-lock.json" "$APP/server/package-lock.json"; then
+    echo "==> Reusing current production server dependencies (manifests unchanged)"
+    [[ -d "$APP/server/node_modules" ]] || fail "Current production server node_modules missing."
+    [[ -d "$APP/server/node_modules/dotenv" ]] || fail "Current production dotenv dependency missing."
+    cp -a "$APP/server/node_modules" "$stage/server/node_modules"
+  else
+    echo "==> Server dependency manifests changed; validating CloudLinux npm before install"
+    if ! npm --version >/dev/null 2>&1; then
+      fail "CloudLinux npm is unavailable; dependency-changing deployment blocked before production mutation."
+    fi
+
+    echo "==> Installing production server dependencies in staging"
+    (
+      cd "$stage/server"
+      npm ci --omit=dev --no-audit --no-fund
+    )
+  fi
 
   [[ -d "$stage/server/node_modules" ]] || fail "Staged server node_modules missing."
   [[ -d "$stage/server/node_modules/dotenv" ]] || fail "dotenv missing from staged server dependencies."
