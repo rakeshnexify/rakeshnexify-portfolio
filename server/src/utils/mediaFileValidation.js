@@ -768,6 +768,7 @@ function sanitizeSvgAttributes(
   attributes = {},
 ) {
   const sanitizedAttributes = {};
+  let inlineStyleSource = "";
 
   Object.entries(attributes).forEach(
     ([attributeName, rawValue]) => {
@@ -783,9 +784,15 @@ function sanitizeSvgAttributes(
       if (
         !normalizedName ||
         normalizedName === "src" ||
-        normalizedName === "style" ||
         normalizedName.startsWith("on")
       ) {
+        return;
+      }
+
+      if (
+        normalizedName === "style"
+      ) {
+        inlineStyleSource = value;
         return;
       }
 
@@ -827,6 +834,15 @@ function sanitizeSvgAttributes(
       ] = value;
     },
   );
+
+  if (inlineStyleSource) {
+    Object.assign(
+      sanitizedAttributes,
+      parseSafeSvgStyleDeclarations(
+        inlineStyleSource,
+      ),
+    );
+  }
 
   return sanitizedAttributes;
 }
