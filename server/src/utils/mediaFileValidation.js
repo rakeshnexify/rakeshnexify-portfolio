@@ -454,6 +454,8 @@ const SVG_HARD_REJECT_PATTERNS = Object.freeze([
   /<\?xml-stylesheet\b/i,
 ]);
 
+const SVG_SAFE_LEGACY_DOCTYPE_PATTERN =
+  /<!DOCTYPE\s+svg\s+PUBLIC\s+["']-\/\/W3C\/\/DTD\s+SVG\s+(?:1\.0|1\.1)\/\/EN["']\s+["']https?:\/\/www\.w3\.org\/Graphics\/SVG\/1\.(?:0|1)\/DTD\/svg1[01]\.dtd["']\s*>/gi;
 const SVG_LOCAL_FRAGMENT_PATTERN =
   /^#[A-Za-z_][A-Za-z0-9_.:-]*$/;
 
@@ -710,6 +712,16 @@ function validateOriginalExtension(
   return originalExtension;
 }
 
+function stripSafeLegacySvgDoctype(
+  svgSource,
+) {
+  return String(
+    svgSource ?? "",
+  ).replace(
+    SVG_SAFE_LEGACY_DOCTYPE_PATTERN,
+    "",
+  );
+}
 function assertSvgSourceCanBeSanitized(svgSource) {
   const source = String(svgSource ?? "");
 
@@ -1280,13 +1292,18 @@ function assertSanitizedSvgSource(
 }
 
 function sanitizeSvgSource(svgSource) {
+  const sourceWithoutSafeLegacyDoctype =
+    stripSafeLegacySvgDoctype(
+      svgSource,
+    );
+
   assertSvgSourceCanBeSanitized(
-    svgSource,
+    sourceWithoutSafeLegacyDoctype,
   );
 
   const sourceWithSafeClassStyles =
     inlineSafeSvgClassStyles(
-      svgSource,
+      sourceWithoutSafeLegacyDoctype,
     );
 
   const sanitized = sanitizeHtml(
