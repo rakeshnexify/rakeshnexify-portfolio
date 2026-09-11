@@ -245,7 +245,7 @@ const SVG_ALLOWED_TAGS = Object.freeze([
   "mask",
   "pattern",
   "symbol",
-  "title",
+  "use","title",
   "desc",
   "text",
   "tspan",
@@ -276,6 +276,7 @@ const SVG_GLOBAL_ATTRIBUTES = Object.freeze([
 const SVG_ALLOWED_ATTRIBUTES = Object.freeze({
   svg: [
     "xmlns",
+    "xmlns:xlink",
     "width",
     "height",
     "viewBox",
@@ -408,6 +409,15 @@ const SVG_ALLOWED_ATTRIBUTES = Object.freeze({
     "viewBox",
     "preserveAspectRatio",
   ],
+  use: [
+    ...SVG_GLOBAL_ATTRIBUTES,
+    "x",
+    "y",
+    "width",
+    "height",
+    "href",
+    "xlink:href",
+  ],
 
   title: [],
 
@@ -438,9 +448,19 @@ const SVG_ALLOWED_ATTRIBUTES = Object.freeze({
   ],
 });
 
-const SVG_FORBIDDEN_CONTENT_PATTERNS = Object.freeze([
+const SVG_HARD_REJECT_PATTERNS = Object.freeze([
   /<!doctype\b/i,
   /<!entity\b/i,
+  /<\?xml-stylesheet\b/i,
+]);
+
+const SVG_LOCAL_FRAGMENT_PATTERN =
+  /^#[A-Za-z_][A-Za-z0-9_.:-]*$/;
+
+const SVG_URL_REFERENCE_PATTERN =
+  /url\(\s*["']?([^"')\s]+)["']?\s*\)/gi;
+
+const SVG_POST_SANITIZE_FORBIDDEN_PATTERNS = Object.freeze([
   /<script\b/i,
   /<foreignObject\b/i,
   /<iframe\b/i,
@@ -455,24 +475,14 @@ const SVG_FORBIDDEN_CONTENT_PATTERNS = Object.freeze([
   /<animateMotion\b/i,
   /<animateTransform\b/i,
   /<set\b/i,
-  /<use\b/i,
   /<link\b/i,
   /<meta\b/i,
   /<base\b/i,
   /<form\b/i,
   /\son[a-z]+\s*=/i,
-  /\shref\s*=/i,
-  /\sxlink:href\s*=/i,
   /\ssrc\s*=/i,
   /\sstyle\s*=/i,
-  /javascript\s*:/i,
-  /vbscript\s*:/i,
-  /data\s*:/i,
-  /expression\s*\(/i,
-  /@import\b/i,
-  /<\?xml-stylesheet\b/i,
 ]);
-
 function normalizeMimeType(value) {
   return String(value ?? "")
     .split(";")[0]
@@ -672,7 +682,7 @@ function validateOriginalExtension(
   return originalExtension;
 }
 
-function assertSafeSvgSource(svgSource) {
+function assertSvgSourceCanBeSanitized(svgSource) {
   const source = String(svgSource ?? "");
 
   if (!source.trim()) {
@@ -683,18 +693,229 @@ function assertSafeSvgSource(svgSource) {
 
   for (
     const pattern of
-      SVG_FORBIDDEN_CONTENT_PATTERNS
+      SVG_HARD_REJECT_PATTERNS
   ) {
     if (pattern.test(source)) {
       throw new Error(
-        "SVG contains prohibited active or externally referenced content.",
+        "SVG contains a prohibited document declaration.",
       );
     }
   }
 }
 
+function isSafeLocalSvgFragment(value) {
+  return SVG_LOCAL_FRAGMENT_PATTERN.test(
+    String(value ?? "").trim(),
+  );
+}
+
+function hasOnlySafeSvgUrlReferences(value) {
+  const source = String(value ?? "");
+
+  SVG_URL_REFERENCE_PATTERN.lastIndex = 0;
+
+  let match;
+
+  while (
+    (
+      match =
+        SVG_URL_REFERENCE_PATTERN.exec(
+          source,
+        )
+    )
+  ) {
+    if (
+      !isSafeLocalSvgFragment(
+        match[1],
+      )
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function sanitizeSvgAttributes(
+  attributes = {},
+) {
+  const sanitizedAttributes = {};
+
+  Object.entries(attributes).forEach(
+    ([attributeName, rawValue]) => {
+      const normalizedName =
+        String(attributeName)
+          .trim()
+          .toLowerCase();
+
+      const value = String(
+        rawValue ?? "",
+      );
+
+      if (
+        !normalizedName ||
+        normalizedName === "src" ||
+        normalizedName === "style" ||
+        normalizedName.startsWith("on")
+      ) {
+        return;
+      }
+
+      if (
+        normalizedName === "href" ||
+        normalizedName === "xlink:href"
+      ) {
+        if (
+          isSafeLocalSvgFragment(value)
+        ) {
+          sanitizedAttributes[
+            attributeName
+          ] = value.trim();
+        }
+
+        return;
+      }
+
+      if (
+        /javascript\s*:/i.test(value) ||
+        /vbscript\s*:/i.test(value) ||
+        /data\s*:/i.test(value) ||
+        /expression\s*\(/i.test(value) ||
+        /@import\b/i.test(value)
+      ) {
+        return;
+      }
+
+      if (
+        !hasOnlySafeSvgUrlReferences(
+          value,
+        )
+      ) {
+        return;
+      }
+
+      sanitizedAttributes[
+        attributeName
+      ] = value;
+    },
+  );
+
+  return sanitizedAttributes;
+}
+
+function createSvgTransformTags() {
+  return Object.fromEntries(
+    SVG_ALLOWED_TAGS.map(
+      (allowedTagName) => [
+        allowedTagName,
+        (
+          tagName,
+          attributes,
+        ) => ({
+          tagName,
+          attribs:
+            sanitizeSvgAttributes(
+              attributes,
+            ),
+        }),
+      ],
+    ),
+  );
+}
+
+function hasSafeSvgDrawableContent(
+  svgSource,
+) {
+  const source = String(
+    svgSource ?? "",
+  );
+
+  if (
+    /<(?:path|rect|circle|ellipse|line|polyline|polygon|text)\b/i.test(
+      source,
+    )
+  ) {
+    return true;
+  }
+
+  return /<use\b[^>]*(?:href|xlink:href)\s*=\s*["']#[A-Za-z_][A-Za-z0-9_.:-]*["']/i.test(
+    source,
+  );
+}
+
+function assertSanitizedSvgSource(
+  svgSource,
+) {
+  const source = String(
+    svgSource ?? "",
+  );
+
+  if (
+    !/^<svg(?:\s|>)/.test(source)
+  ) {
+    throw new Error(
+      "Uploaded SVG must contain a valid SVG root element.",
+    );
+  }
+
+  for (
+    const pattern of
+      SVG_POST_SANITIZE_FORBIDDEN_PATTERNS
+  ) {
+    if (pattern.test(source)) {
+      throw new Error(
+        "SVG still contains prohibited active content after sanitization.",
+      );
+    }
+  }
+
+  const referencePattern =
+    /\s(?:href|xlink:href)\s*=\s*["']([^"']+)["']/gi;
+
+  let referenceMatch;
+
+  while (
+    (
+      referenceMatch =
+        referencePattern.exec(source)
+    )
+  ) {
+    if (
+      !isSafeLocalSvgFragment(
+        referenceMatch[1],
+      )
+    ) {
+      throw new Error(
+        "SVG may only use local fragment references.",
+      );
+    }
+  }
+
+  if (
+    !hasOnlySafeSvgUrlReferences(
+      source,
+    )
+  ) {
+    throw new Error(
+      "SVG may only use local fragment URL references.",
+    );
+  }
+
+  if (
+    !hasSafeSvgDrawableContent(
+      source,
+    )
+  ) {
+    throw new Error(
+      "SVG contains no safe drawable content after sanitization.",
+    );
+  }
+}
+
 function sanitizeSvgSource(svgSource) {
-  assertSafeSvgSource(svgSource);
+  assertSvgSourceCanBeSanitized(
+    svgSource,
+  );
 
   const sanitized = sanitizeHtml(
     svgSource,
@@ -709,9 +930,12 @@ function sanitizeSvgSource(svgSource) {
       allowProtocolRelative: false,
 
       disallowedTagsMode:
-        "completelyDiscard",
+        "discard",
 
       parseStyleAttributes: false,
+
+      transformTags:
+        createSvgTransformTags(),
 
       parser: {
         lowerCaseTags: false,
@@ -728,29 +952,16 @@ function sanitizeSvgSource(svgSource) {
         "iframe",
         "object",
         "embed",
+        "foreignObject",
+        "audio",
+        "video",
       ],
     },
   ).trim();
 
-  if (
-    !/^<svg(?:\s|>)/.test(sanitized)
-  ) {
-    throw new Error(
-      "Uploaded SVG must contain a valid SVG root element.",
-    );
-  }
-
-  if (
-    /url\(\s*["']?(?!#)/i.test(
-      sanitized,
-    )
-  ) {
-    throw new Error(
-      "SVG may only use local fragment references.",
-    );
-  }
-
-  assertSafeSvgSource(sanitized);
+  assertSanitizedSvgSource(
+    sanitized,
+  );
 
   return sanitized;
 }
