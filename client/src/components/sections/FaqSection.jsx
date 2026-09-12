@@ -86,7 +86,7 @@ function resolveCompanyFaqUrl(value) {
 }
 
 function FaqSection() {
-  const { faqs, isLoading, error, refreshFaqs } = useFaqs({ featured: true });
+  const { faqs, isLoading, error, refreshFaqs } = useFaqs();
   const { settings } = useSiteSettings();
 
   const sectionContent = settings?.faqSection || {};
