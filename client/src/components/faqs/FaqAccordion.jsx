@@ -2,7 +2,6 @@ function FaqAccordionItem({
   faq,
   compact = false,
   homePreview = false,
-  index = 0,
 }) {
   const question = String(faq?.question || "").trim();
   const answer = String(faq?.answer || "").trim();
@@ -14,10 +13,7 @@ function FaqAccordionItem({
 
   if (homePreview) {
     return (
-      <details
-        className="public-faq-item"
-        open={index === 2}
-      >
+      <details className="public-faq-item">
         <summary className="public-faq-summary">
           <span className="public-faq-question-icon" aria-hidden="true">
             ?
@@ -136,7 +132,6 @@ function FaqAccordion({
           faq={faq}
           compact={compact}
           homePreview={homePreview}
-          index={index}
         />
       ))}
     </div>
